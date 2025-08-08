@@ -4,7 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using AutoHook.Classes;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
+using ECommons;
 using Lumina.Excel.Sheets;
 
 namespace AutoHook.Utils;
@@ -25,29 +26,12 @@ public static class GameRes
 
     public static void Initialize()
     {
-        
-        Baits =
-            (Service.DataManager.GetExcelSheet<Item>()?
-                 .Where(i => i.ItemSearchCategory.RowId == FishingTackleRow)
-             ?? [])
-            .Concat(
-                Service.DataManager.GetExcelSheet<WKSItemInfo>()?
-                    .Where(i => i.Unknown3 == 5)
-                    .Select(i => Service.DataManager.GetExcelSheet<Item>()?.GetRow(i.Unknown0))
-                    .Where(item => item != null)
-                    .Cast<Item>()
-                ?? []
-            )
-            .Select(b => new BaitFishClass(b))
-            .ToList();
+        Baits = [.. GenericHelpers.FindRows<Item>(i => i.ItemSearchCategory.RowId == FishingTackleRow).ToList()
+            .Concat(GenericHelpers.FindRows<WKSItemInfo>(i => i.WKSItemSubCategory.RowId == 5).Select(i => i.Item.Value).ToList())
+            .Select(b => new BaitFishClass(b))];
 
-        Fishes = Service.DataManager.GetExcelSheet<FishParameter>()?
-                     .Where(f => f.Item.RowId != 0 && f.Item.RowId < 1000000)
-                     .Select(f => new BaitFishClass(f))
-                     .GroupBy(f => f.Id)
-                     .Select(group => group.First())
-                     .ToList()
-                 ?? new List<BaitFishClass>();
+        Fishes = GenericHelpers.FindRows<FishParameter>(f => f.Item.RowId != 0 && f.Item.RowId < 1000000)
+            .Select(f => new BaitFishClass(f)).GroupBy(f => f.Id).Select(group => group.First()).ToList() ?? [];
 
         try
         {

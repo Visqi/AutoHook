@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AutoHook.Utils;
 using ECommons.Automation.NeoTaskManager;
 using ECommons.Throttlers;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using HtmlAgilityPack;
 using System.Linq;
 using AutoHook.Enums;
@@ -133,7 +133,7 @@ public class TabDebug : BaseTab
                 {
                     if (ImGui.Button($"Get Wiki info (cd: {EzThrottler.GetRemainingTime("WikiUpdate")})"))
                     {
-                        WikiPresets.ListWikiPages();
+                        _ = WikiPresets.ListWikiPages();
                     }
 
                     //ImGui.InputTextWithHint("", "regex", ref regex, 500);

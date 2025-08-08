@@ -13,7 +13,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.ImGuiMethods;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Newtonsoft.Json;
 
 namespace AutoHook.Ui;
@@ -193,7 +193,7 @@ public class TabFishingPresets : BaseTab
                     if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
                     {
                         // First, find which folder this preset is coming from
-                        PresetFolder sourceFolder = null;
+                        PresetFolder? sourceFolder = null;
                         foreach (var otherFolder in _basePreset.Folders)
                         {
                             if (otherFolder.PresetIds.Contains(presetId))
@@ -781,7 +781,7 @@ public class TabFishingPresets : BaseTab
 
     private void DrawFolderContextMenu(PresetFolder folder)
     {
-        if (!ImGui.BeginPopupContextItem())
+        if (!ImGui.BeginPopupContextItem(folder.UniqueId.ToString()))
             return;
 
         if (ImGui.Selectable(UIStrings.Rename, false, ImGuiSelectableFlags.DontClosePopups))

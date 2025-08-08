@@ -14,7 +14,7 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.ImGuiMethods;
 using ECommons.Throttlers;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Ui;
 
@@ -40,7 +40,7 @@ public class TabCommunity : BaseTab
             using (var disabled = ImRaii.Disabled(EzThrottler.GetRemainingTime("WikiUpdate") > 0))
             {
                 if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.CloudDownloadAlt, UIStrings.GetWikiPresets))
-                    WikiPresets.ListWikiPages();
+                    _ = WikiPresets.ListWikiPages();
             }
 
             if (ImGui.Selectable(UIStrings.ClickOpenWiki))

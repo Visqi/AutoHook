@@ -1,53 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Dalamud.NET.Sdk/13.0.0">
     <PropertyGroup>
         <Authors>Det</Authors>
         <Version>4.3.4.1</Version>
-        <Description>Auto hooks for you</Description>
-        <PackageProjectUrl>https://github.com/PunishXIV/AutoHook</PackageProjectUrl>
-        <Configurations>Release;Debug</Configurations>
-        <TargetFramework>net9.0-windows</TargetFramework>
-        <Platforms>x64</Platforms>
-        
-        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-        <OutputPath>bin\$(Configuration)\</OutputPath>
-        
-    </PropertyGroup>
-
-    <PropertyGroup>
-        <Nullable>enable</Nullable>
-        <LangVersion>latest</LangVersion>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <EnableWindowsTargeting>true</EnableWindowsTargeting>
-    </PropertyGroup>
-
-    <PropertyGroup>
-        <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+        <LangVersion>preview</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Include="AutoHook.json">
+        <None Include="Data\FishData\*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-    </ItemGroup>
-    
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-        <DebugType>none</DebugType>
-        <DebugSymbols>false</DebugSymbols>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-        <DebugType>none</DebugType>
-        <DebugSymbols>false</DebugSymbols>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <None  Include="Data\FishData\*">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None >
+        </None>
         <None Update="images\Fishy.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -62,40 +24,9 @@
 
     <ItemGroup>
         <PackageReference Include="DalamudPackager" Version="12.0.0" />
+        <PackageReference Include="ECommons" Version="3.0.1.3" />
         <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
-        <ProjectReference Include="..\PunishLib\PunishLib\PunishLib.csproj"/>
-        <Reference Include="FFXIVClientStructs">
-            <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="InteropGenerator.Runtime">
-            <HintPath>$(DalamudLibPath)InteropGenerator.Runtime.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Newtonsoft.Json">
-            <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Dalamud">
-            <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="ImGui.NET">
-            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="ImGuiScene">
-            <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Lumina">
-            <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Lumina.Excel">
-            <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
+        <ProjectReference Include="..\PunishLib\PunishLib\PunishLib.csproj" />
     </ItemGroup>
 
     <ItemGroup>

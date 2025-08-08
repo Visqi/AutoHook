@@ -2,7 +2,7 @@ using AutoHook.Ui;
 using AutoHook.Utils;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using PunishLib.ImGuiMethods;
 using System;
 using System.Collections.Generic;
@@ -146,7 +146,7 @@ public class PluginUi : Window, IDisposable
         ImGui.SetNextItemWidth(300);
         if (ImGui.Begin($"DebugWIndows", ref Service.OpenConsole))
         {
-            var logs = Service.LogMessages.ToArray().Reverse().ToList();
+            var logs = Service.LogMessages.AsEnumerable().Reverse().ToList();
             for (var i = 0; i < logs.Count; i++)
             {
                 if (i == 0)
@@ -206,7 +206,7 @@ public class PluginUi : Window, IDisposable
                         {
                             ImGuiEx.LineCentered("###AHLogo", () =>
                             {
-                                ImGui.Image(logo.ImGuiHandle, new(125f.Scale(), 125f.Scale()));
+                                ImGui.Image(logo.Handle, new(125f.Scale(), 125f.Scale()));
 
                                 if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
                                     Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;
@@ -246,12 +246,12 @@ public class PluginUi : Window, IDisposable
                     }
 #endif
                     
-                    if (ImGui.Selectable($"{UIStrings.AboutTab}", _selectedTab == null))
+                    if (ImGui.Selectable($"{UIStrings.AboutTab}"))
                     {
                         _selectedTab = OpenWindow.About;
                     }
 
-                    if (ImGui.Selectable($"{UIStrings.Changelog}", _selectedTab == null))
+                    if (ImGui.Selectable($"{UIStrings.Changelog}"))
                     {
                         _openChangelog = !_openChangelog;
                     }
