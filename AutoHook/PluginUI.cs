@@ -198,15 +198,14 @@ public class PluginUi : Window, IDisposable
                     if (ImGui.Selectable($"Start Actions"))
                         AutoHook.Plugin.HookManager.StartFishing();
 
-                    var image = Service.Configuration.PluginEnabled ? "images/Fishy.png" : "images/Fishy_g.png";
-                    var imagePath = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName!, image);
+                    var imagePath = Service.Configuration.PluginEnabled ? "AutoHook.images.Fishy.png" : "AutoHook.images.Fishy_g.png";
                     using (var c = ImRaii.Child("logo", new(0, 125f.Scale())))
                     {
-                        if (ThreadLoadImageHandler.TryGetTextureWrap(imagePath, out var logo))
+                        if (Svc.Texture.GetFromManifestResource(Assembly.GetExecutingAssembly(), imagePath).TryGetWrap(out var image, out var _))
                         {
                             ImGuiEx.LineCentered("###AHLogo", () =>
                             {
-                                ImGui.Image(logo.Handle, new(125f.Scale(), 125f.Scale()));
+                                ImGui.Image(image.Handle, new(125f.Scale(), 125f.Scale()));
 
                                 if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
                                     Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;

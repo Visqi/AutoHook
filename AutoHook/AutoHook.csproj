@@ -11,12 +11,8 @@
         <None Include="Data\FishData\*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="images\Fishy.png">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="images\Fishy_g.png">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
+		<EmbeddedResource Include="images\Fishy.png" />
+		<EmbeddedResource Include="images\Fishy_g.png" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">
