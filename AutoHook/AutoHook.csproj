@@ -4,6 +4,7 @@
         <Authors>Det</Authors>
         <Version>4.3.4.1</Version>
         <LangVersion>preview</LangVersion>
+		<GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
     </PropertyGroup>
 
     <ItemGroup>
