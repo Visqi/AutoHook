@@ -8,11 +8,12 @@ public static class PluginChangelog
 {
     public static readonly List<Version> Versions = new()
     {
-        new Version("5.0.0.0")
+        new Version("5.0.0.x")
         {
             Minor =
             {
                 "API 13 update",
+                "Added import all button for community presets",
             }
         },
         new Version("4.3.4.1")
