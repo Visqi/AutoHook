@@ -2,7 +2,7 @@ name: Update Bite Timers
 
 on:
   schedule:
-    - cron: '0 0 * * SUN'  # Runs every Sunday
+    - cron: '0 0 1 * *'  # Runs on the first day of each month
   workflow_dispatch:
   
 jobs:
