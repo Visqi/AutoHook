@@ -68,6 +68,8 @@ public class AutoHook : IDalamudPlugin
         Service.TugType = new SeTugType(Service.SigScanner);
         Service.PluginInterface.UiBuilder.Draw += Service.WindowSystem.Draw;
         Service.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
+        Service.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
+
         Service.Language = Service.ClientState.ClientLanguage;
 
         GameRes.Initialize(); 
@@ -184,6 +186,7 @@ public class AutoHook : IDalamudPlugin
         Service.Save();
         Service.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
         Service.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
+        Service.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;
 
         foreach (var (command, _) in CommandHelp)
         {

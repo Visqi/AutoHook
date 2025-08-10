@@ -97,6 +97,13 @@ public class AutoLures : BaseActionCast
 
         ImGui.SameLine();
         DrawUtil.Info($"{UIStrings.SpecialFishExemple} {GameRes.LureFishes.FirstOrDefault()?.Name}");
+        
+        ImGui.SameLine();
+        if (ImGui.RadioButton(UIStrings.NotSpecial, LureTarget == LureTarget.NotSpecial))
+        {
+            LureTarget = LureTarget.NotSpecial;
+            Service.Save();
+        }
 
         if (DrawUtil.EditNumberField(UIStrings.MaxAttempts, ref stack, "", 1))
         {

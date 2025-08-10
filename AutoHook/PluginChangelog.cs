@@ -8,7 +8,14 @@ public static class PluginChangelog
 {
     public static readonly List<Version> Versions = new()
     {
-        new Version("5.0.0.x")
+        new Version("5.0.0.5")
+        {
+            Minor =
+            {
+                "(by Allison) Added 'Only Small/Large' option for Lures"
+            }
+        },
+        new Version("5.0.0.4")
         {
             Minor =
             {

@@ -1256,6 +1256,9 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="SpecialFishExemple" xml:space="preserve">
     <value>Special fishes are the ones with unique dialogs when using lure, such as:</value>
   </data>
+  <data name="NotSpecial" xml:space="preserve">
+    <value>Only Small/Large</value>
+  </data>
   <data name="MaxAttempts" xml:space="preserve">
     <value>Max. Attempts</value>
   </data>
