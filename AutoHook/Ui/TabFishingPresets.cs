@@ -41,8 +41,8 @@ public class TabFishingPresets : BaseTab
     private string _tempImportName = string.Empty;
     private bool _isImportingFolder = false;
 
-    private Dictionary<Guid, bool> _selectedPresetsForImport = new();
-    private Dictionary<Guid, string> _presetImportNames = new();
+    private Dictionary<Guid, bool> _selectedPresetsForImport = [];
+    private Dictionary<Guid, string> _presetImportNames = [];
     private Guid? _renamePresetId = null;
 
     public override void DrawHeader()
@@ -620,7 +620,7 @@ public class TabFishingPresets : BaseTab
                             if (_selectedPresetsForImport[preset.UniqueId])
                             {
                                 // Apply the new name if it was changed
-                                if (_presetImportNames.TryGetValue(preset.UniqueId, out string newName))
+                                if (_presetImportNames.TryGetValue(preset.UniqueId, out string? newName))
                                 {
                                     preset.PresetName = newName;
                                 }
@@ -637,8 +637,8 @@ public class TabFishingPresets : BaseTab
                         Notify.Success($"Folder imported with {folder.PresetIds.Count} presets");
 
                         _tempImportFolder = null;
-                        _selectedPresetsForImport = null;
-                        _presetImportNames = null;
+                        _selectedPresetsForImport.Clear();
+                        _presetImportNames.Clear();
                         _renamePresetId = null;
                         ImGui.CloseCurrentPopup();
                     }
@@ -648,8 +648,8 @@ public class TabFishingPresets : BaseTab
                     if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0)))
                     {
                         _tempImportFolder = null;
-                        _selectedPresetsForImport = null;
-                        _presetImportNames = null;
+                        _selectedPresetsForImport.Clear();
+                        _presetImportNames.Clear();
                         _renamePresetId = null;
                         ImGui.CloseCurrentPopup();
                     }

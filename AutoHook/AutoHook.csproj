@@ -8,11 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="Data\FishData\*">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-		<EmbeddedResource Include="images\Fishy.png" />
-		<EmbeddedResource Include="images\Fishy_g.png" />
+		<EmbeddedResource Include="Data\FishData\*" />
+		<EmbeddedResource Include="Assets\Fishy.png" />
+		<EmbeddedResource Include="Assets\Fishy_g.png" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">

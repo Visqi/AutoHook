@@ -323,7 +323,7 @@ public class Configuration : IPluginConfiguration
         using (var ms = new MemoryStream(data))
         {
             using var gzip = new GZipStream(ms, CompressionMode.Decompress);
-            gzip.Read(buffer, 0, uncompressedSize);
+            gzip.ReadExactly(buffer, 0, uncompressedSize);
         }
 
         return Encoding.UTF8.GetString(buffer);

@@ -154,7 +154,7 @@ public class TabDebug : BaseTab
         }
     }
 
-    private static string regexold = @"```\s*AH\s*([\s\S]*?)\s*```";
+    //private static string regexold = @"```\s*AH\s*([\s\S]*?)\s*```";
     private static string regex = @"```\s*(AH\s*[\s\S]*?)\s*```";
     
 
@@ -178,19 +178,18 @@ public class TabDebug : BaseTab
     private static Dictionary<string, List<string>> Presets = new();
     private int _swimbaitId = 45949;
 
-    public static async Task UpdateWiki()
-    {
-        if (!EzThrottler.Throttle("WikiUpdate", 10000))
-        {
-        }
+    //public static async Task UpdateWiki()
+    //{
+    //    if (!EzThrottler.Throttle("WikiUpdate", 10000))
+    //    {
+    //    }
 
-        // Example usage:
-        string wikiPageUrl =
-            "https://raw.githubusercontent.com/wiki/PunishXIV/AutoHook/Scrip-Farming-%5BUpdated-to-DT%5D.md"; // Replace with the actual URL
-        //presets = await ExtractBase64FromWikiPage(wikiPageUrl);
+    //    // Example usage:
+    //    string wikiPageUrl = "https://raw.githubusercontent.com/wiki/PunishXIV/AutoHook/Scrip-Farming-%5BUpdated-to-DT%5D.md"; // Replace with the actual URL
+    //    //presets = await ExtractBase64FromWikiPage(wikiPageUrl);
 
-        // Print the extracted base64 codes
-    }
+    //    // Print the extracted base64 codes
+    //}
 
     private const string BaseUrl = "https://github.com/PunishXIV/AutoHook/wiki";
     private const string RawWiki = "https://raw.githubusercontent.com/wiki/PunishXIV/AutoHook";
