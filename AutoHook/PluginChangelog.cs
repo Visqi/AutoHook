@@ -8,6 +8,13 @@ public static class PluginChangelog
 {
     public static readonly List<Version> Versions = new()
     {
+        new Version("5.0.0.0")
+        {
+            Minor =
+            {
+                "API 13 update",
+            }
+        },
         new Version("4.3.4.1")
         {
             Minor =

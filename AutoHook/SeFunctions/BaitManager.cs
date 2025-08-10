@@ -21,7 +21,7 @@ public unsafe class BaitManager
 
     private delegate byte ExecuteCommandDelegate(int id, int unk1, uint baitId, int unk2, int unk3);
 
-    [Signature("E8 ?? ?? ?? ?? 41 C6 04 24")]
+    [Signature(SignaturePatterns.ExecuteCommand)]
     private readonly ExecuteCommandDelegate _executeCommand = null!;
 
     private const int FishingManagerOffset = 0x70;

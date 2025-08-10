@@ -72,7 +72,7 @@ public partial class FishingManager : IDisposable
     public unsafe void CreateDalamudHooks()
     {
         UpdateCatch = Service.GameInteropProvider.HookFromSignature<UpdateCatchDelegate>(
-            @"48 89 6C 24 ?? 56 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 8B 01",
+            SignaturePatterns.UpdateCatch,
             UpdateCatchDetour);
         var hookPtr = (IntPtr)ActionManager.MemberFunctionPointers.UseAction;
         _useActionHook = Service.GameInteropProvider.HookFromAddress<UseActionDelegate>(hookPtr, OnUseAction);
