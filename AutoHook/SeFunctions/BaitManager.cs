@@ -81,7 +81,7 @@ public unsafe class BaitManager
             {
                 var cosmicManager = WKSManager.Instance();
                 if (cosmicManager != null)
-                    return *(uint*)((byte*)cosmicManager + 0xC9C);
+                    return cosmicManager->FishingBait;
             }
 
             return PlayerState.Instance()->FishingBait;

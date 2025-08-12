@@ -115,6 +115,11 @@ public partial class FishingManager : IDisposable
                     @$"[AutoHook] Starting with bait: {MultiString.GetItemName(extraCfg.ForcedBaitId)}");
                 Service.Save();
             }
+            else
+            {
+                Service.PrintChat(@$"[AutoHook] Failed to change bait: {result}");
+                return;
+            }
         }
 
         _lastStep = FishingSteps.StartedCasting;
@@ -190,7 +195,7 @@ public partial class FishingManager : IDisposable
     public HookConfig GetHookCfg()
     {
         var custom = Presets.SelectedPreset?.GetCfgById(GetCurrentBaitMoochId(), _isMooching);
-        
+
         var defaultHook = _isMooching
             ? Presets.DefaultPreset.ListOfMooch.FirstOrDefault()
             : Presets.DefaultPreset.ListOfBaits.FirstOrDefault();
@@ -229,7 +234,7 @@ public partial class FishingManager : IDisposable
 
         if (_lastState == currentState)
             return;
-        
+
         _lastState = currentState;
 
         switch (currentState)
@@ -254,26 +259,28 @@ public partial class FishingManager : IDisposable
 
     private void InitFinishing()
     {
-        if (!_fishingTimer.IsRunning) 
+        if (!_fishingTimer.IsRunning)
             _fishingTimer.Start();
-        
+
         UpdateStatusAndTimer();
     }
 
     FishConfig? lastCatchCfg = null;
+
     private void CheckPluginActions()
     {
         if (!EzThrottler.Throttle(@"CheckPluginActions", 500))
             return;
-        
+
         if (!PlayerRes.IsCastAvailable())
             return;
 
         lastCatchCfg ??= GetLastCatchConfig();
-       
+
         var extraCfg = GetExtraCfg();
 
-        if (_lastStep.HasFlag(FishingSteps.FishCaught) && (_lastStep & (FishingSteps.None | FishingSteps.Quitting)) == 0)
+        if (_lastStep.HasFlag(FishingSteps.FishCaught) &&
+            (_lastStep & (FishingSteps.None | FishingSteps.Quitting)) == 0)
             CheckStopCondition();
 
         // the order matters
@@ -285,7 +292,7 @@ public partial class FishingManager : IDisposable
             casted = UseFishCaughtActions(lastCatchCfg);
             CheckFishCaughtSwap(lastCatchCfg);
         }
-        
+
         FishingHelper.RemoveGuidQueue();
 
         if (!casted)
@@ -332,7 +339,7 @@ public partial class FishingManager : IDisposable
             _lastStep.HasFlag(FishingSteps.Reeling))
             return;
 
-        
+
         Service.Status = @$"Timeout reached - using Rest";
         PlayerRes.CastActionDelayed(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook);
         _lastStep = FishingSteps.TimeOut;
@@ -343,14 +350,13 @@ public partial class FishingManager : IDisposable
         UpdateStatusAndTimer();
         var currentHook = GetHookCfg();
         _fishingTimer.Stop();
-        
+
         if (PlayerRes.HasStatus(IDs.Status.Salvage) && GetAutoCastCfg().ChumAnimationCancel)
             PlayerRes.CastAction(IDs.Actions.Salvage);
 
         _lastCatch = null;
         _lastStep = FishingSteps.FishBit;
         HookFish(Service.TugType?.Bite ?? BiteType.Unknown, currentHook);
-        
     }
 
     private void HookFish(BiteType bite, HookConfig currentHook)
