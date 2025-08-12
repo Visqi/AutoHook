@@ -115,11 +115,6 @@ public partial class FishingManager : IDisposable
                     @$"[AutoHook] Starting with bait: {MultiString.GetItemName(extraCfg.ForcedBaitId)}");
                 Service.Save();
             }
-            else
-            {
-                Service.PrintChat(@$"[AutoHook] Failed to change bait: {result}");
-                return;
-            }
         }
 
         _lastStep = FishingSteps.StartedCasting;
