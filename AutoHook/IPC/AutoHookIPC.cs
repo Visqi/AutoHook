@@ -19,7 +19,6 @@ public class AutoHookIPC
     [EzIPC]
     public void SetPluginState(bool state)
     {
-        
         _cfg.PluginEnabled = state;
         Service.Save();
     }
@@ -69,7 +68,7 @@ public class AutoHookIPC
         if (_import == null) return;
         var name = $"{_import.PresetName}";
         _import.RenamePreset(name);
-        
+
         if (_import is CustomPresetConfig customPreset)
             _cfg.HookPresets.AddNewPreset(customPreset);
         else if (_import is AutoGigConfig gigPreset)
