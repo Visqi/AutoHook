@@ -215,7 +215,7 @@ public abstract class BaseActionCast
     public virtual void DrawGpThreshold()
     {
         ImGui.PushID(@$"{GetName()}_gp");
-        if (ImGui.Button($"GP"))
+        if (ImGui.Button(UIStrings.GPlabel))
         {
             ImGui.OpenPopup(strId: @"gp_cfg");
         }

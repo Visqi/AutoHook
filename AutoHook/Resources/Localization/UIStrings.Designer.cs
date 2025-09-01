@@ -1744,6 +1744,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to GP.
+        /// </summary>
+        internal static string GPlabel {
+            get {
+                return ResourceManager.GetString("GPlabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hook will NOT be used after the defined amount of time has passed
         ///Ex: If you set the Max. Wait to 10 and something bites after 12 seconds, the fish will be ignored.
         /// </summary>

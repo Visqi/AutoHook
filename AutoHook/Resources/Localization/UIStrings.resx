@@ -1506,4 +1506,7 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
 	<data name="Reset_Counter_Bait_Swap" xml:space="preserve">
     <value>Reset counter after swapping baits</value>
   </data>
+	<data name="GPlabel" xml:space="preserve">
+		<value>GP</value>
+	</data>
 </root>
