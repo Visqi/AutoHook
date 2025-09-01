@@ -1,1504 +1,1509 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
+	<!-- 
+		Microsoft ResX Schema 
+		
+		Version 2.0
+		
+		The primary goals of this format is to allow a simple XML format 
+		that is mostly human readable. The generation and parsing of the 
+		various data types are done through the TypeConverter classes 
+		associated with the data types.
+		
+		Example:
+		
+		... ado.net/XML headers & schema ...
+		<resheader name="resmimetype">text/microsoft-resx</resheader>
+		<resheader name="version">2.0</resheader>
+		<resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+		<resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+		<data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+		<data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+		<data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+				<value>[base64 mime encoded serialized .NET Framework object]</value>
+		</data>
+		<data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+				<value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+				<comment>This is a comment</comment>
+		</data>
+								
+		There are any number of "resheader" rows that contain simple 
+		name/value pairs.
+		
+		Each data row contains a name, and value. The row also contains a 
+		type or mimetype. Type corresponds to a .NET class that support 
+		text/value conversion through the TypeConverter architecture. 
+		Classes that don't support this are serialized and stored with the 
+		mimetype set.
+		
+		The mimetype is used for serialized objects, and tells the 
+		ResXResourceReader how to depersist the object. This is currently not 
+		extensible. For a given mimetype the value must be set accordingly:
+		
+		Note - application/x-microsoft.net.object.binary.base64 is the format 
+		that the ResXResourceWriter will generate, however the reader can 
+		read any of the formats listed below.
+		
+		mimetype: application/x-microsoft.net.object.binary.base64
+		value   : The object must be serialized with 
+						: System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+						: and then encoded with base64 encoding.
+		
+		mimetype: application/x-microsoft.net.object.soap.base64
+		value   : The object must be serialized with 
+						: System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+						: and then encoded with base64 encoding.
 
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="DrawHeader_Testing" xml:space="preserve">
+		mimetype: application/x-microsoft.net.object.bytearray.base64
+		value   : The object must be serialized into a byte array 
+						: using a System.ComponentModel.TypeConverter
+						: and then encoded with base64 encoding.
+		-->
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	            xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="metadata">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0"/>
+							</xsd:sequence>
+							<xsd:attribute name="name" use="required" type="xsd:string"/>
+							<xsd:attribute name="type" type="xsd:string"/>
+							<xsd:attribute name="mimetype" type="xsd:string"/>
+							<xsd:attribute ref="xml:space"/>
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="assembly">
+						<xsd:complexType>
+							<xsd:attribute name="alias" type="xsd:string"/>
+							<xsd:attribute name="name" type="xsd:string"/>
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+							<xsd:attribute ref="xml:space"/>
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required"/>
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+			PublicKeyToken=b77a5c561934e089
+		</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+			PublicKeyToken=b77a5c561934e089
+		</value>
+	</resheader>
+	<data name="DrawHeader_Testing" xml:space="preserve">
     <value>Testing</value>
   </data>
-  <data name="DefaultSubTab" xml:space="preserve">
+	<data name="DefaultSubTab" xml:space="preserve">
     <value>Default</value>
   </data>
-  <data name="DrawImportExport_Cancel" xml:space="preserve">
+	<data name="DrawImportExport_Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="ImportPresetFromClipboard" xml:space="preserve">
+	<data name="ImportPresetFromClipboard" xml:space="preserve">
     <value>Import preset from clipboard.</value>
   </data>
-  <data name="Import" xml:space="preserve">
+	<data name="Import" xml:space="preserve">
     <value>Import</value>
   </data>
-  <data name="PresetName" xml:space="preserve">
+	<data name="PresetName" xml:space="preserve">
     <value>Preset Name</value>
   </data>
-  <data name="ImportThisPreset" xml:space="preserve">
+	<data name="ImportThisPreset" xml:space="preserve">
     <value>Import this preset?</value>
   </data>
-  <data name="AutoMooch" xml:space="preserve">
+	<data name="AutoMooch" xml:space="preserve">
     <value>Auto Mooch</value>
   </data>
-  <data name="AddLastCatch" xml:space="preserve">
+	<data name="AddLastCatch" xml:space="preserve">
     <value>Add Last Catch:</value>
   </data>
-  <data name="ExportPresetToClipboard" xml:space="preserve">
+	<data name="ExportPresetToClipboard" xml:space="preserve">
     <value>Export preset to clipboard.</value>
   </data>
-  <data name="PresetExportedToTheClipboard" xml:space="preserve">
+	<data name="PresetExportedToTheClipboard" xml:space="preserve">
     <value>Preset exported to the clipboard</value>
   </data>
-  <data name="APresetWithTheSameNameAlreadyExists" xml:space="preserve">
+	<data name="APresetWithTheSameNameAlreadyExists" xml:space="preserve">
     <value>A preset with the same name already exists</value>
   </data>
-  <data name="PresetAlreadyExist" xml:space="preserve">
+	<data name="PresetAlreadyExist" xml:space="preserve">
     <value>A preset with the same name already exists</value>
   </data>
-  <data name="CurrentBaitMooch" xml:space="preserve">
+	<data name="CurrentBaitMooch" xml:space="preserve">
     <value>Current bait/mooch:</value>
   </data>
-  <data name="AddCurrentBaitMooch" xml:space="preserve">
+	<data name="AddCurrentBaitMooch" xml:space="preserve">
     <value>Add Current Bait/Mooch</value>
   </data>
-  <data name="TabPresets_DrawHeader_IsEnabledByDefault" xml:space="preserve">
+	<data name="TabPresets_DrawHeader_IsEnabledByDefault" xml:space="preserve">
     <value>is enabled by default when new bait/mooch is added </value>
   </data>
-  <data name="TabPresets_DrawHeader_CorrectlyEditTheBaitMoochName" xml:space="preserve">
+	<data name="TabPresets_DrawHeader_CorrectlyEditTheBaitMoochName" xml:space="preserve">
     <value>"All Baits" and "All Mooches" have the lowest priority</value>
   </data>
-  <data name="NewBaitMooch" xml:space="preserve">
+	<data name="NewBaitMooch" xml:space="preserve">
     <value>New bait/mooch</value>
   </data>
-  <data name="EditMe" xml:space="preserve">
+	<data name="EditMe" xml:space="preserve">
     <value>EditMe</value>
   </data>
-  <data name="Add" xml:space="preserve">
+	<data name="Add" xml:space="preserve">
     <value>Add</value>
   </data>
-  <data name="HoldShiftToDelete" xml:space="preserve">
+	<data name="HoldShiftToDelete" xml:space="preserve">
     <value>Hold SHIFT to delete.</value>
   </data>
-  <data name="Close" xml:space="preserve">
+	<data name="Close" xml:space="preserve">
     <value>Close</value>
   </data>
-  <data name="RightClickToRename" xml:space="preserve">
+	<data name="RightClickToRename" xml:space="preserve">
     <value>Right-click to rename</value>
   </data>
-  <data name="EnterToConfirm" xml:space="preserve">
+	<data name="EnterToConfirm" xml:space="preserve">
     <value>Edit Preset name (press Enter to confirm)</value>
   </data>
-  <data name="HookPresets" xml:space="preserve">
+	<data name="HookPresets" xml:space="preserve">
     <value>Hook Presets</value>
   </data>
-  <data name="AddNewPreset" xml:space="preserve">
+	<data name="AddNewPreset" xml:space="preserve">
     <value>Add New Preset</value>
   </data>
-  <data name="TabPresets_DrawHeader_TabDescription" xml:space="preserve">
+	<data name="TabPresets_DrawHeader_TabDescription" xml:space="preserve">
     <value>Here you can customize which hook to use based on the current bait or mooch.
 If a bait/mooch is not specified, the Global Preset will be used instead.</value>
   </data>
-  <data name="TabPresets_DrawHeader_NewTabDescription" xml:space="preserve">
+	<data name="TabPresets_DrawHeader_NewTabDescription" xml:space="preserve">
     <value>Here you can customize which hook to use based on the current bait or mooch.
 If a bait/mooch is not specified, the Global Preset will be used instead.</value>
   </data>
-  <data name="NewPreset" xml:space="preserve">
+	<data name="NewPreset" xml:space="preserve">
     <value>New Preset</value>
   </data>
-  <data name="TabNameCustomPresets" xml:space="preserve">
+	<data name="TabNameCustomPresets" xml:space="preserve">
     <value>Custom Presets</value>
   </data>
-  <data name="TabNameGPConfig" xml:space="preserve">
+	<data name="TabNameGPConfig" xml:space="preserve">
     <value>GP Config</value>
   </data>
-  <data name="TabGPConfig_TabDescription" xml:space="preserve">
+	<data name="TabGPConfig_TabDescription" xml:space="preserve">
     <value>Here you can customize the GP Threshold for the actions and items used by the AutoCast feature.</value>
   </data>
-  <data name="GP" xml:space="preserve">
+	<data name="GP" xml:space="preserve">
     <value>GP</value>
   </data>
-  <data name="Above" xml:space="preserve">
+	<data name="Above" xml:space="preserve">
     <value>Above</value>
   </data>
-  <data name="Below" xml:space="preserve">
+	<data name="Below" xml:space="preserve">
     <value>Below</value>
   </data>
-  <data name="WillBeUsedWhenYourGPIsEqualOr" xml:space="preserve">
+	<data name="WillBeUsedWhenYourGPIsEqualOr" xml:space="preserve">
     <value>will be used when your GP is Equal or</value>
-    <comment>Action will be used when your GP is Equal or Above/Below</comment>
+		<comment>Action will be used when your GP is Equal or Above/Below</comment>
   </data>
-  <data name="None" xml:space="preserve">
+	<data name="None" xml:space="preserve">
     <value>None</value>
   </data>
-  <data name="TabnameGeneral" xml:space="preserve">
+	<data name="TabnameGeneral" xml:space="preserve">
     <value>General</value>
   </data>
-  <data name="DrawHeader_GeneralSettings" xml:space="preserve">
+	<data name="DrawHeader_GeneralSettings" xml:space="preserve">
     <value>General Settings</value>
   </data>
-  <data name="DrawHeader_CheckChangelog" xml:space="preserve">
+	<data name="DrawHeader_CheckChangelog" xml:space="preserve">
     <value>Check the new changes in the Changelog below</value>
   </data>
-  <data name="DrawHeader_ClickToReportAnIssue" xml:space="preserve">
+	<data name="DrawHeader_ClickToReportAnIssue" xml:space="preserve">
     <value>Click here to report an issue or make a suggestion</value>
   </data>
-  <data name="Changelog" xml:space="preserve">
+	<data name="Changelog" xml:space="preserve">
     <value>Changelog</value>
   </data>
-  <data name="HookWeakExclamation" xml:space="preserve">
+	<data name="HookWeakExclamation" xml:space="preserve">
     <value>Hook Weak (!)</value>
   </data>
-  <data name="HookStrongExclamation" xml:space="preserve">
+	<data name="HookStrongExclamation" xml:space="preserve">
     <value>Hook Strong (!!)</value>
   </data>
-  <data name="HookLegendaryExclamation" xml:space="preserve">
+	<data name="HookLegendaryExclamation" xml:space="preserve">
     <value>Hook Legendary (!!!)</value>
   </data>
-  <data name="HookWillBeUsedIfPatienceIsNotUp" xml:space="preserve">
+	<data name="HookWillBeUsedIfPatienceIsNotUp" xml:space="preserve">
     <value>"Hook" will be used if Patience is not up</value>
   </data>
-  <data name="PrecisionHookset" xml:space="preserve">
+	<data name="PrecisionHookset" xml:space="preserve">
     <value>Precision Hookset</value>
   </data>
-  <data name="PowerfulHookset" xml:space="preserve">
+	<data name="PowerfulHookset" xml:space="preserve">
     <value>Powerful Hookset</value>
   </data>
-  <data name="MoochBaitName" xml:space="preserve">
+	<data name="MoochBaitName" xml:space="preserve">
     <value>Mooch/Bait Name</value>
   </data>
-  <data name="BaitAlreadyExists" xml:space="preserve">
+	<data name="BaitAlreadyExists" xml:space="preserve">
     <value>Bait already exists</value>
   </data>
-  <data name="MaxWait" xml:space="preserve">
+	<data name="MaxWait" xml:space="preserve">
     <value>Max. Wait</value>
-    <comment>Maximum time to wait</comment>
+		<comment>Maximum time to wait</comment>
   </data>
-  <data name="HelpMarkerMaxWaitTimer" xml:space="preserve">
+	<data name="HelpMarkerMaxWaitTimer" xml:space="preserve">
     <value>Hook will NOT be used after the defined amount of time has passed
 Ex: If you set the Max. Wait to 10 and something bites after 12 seconds, the fish will be ignored</value>
   </data>
-  <data name="TimeoutHelpText" xml:space="preserve">
+	<data name="TimeoutHelpText" xml:space="preserve">
     <value>Set Zero (0) to disable.
 Cancels the fishing attempt by using hook when the time limit is reached.</value>
   </data>
-  <data name="DoesntHaveAffectUnderChum" xml:space="preserve">
+	<data name="DoesntHaveAffectUnderChum" xml:space="preserve">
     <value>Doesn't have affect when Chum is active</value>
   </data>
-  <data name="MinWait" xml:space="preserve">
+	<data name="MinWait" xml:space="preserve">
     <value>Min. Wait</value>
   </data>
-  <data name="Min" xml:space="preserve">
+	<data name="Min" xml:space="preserve">
     <value>Min.</value>
   </data>
-  <data name="Max" xml:space="preserve">
+	<data name="Max" xml:space="preserve">
     <value>Max.</value>
   </data>
-  <data name="HelpMarkerMinWaitTimer" xml:space="preserve">
+	<data name="HelpMarkerMinWaitTimer" xml:space="preserve">
     <value>Hook will NOT be used until the minimum time has passed.
 Ex: If you Min. Wait to 14 and something bites after 8 seconds, the fish will be ignored</value>
   </data>
-  <data name="StopFishingAfter" xml:space="preserve">
+	<data name="StopFishingAfter" xml:space="preserve">
     <value>Stop fishing after...</value>
   </data>
-  <data name="StopFishing" xml:space="preserve">
+	<data name="StopFishing" xml:space="preserve">
     <value>Stop fishing</value>
   </data>
-  <data name="AfterBeingCaught" xml:space="preserve">
+	<data name="AfterBeingCaught" xml:space="preserve">
     <value>After being caught...</value>
   </data>
-  <data name="AfterBeingCaughtDescription" xml:space="preserve">
+	<data name="AfterBeingCaughtDescription" xml:space="preserve">
     <value>- If this config is a bait: Stops fishing after X amount of fish is caught
 - If this config is a fish: Stops fishing after it being caught X amount of times</value>
   </data>
-  <data name="TimeS" xml:space="preserve">
+	<data name="TimeS" xml:space="preserve">
     <value>time(s)</value>
-    <comment>Quantity, example: 5 Time(s) </comment>
+		<comment>Quantity, example: 5 Time(s) </comment>
   </data>
-  <data name="SurfaceSlapIdenticalCast" xml:space="preserve">
+	<data name="SurfaceSlapIdenticalCast" xml:space="preserve">
     <value>Surface Slap &amp; Identical Cast</value>
   </data>
-  <data name="OverridesIdenticalCast" xml:space="preserve">
+	<data name="OverridesIdenticalCast" xml:space="preserve">
     <value>Overrides Identical Cast</value>
   </data>
-  <data name="OverridesSurfaceSlap" xml:space="preserve">
+	<data name="OverridesSurfaceSlap" xml:space="preserve">
     <value>Overrides Surface Slap</value>
   </data>
-  <data name="UseSurfaceSlap" xml:space="preserve">
+	<data name="UseSurfaceSlap" xml:space="preserve">
     <value>Use Surface Slap</value>
   </data>
-  <data name="UseIdenticalCast" xml:space="preserve">
+	<data name="UseIdenticalCast" xml:space="preserve">
     <value>Use Identical Cast</value>
   </data>
-  <data name="UseMoochII" xml:space="preserve">
+	<data name="UseMoochII" xml:space="preserve">
     <value>Use Mooch II</value>
   </data>
-  <data name="OnlyUseWhenFisherSIntutionIsActive" xml:space="preserve">
+	<data name="OnlyUseWhenFisherSIntutionIsActive" xml:space="preserve">
     <value>Only use when Fisher's Intuition is active</value>
   </data>
-  <data name="AutoMoochPresetDescription" xml:space="preserve">
+	<data name="AutoMoochPresetDescription" xml:space="preserve">
     <value>- If this is a Bait (Ex: Versatile Lure), all fish caught by this bait will be mooched
 - If this is a Fish/Mooch (Ex: Harbor Herring), it'll be mooched when caught
 - If this option is disabled, the fish will NOT be mooched even if Auto Mooch is also enabled in the general tab</value>
   </data>
-  <data name="AutoMoochPresetHelpMarker" xml:space="preserve">
+	<data name="AutoMoochPresetHelpMarker" xml:space="preserve">
     <value>This option takes priority over the Auto Cast Line</value>
   </data>
-  <data name="FisherSIntuitionSettings" xml:space="preserve">
+	<data name="FisherSIntuitionSettings" xml:space="preserve">
     <value>Fisher's Intuition Settings</value>
   </data>
-  <data name="FisherSIntuitionSettingsHelpMarker" xml:space="preserve">
+	<data name="FisherSIntuitionSettingsHelpMarker" xml:space="preserve">
     <value>Enable Custom Hooks when Fisher's Intuition is detected</value>
   </data>
-  <data name="SpectralCurrentSettings" xml:space="preserve">
+	<data name="SpectralCurrentSettings" xml:space="preserve">
     <value>Spectral Current Settings</value>
   </data>
-  <data name="HoldShiftBothDHTH" xml:space="preserve">
+	<data name="HoldShiftBothDHTH" xml:space="preserve">
     <value>Hold SHIFT to select both Double and Triple Hook (not recommended)</value>
   </data>
-  <data name="UseDoubleHookIfGp400" xml:space="preserve">
+	<data name="UseDoubleHookIfGp400" xml:space="preserve">
     <value>Use Double Hook (If gp &gt; 400)</value>
   </data>
-  <data name="UseTripleHookIfGp700" xml:space="preserve">
+	<data name="UseTripleHookIfGp700" xml:space="preserve">
     <value>Use Triple Hook (If gp &gt; 700)</value>
   </data>
-  <data name="UseWhenPatienceIsActiveNotRecommended" xml:space="preserve">
+	<data name="UseWhenPatienceIsActiveNotRecommended" xml:space="preserve">
     <value>Use when Patience is active (not recommended)</value>
   </data>
-  <data name="DHTHPatienceHelpMarker" xml:space="preserve">
+	<data name="DHTHPatienceHelpMarker" xml:space="preserve">
     <value>Important!!!
 
 If disabled, Precision/Powerful hook will be used instead when Patience is up.</value>
   </data>
-  <data name="LetTheFishEscape" xml:space="preserve">
+	<data name="LetTheFishEscape" xml:space="preserve">
     <value>Let the fish escape if GP is below the required</value>
   </data>
-  <data name="OnlyUseWhenIdenticalCastIsActive" xml:space="preserve">
+	<data name="OnlyUseWhenIdenticalCastIsActive" xml:space="preserve">
     <value>Only use when Identical Cast is active</value>
   </data>
-  <data name="DoubleTripleHookSettings" xml:space="preserve">
+	<data name="DoubleTripleHookSettings" xml:space="preserve">
     <value>Double/Triple Hook Settings</value>
   </data>
-  <data name="EnabledConfigArrow" xml:space="preserve">
+	<data name="EnabledConfigArrow" xml:space="preserve">
     <value>Enabled Config -&gt;</value>
   </data>
-  <data name="EnabledConfigArrowhelpMarker" xml:space="preserve">
+	<data name="EnabledConfigArrowhelpMarker" xml:space="preserve">
     <value>Important!!!
 
 If disabled, the fish will NOT be hooked.</value>
   </data>
-  <data name="ChumTimer" xml:space="preserve">
+	<data name="ChumTimer" xml:space="preserve">
     <value>Chum Timer</value>
   </data>
-  <data name="EnableChumTimers" xml:space="preserve">
+	<data name="EnableChumTimers" xml:space="preserve">
     <value>Enable Chum Timers</value>
   </data>
-  <data name="EnableChumTimersHelpMarker" xml:space="preserve">
+	<data name="EnableChumTimersHelpMarker" xml:space="preserve">
     <value>Same as the option above, but only when Chum is active</value>
   </data>
-  <data name="Enable" xml:space="preserve">
+	<data name="Enable" xml:space="preserve">
     <value>Enable</value>
   </data>
-  <data name="TabNameAutoGig" xml:space="preserve">
+	<data name="TabNameAutoGig" xml:space="preserve">
     <value>AutoGig</value>
   </data>
-  <data name="TabAutoGigDescription" xml:space="preserve">
+	<data name="TabAutoGigDescription" xml:space="preserve">
     <value>This is an experimental feature and it might miss the fish. If you find it missing too much, try adjusting the SpearFishing window scale to something different</value>
   </data>
-  <data name="EnableAutoGig" xml:space="preserve">
+	<data name="EnableAutoGig" xml:space="preserve">
     <value>Enable AutoGig</value>
   </data>
-  <data name="HideOverlayDuringSpearfishing" xml:space="preserve">
+	<data name="HideOverlayDuringSpearfishing" xml:space="preserve">
     <value>Hide overlay during Spearfishing</value>
   </data>
-  <data name="AutoGigHideOverlayHelpMarker" xml:space="preserve">
+	<data name="AutoGigHideOverlayHelpMarker" xml:space="preserve">
     <value>It'll only hide if the AutoGig option is disabled</value>
   </data>
-  <data name="DrawFishHitbox" xml:space="preserve">
+	<data name="DrawFishHitbox" xml:space="preserve">
     <value>Draw fish hitbox</value>
   </data>
-  <data name="DrawFishHitboxHelpMarker" xml:space="preserve">
+	<data name="DrawFishHitboxHelpMarker" xml:space="preserve">
     <value>The hitbox its only available for the fish of the Size and Speed selected</value>
   </data>
-  <data name="DrawGigHitbox" xml:space="preserve">
+	<data name="DrawGigHitbox" xml:space="preserve">
     <value>Draw gig hitbox</value>
   </data>
-  <data name="SelectTheSizeAndSpeed" xml:space="preserve">
+	<data name="SelectTheSizeAndSpeed" xml:space="preserve">
     <value>Select the Size and Speed of the fish you want (Gatherbuddy's Spearfishing overlay helps a lot)</value>
   </data>
-  <data name="Size" xml:space="preserve">
+	<data name="Size" xml:space="preserve">
     <value>Size</value>
   </data>
-  <data name="Speed" xml:space="preserve">
+	<data name="Speed" xml:space="preserve">
     <value>Speed</value>
   </data>
-  <data name="AutoCastCordialPriority" xml:space="preserve">
+	<data name="AutoCastCordialPriority" xml:space="preserve">
     <value>Change Priority: Watered-Cordial &gt; Cordial &gt; HI-Cordials</value>
   </data>
-  <data name="AutoCastCordialPriorityHelpMarker" xml:space="preserve">
+	<data name="AutoCastCordialPriorityHelpMarker" xml:space="preserve">
     <value>If theres no Cordials, Hi-Cordials will be used instead</value>
   </data>
-  <data name="AutoCastUseCordial" xml:space="preserve">
+	<data name="AutoCastUseCordial" xml:space="preserve">
     <value>Use Cordials (Hi-Cordial First)</value>
   </data>
-  <data name="AutoCastUseCordialHelpMarker" xml:space="preserve">
+	<data name="AutoCastUseCordialHelpMarker" xml:space="preserve">
     <value>If theres no Hi-Cordials, Cordials will be used instead</value>
   </data>
-  <data name="AutoCastUseFishEyes" xml:space="preserve">
+	<data name="AutoCastUseFishEyes" xml:space="preserve">
     <value>Use Fish Eyes</value>
   </data>
-  <data name="CancelsCurrentMooch" xml:space="preserve">
+	<data name="CancelsCurrentMooch" xml:space="preserve">
     <value>Cancels Current Mooch</value>
   </data>
-  <data name="AutoCastUseChum" xml:space="preserve">
+	<data name="AutoCastUseChum" xml:space="preserve">
     <value>Use Chum</value>
   </data>
-  <data name="AutoCastExtraOptionPrizeCatch" xml:space="preserve">
+	<data name="AutoCastExtraOptionPrizeCatch" xml:space="preserve">
     <value>Only use when Mooch II is on NOT available - READ &gt;&gt;&gt;</value>
   </data>
-  <data name="ExtraOptionPrizeCatchHelpMarker" xml:space="preserve">
+	<data name="ExtraOptionPrizeCatchHelpMarker" xml:space="preserve">
     <value>&gt;Make sure 'Use Mooch II' is enabled or else it wont work&lt;
 This could save you 100gp if going only for mooches</value>
   </data>
-  <data name="Test" xml:space="preserve">
+	<data name="Test" xml:space="preserve">
     <value>.</value>
   </data>
-  <data name="Enable_AutoHook" xml:space="preserve">
+	<data name="Enable_AutoHook" xml:space="preserve">
     <value>Enable AutoHook</value>
   </data>
-  <data name="Plugin_Enabled" xml:space="preserve">
+	<data name="Plugin_Enabled" xml:space="preserve">
     <value>Plugin Enabled</value>
   </data>
-  <data name="Plugin_Disabled" xml:space="preserve">
+	<data name="Plugin_Disabled" xml:space="preserve">
     <value>Plugin Disabled</value>
   </data>
-  <data name="Plugin_Name_Settings" xml:space="preserve">
+	<data name="Plugin_Name_Settings" xml:space="preserve">
     <value>{0} Settings</value>
   </data>
-  <data name="PluginUi_Draw_Enables_Disables" xml:space="preserve">
+	<data name="PluginUi_Draw_Enables_Disables" xml:space="preserve">
     <value>Enables/Disables the plugin for you</value>
   </data>
-  <data name="Using_Chum_Timer" xml:space="preserve">
+	<data name="Using_Chum_Timer" xml:space="preserve">
     <value>Using Chum timer</value>
   </data>
-  <data name="Disables_AutoHook" xml:space="preserve">
+	<data name="Disables_AutoHook" xml:space="preserve">
     <value>Disables AutoHook</value>
   </data>
-  <data name="AutoHook_Disabled" xml:space="preserve">
+	<data name="AutoHook_Disabled" xml:space="preserve">
     <value>AutoHook Disabled</value>
   </data>
-  <data name="AutoHook_Enabled" xml:space="preserve">
+	<data name="AutoHook_Enabled" xml:space="preserve">
     <value>AutoHook Enabled</value>
   </data>
-  <data name="Enables_AutoHook" xml:space="preserve">
+	<data name="Enables_AutoHook" xml:space="preserve">
     <value>Enables AutoHook</value>
   </data>
-  <data name="Opens_Config_Window" xml:space="preserve">
+	<data name="Opens_Config_Window" xml:space="preserve">
     <value>Opens Config Window</value>
   </data>
-  <data name="TabAutoCasts_When_Stack_Equals" xml:space="preserve">
+	<data name="TabAutoCasts_When_Stack_Equals" xml:space="preserve">
     <value>When Stacks = </value>
   </data>
-  <data name="Use_Prize_Catch" xml:space="preserve">
+	<data name="Use_Prize_Catch" xml:space="preserve">
     <value>Use Prize Catch</value>
   </data>
-  <data name="Use_Prize_Catch_HelpText" xml:space="preserve">
+	<data name="Use_Prize_Catch_HelpText" xml:space="preserve">
     <value>Cancels Current Mooch. Patience and Makeshift Bait will not be used when Prize Catch active</value>
   </data>
-  <data name="Toggles_AutoHook_On_Off" xml:space="preserve">
+	<data name="Toggles_AutoHook_On_Off" xml:space="preserve">
     <value>Toggles AutoHook On/Off</value>
   </data>
-  <data name="Triple_Hook" xml:space="preserve">
+	<data name="Triple_Hook" xml:space="preserve">
     <value>Triple Hook</value>
   </data>
-  <data name="Watered_Cordial" xml:space="preserve">
+	<data name="Watered_Cordial" xml:space="preserve">
     <value>Watered Cordial</value>
   </data>
-  <data name="Cordial" xml:space="preserve">
+	<data name="Cordial" xml:space="preserve">
     <value>Cordial</value>
   </data>
-  <data name="HQ_Cordial" xml:space="preserve">
+	<data name="HQ_Cordial" xml:space="preserve">
     <value>HQ Cordial</value>
   </data>
-  <data name="HQ_Watered_Cordial" xml:space="preserve">
+	<data name="HQ_Watered_Cordial" xml:space="preserve">
     <value>HQ Watered Cordial</value>
   </data>
-  <data name="Double_Hook" xml:space="preserve">
+	<data name="Double_Hook" xml:space="preserve">
     <value>Double Hook</value>
   </data>
-  <data name="Patience_II" xml:space="preserve">
+	<data name="Patience_II" xml:space="preserve">
     <value>Patience II</value>
   </data>
-  <data name="Hi_Cordial" xml:space="preserve">
+	<data name="Hi_Cordial" xml:space="preserve">
     <value>Hi-Cordial</value>
   </data>
-  <data name="Patience_I" xml:space="preserve">
+	<data name="Patience_I" xml:space="preserve">
     <value>Patience I</value>
   </data>
-  <data name="Prize_Catch" xml:space="preserve">
+	<data name="Prize_Catch" xml:space="preserve">
     <value>Prize Catch</value>
   </data>
-  <data name="Surface_Slap" xml:space="preserve">
+	<data name="Surface_Slap" xml:space="preserve">
     <value>Surface Slap</value>
   </data>
-  <data name="Surface_Slap_Options" xml:space="preserve">
+	<data name="Surface_Slap_Options" xml:space="preserve">
     <value>Surface Slap Options</value>
   </data>
-  <data name="Identical_Cast_Options" xml:space="preserve">
+	<data name="Identical_Cast_Options" xml:space="preserve">
     <value>Identical Cast Options</value>
   </data>
-  <data name="Identical_Cast" xml:space="preserve">
+	<data name="Identical_Cast" xml:space="preserve">
     <value>Identical Cast</value>
   </data>
-  <data name="Fish_Eyes" xml:space="preserve">
+	<data name="Fish_Eyes" xml:space="preserve">
     <value>Fish Eyes</value>
   </data>
-  <data name="Chum" xml:space="preserve">
+	<data name="Chum" xml:space="preserve">
     <value>Chum</value>
   </data>
-  <data name="Thaliaks_Favor" xml:space="preserve">
+	<data name="Thaliaks_Favor" xml:space="preserve">
     <value>Thaliak's Favor</value>
   </data>
-  <data name="MakeShift_Bait" xml:space="preserve">
+	<data name="MakeShift_Bait" xml:space="preserve">
     <value>Makeshift Bait</value>
   </data>
-  <data name="BaitName_Default" xml:space="preserve">
+	<data name="BaitName_Default" xml:space="preserve">
     <value>Default</value>
   </data>
-  <data name="DecompressString_Invalid_Import" xml:space="preserve">
+	<data name="DecompressString_Invalid_Import" xml:space="preserve">
     <value>This is not a valid import.</value>
   </data>
-  <data name="New_Preset" xml:space="preserve">
+	<data name="New_Preset" xml:space="preserve">
     <value>New Preset</value>
   </data>
-  <data name="Auto_Casts" xml:space="preserve">
+	<data name="Auto_Casts" xml:space="preserve">
     <value>Auto Casts</value>
   </data>
-  <data name="TabAutoCasts_DrawAutoCast_HelpText" xml:space="preserve">
+	<data name="TabAutoCasts_DrawAutoCast_HelpText" xml:space="preserve">
     <value>Cast (FSH Action) will be used after a bite
 
 IMPORTANT!!!
 If Auto Mooch (Global or Custom Preset) is not enabled, the line will be casted normally and you'll lose your mooch opportunity (If available)</value>
   </data>
-  <data name="Global_Auto_Cast_Line" xml:space="preserve">
+	<data name="Global_Auto_Cast_Line" xml:space="preserve">
     <value>Global Auto Cast Line</value>
   </data>
-  <data name="Use_Thaliaks_Favor" xml:space="preserve">
+	<data name="Use_Thaliaks_Favor" xml:space="preserve">
     <value>Use Thaliak's Favor</value>
   </data>
-  <data name="Use_Natures_Bounty" xml:space="preserve">
+	<data name="Use_Natures_Bounty" xml:space="preserve">
     <value>Use Nature's Bounty</value>
   </data>
-  <data name="Enable_AutoGig" xml:space="preserve">
+	<data name="Enable_AutoGig" xml:space="preserve">
     <value>Enable AutoGig</value>
   </data>
-  <data name="Hitbox" xml:space="preserve">
+	<data name="Hitbox" xml:space="preserve">
     <value>Hitbox</value>
   </data>
-  <data name="GigHitbox" xml:space="preserve">
+	<data name="GigHitbox" xml:space="preserve">
     <value>Gig Hitbox</value>
   </data>
-  <data name="Use_Makeshift_Bait" xml:space="preserve">
+	<data name="Use_Makeshift_Bait" xml:space="preserve">
     <value>Use Makeshift Bait</value>
   </data>
-  <data name="TabAutoCasts_DrawMakeShiftBait_HelpText" xml:space="preserve">
+	<data name="TabAutoCasts_DrawMakeShiftBait_HelpText" xml:space="preserve">
     <value>This might conflict with Auto Thaliak's Favor</value>
   </data>
-  <data name="TabAutoCasts_DrawExtraOptionsThaliaksFavor_" xml:space="preserve">
+	<data name="TabAutoCasts_DrawExtraOptionsThaliaksFavor_" xml:space="preserve">
     <value>When Stacks =</value>
   </data>
-  <data name="TabAutoCasts_DrawThaliaksFavor_HelpText" xml:space="preserve">
+	<data name="TabAutoCasts_DrawThaliaksFavor_HelpText" xml:space="preserve">
     <value>This might conflict with Auto MakeShift Bait</value>
   </data>
-  <data name="Use_Patience_I_II" xml:space="preserve">
+	<data name="Use_Patience_I_II" xml:space="preserve">
     <value>Use Patience I/II</value>
   </data>
-  <data name="TabAutoCasts_DrawPatience_HelpText" xml:space="preserve">
+	<data name="TabAutoCasts_DrawPatience_HelpText" xml:space="preserve">
     <value>Patience I/II will be used when your current GP is equal (or higher) to the action cost +20 (Ex: 220 for I, 580 for II), this helps to avoid not having GP for the hooksets</value>
   </data>
-  <data name="TabAutoCasts_DrawExtraOptionsPatience" xml:space="preserve">
+	<data name="TabAutoCasts_DrawExtraOptionsPatience" xml:space="preserve">
     <value>Use when Makeshift Bait is active</value>
   </data>
-  <data name="Enable_Auto_Casts" xml:space="preserve">
+	<data name="Enable_Auto_Casts" xml:space="preserve">
     <value>Enable Auto Casts</value>
   </data>
-  <data name="Dont_Cancel_Mooch" xml:space="preserve">
+	<data name="Dont_Cancel_Mooch" xml:space="preserve">
     <value>Don't Cancel Mooch</value>
   </data>
-  <data name="TabAutoCasts_DrawHeader_HelpText" xml:space="preserve">
+	<data name="TabAutoCasts_DrawHeader_HelpText" xml:space="preserve">
     <value>Actions that cancel mooch wont be used (e.g. Chum, Fish Eyes, Prize Catch etc.)</value>
   </data>
-  <data name="TabAutoCasts_DrawExtraOptionsAutoMooch_Extra_Only_Active" xml:space="preserve">
+	<data name="TabAutoCasts_DrawExtraOptionsAutoMooch_Extra_Only_Active" xml:space="preserve">
     <value>Only use when Fisher's Intuition is active</value>
   </data>
-  <data name="Use_Mooch_II" xml:space="preserve">
+	<data name="Use_Mooch_II" xml:space="preserve">
     <value>Use Mooch II</value>
   </data>
-  <data name="Global_Auto_Mooch" xml:space="preserve">
+	<data name="Global_Auto_Mooch" xml:space="preserve">
     <value>Global Auto Mooch</value>
   </data>
-  <data name="TabAutoCasts_DrawHeader_Guide_Collectables" xml:space="preserve">
+	<data name="TabAutoCasts_DrawHeader_Guide_Collectables" xml:space="preserve">
     <value>Guide: How to auto accept Collectables</value>
   </data>
-  <data name="AutoMooch_HelpText" xml:space="preserve">
+	<data name="AutoMooch_HelpText" xml:space="preserve">
     <value>Mooch everything! This option have priority over 'Auto Cast Line'
 
 If you want to Auto Mooch only a specific fish and ignore others, disable this option add use the Fish Caught tab.</value>
   </data>
-  <data name="Support_me_on_Ko_fi" xml:space="preserve">
+	<data name="Support_me_on_Ko_fi" xml:space="preserve">
     <value>Support me on Ko-fi</value>
   </data>
-  <data name="Complete" xml:space="preserve">
+	<data name="Complete" xml:space="preserve">
     <value>Complete</value>
   </data>
-  <data name="Incomplete" xml:space="preserve">
+	<data name="Incomplete" xml:space="preserve">
     <value>Incomplete</value>
   </data>
-  <data name="AutoHook" xml:space="preserve">
+	<data name="AutoHook" xml:space="preserve">
     <value>AutoHook</value>
   </data>
-  <data name="PluginUi_Language" xml:space="preserve">
+	<data name="PluginUi_Language" xml:space="preserve">
     <value>Language</value>
   </data>
-  <data name="TabGeneral_DrawHeader_Localization_Help" xml:space="preserve">
+	<data name="TabGeneral_DrawHeader_Localization_Help" xml:space="preserve">
     <value>Help with the plugin localization (Crowdin)</value>
   </data>
-  <data name="Add_new_bait" xml:space="preserve">
+	<data name="Add_new_bait" xml:space="preserve">
     <value>Add new bait</value>
   </data>
-  <data name="Add_new_mooch" xml:space="preserve">
+	<data name="Add_new_mooch" xml:space="preserve">
     <value>Add new mooch</value>
   </data>
-  <data name="Presets_Hook" xml:space="preserve">
+	<data name="Presets_Hook" xml:space="preserve">
     <value>Hook</value>
   </data>
-  <data name="Mooch" xml:space="preserve">
+	<data name="Mooch" xml:space="preserve">
     <value>Mooch</value>
   </data>
-  <data name="AutoCastLine_Auto_Cast_Line" xml:space="preserve">
+	<data name="AutoCastLine_Auto_Cast_Line" xml:space="preserve">
     <value>Auto Cast Line</value>
   </data>
-  <data name="AutoMooch_HelpText_old" xml:space="preserve">
+	<data name="AutoMooch_HelpText_old" xml:space="preserve">
     <value>This option have priority over Auto Cast Line</value>
   </data>
-  <data name="Normal_Hook" xml:space="preserve">
+	<data name="Normal_Hook" xml:space="preserve">
     <value>Normal Hook</value>
   </data>
-  <data name="GlobalPreset" xml:space="preserve">
+	<data name="GlobalPreset" xml:space="preserve">
     <value>Global Preset</value>
   </data>
-  <data name="Bait" xml:space="preserve">
+	<data name="Bait" xml:space="preserve">
     <value>Bait</value>
   </data>
-  <data name="All_Baits" xml:space="preserve">
+	<data name="All_Baits" xml:space="preserve">
     <value>All Baits</value>
   </data>
-  <data name="All_Mooches" xml:space="preserve">
+	<data name="All_Mooches" xml:space="preserve">
     <value>All Mooches</value>
   </data>
-  <data name="AutoPatience_Patience" xml:space="preserve">
+	<data name="AutoPatience_Patience" xml:space="preserve">
     <value>Patience</value>
   </data>
-  <data name="Fish" xml:space="preserve">
+	<data name="Fish" xml:space="preserve">
     <value>Fish</value>
   </data>
-  <data name="FishCaught" xml:space="preserve">
+	<data name="FishCaught" xml:space="preserve">
     <value>Fish Caught</value>
   </data>
-  <data name="Add_new_fish" xml:space="preserve">
+	<data name="Add_new_fish" xml:space="preserve">
     <value>Add new fish</value>
   </data>
-  <data name="Cast_Line" xml:space="preserve">
+	<data name="Cast_Line" xml:space="preserve">
     <value>Cast Line</value>
-    <comment>Cast (fisher action)</comment>
+		<comment>Cast (fisher action)</comment>
   </data>
-  <data name="Mooch_II" xml:space="preserve">
+	<data name="Mooch_II" xml:space="preserve">
     <value>Mooch II</value>
   </data>
-  <data name="Never_Mooch" xml:space="preserve">
+	<data name="Never_Mooch" xml:space="preserve">
     <value>Never Mooch</value>
   </data>
-  <data name="Mooch_Setting" xml:space="preserve">
+	<data name="Mooch_Setting" xml:space="preserve">
     <value>Mooch Setting</value>
   </data>
-  <data name="Swap_Preset" xml:space="preserve">
+	<data name="Swap_Preset" xml:space="preserve">
     <value>Swap Preset</value>
   </data>
-  <data name="Swap_Bait" xml:space="preserve">
+	<data name="Swap_Bait" xml:space="preserve">
     <value>Swap Bait</value>
   </data>
-  <data name="IdenticalCast_HelpText" xml:space="preserve">
+	<data name="IdenticalCast_HelpText" xml:space="preserve">
     <value>If disabled, mooching opportunity will be lost</value>
   </data>
-  <data name="Always_Mooch" xml:space="preserve">
+	<data name="Always_Mooch" xml:space="preserve">
     <value>Always Mooch</value>
   </data>
-  <data name="Caught_Counter" xml:space="preserve">
+	<data name="Caught_Counter" xml:space="preserve">
     <value>Caught:</value>
-    <comment>It'll shows how many times the fish was caught. Example: Caught: 5x</comment>
+		<comment>It'll shows how many times the fish was caught. Example: Caught: 5x</comment>
   </data>
-  <data name="Hooked_Counter" xml:space="preserve">
+	<data name="Hooked_Counter" xml:space="preserve">
     <value>Hooked:</value>
-    <comment>It'll shows how many times the fish was caught. Example: Hooked: 5x</comment>
+		<comment>It'll shows how many times the fish was caught. Example: Hooked: 5x</comment>
   </data>
-  <data name="Enabled" xml:space="preserve">
+	<data name="Enabled" xml:space="preserve">
     <value>Enabled</value>
   </data>
-  <data name="StopFishing_After_hooking" xml:space="preserve">
+	<data name="StopFishing_After_hooking" xml:space="preserve">
     <value>After hooking...</value>
   </data>
-  <data name="Hooking_Limited_Reached_Chat_Message" xml:space="preserve">
+	<data name="Hooking_Limited_Reached_Chat_Message" xml:space="preserve">
     <value>Hooking limit reached ({0}). Stopping fishing.</value>
   </data>
-  <data name="Caught_Limited_Reached_Chat_Message" xml:space="preserve">
+	<data name="Caught_Limited_Reached_Chat_Message" xml:space="preserve">
     <value>Caught limit reached ({0}). Stopping fishing.</value>
   </data>
-  <data name="Stop_Casting" xml:space="preserve">
+	<data name="Stop_Casting" xml:space="preserve">
     <value>Stop Casting</value>
   </data>
-  <data name="Auto_Cast_Stopped" xml:space="preserve">
+	<data name="Auto_Cast_Stopped" xml:space="preserve">
     <value>Auto casting will be stopped, but won't quit fishing</value>
   </data>
-  <data name="Quit_Fishing" xml:space="preserve">
+	<data name="Quit_Fishing" xml:space="preserve">
     <value>Quit Fishing</value>
   </data>
-  <data name="Quit_Action_HelpText" xml:space="preserve">
+	<data name="Quit_Action_HelpText" xml:space="preserve">
     <value>Quit action will be used and completely stop fishing</value>
   </data>
-  <data name="Tab_Description" xml:space="preserve">
+	<data name="Tab_Description" xml:space="preserve">
     <value>Description</value>
   </data>
-  <data name="TabDefaultPreset_Description" xml:space="preserve">
+	<data name="TabDefaultPreset_Description" xml:space="preserve">
     <value>The default preset is used when no custom bait/mooch/fish/autocast is detected. Here you can set the hooking behavior that will be used for all baits and mooches unless a custom preset is created. 
 Check the Guide Tab for Guides.</value>
   </data>
-  <data name="TabGlobalPreset_Description" xml:space="preserve">
+	<data name="TabGlobalPreset_Description" xml:space="preserve">
     <value>The global preset is used when no custom hooking/fish caught/autocast is found. Here you can set the global behavior that will be used for all baits and mooches unless a custom preset is created</value>
   </data>
-  <data name="Old_Preset_Warning" xml:space="preserve">
+	<data name="Old_Preset_Warning" xml:space="preserve">
     <value>This is an old import, some settings might be missing.</value>
   </data>
-  <data name="Show_Chat_Logs" xml:space="preserve">
+	<data name="Show_Chat_Logs" xml:space="preserve">
     <value>Show Chat Logs</value>
   </data>
-  <data name="Show_Current_Status_Header" xml:space="preserve">
+	<data name="Show_Current_Status_Header" xml:space="preserve">
     <value>Show Current Status Header</value>
   </data>
-  <data name="DrawConfigs_Max_" xml:space="preserve">
+	<data name="DrawConfigs_Max_" xml:space="preserve">
     <value>Max.</value>
   </data>
-  <data name="DrawConfigs_Min_" xml:space="preserve">
+	<data name="DrawConfigs_Min_" xml:space="preserve">
     <value>Min.</value>
   </data>
-  <data name="Delay_Between_Casts" xml:space="preserve">
+	<data name="Delay_Between_Casts" xml:space="preserve">
     <value>Delay Between Casts (in ms):</value>
   </data>
-  <data name="Show_Debug_Console" xml:space="preserve">
+	<data name="Show_Debug_Console" xml:space="preserve">
     <value>Show Debug Console</value>
   </data>
-  <data name="Show_Chat_Logs_HelpText" xml:space="preserve">
+	<data name="Show_Chat_Logs_HelpText" xml:space="preserve">
     <value>Show messages like "Preset Swapped" in chat</value>
   </data>
-  <data name="TabName_Config_Guides" xml:space="preserve">
+	<data name="TabName_Config_Guides" xml:space="preserve">
     <value>Config / Guides</value>
   </data>
-  <data name="Open_Console" xml:space="preserve">
+	<data name="Open_Console" xml:space="preserve">
     <value>Open Console</value>
   </data>
-  <data name="SubAuto_Disabled" xml:space="preserve">
+	<data name="SubAuto_Disabled" xml:space="preserve">
     <value>Auto cast is disabled</value>
   </data>
-  <data name="AllActionsDisabled" xml:space="preserve">
+	<data name="AllActionsDisabled" xml:space="preserve">
     <value>All actions are disabled</value>
   </data>
-  <data name="SubExtra_Disabled" xml:space="preserve">
+	<data name="SubExtra_Disabled" xml:space="preserve">
     <value>Extra options disabled</value>
   </data>
-  <data name="Default_AutoCast_Being_Used" xml:space="preserve">
+	<data name="Default_AutoCast_Being_Used" xml:space="preserve">
     <value>[Default] auto cast is being used instead</value>
   </data>
-  <data name="Global_AutoCast_Being_Used" xml:space="preserve">
+	<data name="Global_AutoCast_Being_Used" xml:space="preserve">
     <value>[Global] auto cast is being used instead</value>
   </data>
-  <data name="GlobalActionsBeingUsed" xml:space="preserve">
+	<data name="GlobalActionsBeingUsed" xml:space="preserve">
     <value>Auto Actions from the Global Preset are being used instead</value>
   </data>
-  <data name="Custom_AutoCast_Being_Used" xml:space="preserve">
+	<data name="Custom_AutoCast_Being_Used" xml:space="preserve">
     <value>Custom preset [{0}] Auto cast is being used instead</value>
   </data>
-  <data name="Default_Extra_Being_Used" xml:space="preserve">
+	<data name="Default_Extra_Being_Used" xml:space="preserve">
     <value>[Default] Extra config is being used instead</value>
   </data>
-  <data name="Global_Extra_Being_Used" xml:space="preserve">
+	<data name="Global_Extra_Being_Used" xml:space="preserve">
     <value>[Global] Extra config is being used instead</value>
   </data>
-  <data name="Custom_Extra_Being_Used" xml:space="preserve">
+	<data name="Custom_Extra_Being_Used" xml:space="preserve">
     <value>Custom preset [{0}] Extra config is being used instead</value>
   </data>
-  <data name="Auto_Cast_Alert_Manual_Hook" xml:space="preserve">
+	<data name="Auto_Cast_Alert_Manual_Hook" xml:space="preserve">
     <value>Important! Auto Casts wont be used if you hook manually.</value>
   </data>
-  <data name="Acton_Alert_Manual_Hook" xml:space="preserve">
+	<data name="Acton_Alert_Manual_Hook" xml:space="preserve">
     <value>Important! Actions wont be used if you hook manually.</value>
   </data>
-  <data name="Food_Buff" xml:space="preserve">
+	<data name="Food_Buff" xml:space="preserve">
     <value>Food Buff</value>
   </data>
-  <data name="Only_When_Patience_Active" xml:space="preserve">
+	<data name="Only_When_Patience_Active" xml:space="preserve">
     <value>Only use when patience is active</value>
   </data>
-  <data name="Stop_After_Caught" xml:space="preserve">
+	<data name="Stop_After_Caught" xml:space="preserve">
     <value>Stop After Caught</value>
   </data>
-  <data name="Search_Hint" xml:space="preserve">
+	<data name="Search_Hint" xml:space="preserve">
     <value>Search...</value>
-    <comment>Hint Text for search bar</comment>
+		<comment>Hint Text for search bar</comment>
   </data>
-  <data name="Extra" xml:space="preserve">
+	<data name="Extra" xml:space="preserve">
     <value>Extra</value>
   </data>
-  <data name="ExtraOptions" xml:space="preserve">
+	<data name="ExtraOptions" xml:space="preserve">
     <value>Extra Options</value>
   </data>
-  <data name="NeverReleaseHelptext" xml:space="preserve">
+	<data name="NeverReleaseHelptext" xml:space="preserve">
     <value>This fish won't be released if 'Release All Fish' is enabled in the Auto Cast tab</value>
   </data>
-  <data name="NeverRelease" xml:space="preserve">
+	<data name="NeverRelease" xml:space="preserve">
     <value>Never Release</value>
   </data>
-  <data name="ReleaseAllFish" xml:space="preserve">
+	<data name="ReleaseAllFish" xml:space="preserve">
     <value>Release All Fish</value>
   </data>
-  <data name="ReleaseAllFishHelpText" xml:space="preserve">
+	<data name="ReleaseAllFishHelpText" xml:space="preserve">
     <value>If you dont want to release a specific fish, add it to a preset and select "Never Release"</value>
   </data>
-  <data name="Enable_Extra_Configs" xml:space="preserve">
+	<data name="Enable_Extra_Configs" xml:space="preserve">
     <value>Enable Extra Configs</value>
   </data>
-  <data name="When_gaining_fishers_intuition" xml:space="preserve">
+	<data name="When_gaining_fishers_intuition" xml:space="preserve">
     <value>When gaining fisher's intuition...</value>
   </data>
-  <data name="When_losing_fishers_intuition" xml:space="preserve">
+	<data name="When_losing_fishers_intuition" xml:space="preserve">
     <value>When losing fisher's intuition...</value>
   </data>
-  <data name="Draw_Configs" xml:space="preserve">
+	<data name="Draw_Configs" xml:space="preserve">
     <value>Configs</value>
   </data>
-  <data name="Draw_Guides" xml:space="preserve">
+	<data name="Draw_Guides" xml:space="preserve">
     <value>Guides</value>
   </data>
-  <data name="Delay_when_hooking" xml:space="preserve">
+	<data name="Delay_when_hooking" xml:space="preserve">
     <value>Delay before hooking (in ms)</value>
   </data>
-  <data name="Preset_not_found" xml:space="preserve">
+	<data name="Preset_not_found" xml:space="preserve">
     <value>Preset not found</value>
   </data>
-  <data name="Set_preset_command" xml:space="preserve">
+	<data name="Set_preset_command" xml:space="preserve">
     <value>Set custom preset by chat command -&gt; /ahpreset presetName</value>
   </data>
-  <data name="Set_agpreset_command" xml:space="preserve">
+	<data name="Set_agpreset_command" xml:space="preserve">
     <value>Set Autogig preset by chat command -&gt; /agpreset presetName</value>
   </data>
-  <data name="Starts_AutoHook" xml:space="preserve">
+	<data name="Starts_AutoHook" xml:space="preserve">
     <value>Start casting with your selected preset</value>
   </data>
-  <data name="Preset_set_to_" xml:space="preserve">
+	<data name="Preset_set_to_" xml:space="preserve">
     <value>Preset set to:</value>
   </data>
-  <data name="Gig_preset_set_to_" xml:space="preserve">
+	<data name="Gig_preset_set_to_" xml:space="preserve">
     <value>Gig Preset set to:</value>
   </data>
-  <data name="When_gaining_spectral_current" xml:space="preserve">
+	<data name="When_gaining_spectral_current" xml:space="preserve">
     <value>When a spectral current becomes active...</value>
   </data>
-  <data name="When_losing_spectral_current" xml:space="preserve">
+	<data name="When_losing_spectral_current" xml:space="preserve">
     <value>When a spectral current becomes inactive...</value>
   </data>
-  <data name="UseWhenIntuitionTimeIsEqualOrGreaterThan" xml:space="preserve">
+	<data name="UseWhenIntuitionTimeIsEqualOrGreaterThan" xml:space="preserve">
     <value>Use while time remaining on intuition exceeds (seconds)</value>
   </data>
-  <data name="OnlyUseWhenActiveSurfaceSlap" xml:space="preserve">
+	<data name="OnlyUseWhenActiveSurfaceSlap" xml:space="preserve">
     <value>Only use when Surface Slap is active</value>
   </data>
-  <data name="OnlyUseWhenNOTActiveSurfaceSlap" xml:space="preserve">
+	<data name="OnlyUseWhenNOTActiveSurfaceSlap" xml:space="preserve">
     <value>Only use when Surface Slap is not active</value>
   </data>
-  <data name="OnlyHookWhenActiveSurfaceSlap" xml:space="preserve">
+	<data name="OnlyHookWhenActiveSurfaceSlap" xml:space="preserve">
     <value>Only hook when Surface Slap is active</value>
   </data>
-  <data name="OnlyHookWhenNOTActiveSurfaceSlap" xml:space="preserve">
+	<data name="OnlyHookWhenNOTActiveSurfaceSlap" xml:space="preserve">
     <value>Only hook when Surface Slap is not active</value>
   </data>
-  <data name="OnlyUseWhenActiveIdentical" xml:space="preserve">
+	<data name="OnlyUseWhenActiveIdentical" xml:space="preserve">
     <value>Only use when Identical Cast is active</value>
   </data>
-  <data name="OnlyUseWhenNOTActiveIdentical" xml:space="preserve">
+	<data name="OnlyUseWhenNOTActiveIdentical" xml:space="preserve">
     <value>Only use when Identical Cast is not active</value>
   </data>
-  <data name="OnlyHookWhenActiveIdentical" xml:space="preserve">
+	<data name="OnlyHookWhenActiveIdentical" xml:space="preserve">
     <value>Only hook when Identical Cast is active</value>
   </data>
-  <data name="OnlyHookWhenNOTActiveIdentical" xml:space="preserve">
+	<data name="OnlyHookWhenNOTActiveIdentical" xml:space="preserve">
     <value>Only hook when Identical Cast is not active</value>
   </data>
-  <data name="Collect" xml:space="preserve">
+	<data name="Collect" xml:space="preserve">
     <value>Collect</value>
   </data>
-  <data name="CollectHelpText" xml:space="preserve">
+	<data name="CollectHelpText" xml:space="preserve">
     <value>Collector's Glove will be activated when you start fishing</value>
   </data>
-  <data name="RefreshWhenTimeIsLessThanOrEqual" xml:space="preserve">
+	<data name="RefreshWhenTimeIsLessThanOrEqual" xml:space="preserve">
     <value>Refresh when buff timer is less than or equal to</value>
   </data>
-  <data name="Allow_Gp_Overcap" xml:space="preserve">
+	<data name="Allow_Gp_Overcap" xml:space="preserve">
     <value>Allow GP overcap if Identical Cast is active</value>
   </data>
-  <data name="Use_Cordials_First" xml:space="preserve">
+	<data name="Use_Cordials_First" xml:space="preserve">
     <value>Use Cordials before Thaliak's Favor</value>
   </data>
-  <data name="ThaliaksCordialOffCd" xml:space="preserve">
+	<data name="ThaliaksCordialOffCd" xml:space="preserve">
     <value>Only use when cordial is on cooldown</value>
   </data>
-  <data name="Use_Cordials_First_Help" xml:space="preserve">
+	<data name="Use_Cordials_First_Help" xml:space="preserve">
     <value>Only applies when Cordial is enabled</value>
   </data>
-  <data name="Show_Presets_As_Sidebar" xml:space="preserve">
+	<data name="Show_Presets_As_Sidebar" xml:space="preserve">
     <value>Show preset menu as a sidebar</value>
   </data>
-  <data name="Hide_Tab_Description" xml:space="preserve">
+	<data name="Hide_Tab_Description" xml:space="preserve">
     <value>Hide tabs descriptions</value>
   </data>
-  <data name="Ignore_When_Intuition" xml:space="preserve">
+	<data name="Ignore_When_Intuition" xml:space="preserve">
     <value>Ignore fish setting when intuition is active</value>
   </data>
-  <data name="Reset_the_counter" xml:space="preserve">
+	<data name="Reset_the_counter" xml:space="preserve">
     <value>Reset the counter</value>
   </data>
-  <data name="Reset_counter_after_swapping_presets" xml:space="preserve">
+	<data name="Reset_counter_after_swapping_presets" xml:space="preserve">
     <value>Reset hook/fish counter after swapping presets</value>
   </data>
-  <data name="Only_use_when_Cordial_is_available" xml:space="preserve">
+	<data name="Only_use_when_Cordial_is_available" xml:space="preserve">
     <value>Only use when Cordial is available</value>
   </data>
-  <data name="Only_use_when_the_fish_is_caught" xml:space="preserve">
+	<data name="Only_use_when_the_fish_is_caught" xml:space="preserve">
     <value>Only use when the fish is caught</value>
   </data>
-  <data name="UIUseCurrentBait" xml:space="preserve">
+	<data name="UIUseCurrentBait" xml:space="preserve">
     <value>Selects currently selected bait from game</value>
   </data>
-  <data name="AutoCastEndTime" xml:space="preserve">
+	<data name="AutoCastEndTime" xml:space="preserve">
     <value>Ending time to allow auto casting</value>
   </data>
-  <data name="AutoCastStartTime" xml:space="preserve">
+	<data name="AutoCastStartTime" xml:space="preserve">
     <value>Starting time to allow auto casting</value>
   </data>
-  <data name="AutoCastOnlyAtSpecificTimes" xml:space="preserve">
+	<data name="AutoCastOnlyAtSpecificTimes" xml:space="preserve">
     <value>Use actions only at specific times (Eorzea Time)</value>
   </data>
-  <data name="Quit_Fishing_On_IntuitionLost" xml:space="preserve">
+	<data name="Quit_Fishing_On_IntuitionLost" xml:space="preserve">
     <value>Quits fishing when intuition is lost</value>
   </data>
-  <data name="Stop_Fishing_On_IntuitionLost" xml:space="preserve">
+	<data name="Stop_Fishing_On_IntuitionLost" xml:space="preserve">
     <value>Stops fishing when intuition is lost</value>
   </data>
-  <data name="Auto_Cast_Sort_Notice" xml:space="preserve">
+	<data name="Auto_Cast_Sort_Notice" xml:space="preserve">
     <value>Actions will be used from top to bottom. Click the arrow buttons to reorder.</value>
   </data>
-  <data name="Current_Selected_Preset" xml:space="preserve">
+	<data name="Current_Selected_Preset" xml:space="preserve">
     <value>Current selected preset:</value>
   </data>
-  <data name="AutoCastOnlyUnderFishEyes" xml:space="preserve">
+	<data name="AutoCastOnlyUnderFishEyes" xml:space="preserve">
     <value>Only use when Fish Eyes is active.</value>
   </data>
-  <data name="HookType" xml:space="preserve">
+	<data name="HookType" xml:space="preserve">
     <value>Hook Type</value>
   </data>
-  <data name="HookingTimer" xml:space="preserve">
+	<data name="HookingTimer" xml:space="preserve">
     <value>Hooking Timer</value>
   </data>
-  <data name="EnableHookingTimer" xml:space="preserve">
+	<data name="EnableHookingTimer" xml:space="preserve">
     <value>Use Hooking Timer</value>
   </data>
-  <data name="EnableChumTimer" xml:space="preserve">
+	<data name="EnableChumTimer" xml:space="preserve">
     <value>Use Chum Timer</value>
   </data>
-  <data name="HookingTimerHelpText" xml:space="preserve">
+	<data name="HookingTimerHelpText" xml:space="preserve">
     <value>Hook will only be used if the bite happens between the min. and max. values</value>
   </data>
-  <data name="UseDoubleHook" xml:space="preserve">
+	<data name="UseDoubleHook" xml:space="preserve">
     <value>Use Double Hook</value>
   </data>
-  <data name="UseTripleHook" xml:space="preserve">
+	<data name="UseTripleHook" xml:space="preserve">
     <value>Use Triple Hook</value>
   </data>
-  <data name="StopAfterHooking" xml:space="preserve">
+	<data name="StopAfterHooking" xml:space="preserve">
     <value>Stop After Hooking...</value>
   </data>
-  <data name="Timeout" xml:space="preserve">
+	<data name="Timeout" xml:space="preserve">
     <value>Timeout</value>
   </data>
-  <data name="Chum Timeout" xml:space="preserve">
+	<data name="Chum Timeout" xml:space="preserve">
     <value>Chum Timeout</value>
   </data>
-  <data name="TimeoutOption" xml:space="preserve">
+	<data name="TimeoutOption" xml:space="preserve">
     <value>The fishing attempt will be canceled after the specified time has passed</value>
   </data>
-  <data name="Hook" xml:space="preserve">
+	<data name="Hook" xml:space="preserve">
     <value>Hook</value>
   </data>
-  <data name="Hooking" xml:space="preserve">
+	<data name="Hooking" xml:space="preserve">
     <value>Hooking</value>
   </data>
-  <data name="HookingTabHelpText" xml:space="preserve">
+	<data name="HookingTabHelpText" xml:space="preserve">
     <value>Hooking settings when fishing with bait or mooching</value>
   </data>
-  <data name="BaitTabHelpText" xml:space="preserve">
+	<data name="BaitTabHelpText" xml:space="preserve">
     <value>Hooking settings when fishing with bait</value>
   </data>
-  <data name="MoochTabHelpText" xml:space="preserve">
+	<data name="MoochTabHelpText" xml:space="preserve">
     <value>Hooking settings when mooching</value>
   </data>
-  <data name="RequiredStatusSettingHelpText" xml:space="preserve">
+	<data name="RequiredStatusSettingHelpText" xml:space="preserve">
     <value>If disabled, the Default hook will be used instead</value>
   </data>
-  <data name="AntiAfkOption" xml:space="preserve">
+	<data name="AntiAfkOption" xml:space="preserve">
     <value>Anti-Afk while fishing</value>
   </data>
-  <data name="SwapTreeNodeButtons" xml:space="preserve">
+	<data name="SwapTreeNodeButtons" xml:space="preserve">
     <value>Swap Tree Node to Buttons</value>
   </data>
-  <data name="LetFishEscapeHelpText" xml:space="preserve">
+	<data name="LetFishEscapeHelpText" xml:space="preserve">
     <value>if disabled, Normal Hook will be used if GP is below required</value>
   </data>
-  <data name="UseConfigRequiredStatus" xml:space="preserve">
+	<data name="UseConfigRequiredStatus" xml:space="preserve">
     <value>Use this setting when {0} is active</value>
-    <comment>{0} Represents a status effect. For Example: Use this setting when Fisher's Intuition is active</comment>
+		<comment>{0} Represents a status effect. For Example: Use this setting when Fisher's Intuition is active</comment>
   </data>
-  <data name="NormalPatienceHookset" xml:space="preserve">
+	<data name="NormalPatienceHookset" xml:space="preserve">
     <value>Normal Hook / Patience Hookset</value>
   </data>
-  <data name="AutoCastOnlyUnderFishEyesHelpText" xml:space="preserve">
+	<data name="AutoCastOnlyUnderFishEyesHelpText" xml:space="preserve">
     <value>If time filter is enabled, this is ignored during time window</value>
   </data>
-  <data name="Configure" xml:space="preserve">
+	<data name="Configure" xml:space="preserve">
     <value>Configure</value>
   </data>
-  <data name="Type_1" xml:space="preserve">
+	<data name="Type_1" xml:space="preserve">
     <value>Type 1</value>
   </data>
-  <data name="Type_2" xml:space="preserve">
+	<data name="Type_2" xml:space="preserve">
     <value>Type 2</value>
   </data>
-  <data name="CordialOutsideTimeWindow" xml:space="preserve">
+	<data name="CordialOutsideTimeWindow" xml:space="preserve">
     <value>Use cordial outside of the specified auto cast time window</value>
   </data>
-  <data name="SpecificTimeWindowHelpText" xml:space="preserve">
+	<data name="SpecificTimeWindowHelpText" xml:space="preserve">
     <value>Affected actions: Auto Cast Line, Auto Mooch I/II, Cordial (optional), Fish Eyes, Makeshift Bait, Patience I/II</value>
   </data>
-  <data name="CordialOutsideTimeWindowHelpText" xml:space="preserve">
+	<data name="CordialOutsideTimeWindowHelpText" xml:space="preserve">
     <value>By default, cordial will not be used outside of the time window (if enabled). This option will override that behavior</value>
   </data>
-  <data name="TimeLimit" xml:space="preserve">
+	<data name="TimeLimit" xml:space="preserve">
     <value>Time Limit</value>
   </data>
-  <data name="ChumTimeLimit" xml:space="preserve">
+	<data name="ChumTimeLimit" xml:space="preserve">
     <value>Chum Time Limit</value>
   </data>
-  <data name="SetZeroToIgnore" xml:space="preserve">
+	<data name="SetZeroToIgnore" xml:space="preserve">
     <value>Set zero (0) to ignore Min. or Max. timers</value>
   </data>
-  <data name="AboutTab" xml:space="preserve">
+	<data name="AboutTab" xml:space="preserve">
     <value>About</value>
   </data>
-  <data name="UseNaturesBounty" xml:space="preserve">
+	<data name="UseNaturesBounty" xml:space="preserve">
     <value>Use Natures Bounty</value>
   </data>
-  <data name="Settings" xml:space="preserve">
+	<data name="Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
-  <data name="SettingsTab" xml:space="preserve">
+	<data name="SettingsTab" xml:space="preserve">
     <value>Settings</value>
   </data>
-  <data name="EnableActions" xml:space="preserve">
+	<data name="EnableActions" xml:space="preserve">
     <value>Enable Actions</value>
   </data>
-  <data name="DontHideExtraAutoCast" xml:space="preserve">
+	<data name="DontHideExtraAutoCast" xml:space="preserve">
     <value>Don't hide Extra/AutoCast options when disabled</value>
   </data>
-  <data name="IgnoreMooch" xml:space="preserve">
+	<data name="IgnoreMooch" xml:space="preserve">
     <value>Ignore Mooch</value>
   </data>
-  <data name="IgnoreMoochHelpText" xml:space="preserve">
+	<data name="IgnoreMoochHelpText" xml:space="preserve">
     <value>If disabled, the mooch attempt will not be cancelled, even if the Auto Mooch option is disabled</value>
   </data>
-  <data name="NeverMoochHelpText" xml:space="preserve">
+	<data name="NeverMoochHelpText" xml:space="preserve">
     <value>If enabled, actions will also cancel this fish mooch attempt</value>
   </data>
-  <data name="OnlyWhenMakeshiftOrPatience" xml:space="preserve">
+	<data name="OnlyWhenMakeshiftOrPatience" xml:space="preserve">
     <value>Only use when Makeshift or Patience is active</value>
   </data>
-  <data name="IgnoreMoochFishEyes" xml:space="preserve">
+	<data name="IgnoreMoochFishEyes" xml:space="preserve">
     <value>Fish Eyes will be used and cancel the mooch attempt.</value>
   </data>
-  <data name="StartActions" xml:space="preserve">
+	<data name="StartActions" xml:space="preserve">
     <value>Start Actions</value>
   </data>
-  <data name="StartActionHelpText" xml:space="preserve">
+	<data name="StartActionHelpText" xml:space="preserve">
     <value>Start using your Auto Casts! You can also set a bait swap to start fishing with in the Extra Tab
 
 You may also use the command /ahstart to start. Try making a macro with it!</value>
   </data>
-  <data name="ForceBaitSwap" xml:space="preserve">
+	<data name="ForceBaitSwap" xml:space="preserve">
     <value>Force bait swap when using "Start Actions"</value>
   </data>
-  <data name="SelectBaitStartFishing" xml:space="preserve">
+	<data name="SelectBaitStartFishing" xml:space="preserve">
     <value>Select bait to start fishing with:</value>
   </data>
-  <data name="BaitPresetPriorityWarning" xml:space="preserve">
+	<data name="BaitPresetPriorityWarning" xml:space="preserve">
     <value>Bait and Preset swaps here have priority over the Fish Caught swaps</value>
   </data>
-  <data name="WhenAnglersAt" xml:space="preserve">
+	<data name="WhenAnglersAt" xml:space="preserve">
     <value>When Angler's Art stack is at...</value>
   </data>
-  <data name="StacksOrMore" xml:space="preserve">
+	<data name="StacksOrMore" xml:space="preserve">
     <value>Stacks or more</value>
   </data>
-  <data name="StopQuitFishing" xml:space="preserve">
+	<data name="StopQuitFishing" xml:space="preserve">
     <value>Stop/Quit Fishing</value>
   </data>
-  <data name="AnglersArt" xml:space="preserve">
+	<data name="AnglersArt" xml:space="preserve">
     <value>Angler's Art</value>
   </data>
-  <data name="CatchEverything" xml:space="preserve">
+	<data name="CatchEverything" xml:space="preserve">
     <value>Catch Everything</value>
   </data>
-  <data name="IgnoresPresets" xml:space="preserve">
+	<data name="IgnoresPresets" xml:space="preserve">
     <value>Ignores Presets</value>
   </data>
-  <data name="CatchAllNotice" xml:space="preserve">
+	<data name="CatchAllNotice" xml:space="preserve">
     <value>Catch all is enabled. Below settings will be ignored when spearfishing..</value>
   </data>
-  <data name="CatchAllNaturesBountyHelpText" xml:space="preserve">
+	<data name="CatchAllNaturesBountyHelpText" xml:space="preserve">
     <value>Only when Catch Everything is enabled</value>
   </data>
-  <data name="CatchAllGigWindow" xml:space="preserve">
+	<data name="CatchAllGigWindow" xml:space="preserve">
     <value>Catch All Enabled. Presets will be ignored.</value>
   </data>
-  <data name="Intuition" xml:space="preserve">
+	<data name="Intuition" xml:space="preserve">
     <value>Intuition</value>
   </data>
-  <data name="DelaySettings" xml:space="preserve">
+	<data name="DelaySettings" xml:space="preserve">
     <value>Delay Settings</value>
   </data>
-  <data name="GeneratePreset" xml:space="preserve">
+	<data name="GeneratePreset" xml:space="preserve">
     <value>Generate Preset</value>
   </data>
-  <data name="OnlyWhenMoochNotAvailable" xml:space="preserve">
+	<data name="OnlyWhenMoochNotAvailable" xml:space="preserve">
     <value>Only when mooch is not available</value>
   </data>
-  <data name="AutoCastExtraOptionMakeshiftBait" xml:space="preserve">
+	<data name="AutoCastExtraOptionMakeshiftBait" xml:space="preserve">
     <value>Only use when Mooch II is on cooldown</value>
   </data>
-  <data name="AutoCastExtraOptionPatience" xml:space="preserve">
+	<data name="AutoCastExtraOptionPatience" xml:space="preserve">
     <value>Only use when Mooch II is on cooldown</value>
   </data>
-  <data name="Fish_Hitbox_Offset" xml:space="preserve">
+	<data name="Fish_Hitbox_Offset" xml:space="preserve">
     <value>Fish Hitbox Offset</value>
   </data>
-  <data name="OffsetLR" xml:space="preserve">
+	<data name="OffsetLR" xml:space="preserve">
     <value>Offset (L-&gt;R)</value>
   </data>
-  <data name="OffsetRL" xml:space="preserve">
+	<data name="OffsetRL" xml:space="preserve">
     <value>Offset (R-&gt;L)</value>
   </data>
-  <data name="OffsetLRHelpText" xml:space="preserve">
+	<data name="OffsetLRHelpText" xml:space="preserve">
     <value>Hitbox offset for fish coming from left to right</value>
   </data>
-  <data name="OffsetRLHelpText" xml:space="preserve">
+	<data name="OffsetRLHelpText" xml:space="preserve">
     <value>Hitbox offset for fish coming from right to left</value>
   </data>
-  <data name="FishHitboxHelpText" xml:space="preserve">
+	<data name="FishHitboxHelpText" xml:space="preserve">
     <value>Adjust the hitbox area if you think its missing too much</value>
   </data>
-  <data name="NBBeforeFish" xml:space="preserve">
+	<data name="NBBeforeFish" xml:space="preserve">
     <value>Use Natures Bounty before fish appears</value>
   </data>
-  <data name="NBBeforeFishHelpText" xml:space="preserve">
+	<data name="NBBeforeFishHelpText" xml:space="preserve">
     <value>Could waste GP if the target fish doesn't appear</value>
   </data>
-  <data name="AutoCordialPandoras" xml:space="preserve">
+	<data name="AutoCordialPandoras" xml:space="preserve">
     <value>Auto-Cordial can be found in Pandora's Box plugin</value>
   </data>
-  <data name="LureStacks" xml:space="preserve">
+	<data name="LureStacks" xml:space="preserve">
     <value>Lure Stacks:</value>
   </data>
-  <data name="UseLures" xml:space="preserve">
+	<data name="UseLures" xml:space="preserve">
     <value>Use Lures</value>
   </data>
-  <data name="BigGameFishing" xml:space="preserve">
+	<data name="BigGameFishing" xml:space="preserve">
     <value>Big-game Fishing</value>
   </data>
-  <data name="AmbitiousLure" xml:space="preserve">
+	<data name="AmbitiousLure" xml:space="preserve">
     <value>Ambitious Lure</value>
   </data>
-  <data name="ModestLure" xml:space="preserve">
+	<data name="ModestLure" xml:space="preserve">
     <value>Modest Lure</value>
   </data>
-  <data name="AutoLures_Target_Fish" xml:space="preserve">
+	<data name="AutoLures_Target_Fish" xml:space="preserve">
     <value>Target Fish:</value>
   </data>
-  <data name="AnyTarget" xml:space="preserve">
+	<data name="AnyTarget" xml:space="preserve">
     <value>Any Small/Large/Special</value>
   </data>
-  <data name="OnlySpecial" xml:space="preserve">
+	<data name="OnlySpecial" xml:space="preserve">
     <value>Only Special</value>
   </data>
-  <data name="SpecialFishExemple" xml:space="preserve">
+	<data name="SpecialFishExemple" xml:space="preserve">
     <value>Special fishes are the ones with unique dialogs when using lure, such as:</value>
   </data>
-  <data name="NotSpecial" xml:space="preserve">
+	<data name="NotSpecial" xml:space="preserve">
     <value>Only Small/Large</value>
   </data>
-  <data name="MaxAttempts" xml:space="preserve">
+	<data name="MaxAttempts" xml:space="preserve">
     <value>Max. Attempts</value>
   </data>
-  <data name="CancelAttempt" xml:space="preserve">
+	<data name="CancelAttempt" xml:space="preserve">
     <value>Cancel hooking attempt if stack limit is reached without success</value>
   </data>
-  <data name="LureType" xml:space="preserve">
+	<data name="LureType" xml:space="preserve">
     <value>Lure Type:</value>
   </data>
-  <data name="OnlyCastLarge" xml:space="preserve">
+	<data name="OnlyCastLarge" xml:space="preserve">
     <value>Only use when Patience/Prize Catch is active</value>
   </data>
-  <data name="SparefulHand" xml:space="preserve">
+	<data name="SparefulHand" xml:space="preserve">
     <value>Spareful Hand</value>
   </data>
-  <data name="DelayBeforeCancel" xml:space="preserve">
+	<data name="DelayBeforeCancel" xml:space="preserve">
     <value>Delay before canceling the fishing attempt (in ms)</value>
   </data>
-  <data name="DelayBeforeCancelInfo" xml:space="preserve">
+	<data name="DelayBeforeCancelInfo" xml:space="preserve">
     <value>This will delay the use of action Rest when an unwanted bite happens and is not hooked</value>
   </data>
-  <data name="SwitchFishBait" xml:space="preserve">
+	<data name="SwitchFishBait" xml:space="preserve">
     <value>Switches fishing baits (by Name or ID)</value>
   </data>
-  <data name="Disabled" xml:space="preserve">
+	<data name="Disabled" xml:space="preserve">
     <value>Disabled</value>
   </data>
-  <data name="PresetCopied" xml:space="preserve">
+	<data name="PresetCopied" xml:space="preserve">
     <value>Preset copied to clipboard</value>
   </data>
-  <data name="RightClickOptions" xml:space="preserve">
+	<data name="RightClickOptions" xml:space="preserve">
     <value>Right click for options</value>
   </data>
-  <data name="PresetImported" xml:space="preserve">
+	<data name="PresetImported" xml:space="preserve">
     <value>Preset Imported</value>
   </data>
-  <data name="Delete" xml:space="preserve">
+	<data name="Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
-  <data name="CommunityPresets" xml:space="preserve">
+	<data name="CommunityPresets" xml:space="preserve">
     <value>Community Presets</value>
   </data>
-  <data name="PresetGen" xml:space="preserve">
+	<data name="PresetGen" xml:space="preserve">
     <value>Preset Gen</value>
   </data>
-  <data name="PresetGenerator" xml:space="preserve">
+	<data name="PresetGenerator" xml:space="preserve">
     <value>Preset Generator</value>
   </data>
-  <data name="FishingPresets" xml:space="preserve">
+	<data name="FishingPresets" xml:space="preserve">
     <value>Fishing Presets</value>
   </data>
-  <data name="NewAccountWarning" xml:space="preserve">
+	<data name="NewAccountWarning" xml:space="preserve">
     <value>New accounts might need to wait a bit before being able to edit the wiki</value>
   </data>
-  <data name="Fishing" xml:space="preserve">
+	<data name="Fishing" xml:space="preserve">
     <value>Fishing</value>
   </data>
-  <data name="Spearfishing" xml:space="preserve">
+	<data name="Spearfishing" xml:space="preserve">
     <value>Spearfishing</value>
   </data>
-  <data name="ClickOpenWiki" xml:space="preserve">
+	<data name="ClickOpenWiki" xml:space="preserve">
     <value>Click here to open the wiki page</value>
   </data>
-  <data name="CommunityDescription" xml:space="preserve">
+	<data name="CommunityDescription" xml:space="preserve">
     <value>This tab is for community presets. You can get presets from the wiki or share your own.</value>
   </data>
-  <data name="UseIcActive" xml:space="preserve">
+	<data name="UseIcActive" xml:space="preserve">
     <value>Use when Identical Cast is active</value>
   </data>
-  <data name="UseSlapActive" xml:space="preserve">
+	<data name="UseSlapActive" xml:space="preserve">
     <value>Use when Surface Slap is active</value>
   </data>
-  <data name="CantFishHere" xml:space="preserve">
+	<data name="CantFishHere" xml:space="preserve">
     <value>Can't fish here</value>
   </data>
-  <data name="Deselect" xml:space="preserve">
+	<data name="Deselect" xml:space="preserve">
     <value>Deselect</value>
   </data>
-  <data name="SetActive" xml:space="preserve">
+	<data name="SetActive" xml:space="preserve">
     <value>Set as active</value>
   </data>
-  <data name="Rename" xml:space="preserve">
+	<data name="Rename" xml:space="preserve">
     <value>Rename</value>
   </data>
-  <data name="GlobalPresetHelpText" xml:space="preserve">
+	<data name="GlobalPresetHelpText" xml:space="preserve">
     <value>If no preset is selected, the global preset will be used</value>
   </data>
-  <data name="AlreadySwapped" xml:space="preserve">
+	<data name="AlreadySwapped" xml:space="preserve">
     <value>(Already Swapped)</value>
   </data>
-  <data name="AnimationCanceling" xml:space="preserve">
+	<data name="AnimationCanceling" xml:space="preserve">
     <value>Animation Canceling</value>
   </data>
-  <data name="EnableRecastCancel" xml:space="preserve">
+	<data name="EnableRecastCancel" xml:space="preserve">
     <value>Enable line recasting animation cancel</value>
   </data>
-  <data name="EnableRecastCancelHelp" xml:space="preserve">
+	<data name="EnableRecastCancelHelp" xml:space="preserve">
     <value>Doesn't work if the fish is hooked, only works when recasting from a failed/canceled attempt</value>
   </data>
-  <data name="TurnCollectOff" xml:space="preserve">
+	<data name="TurnCollectOff" xml:space="preserve">
     <value>Turn Collector's Glove off if Auto Collect is also disabled</value>
   </data>
-  <data name="TurnCollectOffHelp" xml:space="preserve">
+	<data name="TurnCollectOffHelp" xml:space="preserve">
     <value>Animation canceling requires turning Collector's Glove on before casting the line, this option ensures Collector's Glove will remain off while fishing</value>
   </data>
-  <data name="EnableChumCancel" xml:space="preserve">
+	<data name="EnableChumCancel" xml:space="preserve">
     <value>Enable Chum animation cancel</value>
   </data>
-  <data name="ChumCancelHelp" xml:space="preserve">
+	<data name="ChumCancelHelp" xml:space="preserve">
     <value>Experimental and not consistent (maybe because of ping). Action 'Salvage' will be activated</value>
   </data>
-  <data name="FishCaughtHelp" xml:space="preserve">
+	<data name="FishCaughtHelp" xml:space="preserve">
     <value>Options for when you catch a fish</value>
   </data>
-  <data name="ExtraOptionsHelp" xml:space="preserve">
+	<data name="ExtraOptionsHelp" xml:space="preserve">
     <value>Just extra options</value>
   </data>
-  <data name="AutoCastsHelp" xml:space="preserve">
+	<data name="AutoCastsHelp" xml:space="preserve">
     <value>Options for auto casting actions</value>
   </data>
-  <data name="GetWikiPresets" xml:space="preserve">
+	<data name="GetWikiPresets" xml:space="preserve">
     <value>Get Wiki Presets</value>
   </data>
-  <data name="ClickToToggle" xml:space="preserve">
+	<data name="ClickToToggle" xml:space="preserve">
     <value>Click to toggle on/off</value>
   </data>
-  <data name="PluginEnabledHelp" xml:space="preserve">
+	<data name="PluginEnabledHelp" xml:space="preserve">
     <value>You can also click the fish image to toggle the plugin on/off</value>
   </data>
-  <data name="MakeACopy" xml:space="preserve">
+	<data name="MakeACopy" xml:space="preserve">
     <value>Make a Copy</value>
   </data>
-  <data name="StatusNoPreset" xml:space="preserve">
+	<data name="StatusNoPreset" xml:space="preserve">
     <value>No preset active, Global Preset will be used instead</value>
   </data>
-  <data name="LureSSActive" xml:space="preserve">
+	<data name="LureSSActive" xml:space="preserve">
     <value>Only use lure when Surface Slap is active</value>
   </data>
-  <data name="LureSSNotActive" xml:space="preserve">
+	<data name="LureSSNotActive" xml:space="preserve">
     <value>Only use lure when Surface Slap is not active</value>
   </data>
-  <data name="LureICActive" xml:space="preserve">
+	<data name="LureICActive" xml:space="preserve">
     <value>Only use lure when Identical Cast is active</value>
   </data>
-  <data name="LureICNotActive" xml:space="preserve">
+	<data name="LureICNotActive" xml:space="preserve">
     <value>Only use lure when Identical Cast is not active</value>
   </data>
-  <data name="Prize_Catch_Options" xml:space="preserve">
+	<data name="Prize_Catch_Options" xml:space="preserve">
     <value>Prize Catch Options</value>
   </data>
-  <data name="Prize_Catch_Required" xml:space="preserve">
+	<data name="Prize_Catch_Required" xml:space="preserve">
     <value>Only hook when Prize Catch active</value>
   </data>
-  <data name="Conditions" xml:space="preserve">
+	<data name="Conditions" xml:space="preserve">
     <value>Conditions</value>
   </data>
-  <data name="Conditions_HelpText" xml:space="preserve">
+	<data name="Conditions_HelpText" xml:space="preserve">
     <value>Specific conditions for hooking</value>
   </data>
-  <data name="Status_NoHookEnabled" xml:space="preserve">
+	<data name="Status_NoHookEnabled" xml:space="preserve">
     <value>Skipping bite - No hook for this bite is enabled</value>
   </data>
-  <data name="Status_PrizeCatchRequired" xml:space="preserve">
+	<data name="Status_PrizeCatchRequired" xml:space="preserve">
     <value>Skipping bite - Prize Catch is required for hooking, but is not active</value>
   </data>
-  <data name="Status_IdenticalCastRequired" xml:space="preserve">
+	<data name="Status_IdenticalCastRequired" xml:space="preserve">
     <value>Skipping bite - Identical Cast is required for hooking, but is not active</value>
   </data>
-  <data name="Status_IdenticalCastNotRequired" xml:space="preserve">
+	<data name="Status_IdenticalCastNotRequired" xml:space="preserve">
     <value>Skipping bite - Identical Cast is active, but NOT active is required for hooking</value>
   </data>
-  <data name="Status_SurfaceSlapRequired" xml:space="preserve">
+	<data name="Status_SurfaceSlapRequired" xml:space="preserve">
     <value>Skipping bite - Surface Slap is required for hooking, but is not active</value>
   </data>
-  <data name="Status_SurfaceSlapNotRequired" xml:space="preserve">
+	<data name="Status_SurfaceSlapNotRequired" xml:space="preserve">
     <value>Skipping bite - Surface Slap is active, but NOT active is required for hooking</value>
   </data>
-  <data name="PrizeCatchNotActive" xml:space="preserve">
+	<data name="PrizeCatchNotActive" xml:space="preserve">
     <value>Only hook when Prize Catch NOT active</value>
   </data>
-  <data name="Status_PrizeCatchNotRequired" xml:space="preserve">
+	<data name="Status_PrizeCatchNotRequired" xml:space="preserve">
     <value>Skipping bite - Prize Catch is active, but NOT active is required for hooking</value>
   </data>
-  <data name="StellarHookset" xml:space="preserve">
+	<data name="StellarHookset" xml:space="preserve">
     <value>Stellar Hookset</value>
   </data>
-  <data name="FolderMostBeEmpty" xml:space="preserve">
+	<data name="FolderMostBeEmpty" xml:space="preserve">
     <value>Folder must be empty to delete</value>
   </data>
-  <data name="FolderExported" xml:space="preserve">
+	<data name="FolderExported" xml:space="preserve">
     <value>Folder exported to the clipboard</value>
   </data>
-  <data name="ExportFolderClipboard" xml:space="preserve">
+	<data name="ExportFolderClipboard" xml:space="preserve">
     <value>Export Folder to Clipboard</value>
   </data>
-  <data name="EnterNewFolderName" xml:space="preserve">
+	<data name="EnterNewFolderName" xml:space="preserve">
     <value>Enter a new name for the folder:</value>
   </data>
-  <data name="RenameFolder" xml:space="preserve">
+	<data name="RenameFolder" xml:space="preserve">
     <value>Rename Folder</value>
   </data>
-  <data name="CreateNewFolder" xml:space="preserve">
+	<data name="CreateNewFolder" xml:space="preserve">
     <value>Create New Folder</value>
   </data>
-  <data name="Create" xml:space="preserve">
+	<data name="Create" xml:space="preserve">
     <value>Create</value>
   </data>
-  <data name="FolderNameHint" xml:space="preserve">
+	<data name="FolderNameHint" xml:space="preserve">
     <value>Enter a name for the new folder:</value>
   </data>
-  <data name="NoPresetsSelected" xml:space="preserve">
+	<data name="NoPresetsSelected" xml:space="preserve">
     <value>No presets selected for import</value>
   </data>
-  <data name="RenamePreset" xml:space="preserve">
+	<data name="RenamePreset" xml:space="preserve">
     <value>Rename Preset</value>
   </data>
-  <data name="ImportFolderAndPresets" xml:space="preserve">
+	<data name="ImportFolderAndPresets" xml:space="preserve">
     <value>Import this folder and its presets?</value>
   </data>
-  <data name="Presets_" xml:space="preserve">
+	<data name="Presets_" xml:space="preserve">
     <value>Presets:</value>
   </data>
-  <data name="FolderName" xml:space="preserve">
+	<data name="FolderName" xml:space="preserve">
     <value>Folder Name</value>
   </data>
-  <data name="ImportPresetOrFolder" xml:space="preserve">
+	<data name="ImportPresetOrFolder" xml:space="preserve">
     <value>Import Preset or Folder from Clipboard</value>
   </data>
-  <data name="CreateFolder" xml:space="preserve">
+	<data name="CreateFolder" xml:space="preserve">
     <value>Create Folder</value>
   </data>
-  <data name="Moving_" xml:space="preserve">
+	<data name="Moving_" xml:space="preserve">
     <value>Moving:</value>
-    <comment>Moving: PresetName</comment>
+		<comment>Moving: PresetName</comment>
   </data>
-  <data name="MovingFolder_" xml:space="preserve">
+	<data name="MovingFolder_" xml:space="preserve">
     <value>Moving folder:</value>
-    <comment>Moving folder: FolderName</comment>
+		<comment>Moving folder: FolderName</comment>
   </data>
-  <data name="Reset_Counter_Bait_Swap" xml:space="preserve">
+	<data name="Reset_Counter_Bait_Swap" xml:space="preserve">
     <value>Reset counter after swapping baits</value>
   </data>
 </root>
