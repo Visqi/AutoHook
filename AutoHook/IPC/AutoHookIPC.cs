@@ -2,6 +2,8 @@
 using AutoHook.Configurations;
 using System.Linq;
 using ECommons.EzIpcManager;
+using AutoHook.SeFunctions;
+using AutoHook.Utils;
 
 namespace AutoHook.IPC;
 
@@ -91,5 +93,39 @@ public class AutoHookIPC
     {
         _cfg.HookPresets.CustomPresets.RemoveAll(p => p.PresetName.StartsWith("anon_"));
         Service.Save();
+    }
+
+    [EzIPC]
+    public bool SwapBaitById(uint baitId)
+    {
+        var result = Service.BaitManager.ChangeBait(baitId);
+        return result is BaitManager.ChangeBaitReturn.Success or BaitManager.ChangeBaitReturn.AlreadyEquipped;
+    }
+
+    [EzIPC]
+    public bool SwapBait(string baitNameOrId)
+    {
+        if (string.IsNullOrWhiteSpace(baitNameOrId))
+            return false;
+
+        if (uint.TryParse(baitNameOrId, out var parsedId))
+            return SwapBaitById(parsedId);
+
+        var bait = GameRes.Baits.FirstOrDefault(b =>
+            string.Equals(b.Name, baitNameOrId, StringComparison.OrdinalIgnoreCase));
+
+        if (bait == null || bait.Id <= 0)
+            return false;
+
+        var result = Service.BaitManager.ChangeBait((uint)bait.Id);
+        return result is BaitManager.ChangeBaitReturn.Success or BaitManager.ChangeBaitReturn.AlreadyEquipped;
+    }
+
+    // Swaps the current swimbait slot by index (0,1,2).
+    [EzIPC]
+    public bool SwapSwimbaitByIndex(byte index)
+    {
+        var result = Service.BaitManager.ChangeSwimbait(index);
+        return result is BaitManager.ChangeBaitReturn.Success or BaitManager.ChangeBaitReturn.AlreadyEquipped;
     }
 }

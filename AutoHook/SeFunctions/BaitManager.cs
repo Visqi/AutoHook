@@ -103,13 +103,14 @@ public unsafe class BaitManager
     }
 
 
-    public ChangeBaitReturn ChangeSwimbait(uint id)
+    public ChangeBaitReturn ChangeSwimbait(uint index)
     {
-        if (id > 2)
+        if (index > 2)
             return ChangeBaitReturn.InvalidBait;
 
-        return _executeCommand(701, 25, id, 0, 0) == 1 ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
+        return _executeCommand(701, 25, index, 0, 0) == 1 ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
     }
+
 
     public ChangeBaitReturn ChangeBait(BaitFishClass bait)
     {
