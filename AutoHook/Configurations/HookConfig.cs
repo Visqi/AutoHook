@@ -136,7 +136,7 @@ public class HookConfig : BaseOption
             { BiteType.Strong, (hookset.TripleStrong, hookset.DoubleStrong, hookset.PatienceStrong) },
             { BiteType.Legendary, (hookset.TripleLegendary, hookset.DoubleLegendary, hookset.PatienceLegendary) }
         };
-        
+
         Service.Status = "";
 
         if (hookDictionary.TryGetValue(bite, out var hook))
@@ -169,7 +169,7 @@ public class HookConfig : BaseOption
                     Service.Status = "Not enough GP to use Double Hook, Letting fish escape is enabled";
                     return HookType.None;
                 }
-                
+
                 Service.Status = $"(Triple Hook) {Service.Status}";
             }
 
@@ -178,7 +178,7 @@ public class HookConfig : BaseOption
             {
                 if (CheckHookCondition(hook.ph, timePassed))
                     return IsHookAvailable(hook.ph) ? hook.ph.HooksetType : HookType.Normal;
-                
+
                 Service.Status = $"(Normal/Patience Hook) {Service.Status}";
             }
             else if (Service.Status == "")
@@ -196,7 +196,7 @@ public class HookConfig : BaseOption
 
         if (!CheckSurfaceSlap(hookType))
             return false;
-        
+
         if (!CheckPrizeCatch(hookType))
             return false;
 
@@ -245,8 +245,9 @@ public class HookConfig : BaseOption
         if (hookType.PrizeCatchNotReq && PlayerRes.HasStatus(IDs.Status.PrizeCatch))
         {
             Service.Status = UIStrings.Status_PrizeCatchNotRequired;
+            return false;
         }
-        
+
         return true;
     }
 
@@ -288,13 +289,15 @@ public class HookConfig : BaseOption
 
         if (minimumTime > 0 && timePassed < minimumTime)
         {
-            Service.Status = $"Skipping bite - Minimum time has not been met - Current: {timePassed} < Min: {minimumTime}";
+            Service.Status =
+                $"Skipping bite - Minimum time has not been met - Current: {timePassed} < Min: {minimumTime}";
             return false;
         }
 
         if (maximumTime > 0 && timePassed > maximumTime)
         {
-            Service.Status = $"Skipping bite - Maximum time has been exceeded - Current: {timePassed} > Max: {maximumTime}";
+            Service.Status =
+                $"Skipping bite - Maximum time has been exceeded - Current: {timePassed} > Max: {maximumTime}";
             return false;
         }
 

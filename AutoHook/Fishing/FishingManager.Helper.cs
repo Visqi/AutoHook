@@ -60,14 +60,16 @@ public partial class FishingManager
                 var text = messageSe.TextValue;
                 var logId = Service.DataManager.GetExcelSheet<LogMessage>()
                     ?.FirstOrDefault(x => x.Text.ToString() == text).RowId;
+                
+                if (GetHookCfg().GetHookset().CastLures.LureTarget != LureTarget.NotSpecial)
+                {
+                    // Check if a special fish is found
+                    _lureSuccess = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
 
-                // Check if a special fish is found
-                _lureSuccess = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
-
-                if (_lureSuccess)
-                    return;
-
-                if (GetHookCfg().GetHookset().CastLures.LureTarget == LureTarget.Any)
+                    if (_lureSuccess)
+                        return;
+                }
+                if (GetHookCfg().GetHookset().CastLures.LureTarget == LureTarget.Any || GetHookCfg().GetHookset().CastLures.LureTarget == LureTarget.NotSpecial)
                 {
                     _lureSuccess = logId is XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess;
                 }

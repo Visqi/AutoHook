@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using AutoHook.Configurations;
@@ -67,6 +68,8 @@ public class AutoHook : IDalamudPlugin
         Service.TugType = new SeTugType(Service.SigScanner);
         Service.PluginInterface.UiBuilder.Draw += Service.WindowSystem.Draw;
         Service.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
+        Service.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
+
         Service.Language = Service.ClientState.ClientLanguage;
 
         GameRes.Initialize(); 
@@ -155,18 +158,24 @@ public class AutoHook : IDalamudPlugin
 
     private static void SetGigPreset(string presetName)
     {
-        var preset = Service.Configuration.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == presetName);
-        if (preset == null)
+        try
         {
-            Service.Chat.Print(UIStrings.Preset_not_found);
-            Service.Chat.Print(presetName);
-            return;
-        }
+            var preset = Service.Configuration.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == presetName);
+            if (preset == null)
+            {
+                Service.Chat.Print(@$"{UIStrings.Preset_not_found} - {presetName}");
+                return;
+            }
 
-        Service.Save();
-        Service.Configuration.AutoGigConfig.SelectedPreset = preset;
-        Service.Chat.Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
-        Service.Save();
+            Service.Save();
+            Service.Configuration.AutoGigConfig.SelectedPreset = preset;
+            Service.Chat.Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
+            Service.Save();
+        }
+        catch (Exception e)
+        {
+            Service.PluginLog.Error(e.Message);
+        }
     }
 
     public void Dispose()
@@ -177,6 +186,7 @@ public class AutoHook : IDalamudPlugin
         Service.Save();
         Service.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
         Service.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
+        Service.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;
 
         foreach (var (command, _) in CommandHelp)
         {

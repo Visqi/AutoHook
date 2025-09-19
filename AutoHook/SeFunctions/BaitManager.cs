@@ -21,7 +21,7 @@ public unsafe class BaitManager
 
     private delegate byte ExecuteCommandDelegate(int id, int unk1, uint baitId, int unk2, int unk3);
 
-    [Signature("E8 ?? ?? ?? ?? 41 C6 04 24")]
+    [Signature(SignaturePatterns.ExecuteCommand)]
     private readonly ExecuteCommandDelegate _executeCommand = null!;
 
     private const int FishingManagerOffset = 0x70;
@@ -81,7 +81,7 @@ public unsafe class BaitManager
             {
                 var cosmicManager = WKSManager.Instance();
                 if (cosmicManager != null)
-                    return *(uint*)((byte*)cosmicManager + 0xC9C);
+                    return cosmicManager->FishingBait;
             }
 
             return PlayerState.Instance()->FishingBait;
@@ -103,13 +103,14 @@ public unsafe class BaitManager
     }
 
 
-    public ChangeBaitReturn ChangeSwimbait(uint id)
+    public ChangeBaitReturn ChangeSwimbait(uint index)
     {
-        if (id > 2)
+        if (index > 2)
             return ChangeBaitReturn.InvalidBait;
 
-        return _executeCommand(701, 25, id, 0, 0) == 1 ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
+        return _executeCommand(701, 25, index, 0, 0) == 1 ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
     }
+
 
     public ChangeBaitReturn ChangeBait(BaitFishClass bait)
     {

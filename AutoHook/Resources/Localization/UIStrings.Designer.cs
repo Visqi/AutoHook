@@ -1744,6 +1744,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to GP.
+        /// </summary>
+        internal static string GPlabel {
+            get {
+                return ResourceManager.GetString("GPlabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hook will NOT be used after the defined amount of time has passed
         ///Ex: If you set the Max. Wait to 10 and something bites after 12 seconds, the fish will be ignored.
         /// </summary>
@@ -2421,6 +2430,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Only Small/Large.
+        /// </summary>
+        internal static string NotSpecial {
+            get {
+                return ResourceManager.GetString("NotSpecial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Offset (L-&gt;R).
         /// </summary>
         internal static string OffsetLR {
@@ -2975,6 +2993,15 @@ namespace AutoHook.Resources.Localization {
         internal static string Reset_counter_after_swapping_presets {
             get {
                 return ResourceManager.GetString("Reset_counter_after_swapping_presets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset counter after swapping baits.
+        /// </summary>
+        internal static string Reset_Counter_Bait_Swap {
+            get {
+                return ResourceManager.GetString("Reset_Counter_Bait_Swap", resourceCulture);
             }
         }
         

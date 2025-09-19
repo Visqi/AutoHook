@@ -35,7 +35,7 @@ public class TabDebug : BaseTab
     private unsafe void CreateDalamudHooks()
     {
         _executeCommandHook = Service.GameInteropProvider.HookFromSignature<ExecuteCommandDelegate>(
-            @"E8 ?? ?? ?? ?? 41 C6 04 24",
+            SignaturePatterns.ExecuteCommand,
             ExecuteCommandDetour);
         _executeCommandHook?.Enable();
     }

@@ -1,5 +1,6 @@
 using System;
 using AutoHook.Enums;
+using AutoHook.Utils;
 using Dalamud.Game;
 
 namespace AutoHook.SeFunctions;
@@ -8,7 +9,7 @@ public sealed class SeTugType : SeAddressBase
 {
     public SeTugType(ISigScanner sigScanner)
         : base(sigScanner,
-            "48 8D 35 ?? ?? ?? ?? 4C 8B CE")
+            SignaturePatterns.TugType)
     { }
 
     public unsafe BiteType Bite
