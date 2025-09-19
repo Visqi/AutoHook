@@ -9,6 +9,9 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using ECommons.GameHelpers;
+using ECommons;
+using Lumina.Excel.Sheets;
 
 namespace AutoHook.SeFunctions;
 
@@ -77,7 +80,7 @@ public unsafe class BaitManager
     {
         get
         {
-            if (Service.ClientState.TerritoryType == 1237)
+            if (GenericHelpers.GetRow<TerritoryType>(Player.Territory) is { TerritoryIntendedUse.RowId: 60 })
             {
                 var cosmicManager = WKSManager.Instance();
                 if (cosmicManager != null)
