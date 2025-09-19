@@ -137,7 +137,7 @@ public class SubTabBaitMooch
         
         DrawUtil.DrawComboSelector(
             list,
-            item => item.Name,
+            item => $"[{item.Id}] {item.Name}",
             hookConfig.BaitFish.Name,
             item => hookConfig.BaitFish = item);
 
@@ -148,14 +148,8 @@ public class SubTabBaitMooch
 
         if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowLeft))
         {
-            unsafe
-            {
-                var p = PlayerState.Instance();
-                if (p != null && p->FishingBait > 0) // just make sure bait is bait
-                {
-                    hookConfig.BaitFish = list.Single(x => x.Id == p->FishingBait);
-                }
-            }
+            if (Service.BaitManager.Current > 0) // just make sure bait is bait
+                hookConfig.BaitFish = list.Single(x => x.Id == Service.BaitManager.Current);
         }
 
         if (ImGui.IsItemHovered())
