@@ -13,6 +13,7 @@ using Dalamud.Interface.Utility.Raii;
 using ECommons.Automation.NeoTaskManager;
 using ECommons.ImGuiMethods;
 using ECommons.Throttlers;
+using ECommons;
 
 namespace AutoHook.Utils;
 
@@ -221,13 +222,13 @@ public static class DrawUtil
 
             using (var child = ImRaii.Child("###ComboSelector", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false))
             {
-                foreach (var item in itemList)
+                foreach (var (item, index) in itemList.WithIndex())
                 {
                     var itemName = getItemName(item) ?? $"Error, Try renaming";
 
                     if (_filterText.Length != 0 && !itemName.ToLower().Contains(_filterText.ToLower()))
                         continue;
-
+                    using var _ = ImRaii.PushId($"{itemName}###{index}");
                     if (ImGui.Selectable(itemName, false))
                     {
                         ImGui.CloseCurrentPopup();
