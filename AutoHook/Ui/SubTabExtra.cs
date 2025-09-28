@@ -84,7 +84,7 @@ public class SubTabExtra
                     DrawUtil.TextV(UIStrings.SelectBaitStartFishing);
                     DrawUtil.DrawComboSelector(
                         GameRes.Baits,
-                        bait => bait.Name,
+                        bait => $"[#{bait.Id}] {bait.Name}",
                         $"{MultiString.GetItemName(config.ForcedBaitId)}",
                         bait => config.ForcedBaitId = bait.Id);
                 }
@@ -232,7 +232,7 @@ public class SubTabExtra
             {
                 DrawUtil.DrawComboSelector(
                     GameRes.Baits,
-                    bait => bait.Name,
+                    bait => $"[#{bait.Id}] {bait.Name}",
                     newBait.Name,
                     bait => newBait = bait);
             }

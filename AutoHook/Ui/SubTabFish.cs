@@ -128,7 +128,7 @@ public class SubTabFish
         ImGui.PushID("DrawFishSearchBar");
         DrawUtil.DrawComboSelector<BaitFishClass>(
             GameRes.Fishes,
-            (BaitFishClass fish) => fish.Name,
+            (BaitFishClass fish) => $"[#{fish.Id}] {fish.Name}",
             fishConfig.Fish.Name,
             (BaitFishClass fish) => fishConfig.Fish = fish);
 
@@ -183,7 +183,7 @@ public class SubTabFish
             {
                 DrawUtil.DrawComboSelector(
                     GameRes.Baits,
-                    bait => bait.Name,
+                    bait => $"[#{bait.Id}] {bait.Name}",
                     fishConfig.BaitToSwap.Name,
                     bait => fishConfig.BaitToSwap = bait);
 
