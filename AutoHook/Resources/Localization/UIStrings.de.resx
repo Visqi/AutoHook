@@ -1239,6 +1239,12 @@ Du kannst wahlweise auch das Kommando /ahstart zum Starten verwenden. Auch in Ma
   <data name="BigGameFishing" xml:space="preserve">
     <value>Kaventskenntnis</value>
   </data>
+  <data name="AmbitiousLure" xml:space="preserve">
+    <value>Ehrgeiziges Ködern</value>
+  </data>
+  <data name="ModestLure" xml:space="preserve">
+    <value>Bescheidenes Ködern</value>
+  </data>
   <data name="OnlySpecial" xml:space="preserve">
     <value>Nur Spezial</value>
   </data>
@@ -1337,6 +1343,15 @@ Du kannst wahlweise auch das Kommando /ahstart zum Starten verwenden. Auch in Ma
   </data>
   <data name="CreateNewFolder" xml:space="preserve">
     <value>Neuen Ordner erstellen</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Erstellen</value>
+  </data>
+  <data name="RenamePreset" xml:space="preserve">
+    <value>Preset umbenennen</value>
+  </data>
+  <data name="FolderName" xml:space="preserve">
+    <value>Ordner Name</value>
   </data>
   <data name="GPlabel" xml:space="preserve">
 		<value>SP</value>
