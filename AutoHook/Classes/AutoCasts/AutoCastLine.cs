@@ -3,23 +3,21 @@ using AutoHook.Data;
 using AutoHook.Resources.Localization;
 using AutoHook.Utils;
 
-
 namespace AutoHook.Classes.AutoCasts;
 
 public class AutoCastLine : BaseActionCast
 {
     public bool OnlyCastWithFishEyes = false;
-    
+
     public bool OnlyCastLarge = false;
-    
+
     [DefaultValue(true)] public bool IgnoreMooch = true;
 
     public override bool DoesCancelMooch() => !IgnoreMooch;
 
     public override bool RequiresTimeWindow() => true;
 
-
-    public AutoCastLine() : base(UIStrings.AutoCastLine_Auto_Cast_Line, Data.IDs.Actions.Cast)
+    public AutoCastLine() : base(UIStrings.AutoCastLine_Auto_Cast_Line, IDs.Actions.Cast)
     {
         Enabled = true;
         Priority = 1;
@@ -33,7 +31,7 @@ public class AutoCastLine : BaseActionCast
     {
         if (OnlyCastWithFishEyes && !PlayerRes.HasStatus(IDs.Status.FishEyes))
             return false;
-        
+
         if (OnlyCastLarge && !PlayerRes.HasAnyStatus([IDs.Status.AnglersFortune, IDs.Status.PrizeCatch]))
             return false;
 
@@ -47,7 +45,7 @@ public class AutoCastLine : BaseActionCast
     {
         DrawUtil.Checkbox(UIStrings.AutoCastOnlyUnderFishEyes, ref OnlyCastWithFishEyes,
             UIStrings.AutoCastOnlyUnderFishEyesHelpText);
-        
+
         DrawUtil.Checkbox(UIStrings.OnlyCastLarge, ref OnlyCastLarge);
 
         DrawUtil.Checkbox(UIStrings.IgnoreMooch, ref IgnoreMooch,

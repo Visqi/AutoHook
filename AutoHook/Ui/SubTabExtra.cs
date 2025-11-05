@@ -1,5 +1,4 @@
-﻿using System;
-using AutoHook.Classes;
+﻿using AutoHook.Classes;
 using AutoHook.Configurations;
 using AutoHook.Enums;
 using AutoHook.Resources.Localization;

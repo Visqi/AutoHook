@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
 using AutoHook.Enums;
 using AutoHook.Resources.Localization;
@@ -24,11 +22,11 @@ public class TabSettings : BaseTab
         DrawLanguageSelector();
 
         ImGui.Spacing();
-        
+
         if (ImGui.Button(UIStrings.TabGeneral_DrawHeader_Localization_Help))
         {
             Process.Start(new ProcessStartInfo
-                { FileName = "https://crowdin.com/project/autohook", UseShellExecute = true });
+            { FileName = "https://crowdin.com/project/autohook", UseShellExecute = true });
         }
 
         ImGui.Spacing();
@@ -56,7 +54,7 @@ public class TabSettings : BaseTab
     private void DrawConfigs()
     {
         DrawUtil.Checkbox(UIStrings.Plugin_Enabled, ref Service.Configuration.PluginEnabled, UIStrings.PluginEnabledHelp);
-        
+
         if (ImGui.TreeNodeEx(UIStrings.DelaySettings, ImGuiTreeNodeFlags.FramePadding))
         {
             DrawDelayHook();
@@ -66,7 +64,7 @@ public class TabSettings : BaseTab
         }
 
         ImGui.Separator();
-        
+
         DrawUtil.Checkbox(UIStrings.AntiAfkOption, ref Service.Configuration.ResetAfkTimer);
 
         DrawUtil.Checkbox(UIStrings.DontHideExtraAutoCast, ref Service.Configuration.DontHideOptionsDisabled);
@@ -80,7 +78,7 @@ public class TabSettings : BaseTab
         //DrawUtil.Checkbox(UIStrings.Show_Debug_Console, ref Service.Configuration.ShowDebugConsole);
 
         //DrawUtil.Checkbox(UIStrings.Show_Presets_As_Sidebar, ref Service.Configuration.ShowPresetsAsSidebar);
-        
+
         DrawUtil.DrawCheckboxTree(UIStrings.SwapTreeNodeButtons, ref Service.Configuration.SwapToButtons, () =>
         {
             if (ImGui.RadioButton(UIStrings.Type_1, Service.Configuration.SwapType == 0))
@@ -104,12 +102,12 @@ public class TabSettings : BaseTab
         ImGui.PushID("DrawDelayHook");
 
         ImGui.TextWrapped(UIStrings.Delay_when_hooking);
-        
+
         ref var min = ref Service.Configuration.DelayBetweenHookMin;
         ref var max = ref Service.Configuration.DelayBetweenHookMax;
 
         ImGui.SetNextItemWidth(45 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputInt(UIStrings.DrawConfigs_Min_, ref min,0))
+        if (ImGui.InputInt(UIStrings.DrawConfigs_Min_, ref min, 0))
         {
             min = Math.Clamp(min, 0, max);
             Service.Save();
@@ -132,10 +130,10 @@ public class TabSettings : BaseTab
         ImGui.PushID("DrawDelayCasts");
 
         ImGui.TextWrapped(UIStrings.Delay_Between_Casts);
-        
+
         ref var min = ref Service.Configuration.DelayBetweenCastsMin;
         ref var max = ref Service.Configuration.DelayBetweenCastsMax;
-        
+
         ImGui.SetNextItemWidth(45 * ImGuiHelpers.GlobalScale);
         if (ImGui.InputInt(UIStrings.DrawConfigs_Min_, ref min, 0))
         {
@@ -153,7 +151,7 @@ public class TabSettings : BaseTab
 
         ImGui.PopID();
     }
-    
+
     private static void DrawDelayCancel()
     {
         ImGui.PushID("DrawDelayCancel");
@@ -161,10 +159,10 @@ public class TabSettings : BaseTab
         DrawUtil.TextV(UIStrings.DelayBeforeCancel);
         ImGui.SameLine();
         DrawUtil.Info(UIStrings.DelayBeforeCancelInfo);
-        
+
         ref var min = ref Service.Configuration.DelayBeforeCancelMin;
         ref var max = ref Service.Configuration.DelayBeforeCancelMax;
-        
+
         ImGui.SetNextItemWidth(45 * ImGuiHelpers.GlobalScale);
         if (ImGui.InputInt(UIStrings.DrawConfigs_Min_, ref min, 0))
         {

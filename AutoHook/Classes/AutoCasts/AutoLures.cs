@@ -2,8 +2,6 @@
 using AutoHook.Resources.Localization;
 using AutoHook.Utils;
 using Dalamud.Bindings.ImGui;
-using System;
-using System.Linq;
 using AutoHook.Enums;
 using ECommons.Throttlers;
 using static AutoHook.Enums.FishingState;
@@ -58,7 +56,6 @@ public class AutoLures : BaseActionCast
         return true;
     }
 
-
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
         DrawUtil.TextV(UIStrings.LureType);
@@ -97,7 +94,7 @@ public class AutoLures : BaseActionCast
 
         ImGui.SameLine();
         DrawUtil.Info($"{UIStrings.SpecialFishExemple} {GameRes.LureFishes.FirstOrDefault()?.Name}");
-        
+
         ImGui.SameLine();
         if (ImGui.RadioButton(UIStrings.NotSpecial, LureTarget == LureTarget.NotSpecial))
         {

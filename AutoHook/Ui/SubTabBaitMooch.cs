@@ -1,17 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using AutoHook.Classes;
 using AutoHook.Configurations;
 using AutoHook.Fishing;
 using AutoHook.Resources.Localization;
-using AutoHook.SeFunctions;
 using AutoHook.Utils;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Ui;
@@ -65,7 +60,7 @@ public class SubTabBaitMooch
             ImGuiComponents.HelpMarker(UIStrings.TabPresets_DrawHeader_CorrectlyEditTheBaitMoochName);
             ImGui.Spacing();
         }
-        
+
         using (var items = ImRaii.Child($"###BaitMoochItems", Vector2.Zero, false))
         {
             for (int idx = 0; idx < list?.Count; idx++)
@@ -132,9 +127,9 @@ public class SubTabBaitMooch
         var list = (isMooch ? GameRes.Fishes : GameRes.Baits).ToList();
         if (isMooch)
             list.Insert(0, new BaitFishClass(UIStrings.All_Mooches, GameRes.AllMoochesId));
-        else 
+        else
             list.Insert(0, new BaitFishClass(UIStrings.All_Baits, GameRes.AllBaitsId));
-        
+
         DrawUtil.DrawComboSelector(
             list,
             item => $"[{item.Id}] {item.Name}",

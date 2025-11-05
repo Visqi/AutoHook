@@ -1,5 +1,4 @@
-﻿using System;
-using AutoHook.Data;
+﻿using AutoHook.Data;
 using AutoHook.Resources.Localization;
 using AutoHook.Utils;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -67,7 +66,7 @@ public class AutoMakeShiftBait : BaseActionCast
         {
             Service.Save();
         }
-        
+
         if (DrawUtil.Checkbox(UIStrings.OnlyWhenMoochNotAvailable, ref OnlyWhenMoochNotUp))
         {
             Service.Save();

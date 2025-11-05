@@ -7,10 +7,10 @@ namespace AutoHook.Classes.AutoCasts;
 
 public class AutoSurfaceSlap : BaseActionCast
 {
-    
+
     public override bool DoesCancelMooch() => true;
-    
-    public AutoSurfaceSlap() : base(UIStrings.Surface_Slap, Data.IDs.Actions.SurfaceSlap, ActionType.Action)
+
+    public AutoSurfaceSlap() : base(UIStrings.Surface_Slap, IDs.Actions.SurfaceSlap, ActionType.Action)
     {
         HelpText = UIStrings.OverridesIdenticalCast;
     }

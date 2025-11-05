@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json.Serialization;
 using AutoHook.Classes;
 using AutoHook.Enums;
@@ -10,16 +7,15 @@ using AutoHook.Ui;
 using AutoHook.Utils;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
-using ECommons.ImGuiMethods;
 using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Configurations;
 
 public class CustomPresetConfig : BasePresetConfig
 {
-    public List<HookConfig> ListOfBaits { get; set; } = new();
-    public List<HookConfig> ListOfMooch { get; set; } = new();
-    public List<FishConfig> ListOfFish { get; set; } = new();
+    public List<HookConfig> ListOfBaits { get; set; } = [];
+    public List<HookConfig> ListOfMooch { get; set; } = [];
+    public List<FishConfig> ListOfFish { get; set; } = [];
 
     public AutoCastsConfig AutoCastsCfg = new();
 

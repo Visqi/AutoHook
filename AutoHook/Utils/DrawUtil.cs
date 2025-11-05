@@ -3,16 +3,12 @@ using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Bindings.ImGui;
-using System;
-using System.Collections.Generic;
 using System.Numerics;
 using AutoHook.Classes;
 using AutoHook.Configurations;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
-using ECommons.Automation.NeoTaskManager;
 using ECommons.ImGuiMethods;
-using ECommons.Throttlers;
 using ECommons;
 
 namespace AutoHook.Utils;
@@ -39,7 +35,6 @@ public static class DrawUtil
         ImGui.SameLine();
         ImGui.TextColored(color, $"{value}");
     }
-
 
     public static bool EditFloatField(string label, ref float refValue, string helpText = "",
         bool hoverHelpText = false)
@@ -203,7 +198,7 @@ public static class DrawUtil
     }
 
     private static string _filterText = "";
-    
+
     public static void DrawComboSelector<T>(
         List<T> itemList,
         Func<T, string> getItemName,
@@ -242,7 +237,7 @@ public static class DrawUtil
             ImGui.EndCombo();
         }
     }
-    
+
     public static void DrawComboSelectorPreset(BasePreset presetList)
     {
         ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);
@@ -253,7 +248,7 @@ public static class DrawUtil
             ImGui.SetNextItemWidth(210 * ImGuiHelpers.GlobalScale);
 
             ImGui.InputTextWithHint("", UIStrings.Search_Hint, ref _filterText, 100);
-            
+
             ImGui.Separator();
 
             using (var child = ImRaii.Child("###ComboPreset", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false))
@@ -269,14 +264,14 @@ public static class DrawUtil
                 {
                     using var id = ImRaii.PushId(item.UniqueId.ToString());
                     var itemName = item.PresetName ?? $"Error, Try renaming";
-                    
+
                     if (_filterText.Length != 0 && !itemName.ToLower().Contains(_filterText.ToLower()))
                         continue;
 
                     var color = selectedPreset?.PresetName == itemName
                         ? ImGuiColors.DalamudYellow
                         : ImGuiColors.DalamudWhite;
-                    
+
                     using (var a = ImRaii.PushColor(ImGuiCol.Text, color))
                     {
                         if (ImGui.Selectable(itemName, false))
@@ -296,10 +291,10 @@ public static class DrawUtil
         {
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(UIStrings.RightClickToRename);
-            
+
             if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                 ImGui.OpenPopup(@$"PresetRenameName");
-            
+
             DrawRenamePreset(selectedPreset);
         }
     }
@@ -342,7 +337,7 @@ public static class DrawUtil
             }
             catch (Exception e)
             {
-                Service.PluginLog.Error(e.ToString());
+                Svc.Log.Error(e.ToString());
             }
         }
 
@@ -362,7 +357,7 @@ public static class DrawUtil
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.FileExport))
                 {
                     ImGui.SetClipboardText(Configuration.ExportPreset(basePreset.SelectedPreset!));
-                    
+
                     Notify.Success(UIStrings.PresetExportedToTheClipboard);
                 }
 
@@ -382,7 +377,7 @@ public static class DrawUtil
                 ImGui.SetTooltip(UIStrings.ImportPresetFromClipboard);
 
             using var popup = ImRaii.Popup("import_new_preset");
-            
+
             if (popup.Success && _tempImport != null)
             {
                 var name = _tempImport.PresetName;
@@ -413,7 +408,7 @@ public static class DrawUtil
         }
         catch (Exception e)
         {
-            Service.PluginLog.Error(e.ToString());
+            Svc.Log.Error(e.ToString());
             Notify.Error(e.Message);
         }
     }
@@ -464,7 +459,7 @@ public static class DrawUtil
         }
         catch (Exception e)
         {
-            Service.PluginLog.Error(e.ToString());
+            Svc.Log.Error(e.ToString());
             Notify.Error(e.Message);
         }
     }
@@ -482,7 +477,7 @@ public static class DrawUtil
         }
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             ImGui.SetTooltip(UIStrings.HoldShiftToDelete);
-        
+
     }
 
     public static void DrawCheckboxTree(string treeName, ref bool enable, Action action, string helpText = "")
@@ -521,7 +516,7 @@ public static class DrawUtil
                 ImGui.SetCursorPosX(x);
                 TextV($" └");
                 ImGui.SameLine();
-                
+
                 x = ImGui.GetCursorPosX();
                 if (ImGui.IsItemHovered() && helpText != string.Empty)
                     ImGui.SetTooltip(helpText);
@@ -586,7 +581,7 @@ public static class DrawUtil
         int indexOfId = popupName.IndexOf('#');
         if (indexOfId != -1)
         {
-            popupName = popupName.Substring(0, indexOfId);
+            popupName = popupName[..indexOfId];
         }
 
         TextV(popupName);

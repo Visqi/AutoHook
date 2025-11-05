@@ -4,12 +4,8 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
 using Dalamud.Bindings.ImGui;
 using PunishLib.ImGuiMethods;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using AutoHook.Enums;
@@ -19,23 +15,21 @@ using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
-using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
-using ThreadLoadImageHandler = ECommons.ImGuiMethods.ThreadLoadImageHandler;
 
 namespace AutoHook;
 
 public class PluginUi : Window, IDisposable
 {
-    private static readonly List<BaseTab> _tabs = new()
-    {
+    private static readonly List<BaseTab> _tabs =
+    [
         new TabFishingPresets(),
         new TabAutoGig(),
         new TabCommunity(),
         new TabSettings()
-    };
+    ];
 
-    private BaseTab debug = new TabDebug();
+    private readonly BaseTab debug = new TabDebug();
 
     private static OpenWindow _selectedTab = OpenWindow.FishingPreset;
 
@@ -78,7 +72,7 @@ public class PluginUi : Window, IDisposable
         }
         catch (Exception e)
         {
-            Service.PluginLog.Error(e.Message);
+            Svc.Log.Error(e.Message);
         }
 
         //DrawOldLayout()
@@ -212,7 +206,6 @@ public class PluginUi : Window, IDisposable
                                 if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                                     Service.OpenConsole = !Service.OpenConsole;
 
-
                                 if (ImGui.IsItemHovered())
                                 {
                                     ImGui.BeginTooltip();
@@ -228,7 +221,7 @@ public class PluginUi : Window, IDisposable
 
                     foreach (var tab in _tabs)
                     {
-                        if (tab.Enabled == false) continue;
+                        if (!tab.Enabled) continue;
 
                         if (ImGui.Selectable($"{tab.TabName}###{tab.TabName}Main", _selectedTab == tab.Type))
                         {
@@ -243,7 +236,7 @@ public class PluginUi : Window, IDisposable
                         _selectedTab = OpenWindow.Debug;
                     }
 #endif
-                    
+
                     if (ImGui.Selectable($"{UIStrings.AboutTab}"))
                     {
                         _selectedTab = OpenWindow.About;
@@ -325,7 +318,7 @@ public class PluginUi : Window, IDisposable
                 }
                 catch (Exception e)
                 {
-                    Service.PluginLog.Error(e.Message);
+                    Svc.Log.Error(e.Message);
                 }
             }
             else
@@ -343,7 +336,7 @@ public class PluginUi : Window, IDisposable
             {
                 foreach (var tab in _tabs)
                 {
-                    if (tab.Enabled == false) continue;
+                    if (!tab.Enabled) continue;
 
                     if (ImGui.BeginTabItem($"{tab.TabName}###{tab.TabName}Main"))
                     {
@@ -373,7 +366,7 @@ public class PluginUi : Window, IDisposable
         }
         catch (Exception e)
         {
-            Service.PluginLog.Error(e.Message);
+            Svc.Log.Error(e.Message);
             ImGui.EndTabBar();
         }
     }
@@ -398,14 +391,13 @@ public class PluginUi : Window, IDisposable
         ImGui.PopStyleColor(3);
     }
 
-
     private static void OpenBrowser(string url)
     {
         Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
     }
 
     private bool _openChangelog = false;
-    private static FishingPresets _presets = Service.Configuration.HookPresets;
+    private static readonly FishingPresets _presets = Service.Configuration.HookPresets;
 
     [Localizable(false)]
     private void DrawChangelog()

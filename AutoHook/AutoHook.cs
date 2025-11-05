@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using AutoHook.Configurations;
 using AutoHook.Fishing;
 using AutoHook.IPC;
@@ -12,7 +9,6 @@ using AutoHook.Utils;
 using Dalamud.Game.Command;
 using Dalamud.Plugin;
 using ECommons;
-using ECommons.Automation.NeoTaskManager;
 using PunishLib;
 
 namespace AutoHook;
@@ -65,14 +61,14 @@ public class AutoHook : IDalamudPlugin
             new AboutPlugin() { Developer = "InitialDet", Sponsor = "https://ko-fi.com/initialdet" });
         Plugin = this;
         Service.BaitManager = new BaitManager();
-        Service.TugType = new SeTugType(Service.SigScanner);
-        Service.PluginInterface.UiBuilder.Draw += Service.WindowSystem.Draw;
-        Service.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
-        Service.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
+        Service.TugType = new SeTugType(Svc.SigScanner);
+        Svc.PluginInterface.UiBuilder.Draw += Service.WindowSystem.Draw;
+        Svc.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
+        Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
 
-        Service.Language = Service.ClientState.ClientLanguage;
+        Service.Language = Svc.ClientState.ClientLanguage;
 
-        GameRes.Initialize(); 
+        GameRes.Initialize();
 
         Service.Configuration = Configuration.Load();
         UIStrings.Culture = new CultureInfo(Service.Configuration.CurrentLanguage);
@@ -81,12 +77,12 @@ public class AutoHook : IDalamudPlugin
 
         foreach (var (command, help) in CommandHelp)
         {
-            Service.Commands.AddHandler(command, new CommandInfo(OnCommand)
+            Svc.Commands.AddHandler(command, new CommandInfo(OnCommand)
             {
                 HelpMessage = help
             });
         }
-        
+
         HookManager = new FishingManager();
         AutoHookIpc = new AutoHookIPC();
 
@@ -104,19 +100,19 @@ public class AutoHook : IDalamudPlugin
                 OnOpenConfigUi();
                 break;
             case CmdAhOn:
-                Service.Chat.Print(UIStrings.AutoHook_Enabled);
+                Svc.Chat.Print(UIStrings.AutoHook_Enabled);
                 Service.Configuration.PluginEnabled = true;
                 break;
             case CmdAhOff:
-                Service.Chat.Print(UIStrings.AutoHook_Disabled);
+                Svc.Chat.Print(UIStrings.AutoHook_Disabled);
                 Service.Configuration.PluginEnabled = false;
                 break;
             case CmdAhtg when Service.Configuration.PluginEnabled:
-                Service.Chat.Print(UIStrings.AutoHook_Disabled);
+                Svc.Chat.Print(UIStrings.AutoHook_Disabled);
                 Service.Configuration.PluginEnabled = false;
                 break;
             case CmdAhtg:
-                Service.Chat.Print(UIStrings.AutoHook_Enabled);
+                Svc.Chat.Print(UIStrings.AutoHook_Enabled);
                 Service.Configuration.PluginEnabled = true;
                 break;
             case CmdAhPreset:
@@ -146,13 +142,13 @@ public class AutoHook : IDalamudPlugin
         var preset = Service.Configuration.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == presetName);
         if (preset == null)
         {
-            Service.Chat.Print(UIStrings.Preset_not_found);
+            Svc.Chat.Print(UIStrings.Preset_not_found);
             return;
         }
 
         Service.Save();
         Service.Configuration.HookPresets.SelectedPreset = preset;
-        Service.Chat.Print(@$"{UIStrings.Preset_set_to_} {preset.PresetName}");
+        Svc.Chat.Print(@$"{UIStrings.Preset_set_to_} {preset.PresetName}");
         Service.Save();
     }
 
@@ -163,18 +159,18 @@ public class AutoHook : IDalamudPlugin
             var preset = Service.Configuration.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == presetName);
             if (preset == null)
             {
-                Service.Chat.Print(@$"{UIStrings.Preset_not_found} - {presetName}");
+                Svc.Chat.Print(@$"{UIStrings.Preset_not_found} - {presetName}");
                 return;
             }
 
             Service.Save();
             Service.Configuration.AutoGigConfig.SelectedPreset = preset;
-            Service.Chat.Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
+            Svc.Chat.Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
             Service.Save();
         }
         catch (Exception e)
         {
-            Service.PluginLog.Error(e.Message);
+            Svc.Log.Error(e.Message);
         }
     }
 
@@ -184,13 +180,13 @@ public class AutoHook : IDalamudPlugin
         _autoGig.Dispose();
         HookManager.Dispose();
         Service.Save();
-        Service.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
-        Service.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
-        Service.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;
+        Svc.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
+        Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
+        Svc.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;
 
         foreach (var (command, _) in CommandHelp)
         {
-            Service.Commands.RemoveHandler(command);
+            Svc.Commands.RemoveHandler(command);
         }
 
         ECommonsMain.Dispose();

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using AutoHook.Classes;
 using AutoHook.Configurations;
 using AutoHook.Enums;
@@ -25,11 +23,11 @@ public class TabCommunity : BaseTab
     public override bool Enabled { get; } = true;
     public override OpenWindow Type { get; } = OpenWindow.Community;
 
-    private static SpearFishingPresets _gigPreset = Service.Configuration.AutoGigConfig;
-    private static FishingPresets _fishingPreset = Service.Configuration.HookPresets;
+    private static readonly SpearFishingPresets _gigPreset = Service.Configuration.AutoGigConfig;
+    private static readonly FishingPresets _fishingPreset = Service.Configuration.HookPresets;
 
     // Keep per-category folder names while popups are open
-    private readonly Dictionary<string, string> _importAllFolderNames = new();
+    private readonly Dictionary<string, string> _importAllFolderNames = [];
 
     public override void DrawHeader()
     {
@@ -58,7 +56,7 @@ public class TabCommunity : BaseTab
                 foreach (var (key, value) in WikiPresets.Presets.Where(preset => preset.Value.Count != 0))
                 {
                     ImGui.Indent();
-                    DrawHeaderList(key, value.Cast<BasePresetConfig>().ToList());
+                    DrawHeaderList(key, [.. value.Cast<BasePresetConfig>()]);
                     ImGui.Unindent();
                 }
             }
@@ -70,7 +68,7 @@ public class TabCommunity : BaseTab
                 foreach (var (key, value) in WikiPresets.PresetsSf.Where(preset => preset.Value.Count != 0))
                 {
                     ImGui.Indent();
-                    DrawHeaderList(key, value.Cast<BasePresetConfig>().ToList());
+                    DrawHeaderList(key, [.. value.Cast<BasePresetConfig>()]);
                     ImGui.Unindent();
                 }
             }

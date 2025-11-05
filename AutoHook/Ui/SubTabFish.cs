@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
+﻿using System.Numerics;
 using AutoHook.Classes;
 using AutoHook.Configurations;
 using AutoHook.Enums;
@@ -97,7 +95,7 @@ public class SubTabFish
 
         if (ImGui.Button($"{UIStrings.AddLastCatch} {Service.LastCatch.Name ?? "-"}"))
         {
-            if (Service.LastCatch.Id == 0 || Service.LastCatch.Id == -1)
+            if (Service.LastCatch.Id is 0 or (-1))
                 return;
             if (list.Any(x => x.Fish.Id == Service.LastCatch.Id))
                 return;
@@ -126,7 +124,7 @@ public class SubTabFish
     private static void DrawFishSearchBar(FishConfig fishConfig)
     {
         ImGui.PushID("DrawFishSearchBar");
-        DrawUtil.DrawComboSelector<BaitFishClass>(
+        DrawUtil.DrawComboSelector(
             GameRes.Fishes,
             (BaitFishClass fish) => $"[#{fish.Id}] {fish.Name}",
             fishConfig.Fish.Name,

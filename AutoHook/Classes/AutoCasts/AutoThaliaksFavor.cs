@@ -1,5 +1,4 @@
-﻿using System;
-using AutoHook.Data;
+﻿using AutoHook.Data;
 using AutoHook.Resources.Localization;
 using AutoHook.Utils;
 using FFXIVClientStructs.FFXIV.Client.Game;

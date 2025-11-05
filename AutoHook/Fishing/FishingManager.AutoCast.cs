@@ -31,7 +31,7 @@ public partial class FishingManager
 
         Service.TaskManager.Enqueue(() => hookCfg.GetHookset().CastLures.TryCasting(_lureSuccess));
     }
-    
+
     private void CastCollect()
     {
         var cfg = GetAutoCastCfg();

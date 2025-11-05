@@ -2,7 +2,6 @@
 using AutoHook.Resources.Localization;
 using AutoHook.Utils;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -15,7 +14,7 @@ public class AutoPrizeCatch : BaseActionCast
 
     public override bool DoesCancelMooch() => true;
 
-    public AutoPrizeCatch() : base(UIStrings.Prize_Catch, Data.IDs.Actions.PrizeCatch, ActionType.Action)
+    public AutoPrizeCatch() : base(UIStrings.Prize_Catch, IDs.Actions.PrizeCatch, ActionType.Action)
     {
         HelpText = UIStrings.Use_Prize_Catch_HelpText;
     }
@@ -30,7 +29,7 @@ public class AutoPrizeCatch : BaseActionCast
 
         if (UseWhenMoochIIOnCD && !PlayerRes.ActionOnCoolDown(IDs.Actions.Mooch2))
             return false;
-        
+
         var slapOrIc = true;
         if (UseOnlyWithIdenticalCast || UseOnlyWithActiveSlap)
             slapOrIc = UseOnlyWithIdenticalCast && PlayerRes.HasStatus(IDs.Status.IdenticalCast) ||

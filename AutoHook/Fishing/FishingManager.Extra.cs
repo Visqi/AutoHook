@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using AutoHook.Configurations;
+﻿using AutoHook.Configurations;
 using AutoHook.Data;
 using AutoHook.Enums;
 using AutoHook.SeFunctions;

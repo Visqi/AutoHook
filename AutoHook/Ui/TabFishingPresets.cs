@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using AutoHook.Classes;
 using AutoHook.Configurations;
@@ -25,10 +22,10 @@ public class TabFishingPresets : BaseTab
 
     public override OpenWindow Type => OpenWindow.FishingPreset;
 
-    private static FishingPresets _basePreset = Service.Configuration.HookPresets;
+    private static readonly FishingPresets _basePreset = Service.Configuration.HookPresets;
 
     public static bool OpenPresetGen;
-    private PresetCreator PresetCreator = new();
+    private readonly PresetCreator PresetCreator = new();
 
     private string newFolderName = string.Empty;
     private bool promptingForFolderName = false;
@@ -72,7 +69,7 @@ public class TabFishingPresets : BaseTab
         }
         catch (Exception e)
         {
-            Service.PluginLog.Error(e.Message);
+            Svc.Log.Error(e.Message);
         }
     }
 
@@ -202,7 +199,7 @@ public class TabFishingPresets : BaseTab
                                 break;
                             }
                         }
-                        
+
                         // Now handle the move
                         if (sourceFolder != null && sourceFolder.UniqueId != folder.UniqueId)
                         {
@@ -210,13 +207,13 @@ public class TabFishingPresets : BaseTab
                             var sourcePresetIds = new List<Guid>(sourceFolder.PresetIds);
                             sourcePresetIds.Remove(presetId);
                             sourceFolder.PresetIds = sourcePresetIds;
-                            
+
                             // Add to target folder if not already there
                             if (!folder.PresetIds.Contains(presetId))
                             {
                                 folder.AddPreset(presetId);
                             }
-                            
+
                             Service.Save();
                         }
                         else if (sourceFolder == null)
@@ -335,17 +332,17 @@ public class TabFishingPresets : BaseTab
                         {
                             // Create a new list to avoid modifying the collection during enumeration
                             var newPresetIds = new List<Guid>(folder.PresetIds);
-                            
+
                             // Find the current index of the preset being moved
                             int currentIndex = newPresetIds.IndexOf(presetId);
-                            
+
                             // Only reorder if the preset is in this folder
                             if (currentIndex >= 0)
                             {
                                 // Remove from current position and insert at target position
                                 newPresetIds.RemoveAt(currentIndex);
                                 newPresetIds.Insert(targetIndex, presetId);
-                                
+
                                 // Replace the folder's preset list with our reordered one
                                 folder.PresetIds = newPresetIds;
                                 Service.Save();
@@ -354,7 +351,7 @@ public class TabFishingPresets : BaseTab
                     }
                     catch (Exception ex)
                     {
-                        Service.PluginLog.Error($"Error reordering presets: {ex.Message}");
+                        Svc.Log.Error($"Error reordering presets: {ex.Message}");
                     }
                 }
             }
@@ -365,7 +362,6 @@ public class TabFishingPresets : BaseTab
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip(UIStrings.RightClickOptions);
 
-    
         DrawPresetContext(preset);
     }
 
@@ -529,8 +525,8 @@ public class TabFishingPresets : BaseTab
                         // Initialize selection states if not done yet
                         if (_selectedPresetsForImport == null || _selectedPresetsForImport.Count != _tempImportFolder.Value.Presets.Count)
                         {
-                            _selectedPresetsForImport = new Dictionary<Guid, bool>();
-                            _presetImportNames = new Dictionary<Guid, string>();
+                            _selectedPresetsForImport = [];
+                            _presetImportNames = [];
 
                             foreach (var preset in _tempImportFolder.Value.Presets)
                             {
@@ -544,29 +540,29 @@ public class TabFishingPresets : BaseTab
                         foreach (var preset in _tempImportFolder.Value.Presets)
                         {
                             ImGui.PushID(preset.UniqueId.ToString());
-                            
+
                             // Checkbox for selection
                             bool isSelected = _selectedPresetsForImport[preset.UniqueId];
                             if (ImGui.Checkbox("##selectPreset", ref isSelected))
                             {
                                 _selectedPresetsForImport[preset.UniqueId] = isSelected;
                             }
-                            
+
                             ImGui.SameLine();
-                            
+
                             // Check if this preset is being renamed
                             if (_renamePresetId == preset.UniqueId)
                             {
                                 // Show input field for renaming
                                 ImGui.SetNextItemWidth(200);
-                                if (ImGui.InputText("##renameField", ref _tempImportName, 100, 
+                                if (ImGui.InputText("##renameField", ref _tempImportName, 100,
                                     ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll))
                                 {
                                     // Apply rename on Enter
                                     _presetImportNames[preset.UniqueId] = _tempImportName;
                                     _renamePresetId = null;
                                 }
-                                
+
                                 // Also handle focus loss or clicking elsewhere
                                 if (!ImGui.IsItemActive() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                                 {
@@ -578,20 +574,20 @@ public class TabFishingPresets : BaseTab
                             {
                                 // Normal display of preset name
                                 ImGui.Text(_presetImportNames[preset.UniqueId]);
-                                
+
                                 ImGui.SameLine();
-                                
+
                                 // Edit button
                                 if (ImGuiComponents.IconButton(FontAwesomeIcon.Edit))
                                 {
                                     _renamePresetId = preset.UniqueId;
                                     _tempImportName = _presetImportNames[preset.UniqueId];
                                 }
-                                
+
                                 if (ImGui.IsItemHovered())
                                     ImGui.SetTooltip(UIStrings.RenamePreset);
                             }
-                            
+
                             ImGui.PopID();
                         }
 
@@ -605,7 +601,7 @@ public class TabFishingPresets : BaseTab
                     {
                         // Count how many presets are actually selected for import
                         int selectedCount = _tempImportFolder.Value.Presets.Count(p => _selectedPresetsForImport[p.UniqueId]);
-                        
+
                         // Create a new folder with the selected count in its name if no presets are selected
                         if (selectedCount == 0)
                         {
@@ -613,7 +609,7 @@ public class TabFishingPresets : BaseTab
                             return;
                         }
 
-                        folder.PresetIds = new List<Guid>();
+                        folder.PresetIds = [];
                         // Add only selected presets to the preset list and folder
                         foreach (var preset in _tempImportFolder.Value.Presets)
                         {
@@ -688,7 +684,7 @@ public class TabFishingPresets : BaseTab
         }
         catch (Exception e)
         {
-            Service.PluginLog.Error(e.ToString());
+            Svc.Log.Error(e.ToString());
             Notify.Error(e.Message);
         }
     }
@@ -805,7 +801,7 @@ public class TabFishingPresets : BaseTab
                     presetsToCopy.Add(originalPreset);
                 }
             }
-            
+
             // Create copies of each preset and add them to the new folder
             foreach (var origPreset in presetsToCopy)
             {

@@ -7,7 +7,7 @@ public class AutoReleaseFish : BaseActionCast
     public AutoReleaseFish() : base(UIStrings.ReleaseAllFish, Data.IDs.Actions.Release)
     {
         HelpText = UIStrings.ReleaseAllFishHelpText;
-       
+
     }
 
     public override int Priority { get; set; } = 14;

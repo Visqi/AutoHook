@@ -3,13 +3,9 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoSparefulHand : BaseActionCast
+public class AutoSparefulHand(string name, uint id, ActionType actionType = ActionType.Action) : BaseActionCast(name, id,
+    actionType)
 {
-    public AutoSparefulHand(string name, uint id, ActionType actionType = ActionType.Action) : base(name, id,
-        actionType)
-    {
-    }
-
     public override string GetName()
         => Name = UIStrings.SparefulHand;
 

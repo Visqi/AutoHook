@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using AutoHook.Utils;
 using ECommons.Automation.NeoTaskManager;
 using ECommons.Throttlers;
 using Dalamud.Bindings.ImGui;
 using HtmlAgilityPack;
-using System.Linq;
 using AutoHook.Enums;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.GameHelpers;
@@ -34,7 +30,7 @@ public class TabDebug : BaseTab
 
     private unsafe void CreateDalamudHooks()
     {
-        _executeCommandHook = Service.GameInteropProvider.HookFromSignature<ExecuteCommandDelegate>(
+        _executeCommandHook = Svc.Hook.HookFromSignature<ExecuteCommandDelegate>(
             SignaturePatterns.ExecuteCommand,
             ExecuteCommandDetour);
         _executeCommandHook?.Enable();
@@ -42,16 +38,16 @@ public class TabDebug : BaseTab
 
     private unsafe byte ExecuteCommandDetour(int id, int unk1, uint baitId, int unk2, int unk3)
     {
-        
-        Service.PluginLog.Debug($"ExecuteCommandDetour: {id} {unk1} {baitId} {unk2} {unk3}");
+
+        Svc.Log.Debug($"ExecuteCommandDetour: {id} {unk1} {baitId} {unk2} {unk3}");
         return _executeCommandHook!.Original(id, unk1, baitId, unk2, unk3);
     }
-    
-    private TaskManager _taskManager = new TaskManager()
+
+    private readonly TaskManager _taskManager = new()
     {
         DefaultConfiguration = { TimeLimitMS = 10000 }
     };
-    
+
     public override string TabName => "Debug";
     public override bool Enabled => true;
 
@@ -72,7 +68,7 @@ public class TabDebug : BaseTab
         Failed
     }
 
-    private unsafe uint fishCaught => PlayerState.Instance()->NumFishCaught;
+    private unsafe uint FishCaught => PlayerState.Instance()->NumFishCaught;
 
     public override void Draw()
     {
@@ -83,7 +79,7 @@ public class TabDebug : BaseTab
 
             if (Player.Available)
             {
-                ImGui.Text($"Fish Caught: {fishCaught}");
+                ImGui.Text($"Fish Caught: {FishCaught}");
             }
 
             if (ImGui.Selectable($" {Service.Configuration.HookPresets.Folders.Count} Folders"))
@@ -126,7 +122,6 @@ public class TabDebug : BaseTab
                 Service.BaitManager.ChangeBait((uint)_swimbaitId);
             }
 
-
             if (ImGui.CollapsingHeader("Get Wiki presets", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 using (ImRaii.Group())
@@ -150,13 +145,12 @@ public class TabDebug : BaseTab
         }
         catch (Exception e)
         {
-            Service.PluginLog.Error(e.Message);
+            Svc.Log.Error(e.Message);
         }
     }
 
     //private static string regexold = @"```\s*AH\s*([\s\S]*?)\s*```";
-    private static string regex = @"```\s*(AH\s*[\s\S]*?)\s*```";
-    
+    private static readonly string regex = @"```\s*(AH\s*[\s\S]*?)\s*```";
 
     private static bool ProcessRepair()
     {/*
@@ -173,9 +167,9 @@ public class TabDebug : BaseTab
         repairStauts = RepairStatus.Failed;
     }
 
-    private static readonly HttpClient client = new HttpClient();
+    private static readonly HttpClient client = new();
 
-    private static Dictionary<string, List<string>> Presets = new();
+    private static readonly Dictionary<string, List<string>> Presets = [];
     private int _swimbaitId = 45949;
 
     //public static async Task UpdateWiki()
@@ -222,16 +216,13 @@ public class TabDebug : BaseTab
         if (pageLinks != null)
             pageUrls.AddRange(pageLinks);
 
-
         return pageUrls;
     }
 
     static async Task<List<string>> ExtractBase64FromWikiPage(string url)
     {
         string wikiPageContent = await httpClient.GetStringAsync(url);
-        return Regex.Matches(wikiPageContent, TabDebug.regex)
-            .Select(match => match.Groups[1].Value)
-            .ToList();
+        return [.. Regex.Matches(wikiPageContent, regex).Select(match => match.Groups[1].Value)];
     }
 
     public override void Dispose()
@@ -242,11 +233,11 @@ public class TabDebug : BaseTab
 
     public unsafe void Checkoffsets()
     {
-        Service.PluginLog.Debug($"Initializing WKSManager offset scan");
+        Svc.Log.Debug($"Initializing WKSManager offset scan");
         var cosmicManager = WKSManager.Instance();
         if (cosmicManager == null)
         {
-            Service.PluginLog.Debug("WKSManager pointer is null.");
+            Svc.Log.Debug("WKSManager pointer is null.");
             return;
         }
         for (int offset = 1; offset <= 10000; offset++)
@@ -254,10 +245,10 @@ public class TabDebug : BaseTab
             uint value = *(uint*)((byte*)cosmicManager + offset);
             if (value == 45949)
             {
-                Service.PluginLog.Debug($"Match found at offset 0x{offset:X}: {value}");
+                Svc.Log.Debug($"Match found at offset 0x{offset:X}: {value}");
             }
-           
-            // else Service.PluginLog.Debug($"Offset 0x{offset:X}: {value}");
+
+            // else Svc.Log.Debug($"Offset 0x{offset:X}: {value}");
         }
     }
 }

@@ -1,11 +1,8 @@
-﻿using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using AutoHook.Classes;
 using AutoHook.Enums;
 using AutoHook.Utils;
-using Dalamud.Game;
 using Dalamud.Utility.Signatures;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
@@ -19,7 +16,7 @@ public unsafe class BaitManager
 {
     public BaitManager()
     {
-        Service.GameInteropProvider.InitializeFromAttributes(this);
+        Svc.Hook.InitializeFromAttributes(this);
     }
 
     private delegate byte ExecuteCommandDelegate(int id, int unk1, uint baitId, int unk2, int unk3);
@@ -73,7 +70,7 @@ public unsafe class BaitManager
     }
 
     //public uint Current => PlayerState.Instance()->FishingBait;
-    
+
     public uint CurrentBaitSwimBait => CurrentSwimBait ?? Current;
 
     public uint Current
@@ -105,7 +102,6 @@ public unsafe class BaitManager
         return _executeCommand(701, 4, baitId, 0, 0) == 1 ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
     }
 
-
     public ChangeBaitReturn ChangeSwimbait(uint index)
     {
         if (index > 2)
@@ -113,7 +109,6 @@ public unsafe class BaitManager
 
         return _executeCommand(701, 25, index, 0, 0) == 1 ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
     }
-
 
     public ChangeBaitReturn ChangeBait(BaitFishClass bait)
     {

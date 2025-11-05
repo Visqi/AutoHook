@@ -3,7 +3,6 @@ using AutoHook.Resources.Localization;
 using AutoHook.Utils;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Dalamud.Bindings.ImGui;
-using System;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -15,8 +14,8 @@ public class AutoPatience : BaseActionCast
     public override bool RequiresTimeWindow() => true;
 
     public override bool DoesCancelMooch() => true;
-    
-    public AutoPatience() : base(UIStrings.AutoPatience_Patience, Data.IDs.Actions.Patience2, ActionType.Action)
+
+    public AutoPatience() : base(UIStrings.AutoPatience_Patience, IDs.Actions.Patience2, ActionType.Action)
     {
         HelpText = UIStrings.CancelsCurrentMooch;
     }
