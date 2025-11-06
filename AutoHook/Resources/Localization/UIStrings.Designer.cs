@@ -3540,6 +3540,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Swimbait Settings.
+        /// </summary>
+        internal static string SwimbaitSettings {
+            get {
+                return ResourceManager.GetString("SwimbaitSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Switches fishing baits (by Name or ID).
         /// </summary>
         internal static string SwitchFishBait {

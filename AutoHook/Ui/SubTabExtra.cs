@@ -110,6 +110,14 @@ public class SubTabExtra
 
             DrawUtil.SpacingSeparator();
 
+            if (ImGui.TreeNodeEx(UIStrings.SwimbaitSettings, ImGuiTreeNodeFlags.FramePadding))
+            {
+                DrawSwimbait(config);
+                ImGui.TreePop();
+            }
+
+            DrawUtil.SpacingSeparator();
+
             if (DrawUtil.Checkbox(UIStrings.Reset_counter_after_swapping_presets, ref config.ResetCounterPresetSwap))
             {
                 Service.Save();
@@ -233,6 +241,67 @@ public class SubTabExtra
         );
 
         baitSwap = newBait;
+        ImGui.PopID();
+    }
+
+    private static void DrawSwimbait(ExtraConfig config)
+    {
+        using var _ = ImRaii.PushId("DrawSwimbait");
+
+        ImGui.PushID("swimbait_fills");
+        ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.WhenSwimbaitFills);
+        ImGui.Spacing();
+
+        ImGui.SetNextItemWidth(200 * ImGuiHelpers.GlobalScale);
+        var fillsAction = (int)config.SwimbaitFillsAction;
+        var actionOptions = new[]
+        {
+            UIStrings.None,
+            UIStrings.Swap_Preset,
+            UIStrings.Stop_Casting,
+        };
+        if (ImGui.Combo("###SwimbaitFillsAction", ref fillsAction, actionOptions, actionOptions.Length))
+        {
+            config.SwimbaitFillsAction = (SwimbaitAction)fillsAction;
+            Service.Save();
+        }
+
+        if (config.SwimbaitFillsAction == SwimbaitAction.SwapPreset)
+        {
+            ImGui.Spacing();
+            DrawUtil.DrawComboSelector(
+                Service.Configuration.HookPresets.CustomPresets,
+                preset => preset.PresetName,
+                config.PresetToSwapSwimbaitFills,
+                preset => config.PresetToSwapSwimbaitFills = preset.PresetName);
+        }
+        ImGui.PopID();
+
+        ImGui.Spacing();
+        DrawUtil.SpacingSeparator();
+        ImGui.Spacing();
+
+        ImGui.PushID("swimbait_runs_out");
+        ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.WhenSwimbaitIsOut);
+        ImGui.Spacing();
+
+        ImGui.SetNextItemWidth(200 * ImGuiHelpers.GlobalScale);
+        var runsOutAction = (int)config.SwimbaitRunsOutAction;
+        if (ImGui.Combo("###SwimbaitRunsOutAction", ref runsOutAction, actionOptions, actionOptions.Length))
+        {
+            config.SwimbaitRunsOutAction = (SwimbaitAction)runsOutAction;
+            Service.Save();
+        }
+
+        if (config.SwimbaitRunsOutAction == SwimbaitAction.SwapPreset)
+        {
+            ImGui.Spacing();
+            DrawUtil.DrawComboSelector(
+                Service.Configuration.HookPresets.CustomPresets,
+                preset => preset.PresetName,
+                config.PresetToSwapSwimbaitRunsOut,
+                preset => config.PresetToSwapSwimbaitRunsOut = preset.PresetName);
+        }
         ImGui.PopID();
     }
 }

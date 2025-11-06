@@ -44,6 +44,12 @@ public class ExtraConfig : BaseOption
     public bool SwapPresetAnglersArt = false;
     public string PresetToSwapAnglersArt = @"-";
 
+    // Swimbait
+    public SwimbaitAction SwimbaitFillsAction = SwimbaitAction.None;
+    public string PresetToSwapSwimbaitFills = @"-";
+    public SwimbaitAction SwimbaitRunsOutAction = SwimbaitAction.None;
+    public string PresetToSwapSwimbaitRunsOut = @"-";
+
     public override void DrawOptions()
     {
 

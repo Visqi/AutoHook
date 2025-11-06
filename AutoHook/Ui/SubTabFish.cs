@@ -250,41 +250,10 @@ public class SubTabFish
                 ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
                 if (ImGui.InputInt(UIStrings.TimeS, ref fishConfig.SwapPresetCount))
                 {
-                    if (fishConfig.SwapPresetCount < 1)
-                        fishConfig.SwapPresetCount = 1;
+                if (fishConfig.SwapPresetCount < 1)
+                    fishConfig.SwapPresetCount = 1;
 
                     Service.Save();
-                }
-
-                ImGui.Spacing();
-                ImGui.Separator();
-                ImGui.Spacing();
-
-                using var id = ImRaii.PushId("DrawSwapPresetAfterSwimbait");
-                DrawUtil.DrawWordWrappedString(UIStrings.Swap_Preset_After_Swimbait);
-                ImGui.Spacing();
-                ImGui.SetNextItemWidth(200 * ImGuiHelpers.GlobalScale);
-                var swapPresetAfterSwimbait = (int)fishConfig.SwapPresetAfterSwimbait;
-                var swapPresetAfterSwimbaitOptions = new[]
-                {
-                    UIStrings.None,
-                    UIStrings.WhenSwimbaitFills,
-                    UIStrings.WhenSwimbaitIsOut,
-                };
-                if (ImGui.Combo("###SwapPresetAfterSwimbait", ref swapPresetAfterSwimbait, swapPresetAfterSwimbaitOptions, swapPresetAfterSwimbaitOptions.Length))
-                {
-                    fishConfig.SwapPresetAfterSwimbait = (SwapPresetAfterSwimbait)swapPresetAfterSwimbait;
-                    Service.Save();
-                }
-
-                if (fishConfig.SwapPresetAfterSwimbait != SwapPresetAfterSwimbait.None)
-                {
-                    ImGui.Spacing();
-                    DrawUtil.DrawComboSelector(
-                        Service.Configuration.HookPresets.CustomPresets,
-                        preset => preset.PresetName,
-                        fishConfig.PresetToSwapAfterSwimbait,
-                        preset => fishConfig.PresetToSwapAfterSwimbait = preset.PresetName);
                 }
             }
         );

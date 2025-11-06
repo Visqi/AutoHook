@@ -28,8 +28,6 @@ public class FishConfig : BaseOption
     public bool SwapPresets = false;
     public string PresetToSwap = "-";
     public int SwapPresetCount = 1;
-    public SwapPresetAfterSwimbait SwapPresetAfterSwimbait = SwapPresetAfterSwimbait.None;
-    public string PresetToSwapAfterSwimbait = "-";
 
     public bool NeverMooch = false;
 

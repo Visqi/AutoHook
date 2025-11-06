@@ -1300,6 +1300,9 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
 	<data name="WhenSwimbaitIsOut" xml:space="preserve">
     <value>When Swimbait is Out</value>
   </data>
+	<data name="SwimbaitSettings" xml:space="preserve">
+    <value>Swimbait Settings</value>
+  </data>
 	<data name="DelayBeforeCancel" xml:space="preserve">
     <value>Delay before canceling the fishing attempt (in ms)</value>
   </data>

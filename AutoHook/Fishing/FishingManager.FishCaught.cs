@@ -93,39 +93,5 @@ public partial class FishingManager
                 if (lastCatchCfg.SwapBaitResetCount) FishingHelper.ToBeRemoved.Add(guid);
             }
         }
-
-        if (lastCatchCfg.SwapPresetAfterSwimbait != SwapPresetAfterSwimbait.None && !_lastStep.HasFlag(FishingSteps.PresetSwapped))
-        {
-            var shouldSwap = false;
-            var swapReason = "";
-
-            if (lastCatchCfg.SwapPresetAfterSwimbait == SwapPresetAfterSwimbait.WhenSwimbaitFills && Service.BaitManager.IsSwimbaitFull())
-            {
-                shouldSwap = true;
-                swapReason = "Swimbait filled";
-            }
-            else if (lastCatchCfg.SwapPresetAfterSwimbait == SwapPresetAfterSwimbait.WhenSwimbaitIsOut && Service.BaitManager.IsSwimbaitEmpty())
-            {
-                shouldSwap = true;
-                swapReason = "Swimbait is out";
-            }
-
-            if (shouldSwap && lastCatchCfg.PresetToSwapAfterSwimbait != "-" && lastCatchCfg.PresetToSwapAfterSwimbait != Presets.SelectedPreset?.PresetName)
-            {
-                var preset = Presets.CustomPresets.FirstOrDefault(preset => preset.PresetName == lastCatchCfg.PresetToSwapAfterSwimbait);
-
-                _lastStep |= FishingSteps.PresetSwapped;
-
-                if (preset == null)
-                    Service.PrintChat(@$"Preset {lastCatchCfg.PresetToSwapAfterSwimbait} not found.");
-                else
-                {
-                    Service.Save();
-                    Presets.SelectedPreset = preset;
-                    Service.PrintChat(@$"[Fish Caught] {swapReason}: Swapping preset to {lastCatchCfg.PresetToSwapAfterSwimbait}");
-                    Service.Save();
-                }
-            }
-        }
     }
 }
