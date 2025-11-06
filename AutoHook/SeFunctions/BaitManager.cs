@@ -64,6 +64,21 @@ public unsafe class BaitManager
         }
     }
 
+    public uint[] SwimbaitIds
+    {
+        get
+        {
+            var ptr = FishingMan;
+            if (ptr == null)
+                return [];
+            var ids = new uint[3];
+            ids[0] = ptr->SwimBaitId1;
+            ids[1] = ptr->SwimBaitId2;
+            ids[2] = ptr->SwimBaitId3;
+            return ids;
+        }
+    }
+
     //public uint Current => PlayerState.Instance()->FishingBait;
 
     public uint CurrentBaitSwimBait => CurrentSwimBait ?? Current;

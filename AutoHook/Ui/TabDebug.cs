@@ -119,6 +119,8 @@ public class TabDebug : BaseTab
                 Service.BaitManager.ChangeBait((uint)_swimbaitId);
             }
 
+            ImGui.Text($"Current Swimbait: {string.Join(", ", Service.BaitManager.SwimbaitIds)}");
+
             if (ImGui.CollapsingHeader("Get Wiki presets", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 using (ImRaii.Group())
