@@ -1,8 +1,6 @@
 ﻿using System.IO;
 using System.Text.Json;
-using AutoHook.Classes;
 using Dalamud.Bindings.ImGui;
-using ECommons;
 using Lumina.Excel.Sheets;
 
 namespace AutoHook.Utils;
@@ -23,11 +21,11 @@ public static class GameRes
 
     public static void Initialize()
     {
-        Baits = [.. GenericHelpers.FindRows<Item>(i => i.ItemSearchCategory.RowId == FishingTackleRow).ToList()
-            .Concat(GenericHelpers.FindRows<WKSItemInfo>(i => i.WKSItemSubCategory.RowId == 5).Select(i => i.Item.Value).ToList())
+        Baits = [.. FindRows<Item>(i => i.ItemSearchCategory.RowId == FishingTackleRow).ToList()
+            .Concat(FindRows<WKSItemInfo>(i => i.WKSItemSubCategory.RowId == 5).Select(i => i.Item.Value).ToList())
             .Select(b => new BaitFishClass(b))];
 
-        Fishes = GenericHelpers.FindRows<FishParameter>(f => f.Item.RowId is not 0 and < 1000000)
+        Fishes = FindRows<FishParameter>(f => f.Item.RowId is not 0 and < 1000000)
             .Select(f => new BaitFishClass(f)).GroupBy(f => f.Id).Select(group => group.First()).ToList() ?? [];
 
         try

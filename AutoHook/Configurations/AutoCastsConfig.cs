@@ -1,8 +1,4 @@
 using System.ComponentModel;
-using AutoHook.Classes;
-using AutoHook.Classes.AutoCasts;
-using AutoHook.Data;
-using AutoHook.Utils;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 
 namespace AutoHook.Configurations;

@@ -1,10 +1,4 @@
 using System.ComponentModel;
-using AutoHook.Classes;
-using AutoHook.Data;
-using AutoHook.Enums;
-using AutoHook.Fishing;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
 
 namespace AutoHook.Configurations;
 

@@ -1,10 +1,4 @@
-﻿using AutoHook.Configurations;
-using AutoHook.Data;
-using AutoHook.Enums;
-using AutoHook.SeFunctions;
-using AutoHook.Utils;
-
-namespace AutoHook.Fishing;
+﻿namespace AutoHook.Fishing;
 
 public partial class FishingManager
 {

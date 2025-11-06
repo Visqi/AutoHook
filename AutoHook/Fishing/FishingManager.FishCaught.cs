@@ -1,11 +1,4 @@
-﻿using AutoHook.Classes;
-using AutoHook.Configurations;
-using AutoHook.Data;
-using AutoHook.Enums;
-using AutoHook.SeFunctions;
-using AutoHook.Utils;
-
-namespace AutoHook.Fishing;
+﻿namespace AutoHook.Fishing;
 
 public partial class FishingManager
 {
@@ -29,11 +22,18 @@ public partial class FishingManager
 
         var caughtCount = FishingHelper.GetFishCount(lastFishCatchCfg.UniqueId);
 
+        // Set the fish ID for Spareful Hand to check swimbait count
+        if (_lastCatch != null)
+            lastFishCatchCfg.SparefulHand.FishIdToCheck = (uint)_lastCatch.Id;
+
         if (lastFishCatchCfg.IdenticalCast.IsAvailableToCast(caughtCount))
             cast = lastFishCatchCfg.IdenticalCast;
 
         if (lastFishCatchCfg.SurfaceSlap.IsAvailableToCast())
             cast = lastFishCatchCfg.SurfaceSlap;
+
+        if (lastFishCatchCfg.SparefulHand.IsAvailableToCast())
+            cast = lastFishCatchCfg.SparefulHand;
 
         if (cast != null)
         {
@@ -91,6 +91,40 @@ public partial class FishingManager
                     Service.Save();
                 }
                 if (lastCatchCfg.SwapBaitResetCount) FishingHelper.ToBeRemoved.Add(guid);
+            }
+        }
+
+        if (lastCatchCfg.SwapPresetAfterSwimbait != SwapPresetAfterSwimbait.None && !_lastStep.HasFlag(FishingSteps.PresetSwapped))
+        {
+            var shouldSwap = false;
+            var swapReason = "";
+
+            if (lastCatchCfg.SwapPresetAfterSwimbait == SwapPresetAfterSwimbait.WhenSwimbaitFills && Service.BaitManager.IsSwimbaitFull())
+            {
+                shouldSwap = true;
+                swapReason = "Swimbait filled";
+            }
+            else if (lastCatchCfg.SwapPresetAfterSwimbait == SwapPresetAfterSwimbait.WhenSwimbaitIsOut && Service.BaitManager.IsSwimbaitEmpty())
+            {
+                shouldSwap = true;
+                swapReason = "Swimbait is out";
+            }
+
+            if (shouldSwap && lastCatchCfg.PresetToSwapAfterSwimbait != "-" && lastCatchCfg.PresetToSwapAfterSwimbait != Presets.SelectedPreset?.PresetName)
+            {
+                var preset = Presets.CustomPresets.FirstOrDefault(preset => preset.PresetName == lastCatchCfg.PresetToSwapAfterSwimbait);
+
+                _lastStep |= FishingSteps.PresetSwapped;
+
+                if (preset == null)
+                    Service.PrintChat(@$"Preset {lastCatchCfg.PresetToSwapAfterSwimbait} not found.");
+                else
+                {
+                    Service.Save();
+                    Presets.SelectedPreset = preset;
+                    Service.PrintChat(@$"[Fish Caught] {swapReason}: Swapping preset to {lastCatchCfg.PresetToSwapAfterSwimbait}");
+                    Service.Save();
+                }
             }
         }
     }

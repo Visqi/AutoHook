@@ -1,9 +1,4 @@
 using System.Numerics;
-using AutoHook.Classes;
-using AutoHook.Configurations;
-using AutoHook.Fishing;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;

@@ -1,7 +1,4 @@
-﻿using AutoHook.Classes;
-using AutoHook.Enums;
-
-namespace AutoHook.Configurations;
+﻿namespace AutoHook.Configurations;
 
 public class ExtraConfig : BaseOption
 {

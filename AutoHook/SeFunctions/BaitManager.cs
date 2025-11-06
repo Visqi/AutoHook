@@ -1,13 +1,8 @@
 ﻿using System.Runtime.InteropServices;
-using AutoHook.Classes;
-using AutoHook.Enums;
-using AutoHook.Utils;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
-using ECommons.GameHelpers;
-using ECommons;
 using Lumina.Excel.Sheets;
 
 namespace AutoHook.SeFunctions;
@@ -77,7 +72,7 @@ public unsafe class BaitManager
     {
         get
         {
-            if (GenericHelpers.GetRow<TerritoryType>(Player.Territory) is { TerritoryIntendedUse.RowId: 60 })
+            if (GetRow<TerritoryType>(Player.Territory) is { TerritoryIntendedUse.RowId: 60 })
             {
                 var cosmicManager = WKSManager.Instance();
                 if (cosmicManager != null)
@@ -134,6 +129,37 @@ public unsafe class BaitManager
             ? ChangeBaitReturn.Success
             : ChangeBaitReturn.UnknownError;
     }
+
+    public int GetSwimbaitCount()
+    {
+        var ptr = FishingMan;
+        if (ptr == null)
+            return 0;
+
+        var count = 0;
+        if (ptr->SwimBaitId1 != 0) count++;
+        if (ptr->SwimBaitId2 != 0) count++;
+        if (ptr->SwimBaitId3 != 0) count++;
+
+        return count;
+    }
+
+    public int GetSwimbaitCountForFish(uint fishId)
+    {
+        var ptr = FishingMan;
+        if (ptr == null)
+            return 0;
+
+        var count = 0;
+        if (ptr->SwimBaitId1 == fishId) count++;
+        if (ptr->SwimBaitId2 == fishId) count++;
+        if (ptr->SwimBaitId3 == fishId) count++;
+
+        return count;
+    }
+
+    public bool IsSwimbaitFull() => GetSwimbaitCount() >= 3;
+    public bool IsSwimbaitEmpty() => GetSwimbaitCount() == 0;
 
     public enum ChangeBaitReturn
     {

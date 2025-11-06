@@ -1,10 +1,4 @@
 ﻿using System.Numerics;
-using AutoHook.Classes;
-using AutoHook.Configurations;
-using AutoHook.Enums;
-using AutoHook.Fishing;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
@@ -52,6 +46,9 @@ public class SubTabFish
                     ImGui.Spacing();
 
                     DrawMooch(fish);
+                    ImGui.Spacing();
+
+                    DrawSparefulHand(fish);
                     ImGui.Spacing();
 
                     DrawSwapBait(fish);
@@ -168,9 +165,35 @@ public class SubTabFish
         ImGui.PopID();
     }
 
+    private static void DrawSparefulHand(FishConfig fishConfig)
+    {
+        using var _ = ImRaii.PushId("DrawSparefulHand");
+        using var tree = ImRaii.TreeNode(UIStrings.SparefulHand_Settings, ImGuiTreeNodeFlags.FramePadding);
+        if (!tree) return;
+
+        fishConfig.SparefulHand.FishIdToCheck = (uint)fishConfig.Fish.Id;
+        fishConfig.SparefulHand.DrawConfig();
+
+        ImGui.Spacing();
+
+        DrawUtil.DrawWordWrappedString(UIStrings.OnlyUseIfSwimbaitCountLessThan);
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+        var swimbaitLimit = fishConfig.SparefulHand.SwimbaitCountLimit;
+        if (ImGui.InputInt("###SwimbaitLimit", ref swimbaitLimit, 1, 1))
+        {
+            swimbaitLimit = Math.Clamp(swimbaitLimit, 0, 3);
+            fishConfig.SparefulHand.SwimbaitCountLimit = swimbaitLimit;
+            Service.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(UIStrings.OnlyUseIfSwimbaitCountLessThanHelpText);
+    }
+
     private static void DrawSwapBait(FishConfig fishConfig)
     {
-        ImGui.PushID("DrawSwapBait");
+        using var _ = ImRaii.PushId("DrawSwapBait");
 
         var alreadySwapped = "";
         if (FishingManager.FishingHelper.SwappedBait(fishConfig.UniqueId))
@@ -201,13 +224,11 @@ public class SubTabFish
                 DrawUtil.Checkbox(UIStrings.Reset_Counter_Bait_Swap, ref fishConfig.SwapBaitResetCount);
             }
         );
-
-        ImGui.PopID();
     }
 
     private static void DrawSwapPreset(FishConfig fishConfig)
     {
-        ImGui.PushID("DrawSwapPreset");
+        using var _ = ImRaii.PushId("DrawSwapPreset");
 
         var alreadySwapped = "";
         if (FishingManager.FishingHelper.SwappedPreset(fishConfig.UniqueId))
@@ -234,15 +255,44 @@ public class SubTabFish
 
                     Service.Save();
                 }
+
+                ImGui.Spacing();
+                ImGui.Separator();
+                ImGui.Spacing();
+
+                using var id = ImRaii.PushId("DrawSwapPresetAfterSwimbait");
+                DrawUtil.DrawWordWrappedString(UIStrings.Swap_Preset_After_Swimbait);
+                ImGui.Spacing();
+                ImGui.SetNextItemWidth(200 * ImGuiHelpers.GlobalScale);
+                var swapPresetAfterSwimbait = (int)fishConfig.SwapPresetAfterSwimbait;
+                var swapPresetAfterSwimbaitOptions = new[]
+                {
+                    UIStrings.None,
+                    UIStrings.WhenSwimbaitFills,
+                    UIStrings.WhenSwimbaitIsOut,
+                };
+                if (ImGui.Combo("###SwapPresetAfterSwimbait", ref swapPresetAfterSwimbait, swapPresetAfterSwimbaitOptions, swapPresetAfterSwimbaitOptions.Length))
+                {
+                    fishConfig.SwapPresetAfterSwimbait = (SwapPresetAfterSwimbait)swapPresetAfterSwimbait;
+                    Service.Save();
+                }
+
+                if (fishConfig.SwapPresetAfterSwimbait != SwapPresetAfterSwimbait.None)
+                {
+                    ImGui.Spacing();
+                    DrawUtil.DrawComboSelector(
+                        Service.Configuration.HookPresets.CustomPresets,
+                        preset => preset.PresetName,
+                        fishConfig.PresetToSwapAfterSwimbait,
+                        preset => fishConfig.PresetToSwapAfterSwimbait = preset.PresetName);
+                }
             }
         );
-
-        ImGui.PopID();
     }
 
     private static void DrawStopAfter(FishConfig fishConfig)
     {
-        ImGui.PushID("DrawStopAfter");
+        using var _ = ImRaii.PushId("DrawStopAfter");
 
         DrawUtil.DrawCheckboxTree(UIStrings.Stop_After_Caught, ref fishConfig.StopAfterCaught,
             () =>
@@ -276,6 +326,5 @@ public class SubTabFish
 
                 DrawUtil.Checkbox(UIStrings.Reset_the_counter, ref fishConfig.StopAfterResetCount);
             });
-        ImGui.PopID();
     }
 }

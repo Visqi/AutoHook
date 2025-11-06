@@ -1,6 +1,4 @@
-﻿using AutoHook.Classes;
-using AutoHook.Configurations;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace AutoHook.Fishing;
 

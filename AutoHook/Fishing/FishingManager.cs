@@ -1,11 +1,4 @@
 using System.Diagnostics;
-using AutoHook.Classes;
-using AutoHook.Configurations;
-using AutoHook.Data;
-using AutoHook.Enums;
-using AutoHook.Resources.Localization;
-using AutoHook.SeFunctions;
-using AutoHook.Utils;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using ECommons.Throttlers;

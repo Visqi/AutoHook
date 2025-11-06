@@ -1,6 +1,4 @@
-﻿using AutoHook.Resources.Localization;
-
-namespace AutoHook.Classes.AutoCasts;
+﻿namespace AutoHook.Classes.AutoCasts;
 
 public class AutoReleaseFish : BaseActionCast
 {

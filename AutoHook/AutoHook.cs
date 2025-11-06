@@ -1,14 +1,8 @@
 ﻿using System.Globalization;
-using AutoHook.Configurations;
-using AutoHook.Fishing;
 using AutoHook.IPC;
-using AutoHook.Resources.Localization;
-using AutoHook.SeFunctions;
 using AutoHook.Spearfishing;
-using AutoHook.Utils;
 using Dalamud.Game.Command;
 using Dalamud.Plugin;
-using ECommons;
 using PunishLib;
 
 namespace AutoHook;

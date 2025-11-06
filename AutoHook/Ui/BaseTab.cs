@@ -1,5 +1,3 @@
-using AutoHook.Enums;
-using AutoHook.Resources.Localization;
 using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Ui;

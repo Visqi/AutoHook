@@ -1,12 +1,9 @@
-using AutoHook.Data;
-using AutoHook.Utils;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Dalamud.Bindings.ImGui;
 using System.ComponentModel;
 using System.Numerics;
-using AutoHook.Resources.Localization;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.Throttlers;
 

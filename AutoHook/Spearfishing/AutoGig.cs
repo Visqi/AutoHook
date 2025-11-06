@@ -1,13 +1,9 @@
-﻿using AutoHook.Data;
-using AutoHook.Resources.Localization;
-using AutoHook.Spearfishing.Struct;
-using AutoHook.Utils;
+﻿using AutoHook.Spearfishing.Struct;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Dalamud.Bindings.ImGui;
 using System.Numerics;
-using AutoHook.Classes;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface.Colors;
 using ECommons.Automation;

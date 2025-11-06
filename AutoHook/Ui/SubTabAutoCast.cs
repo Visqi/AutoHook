@@ -1,9 +1,4 @@
-﻿using AutoHook.Classes;
-using AutoHook.Classes.AutoCasts;
-using AutoHook.Configurations;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
-using Dalamud.Interface.Colors;
+﻿using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;

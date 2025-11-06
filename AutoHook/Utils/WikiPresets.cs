@@ -1,6 +1,5 @@
 ﻿using System.Net.Http;
 using System.Text.RegularExpressions;
-using AutoHook.Configurations;
 using ECommons.Throttlers;
 using HtmlAgilityPack;
 

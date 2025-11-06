@@ -1,9 +1,4 @@
-﻿using AutoHook.Configurations;
-using AutoHook.Data;
-using AutoHook.Enums;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
-using ECommons.Throttlers;
+﻿using ECommons.Throttlers;
 
 namespace AutoHook.Fishing;
 

@@ -1,8 +1,4 @@
-﻿using AutoHook.Data;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
-using Dalamud.Bindings.ImGui;
-using AutoHook.Enums;
+﻿using Dalamud.Bindings.ImGui;
 using ECommons.Throttlers;
 using static AutoHook.Enums.FishingState;
 

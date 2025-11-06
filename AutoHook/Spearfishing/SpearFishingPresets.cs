@@ -1,7 +1,4 @@
 ﻿using System.ComponentModel;
-using AutoHook.Classes;
-using AutoHook.Classes.AutoCasts;
-using AutoHook.Configurations;
 using Newtonsoft.Json;
 
 namespace AutoHook.Spearfishing;

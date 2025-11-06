@@ -3,12 +3,8 @@ using Newtonsoft.Json;
 using System.ComponentModel;
 using System.IO.Compression;
 using System.IO;
-using AutoHook.Classes;
 using AutoHook.Configurations.old_config;
-using AutoHook.Fishing;
-using AutoHook.Resources.Localization;
 using AutoHook.Spearfishing;
-using AutoHook.Utils;
 
 namespace AutoHook.Configurations;
 

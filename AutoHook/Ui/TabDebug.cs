@@ -1,13 +1,10 @@
 ﻿using System.Net.Http;
 using System.Text.RegularExpressions;
-using AutoHook.Utils;
 using ECommons.Automation.NeoTaskManager;
 using ECommons.Throttlers;
 using Dalamud.Bindings.ImGui;
 using HtmlAgilityPack;
-using AutoHook.Enums;
 using Dalamud.Interface.Utility.Raii;
-using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;

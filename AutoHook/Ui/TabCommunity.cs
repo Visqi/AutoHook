@@ -1,11 +1,5 @@
 ﻿using System.Diagnostics;
-using AutoHook.Classes;
-using AutoHook.Configurations;
-using AutoHook.Enums;
-using AutoHook.Fishing;
-using AutoHook.Resources.Localization;
 using AutoHook.Spearfishing;
-using AutoHook.Utils;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
@@ -130,7 +124,7 @@ public class TabCommunity : BaseTab
                                 // Clone to new preset and add to list
                                 var json = JsonConvert.SerializeObject(custom);
                                 var copy = JsonConvert.DeserializeObject<CustomPresetConfig>(json);
-                                copy!.UniqueId = System.Guid.NewGuid();
+                                copy!.UniqueId = Guid.NewGuid();
                                 _fishingPreset.CustomPresets.Add(copy);
                                 importedGuids.Add(copy.UniqueId);
                                 imported++;

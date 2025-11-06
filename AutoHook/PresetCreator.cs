@@ -1,11 +1,4 @@
-﻿using AutoHook.Classes;
-using AutoHook.Configurations;
-using AutoHook.Data;
-using AutoHook.Enums;
-using AutoHook.Fishing;
-using AutoHook.Resources.Localization;
-using AutoHook.Ui;
-using AutoHook.Utils;
+﻿using AutoHook.Ui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Bindings.ImGui;

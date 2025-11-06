@@ -1,8 +1,4 @@
-﻿using AutoHook.Classes;
-using AutoHook.Enums;
-using AutoHook.Resources.Localization;
-using AutoHook.Spearfishing;
-using AutoHook.Utils;
+﻿using AutoHook.Spearfishing;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;

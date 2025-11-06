@@ -1279,6 +1279,27 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
 	<data name="SparefulHand" xml:space="preserve">
     <value>Spareful Hand</value>
   </data>
+	<data name="SparefulHand_Settings" xml:space="preserve">
+    <value>Spareful Hand Settings</value>
+  </data>
+	<data name="SparefulHand_HelpText" xml:space="preserve">
+    <value>Automatically use Spareful Hand when GP threshold is met</value>
+  </data>
+	<data name="OnlyUseIfSwimbaitCountLessThan" xml:space="preserve">
+    <value>Only use if swimbait count is less than:</value>
+  </data>
+	<data name="OnlyUseIfSwimbaitCountLessThanHelpText" xml:space="preserve">
+    <value>Only use Spareful Hand if the current fish has fewer than this many swimbaits stored (0-3)</value>
+  </data>
+	<data name="Swap_Preset_After_Swimbait" xml:space="preserve">
+    <value>Swap Preset After Swimbait:</value>
+  </data>
+	<data name="WhenSwimbaitFills" xml:space="preserve">
+    <value>When Swimbait Fills</value>
+  </data>
+	<data name="WhenSwimbaitIsOut" xml:space="preserve">
+    <value>When Swimbait is Out</value>
+  </data>
 	<data name="DelayBeforeCancel" xml:space="preserve">
     <value>Delay before canceling the fishing attempt (in ms)</value>
   </data>

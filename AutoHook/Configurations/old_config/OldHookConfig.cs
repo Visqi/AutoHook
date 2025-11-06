@@ -1,7 +1,3 @@
-using AutoHook.Classes;
-using AutoHook.Data;
-using AutoHook.Enums;
-
 namespace AutoHook.Configurations.old_config;
 
 public class OldHookConfig

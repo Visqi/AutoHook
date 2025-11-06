@@ -1,5 +1,4 @@
 using AutoHook.Ui;
-using AutoHook.Utils;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
 using Dalamud.Bindings.ImGui;
@@ -8,9 +7,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
-using AutoHook.Enums;
-using AutoHook.Fishing;
-using AutoHook.Resources.Localization;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
