@@ -211,7 +211,7 @@ public static class DrawUtil
 
             ImGui.Separator();
 
-            using (var child = ImRaii.Child($"###ComboSelector_{typeof(T).Name}_{onSelect.GetHashCode()}_{selectedItem ?? "None"}", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false))
+            using (var child = ImRaii.Child($"###ComboSelector", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false))
             {
                 foreach (var (item, index) in itemList.WithIndex())
                 {
