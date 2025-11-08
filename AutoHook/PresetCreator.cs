@@ -1,7 +1,8 @@
 ﻿using AutoHook.Ui;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
-using Dalamud.Bindings.ImGui;
+using Lumina.Excel.Sheets;
 
 namespace AutoHook;
 
@@ -19,6 +20,7 @@ public class PresetCreator
     private bool _includeIntPrep;
     private bool _fishEyes;
     private bool _createAnglersPreset;
+    private bool _sparefulHandPrep;
 
     private void DrawHeader()
     {
@@ -56,6 +58,7 @@ public class PresetCreator
         _includeIntPrep = false;
         _fishEyes = false;
         _createAnglersPreset = false;
+        _sparefulHandPrep = false;
         _presetMoochList = [];
         _presetPrepList = [];
     }
@@ -132,6 +135,10 @@ public class PresetCreator
                 ImGui.Unindent();
             }
 
+            if (IsFishMoochable(_selectedTargetFish.ItemId))
+                DrawUtil.Checkbox("Create Spareful Hand Prep preset", ref _sparefulHandPrep,
+                    "Generates a preset that catches 3 fish, stores them to swimbait, catches a 4th fish, and stops");
+
             if (ImGui.Button("Create Preset and Close"))
             {
                 GeneratePreset(_presetMoochList, _presetPrepList);
@@ -186,7 +193,10 @@ public class PresetCreator
             }
         }
 
-        newPreset.AddItem(new FishConfig(_selectedTargetFish.ItemId));
+        if (_sparefulHandPrep)
+            SetupSparefulHandPrep(newPreset);
+        else
+            newPreset.AddItem(new FishConfig(_selectedTargetFish.ItemId));
 
         if (_createAnglersPreset)
         {
@@ -409,4 +419,47 @@ public class PresetCreator
             BiteType.Legendary => "(!!!)",
             _ => "Error",
         };
+
+    private static bool IsFishMoochable(int fishId) => FindRows<FishingBaitParameter>(x => x.Unknown0 != 0 && GetRow<Item>(x.Unknown0)?.ItemUICategory.RowId != 33).Any(x => x.Unknown0 == fishId);
+
+    private void SetupSparefulHandPrep(CustomPresetConfig newPreset)
+    {
+        if (_selectedTargetFish == null)
+            return;
+
+        var initBaitCfg = newPreset.ListOfBaits.FirstOrDefault(f => f.BaitFish.Id == _selectedTargetFish.InitialBait);
+
+        if (initBaitCfg == null)
+        {
+            initBaitCfg = new HookConfig(_selectedTargetFish.InitialBait);
+            initBaitCfg.ResetAllHooksets();
+        }
+
+        initBaitCfg.SetBiteAndHookType(_selectedTargetFish.BiteType, _selectedTargetFish.HookType, false);
+
+        if (_includeTimers)
+        {
+            var timer = GameRes.BiteTimers.FirstOrDefault(b => b.itemId == _selectedTargetFish.ItemId) ?? new BiteTimers();
+            initBaitCfg.SetHooksetTimer(_selectedTargetFish.BiteType, timer.min, timer.max, false);
+        }
+
+        newPreset.ReplaceBaitConfig(initBaitCfg);
+
+        ref var ac = ref newPreset.AutoCastsCfg;
+        ac.EnableAll = true;
+        ac.CastLine.Enabled = true;
+        ac.CastCordial.Enabled = true;
+        ac.CastCollect.Enabled = true;
+
+        var fishConfig = new FishConfig(_selectedTargetFish.ItemId);
+
+        fishConfig.SparefulHand.Enabled = true;
+        fishConfig.SparefulHand.FishIdToCheck = (uint)_selectedTargetFish.ItemId;
+        fishConfig.SparefulHand.SwimbaitCountLimit = 3;
+
+        fishConfig.StopAfterCaught = true;
+        fishConfig.StopAfterCaughtLimit = 4;
+
+        newPreset.AddItem(fishConfig);
+    }
 }
