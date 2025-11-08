@@ -11,6 +11,10 @@ public class HookConfig : BaseOption
     public BaseHookset NormalHook = new(IDs.Status.None);
     public BaseHookset IntuitionHook = new(IDs.Status.FishersIntuition);
 
+    public bool UseSwimbait = false;
+    public int SwimbaitCountThreshold = 1;
+    public bool OnlyUseWhenNoMoochAvailable = true;
+
     //todo enable more hook settings based on the current status
     //List<BaseHookset> CustomHooksets = new();
 

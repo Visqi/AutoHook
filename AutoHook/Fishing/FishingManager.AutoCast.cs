@@ -75,6 +75,12 @@ public partial class FishingManager
     {
         var blockMooch = lastFishCatchCfg is { Enabled: true, NeverMooch: true };
 
+        if (TryUseSwimbait(acCfg, lastFishCatchCfg, blockMooch))
+        {
+            if (acCfg.TryCastAction(acCfg.CastLine, true))
+                return;
+        }
+
         if (!blockMooch)
         {
             if (lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast())
@@ -90,5 +96,57 @@ public partial class FishingManager
 
         if (acCfg.TryCastAction(acCfg.CastLine, true))
             return;
+    }
+
+    private bool TryUseSwimbait(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg, bool blockMooch)
+    {
+        if (Service.BaitManager.GetSwimbaitCount() is 0)
+            return false;
+
+        if (Service.BaitManager.CurrentSwimBait is not { })
+            return false;
+
+        HookConfig? swimbaitMoochConfig = null;
+        if (Presets.SelectedPreset != null)
+            swimbaitMoochConfig = Presets.SelectedPreset.GetCfgById((int)Service.BaitManager.CurrentSwimBait, true);
+
+        // If no config found in selected preset, or swimbait not enabled, check global preset config
+        if (swimbaitMoochConfig == null || !swimbaitMoochConfig.Enabled || !swimbaitMoochConfig.UseSwimbait)
+        {
+            if (Presets.DefaultPreset.ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == GameRes.AllMoochesId) is { Enabled: true, UseSwimbait: true } global)
+                swimbaitMoochConfig = global;
+            else
+                return false;
+        }
+
+        if (Service.BaitManager.GetSwimbaitCountForFish((uint)Service.BaitManager.CurrentSwimBait) < swimbaitMoochConfig.SwimbaitCountThreshold)
+            return false;
+
+        if (swimbaitMoochConfig.OnlyUseWhenNoMoochAvailable)
+        {
+            if (!blockMooch)
+            {
+                if (lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast())
+                    return false;
+                if (acCfg.CastMooch.IsAvailableToCast())
+                    return false;
+            }
+        }
+
+        var swimbaitIds = Service.BaitManager.SwimbaitIds;
+        foreach (var id in Service.BaitManager.SwimbaitIds)
+        {
+            if (id == Service.BaitManager.CurrentSwimBait)
+            {
+                if (Service.BaitManager.ChangeSwimbait(id) == BaitManager.ChangeBaitReturn.Success)
+                {
+                    Service.PrintDebug($"[Swimbait] Using swimbait slot {id} (fish ID: {Service.BaitManager.CurrentSwimBait})");
+                    Service.Status = $"Using swimbait: {MultiString.GetItemName((int)Service.BaitManager.CurrentSwimBait)}";
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

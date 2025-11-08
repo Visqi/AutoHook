@@ -1420,6 +1420,24 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enable using this fish from swimbait.
+        /// </summary>
+        internal static string EnableUsingSwimbait {
+            get {
+                return ResourceManager.GetString("EnableUsingSwimbait", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable using stored swimbait.
+        /// </summary>
+        internal static string EnableUsingSwimbaitGlobal {
+            get {
+                return ResourceManager.GetString("EnableUsingSwimbaitGlobal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter a new name for the folder:.
         /// </summary>
         internal static string EnterNewFolderName {
@@ -2620,6 +2638,24 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Only use when no regular mooch is available.
+        /// </summary>
+        internal static string OnlyUseWhenNoMoochAvailable {
+            get {
+                return ResourceManager.GetString("OnlyUseWhenNoMoochAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only use swimbait if the current fish cannot be mooched (e.g., Never Mooch is enabled or mooch is not available).
+        /// </summary>
+        internal static string OnlyUseWhenNoMoochAvailableHelpText {
+            get {
+                return ResourceManager.GetString("OnlyUseWhenNoMoochAvailableHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Only use when Identical Cast is not active.
         /// </summary>
         internal static string OnlyUseWhenNOTActiveIdentical {
@@ -2634,6 +2670,42 @@ namespace AutoHook.Resources.Localization {
         internal static string OnlyUseWhenNOTActiveSurfaceSlap {
             get {
                 return ResourceManager.GetString("OnlyUseWhenNOTActiveSurfaceSlap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only use when swimbait count for this fish is at least:.
+        /// </summary>
+        internal static string OnlyUseWhenSwimbaitCount {
+            get {
+                return ResourceManager.GetString("OnlyUseWhenSwimbaitCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only use when swimbait count is at least:.
+        /// </summary>
+        internal static string OnlyUseWhenSwimbaitCountGlobal {
+            get {
+                return ResourceManager.GetString("OnlyUseWhenSwimbaitCountGlobal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only use this fish from swimbait if there are at least this many stored (1-3).
+        /// </summary>
+        internal static string OnlyUseWhenSwimbaitCountHelpText {
+            get {
+                return ResourceManager.GetString("OnlyUseWhenSwimbaitCountHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only use swimbait if there are at least this many stored for the fish in swimbait (1-3).
+        /// </summary>
+        internal static string OnlyUseWhenSwimbaitCountHelpTextGlobal {
+            get {
+                return ResourceManager.GetString("OnlyUseWhenSwimbaitCountHelpTextGlobal", resourceCulture);
             }
         }
         
@@ -4092,6 +4164,33 @@ namespace AutoHook.Resources.Localization {
         internal static string UseSurfaceSlap {
             get {
                 return ResourceManager.GetString("UseSurfaceSlap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use Stored Swimbait.
+        /// </summary>
+        internal static string UseSwimbait {
+            get {
+                return ResourceManager.GetString("UseSwimbait", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to When enabled, this fish will be used from swimbait instead of mooching the current fish. Uses this fish&apos;s mooch hooking settings..
+        /// </summary>
+        internal static string UseSwimbaitHelpText {
+            get {
+                return ResourceManager.GetString("UseSwimbaitHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to When enabled, stored swimbait will be used instead of mooching the current fish. Uses the mooch hooking settings for the fish in swimbait..
+        /// </summary>
+        internal static string UseSwimbaitHelpTextGlobal {
+            get {
+                return ResourceManager.GetString("UseSwimbaitHelpTextGlobal", resourceCulture);
             }
         }
         
