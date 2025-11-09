@@ -1,7 +1,4 @@
 ﻿using System.ComponentModel;
-using AutoHook.Data;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
 
 namespace AutoHook.Classes.AutoCasts;
 

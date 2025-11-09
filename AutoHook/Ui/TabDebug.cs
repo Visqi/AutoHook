@@ -1,16 +1,14 @@
 ﻿using System.Net.Http;
 using System.Text.RegularExpressions;
-using AutoHook.Utils;
 using ECommons.Automation.NeoTaskManager;
 using ECommons.Throttlers;
 using Dalamud.Bindings.ImGui;
 using HtmlAgilityPack;
-using AutoHook.Enums;
 using Dalamud.Interface.Utility.Raii;
-using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using Lumina.Excel.Sheets;
 
 namespace AutoHook.Ui;
 
@@ -121,6 +119,11 @@ public class TabDebug : BaseTab
             {
                 Service.BaitManager.ChangeBait((uint)_swimbaitId);
             }
+
+            ImGui.Text($"Current Swimbait: {string.Join(", ", Service.BaitManager.SwimbaitIds)}");
+
+            if (ImGui.Button($"copy mooches"))
+                ImGui.SetClipboardText(string.Join("\n", FindRows<FishingBaitParameter>(x => x.Unknown0 != 0 && GetRow<Item>(x.Unknown0)?.ItemUICategory.RowId != 33).Select(x => $"[{x.Unknown0}] {GetRow<Item>(x.Unknown0)?.Singular}")));
 
             if (ImGui.CollapsingHeader("Get Wiki presets", ImGuiTreeNodeFlags.DefaultOpen))
             {

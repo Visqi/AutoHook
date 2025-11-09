@@ -19,6 +19,7 @@ public static class IDs
             ThaliaksFavor = 26804,
             MakeshiftBait = 26805,
             PrizeCatch = 26806,
+            SparefulHand = 37045,
             Hook = 296,
             DoubleHook = 269,
             TripleHook = 27523,

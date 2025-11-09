@@ -1,5 +1,3 @@
-using AutoHook.Data;
-
 namespace AutoHook.Enums;
 
 public enum HookType : uint

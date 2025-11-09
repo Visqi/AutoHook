@@ -1,8 +1,4 @@
 ﻿using System.ComponentModel;
-using AutoHook.Classes;
-using AutoHook.Classes.AutoCasts;
-using AutoHook.Enums;
-using AutoHook.Resources.Localization;
 
 namespace AutoHook.Configurations;
 
@@ -22,6 +18,7 @@ public class FishConfig : BaseOption
     public AutoIdenticalCast IdenticalCast = new();
     public AutoSurfaceSlap SurfaceSlap = new();
     public AutoMooch Mooch = new();
+    public AutoSparefulHand SparefulHand = new();
 
     public bool SwapBait = false;
     public BaitFishClass BaitToSwap = new();

@@ -1,6 +1,4 @@
-﻿using AutoHook.Enums;
-using AutoHook.Spearfishing.Enums;
-using AutoHook.Utils;
+﻿using AutoHook.Spearfishing.Enums;
 
 namespace AutoHook.Classes;
 

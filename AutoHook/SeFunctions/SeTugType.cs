@@ -1,5 +1,3 @@
-using AutoHook.Enums;
-using AutoHook.Utils;
 using Dalamud.Game;
 
 namespace AutoHook.SeFunctions;

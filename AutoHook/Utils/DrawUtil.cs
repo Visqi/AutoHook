@@ -1,15 +1,11 @@
-﻿using AutoHook.Resources.Localization;
-using Dalamud.Interface;
+﻿using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Bindings.ImGui;
 using System.Numerics;
-using AutoHook.Classes;
-using AutoHook.Configurations;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.ImGuiMethods;
-using ECommons;
 
 namespace AutoHook.Utils;
 
@@ -215,7 +211,7 @@ public static class DrawUtil
 
             ImGui.Separator();
 
-            using (var child = ImRaii.Child("###ComboSelector", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false))
+            using (var child = ImRaii.Child($"###ComboSelector", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false))
             {
                 foreach (var (item, index) in itemList.WithIndex())
                 {

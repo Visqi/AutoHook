@@ -1,7 +1,4 @@
-﻿using AutoHook.Classes;
-using AutoHook.Enums;
-
-namespace AutoHook.Configurations;
+﻿namespace AutoHook.Configurations;
 
 public class ExtraConfig : BaseOption
 {
@@ -46,6 +43,12 @@ public class ExtraConfig : BaseOption
     public BaitFishClass BaitToSwapAnglersArt = new();
     public bool SwapPresetAnglersArt = false;
     public string PresetToSwapAnglersArt = @"-";
+
+    // Swimbait
+    public SwimbaitAction SwimbaitFillsAction = SwimbaitAction.None;
+    public string PresetToSwapSwimbaitFills = @"-";
+    public SwimbaitAction SwimbaitRunsOutAction = SwimbaitAction.None;
+    public string PresetToSwapSwimbaitRunsOut = @"-";
 
     public override void DrawOptions()
     {

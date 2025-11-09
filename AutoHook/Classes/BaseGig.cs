@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel;
-using AutoHook.Resources.Localization;
 using AutoHook.Spearfishing.Enums;
-using AutoHook.Utils;
 
 namespace AutoHook.Classes;
 

@@ -1,9 +1,6 @@
-using AutoHook.Classes;
 using Dalamud.Game;
 using Dalamud.Plugin;
 using Dalamud.Interface.Windowing;
-using AutoHook.SeFunctions;
-using AutoHook.Configurations;
 using ECommons.Automation.NeoTaskManager;
 
 namespace AutoHook;

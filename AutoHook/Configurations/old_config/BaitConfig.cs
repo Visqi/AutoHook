@@ -1,8 +1,4 @@
-﻿using AutoHook.Data;
-using AutoHook.Enums;
-using AutoHook.Utils;
-
-namespace AutoHook.Configurations.old_config;
+﻿namespace AutoHook.Configurations.old_config;
 
 public class BaitConfig(string bait)
 {

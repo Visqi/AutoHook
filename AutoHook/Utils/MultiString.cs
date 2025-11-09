@@ -1,4 +1,3 @@
-using AutoHook.Resources.Localization;
 using Lumina.Excel.Sheets;
 using Lumina.Text.ReadOnly;
 using Action = Lumina.Excel.Sheets.Action;

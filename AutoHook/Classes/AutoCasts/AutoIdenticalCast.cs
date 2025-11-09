@@ -1,7 +1,4 @@
-﻿using AutoHook.Data;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
-using FFXIVClientStructs.FFXIV.Client.Game;
+﻿using FFXIVClientStructs.FFXIV.Client.Game;
 using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Classes.AutoCasts;

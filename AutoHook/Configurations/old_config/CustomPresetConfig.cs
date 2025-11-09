@@ -1,6 +1,4 @@
-﻿using AutoHook.Resources.Localization;
-
-namespace AutoHook.Configurations.old_config;
+﻿namespace AutoHook.Configurations.old_config;
 
 public class BaitPresetConfig
 {

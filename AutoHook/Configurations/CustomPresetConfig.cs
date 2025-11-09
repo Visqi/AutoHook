@@ -1,10 +1,5 @@
 using System.Text.Json.Serialization;
-using AutoHook.Classes;
-using AutoHook.Enums;
-using AutoHook.Fishing;
-using AutoHook.Resources.Localization;
 using AutoHook.Ui;
-using AutoHook.Utils;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Bindings.ImGui;
