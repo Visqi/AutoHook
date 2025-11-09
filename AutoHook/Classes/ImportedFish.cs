@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using AutoHook.Enums;
-using AutoHook.Spearfishing.Enums;
-using AutoHook.Utils;
+﻿using AutoHook.Spearfishing.Enums;
 
 namespace AutoHook.Classes;
 
@@ -12,9 +8,9 @@ public class ImportedFish
     public HookType HookType { get; set; }
     public BiteType BiteType { get; set; }
     public int InitialBait { get; set; }
-    public List<int> Mooches { get; set; } = new();
-    public List<FishPredator> Predators { get; set; } = new();
-    public List<int> Nodes { get; set; } = new();
+    public List<int> Mooches { get; set; } = [];
+    public List<FishPredator> Predators { get; set; } = [];
+    public List<int> Nodes { get; set; } = [];
     public bool IsSpearFish { get; set; } = new();
     public SpearfishSize Size { get; set; } = new();
     public SpearfishSpeed Speed { get; set; } = new();
@@ -24,7 +20,7 @@ public class ImportedFish
     public FishInterval Interval { get; set; } = new();
 
     public string Name => MultiString.GetItemName(ItemId);
-    
+
     public bool IsLureFish => GameRes.LureFishes.Any(f => f.Id == ItemId);
 
     public class FishPredator

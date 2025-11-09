@@ -1,18 +1,11 @@
-using System;
-using System.Collections.Generic;
-using AutoHook.Classes;
-using AutoHook.Data;
-using AutoHook.Enums;
-using AutoHook.Utils;
-
 namespace AutoHook.Configurations.old_config;
 
 public class OldHookConfig
 {
     public bool Enabled = true;
-    
+
     public BaitFishClass BaitFish = new();
-    
+
     public BaseHookset NormalHook = new(IDs.Status.None);
     public BaseHookset IntuitionHook = new(IDs.Status.FishersIntuition);
 
@@ -48,7 +41,7 @@ public class OldHookConfig
 
     /*public bool UseSurfaceSlap = false;
     public bool UseIdenticalCast = false;*/
-    
+
     public bool UseDoubleHook = false;
     public bool UseTripleHook = false;
     public bool UseDHTHPatience = false;
@@ -67,23 +60,22 @@ public class OldHookConfig
     public int StopAfterCaughtLimit = 1;
     public bool StopAfterResetCount = false;
 
-    
     public FishingSteps StopFishingStep = FishingSteps.None;
 
     /*public HookConfig(string bait)
     {
         BaitName = bait;
     }*/
-    
+
     public void ConvertV3ToV4()
     {
-        
+
         if (NormalHook == null)
-            NormalHook =  new(IDs.Status.None);
+            NormalHook = new(IDs.Status.None);
 
         if (IntuitionHook == null)
-            IntuitionHook =  new(IDs.Status.None);
-        
+            IntuitionHook = new(IDs.Status.None);
+
         Convert(NormalHook, false);
         Convert(IntuitionHook, true);
 
@@ -96,7 +88,7 @@ public class OldHookConfig
 
         if (isIntuition)
         {
-            normal = new ()
+            normal = new()
             {
                 {
                     hookset.PatienceWeak,
@@ -174,7 +166,7 @@ public class OldHookConfig
                 bite.HooksetType = type;
                 bite.OnlyWhenActiveSlap = slapActive;
                 bite.OnlyWhenNotActiveSlap = slapNotActive;
-                
+
                 bite.OnlyWhenActiveIdentical = identicalActive;
 
                 bite.MinHookTimer = MinTimeDelay;

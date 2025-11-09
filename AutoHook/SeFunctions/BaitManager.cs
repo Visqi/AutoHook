@@ -1,14 +1,9 @@
-﻿using System.Linq;
-using System.Runtime.InteropServices;
-using AutoHook.Classes;
-using AutoHook.Enums;
-using AutoHook.Utils;
-using Dalamud.Game;
+﻿using System.Runtime.InteropServices;
 using Dalamud.Utility.Signatures;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using Lumina.Excel.Sheets;
 
 namespace AutoHook.SeFunctions;
 
@@ -16,7 +11,7 @@ public unsafe class BaitManager
 {
     public BaitManager()
     {
-        Service.GameInteropProvider.InitializeFromAttributes(this);
+        Svc.Hook.InitializeFromAttributes(this);
     }
 
     private delegate byte ExecuteCommandDelegate(int id, int unk1, uint baitId, int unk2, int unk3);
@@ -69,15 +64,30 @@ public unsafe class BaitManager
         }
     }
 
+    public uint[] SwimbaitIds
+    {
+        get
+        {
+            var ptr = FishingMan;
+            if (ptr == null)
+                return [];
+            var ids = new uint[3];
+            ids[0] = ptr->SwimBaitId1;
+            ids[1] = ptr->SwimBaitId2;
+            ids[2] = ptr->SwimBaitId3;
+            return ids;
+        }
+    }
+
     //public uint Current => PlayerState.Instance()->FishingBait;
-    
+
     public uint CurrentBaitSwimBait => CurrentSwimBait ?? Current;
 
     public uint Current
     {
         get
         {
-            if (Service.ClientState.TerritoryType == 1237)
+            if (GetRow<TerritoryType>(Player.Territory) is { TerritoryIntendedUse.RowId: 60 })
             {
                 var cosmicManager = WKSManager.Instance();
                 if (cosmicManager != null)
@@ -102,7 +112,6 @@ public unsafe class BaitManager
         return _executeCommand(701, 4, baitId, 0, 0) == 1 ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
     }
 
-
     public ChangeBaitReturn ChangeSwimbait(uint index)
     {
         if (index > 2)
@@ -110,7 +119,6 @@ public unsafe class BaitManager
 
         return _executeCommand(701, 25, index, 0, 0) == 1 ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
     }
-
 
     public ChangeBaitReturn ChangeBait(BaitFishClass bait)
     {
@@ -136,6 +144,37 @@ public unsafe class BaitManager
             ? ChangeBaitReturn.Success
             : ChangeBaitReturn.UnknownError;
     }
+
+    public int GetSwimbaitCount()
+    {
+        var ptr = FishingMan;
+        if (ptr == null)
+            return 0;
+
+        var count = 0;
+        if (ptr->SwimBaitId1 != 0) count++;
+        if (ptr->SwimBaitId2 != 0) count++;
+        if (ptr->SwimBaitId3 != 0) count++;
+
+        return count;
+    }
+
+    public int GetSwimbaitCountForFish(uint fishId)
+    {
+        var ptr = FishingMan;
+        if (ptr == null)
+            return 0;
+
+        var count = 0;
+        if (ptr->SwimBaitId1 == fishId) count++;
+        if (ptr->SwimBaitId2 == fishId) count++;
+        if (ptr->SwimBaitId3 == fishId) count++;
+
+        return count;
+    }
+
+    public bool IsSwimbaitFull() => GetSwimbaitCount() >= 3;
+    public bool IsSwimbaitEmpty() => GetSwimbaitCount() == 0;
 
     public enum ChangeBaitReturn
     {

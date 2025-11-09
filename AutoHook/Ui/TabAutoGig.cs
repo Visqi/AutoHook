@@ -1,10 +1,4 @@
-﻿using System;
-using AutoHook.Classes;
-using AutoHook.Configurations;
-using AutoHook.Enums;
-using AutoHook.Resources.Localization;
-using AutoHook.Spearfishing;
-using AutoHook.Utils;
+﻿using AutoHook.Spearfishing;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
@@ -16,11 +10,10 @@ internal class TabAutoGig : BaseTab
 {
     public override string TabName => "Spearfishing Presets";
     public override bool Enabled => true;
-    
+
     public override OpenWindow Type => OpenWindow.AutoGig;
 
-
-    private SpearFishingPresets _gigCfg = Service.Configuration.AutoGigConfig;
+    private readonly SpearFishingPresets _gigCfg = Service.Configuration.AutoGigConfig;
 
     public override void DrawHeader()
     {
@@ -37,10 +30,10 @@ internal class TabAutoGig : BaseTab
             if (DrawUtil.Checkbox(UIStrings.HideOverlayDuringSpearfishing, ref _gigCfg.AutoGigHideOverlay,
                     UIStrings.AutoGigHideOverlayHelpMarker))
                 Service.Save();
-            
+
             if (DrawUtil.Checkbox(UIStrings.DrawFishHitbox, ref _gigCfg.AutoGigDrawFishHitbox))
                 Service.Save();
-            
+
             if (DrawUtil.Checkbox(UIStrings.DrawGigHitbox, ref _gigCfg.AutoGigDrawGigHitbox))
                 Service.Save();
 
@@ -49,7 +42,7 @@ internal class TabAutoGig : BaseTab
 
             if (DrawUtil.Checkbox(UIStrings.CatchEverything, ref _gigCfg.CatchAll, UIStrings.IgnoresPresets))
                 Service.Save();
-            
+
             if (_gigCfg.CatchAll)
             {
                 ImGui.Text($" └");
@@ -58,10 +51,10 @@ internal class TabAutoGig : BaseTab
                         UIStrings.CatchAllNaturesBountyHelpText))
                     Service.Save();
             }
-            
+
             if (DrawUtil.Checkbox(UIStrings.NBBeforeFish, ref _gigCfg.NatureBountyBeforeFish, UIStrings.NBBeforeFishHelpText))
                 Service.Save();
-            
+
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.AutoCordialPandoras);
         });
 

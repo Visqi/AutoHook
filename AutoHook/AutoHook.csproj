@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Dalamud.NET.Sdk/13.0.0">
+<Project Sdk="Dalamud.NET.Sdk/13.1.0">
     <PropertyGroup>
         <Authors>Det</Authors>
         <Version>5.0.0.11</Version>
@@ -20,8 +20,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ECommons" Version="3.0.1.10" />
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
+        <PackageReference Include="ECommons" Version="3.0.1.26" />
+        <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
         <ProjectReference Include="..\PunishLib\PunishLib\PunishLib.csproj" />
     </ItemGroup>
 
@@ -38,5 +38,9 @@
             <Generator>ResXFileCodeGenerator</Generator>
             <LastGenOutput>UIStrings.Designer.cs</LastGenOutput>
         </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />
     </ItemGroup>
 </Project>

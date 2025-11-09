@@ -1,8 +1,4 @@
-﻿using System;
-using AutoHook.Data;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
-using FFXIVClientStructs.FFXIV.Client.Game;
+﻿using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 

@@ -1,9 +1,4 @@
-﻿using AutoHook.Data;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
-using System;
-
-namespace AutoHook.Classes.AutoCasts;
+﻿namespace AutoHook.Classes.AutoCasts;
 
 public class AutoChum : BaseActionCast
 {

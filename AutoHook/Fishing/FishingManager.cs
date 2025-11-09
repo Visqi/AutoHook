@@ -1,18 +1,8 @@
-using System;
 using System.Diagnostics;
-using System.Linq;
-using AutoHook.Classes;
-using AutoHook.Configurations;
-using AutoHook.Data;
-using AutoHook.Enums;
-using AutoHook.Resources.Localization;
-using AutoHook.SeFunctions;
-using AutoHook.Utils;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
-
 
 namespace AutoHook.Fishing;
 
@@ -53,12 +43,12 @@ public partial class FishingManager : IDisposable
         try
         {
             Service.TaskManager.EnqueueDelay(200);
-            Service.TaskManager.Enqueue(() => CreateDalamudHooks());
+            Service.TaskManager.Enqueue(CreateDalamudHooks);
             //CreateDalamudHooks();
         }
         catch (Exception e)
         {
-            Service.PluginLog.Error(@$"{e.Message}");
+            Svc.Log.Error(@$"{e.Message}");
         }
     }
 
@@ -71,27 +61,27 @@ public partial class FishingManager : IDisposable
 
     public unsafe void CreateDalamudHooks()
     {
-        UpdateCatch = Service.GameInteropProvider.HookFromSignature<UpdateCatchDelegate>(
+        UpdateCatch = Svc.Hook.HookFromSignature<UpdateCatchDelegate>(
             SignaturePatterns.UpdateCatch,
             UpdateCatchDetour);
         var hookPtr = (IntPtr)ActionManager.MemberFunctionPointers.UseAction;
-        _useActionHook = Service.GameInteropProvider.HookFromAddress<UseActionDelegate>(hookPtr, OnUseAction);
+        _useActionHook = Svc.Hook.HookFromAddress<UseActionDelegate>(hookPtr, OnUseAction);
 
         Enable();
     }
 
     private void Enable()
     {
-        Service.Framework.Update += OnFrameworkUpdate;
-        Service.Chat.CheckMessageHandled += OnMessageDelegate;
+        Svc.Framework.Update += OnFrameworkUpdate;
+        Svc.Chat.CheckMessageHandled += OnMessageDelegate;
         UpdateCatch?.Enable();
         _useActionHook?.Enable();
     }
 
     private void Disable()
     {
-        Service.Framework.Update -= OnFrameworkUpdate;
-        Service.Chat.CheckMessageHandled -= OnMessageDelegate;
+        Svc.Framework.Update -= OnFrameworkUpdate;
+        Svc.Chat.CheckMessageHandled -= OnMessageDelegate;
         _useActionHook?.Disable();
         UpdateCatch?.Disable();
     }
@@ -221,7 +211,7 @@ public partial class FishingManager : IDisposable
         if (!_lastStep.HasFlag(FishingSteps.Quitting) && currentState == FishingState.PoleReady)
             CheckPluginActions();
 
-        if (currentState == FishingState.NormalFishing || currentState == FishingState.LureFishing)
+        if (currentState is FishingState.NormalFishing or FishingState.LureFishing)
         {
             CheckWhileFishingActions();
             CheckTimeout();
@@ -334,7 +324,6 @@ public partial class FishingManager : IDisposable
             _lastStep.HasFlag(FishingSteps.Reeling))
             return;
 
-
         Service.Status = @$"Timeout reached - using Rest";
         PlayerRes.CastActionDelayed(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook);
         _lastStep = FishingSteps.TimeOut;
@@ -380,8 +369,8 @@ public partial class FishingManager : IDisposable
 
         Service.TaskManager.EnqueueDelay(delay);
         Service.TaskManager.Enqueue(() =>
-            PlayerRes.CastActionDelayed((uint)hook, ActionType.Action, @$"{hook.ToString()}"));
-        Service.Status = (@$"Using {hook.ToString()} hook. (Bite: {bite})");
+            PlayerRes.CastActionDelayed((uint)hook, ActionType.Action, @$"{hook}"));
+        Service.Status = (@$"Using {hook} hook. (Bite: {bite})");
     }
 
     private void OnCatch(uint fishId, uint amount)

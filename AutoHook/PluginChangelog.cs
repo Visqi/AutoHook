@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-
-// ReSharper disable LocalizableElement
+﻿// ReSharper disable LocalizableElement
 
 namespace AutoHook;
 
 public static class PluginChangelog
 {
-    public static readonly List<Version> Versions = new()
-    {
+    public static readonly List<Version> Versions =
+    [
         new Version("5.0.0.5")
         {
             Minor =
@@ -600,19 +598,12 @@ public static class PluginChangelog
                 "Upgrade to .net7 and API8"
             }
         }
-    };
+    ];
 
-    public class Version
+    public class Version(string versionNumber)
     {
-        public string VersionNumber { get; set; }
-        public List<string> Main { get; set; }
-        public List<string> Minor { get; set; }
-
-        public Version(string versionNumber)
-        {
-            VersionNumber = versionNumber;
-            Main = new List<string>();
-            Minor = new List<string>();
-        }
+        public string VersionNumber { get; set; } = versionNumber;
+        public List<string> Main { get; set; } = [];
+        public List<string> Minor { get; set; } = [];
     }
 }

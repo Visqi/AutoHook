@@ -1,21 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Newtonsoft.Json;
-
 namespace AutoHook.Classes;
 
-public class PresetFolder
+public class PresetFolder(string folderName)
 {
     public Guid UniqueId { get; set; } = Guid.NewGuid();
-    public string FolderName { get; set; }
+    public string FolderName { get; set; } = folderName;
     public bool IsExpanded { get; set; } = true;
-    public List<Guid> PresetIds { get; set; } = new();
-
-    public PresetFolder(string folderName)
-    {
-        FolderName = folderName;
-    }
+    public List<Guid> PresetIds { get; set; } = [];
 
     public void AddPreset(Guid presetId)
     {
@@ -26,7 +16,7 @@ public class PresetFolder
     public void RemovePreset(Guid presetId)
     {
         if (PresetIds.Contains(presetId))
-            PresetIds = PresetIds.Where(p => p != presetId).ToList();
+            PresetIds = [.. PresetIds.Where(p => p != presetId)];
     }
 
     public bool ContainsPreset(Guid presetId)

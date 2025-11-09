@@ -1,17 +1,11 @@
-﻿using System;
-using AutoHook.Data;
-using AutoHook.Enums;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
+﻿namespace AutoHook.Configurations.old_config;
 
-namespace AutoHook.Configurations.old_config;
-
-public class BaitConfig
+public class BaitConfig(string bait)
 {
     /* old config, dont use*/
     public bool Enabled = true;
 
-    public string BaitName = UIStrings.BaitName_Default;
+    public string BaitName = bait;
 
     public bool HookWeakEnabled = true;
     public bool HookWeakIntuitionEnabled = true;
@@ -56,11 +50,6 @@ public class BaitConfig
     public bool StopAfterCaught = false;
     public int StopAfterCaughtLimit = 1;
 
-    public BaitConfig(string bait)
-    {
-        BaitName = bait;
-    }
-
     public HookType? GetHook(BiteType bite)
     {
         bool hasIntuition = PlayerRes.HasStatus(IDs.Status.FishersIntuition);
@@ -90,7 +79,7 @@ public class BaitConfig
 
         var hook = GetDoubleTripleHook(bite);
 
-        if (hook == null || hook != HookType.None)
+        if (hook is null or not HookType.None)
             return hook;
 
         if (hasIntuition)
@@ -116,7 +105,6 @@ public class BaitConfig
         bite == BiteType.Strong ? HookStrongDHTHEnabled :
         bite == BiteType.Legendary ? HookLegendaryDHTHEnabled :
         false;
-
 
     private HookType GetPatienceHook(BiteType bite) => bite switch
     {

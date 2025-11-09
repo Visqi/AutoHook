@@ -38,7 +38,6 @@ public struct SpearfishWindow
     [FieldOffset(0x2CC)]
     public Info Fish3;
 
-
     public unsafe AtkResNode* FishLines
         => Base.UldManager.NodeList[3];
 
@@ -53,6 +52,5 @@ public struct SpearfishWindow
 
     public unsafe AtkComponentGaugeBar* GaugeBar
         => (AtkComponentGaugeBar*)Base.UldManager.NodeList[35];
-
 
 }

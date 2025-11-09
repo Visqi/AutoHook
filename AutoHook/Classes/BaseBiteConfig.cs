@@ -1,7 +1,4 @@
 ﻿using System.ComponentModel;
-using AutoHook.Enums;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
@@ -9,7 +6,7 @@ using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Classes;
 
-public class BaseBiteConfig
+public class BaseBiteConfig(HookType type)
 {
     [DefaultValue(true)]
     public bool HooksetEnabled = true;
@@ -32,13 +29,8 @@ public class BaseBiteConfig
 
     public bool PrizeCatchReq;
     public bool PrizeCatchNotReq;
-    
-    public HookType HooksetType;
 
-    public BaseBiteConfig(HookType type)
-    {
-        HooksetType = type;
-    }
+    public HookType HooksetType = type;
 
     public void DrawOptions(string biteName, bool enableSwap = false)
     {
@@ -52,20 +44,20 @@ public class BaseBiteConfig
                 {
                     ImGui.Indent();
                     DrawUtil.DrawTreeNodeEx(UIStrings.Surface_Slap_Options, DrawSurfaceSwap);
-               
+
                     DrawUtil.DrawTreeNodeEx(UIStrings.Identical_Cast_Options, DrawIdenticalCast);
-                    
+
                     DrawUtil.DrawTreeNodeEx(UIStrings.Prize_Catch_Options, DrawPrizeCatch);
-                    
+
                     ImGui.Unindent();
-                    
+
                 }, UIStrings.Conditions_HelpText);
-                
+
                 if (EnableHooksetSwap)
                     DrawUtil.DrawTreeNodeEx(UIStrings.HookType, DrawBite, UIStrings.HookWillBeUsedIfPatienceIsNotUp);
-                
-                DrawUtil.DrawTreeNodeEx(UIStrings.HookingTimer,DrawTimers, UIStrings.HookingTimerHelpText);
-                
+
+                DrawUtil.DrawTreeNodeEx(UIStrings.HookingTimer, DrawTimers, UIStrings.HookingTimerHelpText);
+
             });
 
         ImGui.PopID();
@@ -74,7 +66,7 @@ public class BaseBiteConfig
     private void DrawBite()
     {
         ImGui.Indent();
-        
+
         if (ImGui.RadioButton(UIStrings.Normal_Hook, HooksetType == HookType.Normal))
         {
             HooksetType = HookType.Normal;
@@ -92,20 +84,20 @@ public class BaseBiteConfig
             HooksetType = HookType.Powerful;
             Service.Save();
         }
-        
+
         if (ImGui.RadioButton(UIStrings.StellarHookset, HooksetType == HookType.Stellar))
         {
             HooksetType = HookType.Stellar;
             Service.Save();
         }
-        
+
         ImGui.Unindent();
     }
 
     private void DrawSurfaceSwap()
     {
         ImGui.Indent();
-        
+
         if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenActiveSurfaceSlap, ref OnlyWhenActiveSlap))
         {
             OnlyWhenNotActiveSlap = false;
@@ -117,14 +109,14 @@ public class BaseBiteConfig
             OnlyWhenActiveSlap = false;
             Service.Save();
         }
-        
+
         ImGui.Unindent();
     }
 
     private void DrawIdenticalCast()
     {
         ImGui.Indent();
-        
+
         if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenActiveIdentical, ref OnlyWhenActiveIdentical))
         {
             OnlyWhenNotActiveIdentical = false;
@@ -136,18 +128,18 @@ public class BaseBiteConfig
             OnlyWhenActiveIdentical = false;
             Service.Save();
         }
-        
+
         ImGui.Unindent();
     }
-    
+
     private void DrawPrizeCatch()
     {
         ImGui.Indent();
 
         DrawUtil.Checkbox(UIStrings.Prize_Catch_Required, ref PrizeCatchReq);
-        
+
         DrawUtil.Checkbox(UIStrings.PrizeCatchNotActive, ref PrizeCatchNotReq);
-        
+
         ImGui.Unindent();
     }
 
@@ -169,10 +161,10 @@ public class BaseBiteConfig
         ImGui.PopID();
         ImGui.Unindent();
     }
-    
+
     private void SetupTimer(ref double minTimeDelay, ref double maxTimeDelay)
     {
-        
+
         ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
         if (ImGui.InputDouble(UIStrings.MinWait, ref minTimeDelay, .1, 1, @"%.1f%"))
         {
@@ -211,7 +203,7 @@ public class BaseBiteConfig
 
             Service.Save();
         }
-        
+
         ImGuiComponents.HelpMarker(UIStrings.HelpMarkerMaxWaitTimer);
     }
 }

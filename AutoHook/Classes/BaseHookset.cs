@@ -1,9 +1,4 @@
-﻿using System;
-using AutoHook.Classes.AutoCasts;
-using AutoHook.Enums;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
-using Dalamud.Interface.Colors;
+﻿using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Bindings.ImGui;
@@ -13,10 +8,10 @@ using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Classes;
 
-public class BaseHookset
+public class BaseHookset(uint requiredStatus)
 {
     // for future use, maybe we need a hooking condition under a different status?
-    public uint RequiredStatus;
+    public uint RequiredStatus = requiredStatus;
 
     private Guid _uniqueId;
 
@@ -62,12 +57,6 @@ public class BaseHookset
 
         return _uniqueId;
     }
-
-    public BaseHookset(uint requiredStatus)
-    {
-        this.RequiredStatus = requiredStatus;
-    }
-
 
     public void DrawOptions()
     {
@@ -197,11 +186,10 @@ public class BaseHookset
         }
     }
 
-
     private void DrawLures()
     {
         ImGui.PushID($"Lures");
-        
+
         CastLures.DrawConfig();
 
         ImGui.PopID();

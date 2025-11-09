@@ -1,11 +1,4 @@
-﻿using System.Linq;
-using AutoHook.Configurations;
-using AutoHook.Data;
-using AutoHook.Enums;
-using AutoHook.SeFunctions;
-using AutoHook.Utils;
-
-namespace AutoHook.Fishing;
+﻿namespace AutoHook.Fishing;
 
 public partial class FishingManager
 {
@@ -21,6 +14,7 @@ public partial class FishingManager
         CheckIntuition(extraCfg);
         CheckSpectral(extraCfg);
         CheckAnglersArt(extraCfg);
+        CheckSwimbait(extraCfg);
     }
 
     private void CheckSpectral(ExtraConfig extraCfg)
@@ -269,5 +263,75 @@ public partial class FishingManager
                 Service.Save();
             }
         }
+    }
+
+    private int _lastSwimbaitCount = -1;
+
+    private void CheckSwimbait(ExtraConfig extraCfg)
+    {
+        if (!extraCfg.Enabled)
+            return;
+
+        var currentSwimbaitCount = Service.BaitManager.GetSwimbaitCount();
+
+        // Only check on state change
+        if (_lastSwimbaitCount == currentSwimbaitCount)
+            return;
+
+        // Check if swimbait filled (0 -> 3 or any increase to 3)
+        if (currentSwimbaitCount >= 3 && _lastSwimbaitCount < 3 && extraCfg.SwimbaitFillsAction != SwimbaitAction.None)
+        {
+            if (extraCfg.SwimbaitFillsAction == SwimbaitAction.SwapPreset && !_lastStep.HasFlag(FishingSteps.PresetSwapped))
+            {
+                var preset = Presets.CustomPresets.FirstOrDefault(preset =>
+                    preset.PresetName == extraCfg.PresetToSwapSwimbaitFills);
+
+                _lastStep |= FishingSteps.PresetSwapped;
+
+                if (preset != null)
+                {
+                    Service.Save();
+                    Presets.SelectedPreset = preset;
+                    Service.PrintChat(@$"[Extra] Swimbait Filled: Swapping preset to {extraCfg.PresetToSwapSwimbaitFills}");
+                    Service.Save();
+                }
+                else
+                    Service.PrintChat(@$"[Extra] Swimbait Filled: Preset {extraCfg.PresetToSwapSwimbaitFills} not found.");
+            }
+            else if (extraCfg.SwimbaitFillsAction == SwimbaitAction.Stop)
+            {
+                _lastStep = FishingSteps.None;
+                Service.PrintChat(@$"[Extra] Swimbait Filled: Stopping fishing");
+            }
+        }
+
+        // Check if swimbait ran out (any count -> 0)
+        if (currentSwimbaitCount == 0 && _lastSwimbaitCount > 0 && extraCfg.SwimbaitRunsOutAction != SwimbaitAction.None)
+        {
+            if (extraCfg.SwimbaitRunsOutAction == SwimbaitAction.SwapPreset && !_lastStep.HasFlag(FishingSteps.PresetSwapped))
+            {
+                var preset = Presets.CustomPresets.FirstOrDefault(preset =>
+                    preset.PresetName == extraCfg.PresetToSwapSwimbaitRunsOut);
+
+                _lastStep |= FishingSteps.PresetSwapped;
+
+                if (preset != null)
+                {
+                    Service.Save();
+                    Presets.SelectedPreset = preset;
+                    Service.PrintChat(@$"[Extra] Swimbait Ran Out: Swapping preset to {extraCfg.PresetToSwapSwimbaitRunsOut}");
+                    Service.Save();
+                }
+                else
+                    Service.PrintChat(@$"[Extra] Swimbait Ran Out: Preset {extraCfg.PresetToSwapSwimbaitRunsOut} not found.");
+            }
+            else if (extraCfg.SwimbaitRunsOutAction == SwimbaitAction.Stop)
+            {
+                _lastStep = FishingSteps.None;
+                Service.PrintChat(@$"[Extra] Swimbait Ran Out: Stopping fishing");
+            }
+        }
+
+        _lastSwimbaitCount = currentSwimbaitCount;
     }
 }

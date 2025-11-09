@@ -1,15 +1,10 @@
-﻿using System;
-using AutoHook.Configurations;
-using System.Linq;
-using ECommons.EzIpcManager;
-using AutoHook.SeFunctions;
-using AutoHook.Utils;
+﻿using ECommons.EzIpcManager;
 
 namespace AutoHook.IPC;
 
 public class AutoHookIPC
 {
-    private Configuration _cfg = Service.Configuration;
+    private readonly Configuration _cfg = Service.Configuration;
 
     public AutoHookIPC()
     {

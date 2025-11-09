@@ -1,5 +1,3 @@
-using AutoHook.Data;
-
 namespace AutoHook.Enums;
 
 public enum HookType : uint
@@ -11,5 +9,5 @@ public enum HookType : uint
     Double = IDs.Actions.DoubleHook,
     Triple = IDs.Actions.TripleHook,
     Stellar = IDs.Actions.StellarHook,
-    Unknown    = 255,
+    Unknown = 255,
 }

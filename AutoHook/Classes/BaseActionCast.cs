@@ -1,15 +1,9 @@
-using AutoHook.Data;
-using AutoHook.Utils;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Dalamud.Bindings.ImGui;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Numerics;
-using AutoHook.Resources.Localization;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.Throttlers;
 
@@ -87,7 +81,7 @@ public abstract class BaseActionCast
 
         var actionAvailable = PlayerRes.ActionTypeAvailable(Id, ActionType);
 
-        if (EzThrottler.Throttle("LogActions",1000))
+        if (EzThrottler.Throttle("LogActions", 1000))
             Service.PrintVerbose(
                 @$"[BaseAction] {Name} - GpCheck:{hasGp}, ActionAvailable: {actionAvailable}, OtherConditions: {condition}");
 
@@ -109,7 +103,7 @@ public abstract class BaseActionCast
     public virtual void DrawConfig(List<BaseActionCast>? availableActs = null)
     {
         ImGui.PushID(@$"{GetName()}_cfg");
-        
+
         if (DrawOptions != null)
         {
             if (DrawUtil.Checkbox(@$"###{GetName()}", ref Enabled, HelpText, true))
@@ -118,8 +112,8 @@ public abstract class BaseActionCast
                 Service.Save();
             }
 
-            ImGui.SameLine(0,3);
-            
+            ImGui.SameLine(0, 3);
+
             var x = ImGui.GetCursorPosX();
             if (ImGui.TreeNodeEx(@$"{GetName()}", ImGuiTreeNodeFlags.FramePadding))
             {
@@ -161,7 +155,7 @@ public abstract class BaseActionCast
     {
         DrawOptions?.Invoke();
     }
-    
+
     private void DrawUpDownArrows(List<BaseActionCast>? availableActs)
     {
         if (availableActs is null || IsExcludedPriority) return;
@@ -184,8 +178,8 @@ public abstract class BaseActionCast
             {
                 var nextAct = availableActs.Where(x => x.Priority < Priority && !x.IsExcludedPriority)
                     .OrderByDescending(x => x.Priority).First();
-                nextAct.Priority = this.Priority;
-                this.Priority--;
+                nextAct.Priority = Priority;
+                Priority--;
             }
         }
 
@@ -203,8 +197,8 @@ public abstract class BaseActionCast
             {
                 var lastAct = availableActs.Where(x => x.Priority > Priority && !x.IsExcludedPriority)
                     .OrderBy(x => x.Priority).First();
-                lastAct.Priority = this.Priority;
-                this.Priority++;
+                lastAct.Priority = Priority;
+                Priority++;
             }
         }
 
@@ -242,7 +236,7 @@ public abstract class BaseActionCast
 
                 //ImGui.SameLine();
 
-                if (ImGui.RadioButton(UIStrings.Below, GpThresholdAbove == false))
+                if (ImGui.RadioButton(UIStrings.Below, !GpThresholdAbove))
                 {
                     GpThresholdAbove = false;
                     Service.Save();

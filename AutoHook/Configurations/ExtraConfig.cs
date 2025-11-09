@@ -1,22 +1,18 @@
-﻿using System;
-using AutoHook.Classes;
-using AutoHook.Enums;
-
-namespace AutoHook.Configurations;
+﻿namespace AutoHook.Configurations;
 
 public class ExtraConfig : BaseOption
 {
     public bool Enabled = false;
-    
+
     public bool SwapBaitIntuitionGain = false;
     public BaitFishClass BaitToSwapIntuitionGain = new();
-    
+
     public bool SwapBaitIntuitionLost = false;
     public BaitFishClass BaitToSwapIntuitionLost = new();
-    
+
     public bool SwapPresetIntuitionGain = false;
     public string PresetToSwapIntuitionGain = @"-";
-    
+
     public bool SwapPresetIntuitionLost = false;
     public string PresetToSwapIntuitionLost = @"-";
 
@@ -35,10 +31,10 @@ public class ExtraConfig : BaseOption
     public bool ResetCounterPresetSwap = false;
     public bool QuitOnIntuitionLost = false;
     public bool StopOnIntuitionLost = false;
-    
+
     public bool ForceBaitSwap;
     public int ForcedBaitId;
-    
+
     // Angler's Art
     public bool StopAfterAnglersArt = false;
     public int AnglerStackQtd = 0;
@@ -47,10 +43,15 @@ public class ExtraConfig : BaseOption
     public BaitFishClass BaitToSwapAnglersArt = new();
     public bool SwapPresetAnglersArt = false;
     public string PresetToSwapAnglersArt = @"-";
-    
-    
+
+    // Swimbait
+    public SwimbaitAction SwimbaitFillsAction = SwimbaitAction.None;
+    public string PresetToSwapSwimbaitFills = @"-";
+    public SwimbaitAction SwimbaitRunsOutAction = SwimbaitAction.None;
+    public string PresetToSwapSwimbaitRunsOut = @"-";
+
     public override void DrawOptions()
     {
-        
+
     }
 }

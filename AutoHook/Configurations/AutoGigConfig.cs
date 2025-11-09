@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using AutoHook.Classes;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
-using Dalamud.Interface;
+﻿using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Bindings.ImGui;
 
@@ -14,7 +8,7 @@ public class AutoGigConfig : BasePresetConfig
 {
     public string Name { get; set; } = "Old Preset";
 
-    public List<BaseGig> Gigs { get; set; } = new();
+    public List<BaseGig> Gigs { get; set; } = [];
 
     public int HitboxSize = 25;
 
@@ -23,9 +17,8 @@ public class AutoGigConfig : BasePresetConfig
         PresetName = presetName;
     }
 
-
     public List<BaseGig> GetGigCurrentNode(int node) =>
-        Gigs.Where(f => f.Fish != null && f.Fish.Nodes.Contains(node)).ToList();
+        [.. Gigs.Where(f => f.Fish != null && f.Fish.Nodes.Contains(node))];
 
     public override void AddItem(BaseOption item)
     {

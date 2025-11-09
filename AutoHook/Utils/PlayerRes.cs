@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using AutoHook.Data;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
@@ -23,10 +20,10 @@ public static class PlayerRes
 
     public static bool HasStatus(uint statusID)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Svc.ClientState.LocalPlayer?.StatusList == null)
             return false;
 
-        foreach (var buff in Service.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Svc.ClientState.LocalPlayer.StatusList)
         {
             if (buff.StatusId == statusID)
                 return true;
@@ -34,13 +31,13 @@ public static class PlayerRes
 
         return false;
     }
-    
+
     public static bool HasAnyStatus(uint[] statusIDs)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Svc.ClientState.LocalPlayer?.StatusList == null)
             return false;
 
-        return Service.ClientState.LocalPlayer.StatusList.Any(buff => statusIDs.Contains(buff.StatusId));
+        return Svc.ClientState.LocalPlayer.StatusList.Any(buff => statusIDs.Contains(buff.StatusId));
     }
 
     public static unsafe bool IsInActiveSpectralCurrent()
@@ -53,26 +50,26 @@ public static class PlayerRes
 
     public static uint GetCurrentGp()
     {
-        if (Service.ClientState.LocalPlayer?.CurrentGp == null)
+        if (Svc.ClientState.LocalPlayer?.CurrentGp == null)
             return 0;
 
-        return Service.ClientState.LocalPlayer.CurrentGp;
+        return Svc.ClientState.LocalPlayer.CurrentGp;
     }
 
     public static uint GetMaxGp()
     {
-        if (Service.ClientState.LocalPlayer?.MaxGp == null)
+        if (Svc.ClientState.LocalPlayer?.MaxGp == null)
             return 0;
 
-        return Service.ClientState.LocalPlayer.MaxGp;
+        return Svc.ClientState.LocalPlayer.MaxGp;
     }
-    
+
     public static int GetStatusStacks(uint status)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Svc.ClientState.LocalPlayer?.StatusList == null)
             return 0;
 
-        foreach (var buff in Service.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Svc.ClientState.LocalPlayer.StatusList)
         {
             if (buff.StatusId == status)
                 return buff.Param;
@@ -83,10 +80,10 @@ public static class PlayerRes
 
     public static bool HasAnglersArtStacks(int amount)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Svc.ClientState.LocalPlayer?.StatusList == null)
             return false;
 
-        foreach (var buff in Service.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Svc.ClientState.LocalPlayer.StatusList)
         {
             if (buff.StatusId == IDs.Status.AnglersArt)
                 return buff.Param >= amount;
@@ -97,10 +94,10 @@ public static class PlayerRes
 
     public static float GetStatusTime(uint statusId)
     {
-        if (Service.ClientState.LocalPlayer?.StatusList == null)
+        if (Svc.ClientState.LocalPlayer?.StatusList == null)
             return 0;
 
-        foreach (var buff in Service.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Svc.ClientState.LocalPlayer.StatusList)
         {
             if (buff.StatusId == statusId)
                 return buff.RemainingTime;
@@ -147,7 +144,7 @@ public static class PlayerRes
     {
         return ActionManager.Instance()->GetRecastGroup((int)actionType, id);
     }
-    
+
     public static unsafe int HasItem(uint itemId)
         => InventoryManager.Instance()->GetInventoryItemCount(itemId);
 
@@ -187,7 +184,6 @@ public static class PlayerRes
     {
         return InventoryManager.Instance()->GetInventoryItemCount(id) > 0;
     }
-
 
     private static bool _blockCasting = false;
 
@@ -270,7 +266,7 @@ public static class PlayerRes
         }
         catch (Exception e)
         {
-            Service.PluginLog.Error(@$"Error getting delay between casts: {e}");
+            Svc.Log.Error(@$"Error getting delay between casts: {e}");
         }
 
         await Task.Delay(delay + ConditionalDelay(actionId));

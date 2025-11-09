@@ -1,0 +1,18 @@
+﻿global using AutoHook.Classes;
+global using AutoHook.Classes.AutoCasts;
+global using AutoHook.Configurations;
+global using AutoHook.Data;
+global using AutoHook.Enums;
+global using AutoHook.Fishing;
+global using AutoHook.Resources.Localization;
+global using AutoHook.SeFunctions;
+global using AutoHook.Utils;
+global using ECommons;
+global using ECommons.DalamudServices;
+global using ECommons.GameHelpers;
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Text;
+global using System.Threading.Tasks;
+global using static ECommons.GenericHelpers;

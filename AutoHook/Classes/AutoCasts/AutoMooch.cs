@@ -1,6 +1,3 @@
-using AutoHook.Data;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
@@ -13,7 +10,7 @@ public class AutoMooch : BaseActionCast
 
     public override bool RequiresTimeWindow() => true;
 
-    public AutoMooch() : base(UIStrings.AutoMooch, Data.IDs.Actions.Mooch, ActionType.Action)
+    public AutoMooch() : base(UIStrings.AutoMooch, IDs.Actions.Mooch, ActionType.Action)
     {
         HelpText = UIStrings.AutoMooch_HelpText;
     }

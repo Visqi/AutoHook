@@ -1,14 +1,6 @@
-using System.Collections.Generic;
-using AutoHook.Classes;
 using Dalamud.Game;
-using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Interface.Windowing;
-using AutoHook.SeFunctions;
-using Dalamud.Plugin.Services;
-using Dalamud;
-using AutoHook.Configurations;
-using Dalamud.Game.ClientState.Objects;
 using ECommons.Automation.NeoTaskManager;
 
 namespace AutoHook;
@@ -19,22 +11,9 @@ public class Service
         => pluginInterface.Create<Service>();
 
     public const string PluginName = "AutoHook";
-    
+
     public const string GlobalPresetName = "Global Preset";
 
-    [PluginService] public static IDalamudPluginInterface PluginInterface { get; set; } = null!;
-    [PluginService] public static ISigScanner SigScanner { get; private set; } = null!;
-    [PluginService] public static IChatGui Chat { get; private set; } = null!;
-    [PluginService] public static IClientState ClientState { get; private set; } = null!;
-    [PluginService] public static IDataManager DataManager { get; private set; } = null!;
-    [PluginService] public static ICommandManager Commands { get; private set; } = null!;
-    [PluginService] public static IFramework Framework { get; private set; } = null!;
-    [PluginService] public static IGameGui GameGui { get; private set; } = null!;
-    [PluginService] public static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
-    [PluginService] public static IPluginLog  PluginLog { get; private set; } = null!;
-    [PluginService] public static ICondition Condition { get;private set; } = null!;
-    [PluginService] public static ITargetManager TargetManager { get; private set; } = null!;
-    
     public static BaitManager BaitManager { get; set; } = null!;
     public static Configuration Configuration { get; set; } = null!;
     public static WindowSystem WindowSystem { get; } = new(PluginName);
@@ -42,7 +21,7 @@ public class Service
     public static ClientLanguage Language { get; set; }
 
     public static string _status = @"";
-    
+
     public static BaitFishClass LastCatch { get; set; } = new(@"-", -1);
 
     public static string Status
@@ -51,12 +30,11 @@ public class Service
         set => _status = value;
     }
 
-    public static readonly TaskManager TaskManager = new TaskManager()
+    public static readonly TaskManager TaskManager = new()
     {
         DefaultConfiguration = { TimeLimitMS = 5000 }
     };
 
-    
     public static void Save()
     {
         Configuration.Save();
@@ -69,29 +47,29 @@ public class Service
     {
         if (LogMessages.Count >= MaxLogSize)
         {
-            LogMessages.Dequeue(); 
+            LogMessages.Dequeue();
         }
-       
+
         LogMessages.Enqueue(msg);
-        PluginLog.Debug(msg);
+        Svc.Log.Debug(msg);
     }
-    
+
     public static void PrintVerbose(string msg)
     {
         if (LogMessages.Count >= MaxLogSize)
         {
-            LogMessages.Dequeue(); 
+            LogMessages.Dequeue();
         }
-       
+
         LogMessages.Enqueue(msg);
-        PluginLog.Verbose(msg);
+        Svc.Log.Verbose(msg);
     }
-    
+
     public static void PrintChat(string msg)
     {
         Status = msg;
 
         if (Configuration.ShowChatLogs)
-            Chat.Print(msg);
+            Svc.Chat.Print(msg);
     }
 }

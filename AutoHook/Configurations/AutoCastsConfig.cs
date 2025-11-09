@@ -1,11 +1,4 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
 using System.ComponentModel;
-using AutoHook.Classes;
-using AutoHook.Classes.AutoCasts;
-using AutoHook.Data;
-using AutoHook.Utils;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 
 namespace AutoHook.Configurations;
@@ -84,10 +77,10 @@ public class AutoCastsConfig
 
         return eorzeaTime.IsBetween(StartTime, EndTime);
     }
-    
+
     public bool TryCastAction(BaseActionCast? action, bool noDelay = false, bool ignoreCurrentMooch = false)
     {
-        if (action == null || EnableAll == false)
+        if (action == null || !EnableAll)
             return false;
 
         if (OnlyCastDuringSpecificTime && action.RequiresTimeWindow() && !InsideCastWindow())
@@ -110,10 +103,10 @@ public class AutoCastsConfig
     {
         Service.PrintDebug("Trying to cancel chum animation");
         // Make sure Salvage is disabled before chum
-        
+
         Service.TaskManager.EnqueueDelay(40);
         Service.TaskManager.Enqueue(() => PlayerRes.CastAction(IDs.Actions.Chum));
-        
+
         // Recast Salvage a few ms's later, maybe 500 is enough?
         Service.TaskManager.EnqueueDelay(465);
         Service.TaskManager.Enqueue(() => PlayerRes.CastAction(IDs.Actions.Salvage));

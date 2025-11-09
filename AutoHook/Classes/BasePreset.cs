@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ECommons.Throttlers;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace AutoHook.Classes;
 
 public abstract class BasePreset
 {
     public string SelectedGuid { get; set; } = "";
-    
-    [JsonIgnore] public virtual BasePresetConfig? SelectedPreset
+
+    [JsonIgnore]
+    public virtual BasePresetConfig? SelectedPreset
     {
         get
         {
@@ -23,7 +20,8 @@ public abstract class BasePreset
             {
                 OnSelectedPreset(value, SelectedPreset);
                 SelectedGuid = value.UniqueId.ToString();
-            } else 
+            }
+            else
                 SelectedGuid = "";
         }
     }
@@ -52,12 +50,11 @@ public abstract class BasePreset
     }
 
     public abstract void SwapIndex(int itemIndex, int targetIndex);
-    
+
     public virtual BasePresetConfig? GetPreset(Guid value)
     {
         return PresetList.Find(p => p.UniqueId == value);
     }
 
     [JsonIgnore] public abstract List<BasePresetConfig> PresetList { get; }
-    
 }

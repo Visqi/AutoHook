@@ -1,12 +1,4 @@
-﻿using System.Linq;
-using AutoHook.Classes;
-using AutoHook.Configurations;
-using AutoHook.Data;
-using AutoHook.Enums;
-using AutoHook.SeFunctions;
-using AutoHook.Utils;
-
-namespace AutoHook.Fishing;
+﻿namespace AutoHook.Fishing;
 
 public partial class FishingManager
 {
@@ -17,7 +9,7 @@ public partial class FishingManager
 
         return Presets.SelectedPreset?.GetFishById(_lastCatch.Id) ?? Presets.DefaultPreset.GetFishById(_lastCatch.Id);
     }
-    
+
     private bool UseFishCaughtActions(FishConfig? lastFishCatchCfg)
     {
         BaseActionCast? cast = null;
@@ -30,11 +22,18 @@ public partial class FishingManager
 
         var caughtCount = FishingHelper.GetFishCount(lastFishCatchCfg.UniqueId);
 
+        // Set the fish ID for Spareful Hand to check swimbait count
+        if (_lastCatch != null)
+            lastFishCatchCfg.SparefulHand.FishIdToCheck = (uint)_lastCatch.Id;
+
         if (lastFishCatchCfg.IdenticalCast.IsAvailableToCast(caughtCount))
             cast = lastFishCatchCfg.IdenticalCast;
 
         if (lastFishCatchCfg.SurfaceSlap.IsAvailableToCast())
             cast = lastFishCatchCfg.SurfaceSlap;
+
+        if (lastFishCatchCfg.SparefulHand.IsAvailableToCast())
+            cast = lastFishCatchCfg.SparefulHand;
 
         if (cast != null)
         {
@@ -91,7 +90,7 @@ public partial class FishingManager
                     Service.PrintChat(@$"[Fish Caught] Swapping bait to {lastCatchCfg.BaitToSwap.Name}");
                     Service.Save();
                 }
-                if(lastCatchCfg.SwapBaitResetCount) FishingHelper.ToBeRemoved.Add(guid);
+                if (lastCatchCfg.SwapBaitResetCount) FishingHelper.ToBeRemoved.Add(guid);
             }
         }
     }

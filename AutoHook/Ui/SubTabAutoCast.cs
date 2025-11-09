@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using AutoHook.Classes;
-using AutoHook.Classes.AutoCasts;
-using AutoHook.Configurations;
-using AutoHook.Resources.Localization;
-using AutoHook.Utils;
-using Dalamud.Interface.Colors;
+﻿using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
@@ -16,7 +8,7 @@ namespace AutoHook.Ui;
 
 public class SubTabAutoCast
 {
-    private static List<BaseActionCast> _actionsAvailable = new();
+    private static List<BaseActionCast> _actionsAvailable = [];
 
     private static CustomPresetConfig _preset = null!;
 
@@ -49,7 +41,7 @@ public class SubTabAutoCast
         ImGui.Spacing();
 
         DrawUtil.Checkbox(UIStrings.EnableActions, ref acCfg.EnableAll, UIStrings.Acton_Alert_Manual_Hook);
-            
+
         ImGui.SameLine();
 
         if (DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref acCfg.DontCancelMooch,
@@ -148,7 +140,7 @@ public class SubTabAutoCast
                 }
                 catch (Exception e)
                 {
-                    Service.PluginLog.Error(e.ToString());
+                    Svc.Log.Error(e.ToString());
                 }
             }
         }

@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using AutoHook.Resources.Localization;
-
-namespace AutoHook.Configurations.old_config;
+﻿namespace AutoHook.Configurations.old_config;
 
 public class BaitPresetConfig
 {
     /* old config, dont use*/
     private string presetName = UIStrings.New_Preset;
 
-    private List<BaitConfig> _listOfBaits = new();
+    private List<BaitConfig> _listOfBaits = [];
 
     public string PresetName { get => presetName; set => presetName = value; }
     public List<BaitConfig> ListOfBaits { get => _listOfBaits; set => _listOfBaits = value; }
 
     public BaitPresetConfig(string presetName)
     {
-        if (ListOfBaits == null) 
-            ListOfBaits = new();
+        if (ListOfBaits == null)
+            ListOfBaits = [];
 
         PresetName = presetName;
     }
@@ -39,7 +35,7 @@ public class BaitPresetConfig
     }
 
     // This is just for the conversion of the Config version 1 to version 2
-    public void AddListOfHook(List<BaitConfig> listOfBaits) 
+    public void AddListOfHook(List<BaitConfig> listOfBaits)
     {
         ListOfBaits.AddRange(listOfBaits);
     }
@@ -55,9 +51,8 @@ public class BaitPresetConfig
         return HashCode.Combine(presetName + @"a");
     }
 
-    public void RenamePreset(string name) {
+    public void RenamePreset(string name)
+    {
         PresetName = name;
     }
-
-
 }

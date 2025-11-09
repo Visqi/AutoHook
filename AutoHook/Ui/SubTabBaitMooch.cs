@@ -1,17 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using AutoHook.Classes;
-using AutoHook.Configurations;
-using AutoHook.Fishing;
-using AutoHook.Resources.Localization;
-using AutoHook.SeFunctions;
-using AutoHook.Utils;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Ui;
@@ -65,7 +56,7 @@ public class SubTabBaitMooch
             ImGuiComponents.HelpMarker(UIStrings.TabPresets_DrawHeader_CorrectlyEditTheBaitMoochName);
             ImGui.Spacing();
         }
-        
+
         using (var items = ImRaii.Child($"###BaitMoochItems", Vector2.Zero, false))
         {
             for (int idx = 0; idx < list?.Count; idx++)
@@ -117,6 +108,13 @@ public class SubTabBaitMooch
                         }
                     }
 
+                    if (isMooch)
+                    {
+                        ImGui.Spacing();
+                        if (_preset.IsGlobal || hook.BaitFish.Id == GameRes.AllMoochesId || GameRes.MoochableFish.Any(f => f.Id == hook.BaitFish.Id))
+                            DrawSwimbaitUsage(hook);
+                    }
+
                     ImGui.EndGroup();
                 }
 
@@ -132,12 +130,12 @@ public class SubTabBaitMooch
         var list = (isMooch ? GameRes.Fishes : GameRes.Baits).ToList();
         if (isMooch)
             list.Insert(0, new BaitFishClass(UIStrings.All_Mooches, GameRes.AllMoochesId));
-        else 
+        else
             list.Insert(0, new BaitFishClass(UIStrings.All_Baits, GameRes.AllBaitsId));
-        
+
         DrawUtil.DrawComboSelector(
             list,
-            item => item.Name,
+            item => $"[{item.Id}] {item.Name}",
             hookConfig.BaitFish.Name,
             item => hookConfig.BaitFish = item);
 
@@ -148,14 +146,8 @@ public class SubTabBaitMooch
 
         if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowLeft))
         {
-            unsafe
-            {
-                var p = PlayerState.Instance();
-                if (p != null && p->FishingBait > 0) // just make sure bait is bait
-                {
-                    hookConfig.BaitFish = list.Single(x => x.Id == p->FishingBait);
-                }
-            }
+            if (Service.BaitManager.Current > 0) // just make sure bait is bait
+                hookConfig.BaitFish = list.Single(x => x.Id == Service.BaitManager.Current);
         }
 
         if (ImGui.IsItemHovered())
@@ -178,5 +170,50 @@ public class SubTabBaitMooch
 
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             ImGui.SetTooltip(UIStrings.HoldShiftToDelete);
+    }
+
+    private static void DrawSwimbaitUsage(HookConfig hookConfig)
+    {
+        using var _ = ImRaii.PushId("DrawSwimbaitUsage");
+
+        var isGlobal = _preset.IsGlobal;
+
+        if (ImGui.TreeNodeEx(UIStrings.UseSwimbait, ImGuiTreeNodeFlags.FramePadding))
+        {
+            var enableText = isGlobal ? UIStrings.EnableUsingSwimbaitGlobal : UIStrings.EnableUsingSwimbait;
+            var helpText = isGlobal ? UIStrings.UseSwimbaitHelpTextGlobal : UIStrings.UseSwimbaitHelpText;
+
+            if (DrawUtil.Checkbox(enableText, ref hookConfig.UseSwimbait, helpText))
+                Service.Save();
+
+            if (hookConfig.UseSwimbait)
+            {
+                ImGui.Spacing();
+
+                var countText = isGlobal ? UIStrings.OnlyUseWhenSwimbaitCountGlobal : UIStrings.OnlyUseWhenSwimbaitCount;
+                var countHelpText = isGlobal ? UIStrings.OnlyUseWhenSwimbaitCountHelpTextGlobal : UIStrings.OnlyUseWhenSwimbaitCountHelpText;
+
+                DrawUtil.DrawWordWrappedString(countText);
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+                var threshold = hookConfig.SwimbaitCountThreshold;
+                if (ImGui.InputInt("###SwimbaitThreshold", ref threshold, 1, 1))
+                {
+                    threshold = Math.Clamp(threshold, 1, 3);
+                    hookConfig.SwimbaitCountThreshold = threshold;
+                    Service.Save();
+                }
+
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(countHelpText);
+
+                ImGui.Spacing();
+
+                if (DrawUtil.Checkbox(UIStrings.OnlyUseWhenNoMoochAvailable, ref hookConfig.OnlyUseWhenNoMoochAvailable, UIStrings.OnlyUseWhenNoMoochAvailableHelpText))
+                    Service.Save();
+            }
+
+            ImGui.TreePop();
+        }
     }
 }
