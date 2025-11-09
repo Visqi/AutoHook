@@ -157,12 +157,19 @@ internal class AutoGig : Window, IDisposable
                 UIStrings.Thaliaks_Favor);
 
         if (!info.Available)
+        {
+            Service.PrintDebug("[AutoGig] GigFish - Fish not available");
             return;
+        }
 
         var fish = _gigCfg.CatchAll ? GetCatchAllGig() : CheckFish(info);
+        Service.PrintDebug($"[AutoGig] GigFish - fish: {(fish != null ? fish.Fish?.Name ?? "null" : "null")}, Enabled: {fish?.Enabled ?? false}, CatchAll: {_gigCfg.CatchAll}");
 
         if (fish == null || !fish.Enabled)
+        {
+            Service.PrintDebug($"[AutoGig] GigFish - Skipping (fish is null: {fish == null}, enabled: {fish?.Enabled ?? false})");
             return;
+        }
 
         if (!PlayerRes.HasStatus(IDs.Status.NaturesBounty) && fish.UseNaturesBounty)
             PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
@@ -182,22 +189,38 @@ internal class AutoGig : Window, IDisposable
         else
             fishHitbox = (node->X * _uiScale) + (node->Width * node->ScaleX * _uiScale * (0.4f - (fish.LeftOffset / 10)));
 
+        Service.PrintDebug($"[AutoGig] GigFish - Drawing hitbox at {fishHitbox}, centerX: {centerX}, gigHitbox: {gigHitbox}");
         DrawFishHitbox(drawList, fishHitbox);
 
         if (fishHitbox >= (centerX - gigHitbox) && fishHitbox <= (centerX + gigHitbox))
         {
+            Service.PrintDebug("[AutoGig] GigFish - Fish in range, casting gig");
             _taskManager.Enqueue(() => { Chat.ExecuteCommand($"/ac \"{Gig}\""); });
         }
     }
 
     private BaseGig? CheckFish(SpearfishWindow.Info info)
     {
+        Service.PrintDebug($"[AutoGig] CheckFish - currentNode: {currentNode}, Speed: {info.Speed}, Size: {info.Size}");
+        
         var fishes = _gigCfg.SelectedPreset?.GetGigCurrentNode(currentNode);
+        Service.PrintDebug($"[AutoGig] GetGigCurrentNode returned {fishes?.Count ?? 0} fish(es)");
 
         if (fishes is null || fishes.Count == 0)
+        {
+            Service.PrintDebug("[AutoGig] No fish found for current node");
             return null;
+        }
 
-        return fishes.FirstOrDefault(f => f.Fish?.Speed == info.Speed && f.Fish?.Size == info.Size);
+        foreach (var f in fishes)
+        {
+            Service.PrintDebug($"[AutoGig] Checking fish: {f.Fish?.Name ?? "null"}, Enabled: {f.Enabled}, Fish.Speed: {f.Fish?.Speed}, Fish.Size: {f.Fish?.Size}");
+        }
+
+        var matched = fishes.FirstOrDefault(f => f.Fish?.Speed == info.Speed && f.Fish?.Size == info.Size);
+        Service.PrintDebug($"[AutoGig] Matched fish: {(matched != null ? matched.Fish?.Name ?? "null" : "none")}, Enabled: {matched?.Enabled ?? false}");
+        
+        return matched;
     }
 
     private BaseGig? GetCatchAllGig()
@@ -229,12 +252,18 @@ internal class AutoGig : Window, IDisposable
 
     private unsafe void DrawFishHitbox(ImDrawListPtr drawList, float fishHitbox)
     {
+        Service.PrintDebug($"[AutoGig] DrawFishHitbox - AutoGigDrawFishHitbox: {_gigCfg.AutoGigDrawFishHitbox}, fishHitbox: {fishHitbox}");
+        
         if (!_gigCfg.AutoGigDrawFishHitbox)
+        {
+            Service.PrintDebug("[AutoGig] DrawFishHitbox - Setting is disabled, not drawing");
             return;
+        }
 
         var lineStart = _uiPos + new Vector2(fishHitbox, _addon->FishLines->Y * _uiScale);
         var lineEnd = lineStart + new Vector2(0, _addon->FishLines->Height * _uiScale);
         drawList.AddLine(lineStart, lineEnd, 0xFF20B020, 1 * ImGuiHelpers.GlobalScale);
+        Service.PrintDebug($"[AutoGig] DrawFishHitbox - Green line drawn at {fishHitbox}");
     }
 
     private bool _isOpen = false;

@@ -8,7 +8,26 @@ public class BaseGig(int itemId) : BaseOption
     [DefaultValue(true)]
     public bool Enabled = true;
 
-    public ImportedFish? Fish = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == itemId);
+    private int _itemId = itemId;
+    public ImportedFish? Fish
+    {
+        get
+        {
+            if (_fish == null && _itemId != 0)
+            {
+                Service.PrintDebug($"[AutoGig] BaseGig.Fish - Lazy initializing for itemId: {_itemId}, ImportedFishes count: {GameRes.ImportedFishes.Count}");
+                _fish = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == _itemId);
+                Service.PrintDebug($"[AutoGig] BaseGig.Fish - Found: {(_fish != null ? _fish.Name : "null")}");
+            }
+            return _fish;
+        }
+        set
+        {
+            Service.PrintDebug($"[AutoGig] BaseGig.Fish - Setting to: {(value != null ? value.Name : "null")}");
+            _fish = value;
+        }
+    }
+    private ImportedFish? _fish = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == itemId);
 
     public bool UseNaturesBounty;
 
