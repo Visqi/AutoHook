@@ -1,5 +1,4 @@
 ﻿using ECommons.Throttlers;
-using AutoHook.Utils;
 
 namespace AutoHook.Fishing;
 

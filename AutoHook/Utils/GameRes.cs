@@ -14,7 +14,7 @@ public static class GameRes
     public static List<BaitFishClass> Baits { get; private set; } = [];
     public static List<BaitFishClass> Fishes { get; private set; } = [];
     public static List<BaitFishClass> LureFishes => [.. Fishes.Where(f => f.LureMessage != "")];
-
+    public static List<BaitFishClass> MoochableFish { get; private set; } = [];
     public static List<ImportedFish> ImportedFishes { get; private set; } = [];
 
     public static List<BiteTimers> BiteTimers { get; private set; } = [];
@@ -22,11 +22,13 @@ public static class GameRes
     public static void Initialize()
     {
         Baits = [.. FindRows<Item>(i => i.ItemSearchCategory.RowId == FishingTackleRow).ToList()
-            .Concat(FindRows<WKSItemInfo>(i => i.WKSItemSubCategory.RowId == 5).Select(i => i.Item.Value).ToList())
+            .Concat([.. FindRows<WKSItemInfo>(i => i.WKSItemSubCategory.RowId == 5).Select(i => i.Item.Value)])
             .Select(b => new BaitFishClass(b))];
 
         Fishes = FindRows<FishParameter>(f => f.Item.RowId is not 0 and < 1000000)
             .Select(f => new BaitFishClass(f)).GroupBy(f => f.Id).Select(group => group.First()).ToList() ?? [];
+
+        MoochableFish = FindRows<FishingBaitParameter>(x => x.Unknown0 != 0 && GetRow<Item>(x.Unknown0)?.ItemUICategory.RowId != 33).Select(f => new BaitFishClass(GetRow<Item>(f.Unknown0)!.Value)).ToList() ?? [];
 
         try
         {

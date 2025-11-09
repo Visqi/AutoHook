@@ -135,7 +135,7 @@ public class PresetCreator
                 ImGui.Unindent();
             }
 
-            if (IsFishMoochable(_selectedTargetFish.ItemId))
+            if (GameRes.MoochableFish.Any(f => f.Id == _selectedTargetFish.ItemId))
                 DrawUtil.Checkbox("Create Spareful Hand Prep preset", ref _sparefulHandPrep,
                     "Generates a preset that catches 3 fish, stores them to swimbait, catches a 4th fish, and stops");
 
@@ -419,8 +419,6 @@ public class PresetCreator
             BiteType.Legendary => "(!!!)",
             _ => "Error",
         };
-
-    private static bool IsFishMoochable(int fishId) => FindRows<FishingBaitParameter>(x => x.Unknown0 != 0 && GetRow<Item>(x.Unknown0)?.ItemUICategory.RowId != 33).Any(x => x.Unknown0 == fishId);
 
     private void SetupSparefulHandPrep(CustomPresetConfig newPreset)
     {

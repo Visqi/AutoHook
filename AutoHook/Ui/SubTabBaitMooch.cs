@@ -111,7 +111,8 @@ public class SubTabBaitMooch
                     if (isMooch)
                     {
                         ImGui.Spacing();
-                        DrawSwimbaitUsage(hook);
+                        if (_preset.IsGlobal || hook.BaitFish.Id == GameRes.AllMoochesId || GameRes.MoochableFish.Any(f => f.Id == hook.BaitFish.Id))
+                            DrawSwimbaitUsage(hook);
                     }
 
                     ImGui.EndGroup();
