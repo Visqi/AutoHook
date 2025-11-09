@@ -1,4 +1,5 @@
 ﻿using ECommons.Throttlers;
+using AutoHook.Utils;
 
 namespace AutoHook.Fishing;
 
@@ -101,48 +102,77 @@ public partial class FishingManager
     private bool TryUseSwimbait(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg, bool blockMooch)
     {
         if (Service.BaitManager.GetSwimbaitCount() is 0)
-            return false;
-
-        if (Service.BaitManager.CurrentSwimBait is not { })
-            return false;
-
-        HookConfig? swimbaitMoochConfig = null;
-        if (Presets.SelectedPreset != null)
-            swimbaitMoochConfig = Presets.SelectedPreset.GetCfgById((int)Service.BaitManager.CurrentSwimBait, true);
-
-        // If no config found in selected preset, or swimbait not enabled, check global preset config
-        if (swimbaitMoochConfig == null || !swimbaitMoochConfig.Enabled || !swimbaitMoochConfig.UseSwimbait)
         {
-            if (Presets.DefaultPreset.ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == GameRes.AllMoochesId) is { Enabled: true, UseSwimbait: true } global)
-                swimbaitMoochConfig = global;
-            else
-                return false;
+            Service.PrintDebug("[Swimbait] No swimbait available");
+            return false;
         }
 
-        if (Service.BaitManager.GetSwimbaitCountForFish((uint)Service.BaitManager.CurrentSwimBait) < swimbaitMoochConfig.SwimbaitCountThreshold)
-            return false;
+        var swimbaitIds = Service.BaitManager.SwimbaitIds;
+        Service.PrintDebug($"[Swimbait] Checking swimbait slots: [{string.Join(", ", swimbaitIds)}]");
 
-        if (swimbaitMoochConfig.OnlyUseWhenNoMoochAvailable)
+        foreach (var (fishId, slotIndex) in swimbaitIds.WithIndex())
         {
-            if (!blockMooch)
+            if (fishId == 0)
+                continue;
+
+            Service.PrintDebug($"[Swimbait] Checking slot {slotIndex} with fish ID: {fishId}");
+
+            HookConfig? swimbaitMoochConfig = null;
+            if (Presets.SelectedPreset != null)
             {
-                if (lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast())
-                    return false;
-                if (acCfg.CastMooch.IsAvailableToCast())
-                    return false;
+                swimbaitMoochConfig = Presets.SelectedPreset.GetCfgById((int)fishId, true);
+                Service.PrintDebug($"[Swimbait] Found config in selected preset: {swimbaitMoochConfig != null}, Enabled: {swimbaitMoochConfig?.Enabled}, UseSwimbait: {swimbaitMoochConfig?.UseSwimbait}");
             }
-        }
 
-        foreach (var (id, i) in Service.BaitManager.SwimbaitIds.WithIndex())
-        {
-            if (id == Service.BaitManager.CurrentSwimBait)
+            // If no config found in selected preset, or swimbait not enabled, check global preset config
+            if (swimbaitMoochConfig == null || !swimbaitMoochConfig.Enabled || !swimbaitMoochConfig.UseSwimbait)
             {
-                if (Service.BaitManager.ChangeSwimbait((uint)i) == BaitManager.ChangeBaitReturn.Success)
+                var globalAllMooches = Presets.DefaultPreset.ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == GameRes.AllMoochesId);
+                if (globalAllMooches != null && globalAllMooches.Enabled && globalAllMooches.UseSwimbait)
                 {
-                    Service.PrintDebug($"[Swimbait] Using swimbait slot {i} (fish ID: {Service.BaitManager.CurrentSwimBait})");
-                    Service.Status = $"Using swimbait: {MultiString.GetItemName((int)Service.BaitManager.CurrentSwimBait)}";
-                    return true;
+                    swimbaitMoochConfig = globalAllMooches;
+                    Service.PrintDebug("[Swimbait] Using global 'All Mooches' config");
                 }
+                else
+                {
+                    Service.PrintDebug($"[Swimbait] No valid config found for fish {fishId}, trying next slot");
+                    continue;
+                }
+            }
+
+            var swimbaitCountForFish = Service.BaitManager.GetSwimbaitCountForFish(fishId);
+            Service.PrintDebug($"[Swimbait] Count for fish {fishId}: {swimbaitCountForFish}, Threshold: {swimbaitMoochConfig.SwimbaitCountThreshold}");
+            if (swimbaitCountForFish < swimbaitMoochConfig.SwimbaitCountThreshold)
+            {
+                Service.PrintDebug($"[Swimbait] Count threshold not met, trying next slot");
+                continue;
+            }
+
+            if (swimbaitMoochConfig.OnlyUseWhenNoMoochAvailable)
+            {
+                Service.PrintDebug("[Swimbait] Checking 'only use when no mooch available' condition");
+                if (!blockMooch)
+                {
+                    var canMooch = lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast();
+                    if (canMooch)
+                    {
+                        Service.PrintDebug("[Swimbait] Mooch available for current fish, skipping swimbait");
+                        continue;
+                    }
+
+                    if (acCfg.CastMooch.IsAvailableToCast())
+                    {
+                        Service.PrintDebug("[Swimbait] Auto mooch available, skipping swimbait");
+                        continue;
+                    }
+                }
+            }
+
+            if (Service.BaitManager.ChangeSwimbait((uint)slotIndex) == BaitManager.ChangeBaitReturn.Success)
+            {
+                Service.PrintDebug($"[Swimbait] Using swimbait slot {slotIndex} (fish ID: {fishId})");
+                Service.Status = $"Using swimbait: {MultiString.GetItemName((int)fishId)}";
+                return true;
             }
         }
 
