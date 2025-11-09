@@ -1232,6 +1232,15 @@ Du kannst wahlweise auch das Kommando /ahstart zum Starten verwenden. Auch in Ma
   <data name="UseLures" xml:space="preserve">
     <value>Köder benutzen</value>
   </data>
+  <data name="BigGameFishing" xml:space="preserve">
+    <value>Kaventskenntnis</value>
+  </data>
+  <data name="AmbitiousLure" xml:space="preserve">
+    <value>Ehrgeiziges Ködern</value>
+  </data>
+  <data name="ModestLure" xml:space="preserve">
+    <value>Bescheidenes Ködern</value>
+  </data>
   <data name="OnlySpecial" xml:space="preserve">
     <value>Nur Spezial</value>
   </data>
@@ -1240,6 +1249,9 @@ Du kannst wahlweise auch das Kommando /ahstart zum Starten verwenden. Auch in Ma
   </data>
   <data name="LureType" xml:space="preserve">
     <value>Köder Typ:</value>
+  </data>
+  <data name="SparefulHand" xml:space="preserve">
+    <value>Fischnatur</value>
   </data>
   <data name="Disabled" xml:space="preserve">
     <value>Deaktiviert</value>
@@ -1277,6 +1289,12 @@ Du kannst wahlweise auch das Kommando /ahstart zum Starten verwenden. Auch in Ma
   <data name="ClickOpenWiki" xml:space="preserve">
     <value>Hier klicken, um die Wiki-Seite zu öffnen</value>
   </data>
+  <data name="UseIcActive" xml:space="preserve">
+    <value>Verwende, wenn Stetes Angeln aktiv ist</value>
+  </data>
+  <data name="UseSlapActive" xml:space="preserve">
+    <value>Verwende, wenn Bunte Gewässer aktiv ist</value>
+  </data>
   <data name="CantFishHere" xml:space="preserve">
     <value>Du kannst hier nicht fischen</value>
   </data>
@@ -1298,11 +1316,17 @@ Du kannst wahlweise auch das Kommando /ahstart zum Starten verwenden. Auch in Ma
   <data name="AnimationCanceling" xml:space="preserve">
     <value>Animation abbrechen</value>
   </data>
+  <data name="ClickToToggle" xml:space="preserve">
+    <value>Klicken zum ein/aus schalten</value>
+  </data>
   <data name="MakeACopy" xml:space="preserve">
     <value>Kopie erstellen</value>
   </data>
   <data name="StatusNoPreset" xml:space="preserve">
     <value>Keine Voreinstellung aktiv, globale Voreinstellung wird stattdessen verwendet</value>
+  </data>
+  <data name="Conditions" xml:space="preserve">
+    <value>Konditionen</value>
   </data>
   <data name="Conditions_HelpText" xml:space="preserve">
     <value>Bestimmte Bedingungen für den Anschlag</value>
@@ -1310,4 +1334,22 @@ Du kannst wahlweise auch das Kommando /ahstart zum Starten verwenden. Auch in Ma
   <data name="FolderExported" xml:space="preserve">
     <value>Ordner in die Zwischenablage exportiert</value>
   </data>
+  <data name="RenameFolder" xml:space="preserve">
+    <value>Ordner umbenennen</value>
+  </data>
+  <data name="CreateNewFolder" xml:space="preserve">
+    <value>Neuen Ordner erstellen</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Erstellen</value>
+  </data>
+  <data name="RenamePreset" xml:space="preserve">
+    <value>Preset umbenennen</value>
+  </data>
+  <data name="FolderName" xml:space="preserve">
+    <value>Ordner Name</value>
+  </data>
+  <data name="GPlabel" xml:space="preserve">
+		<value>SP</value>
+	</data>
 </root>
