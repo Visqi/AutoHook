@@ -114,11 +114,11 @@ public partial class FishingManager : IDisposable
 
     private int GetCurrentBaitMoochId()
     {
-        if (_isMooching)
-            return _lastCatch?.Id ?? 0;
-
         if (Service.BaitManager.CurrentSwimBait is { } fishId)
             return (int)fishId;
+
+        if (_isMooching)
+            return _lastCatch?.Id ?? 0;
 
         return (int)Service.BaitManager.Current;
     }
