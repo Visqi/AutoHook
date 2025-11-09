@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using ECommons.MathHelpers;
+using System.Text.Json.Serialization;
 using FishRow = Lumina.Excel.Sheets.FishParameter;
 using ItemRow = Lumina.Excel.Sheets.Item;
 
@@ -51,7 +52,7 @@ public class BaitFishClass : IComparable<BaitFishClass>
         Id = -1;
     }
 
-    public BaitFishClass(int id)
+    public BaitFishClass(Number id)
     {
         Id = id;
     }
