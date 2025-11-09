@@ -1,4 +1,5 @@
 ﻿using ECommons.Throttlers;
+using AutoHook.Utils;
 
 namespace AutoHook.Fishing;
 
@@ -133,14 +134,13 @@ public partial class FishingManager
             }
         }
 
-        var swimbaitIds = Service.BaitManager.SwimbaitIds;
-        foreach (var id in Service.BaitManager.SwimbaitIds)
+        foreach (var (id, i) in Service.BaitManager.SwimbaitIds.WithIndex())
         {
             if (id == Service.BaitManager.CurrentSwimBait)
             {
-                if (Service.BaitManager.ChangeSwimbait(id) == BaitManager.ChangeBaitReturn.Success)
+                if (Service.BaitManager.ChangeSwimbait((uint)i) == BaitManager.ChangeBaitReturn.Success)
                 {
-                    Service.PrintDebug($"[Swimbait] Using swimbait slot {id} (fish ID: {Service.BaitManager.CurrentSwimBait})");
+                    Service.PrintDebug($"[Swimbait] Using swimbait slot {i} (fish ID: {Service.BaitManager.CurrentSwimBait})");
                     Service.Status = $"Using swimbait: {MultiString.GetItemName((int)Service.BaitManager.CurrentSwimBait)}";
                     return true;
                 }
