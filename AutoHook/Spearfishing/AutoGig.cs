@@ -287,7 +287,7 @@ internal class AutoGig : Window, IDisposable
     private void SetFishTargets()
     {
         currentNode = 0;
-        if (Svc.Targets.Target is { ObjectIndex: (ushort)ObjectKind.GatheringPoint, BaseId: var id })
+        if (Svc.Targets.Target is { ObjectKind: ObjectKind.GatheringPoint, BaseId: var id })
             currentNode = (int)id;
     }
 
