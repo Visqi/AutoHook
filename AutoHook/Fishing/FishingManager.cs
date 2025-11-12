@@ -112,7 +112,6 @@ public partial class FishingManager : IDisposable
         //Service.TaskManager.Enqueue(() => UseAutoCasts());
     }
 
-
     // The current config is updates two times: When we began fishing (to get the config based on the mooch/bait) and when we hooked the fish (in case the user updated their configs).
     private void UpdateStatusAndTimer()
     {
@@ -152,8 +151,12 @@ public partial class FishingManager : IDisposable
 
     public string GetPresetName()
     {
-        var isMooching = Service.BaitManager.IsMooching(_lastCatch?.Id);
-        var customHook = Presets.SelectedPreset?.GetCfgById(Service.BaitManager.GetCurrentBaitMoochId(_lastCatch?.Id), isMooching);
+        var isMooching = Service.BaitManager.IsMooching() || _isMooching;
+        var currentBaitId = Service.BaitManager.GetCurrentBaitMoochId(_lastCatch?.Id, _isMooching);
+
+        HookConfig? customHook = null;
+        if (Presets.SelectedPreset != null)
+            customHook = Presets.SelectedPreset.GetCfgById(currentBaitId, isMooching);
 
         var globalHook = isMooching
             ? Presets.DefaultPreset.ListOfMooch.FirstOrDefault()
@@ -170,8 +173,12 @@ public partial class FishingManager : IDisposable
 
     public HookConfig GetHookCfg()
     {
-        var isMooching = Service.BaitManager.IsMooching(_lastCatch?.Id);
-        var custom = Presets.SelectedPreset?.GetCfgById(Service.BaitManager.GetCurrentBaitMoochId(_lastCatch?.Id), isMooching);
+        var isMooching = Service.BaitManager.IsMooching() || _isMooching;
+        var currentBaitId = Service.BaitManager.GetCurrentBaitMoochId(_lastCatch?.Id, _isMooching);
+
+        HookConfig? custom = null;
+        if (Presets.SelectedPreset != null)
+            custom = Presets.SelectedPreset.GetCfgById(currentBaitId, isMooching);
 
         var defaultHook = isMooching
             ? Presets.DefaultPreset.ListOfMooch.FirstOrDefault()
@@ -285,12 +292,10 @@ public partial class FishingManager : IDisposable
         _isMooching = mooching;
         _lureSuccess = false;
 
-        var baitname = MultiString.GetItemName(Service.BaitManager.GetCurrentBaitMoochId(_lastCatch?.Id));
+        // Only pass isMooching=true if the mooch action was actually used
+        var baitname = MultiString.GetItemName(Service.BaitManager.GetCurrentBaitMoochId(_lastCatch?.Id, _isMooching));
         if (!_isMooching)
-        {
-            _isMooching = Service.BaitManager.IsMooching(_lastCatch?.Id);
-            Service.PrintDebug(@$"Started fishing with {(_isMooching ? @"Swimbait/Mooch" : @"normal bait")}: {baitname}");
-        }
+            Service.PrintDebug(@$"Started fishing with {(Service.BaitManager.IsMooching() ? @"Swimbait/Mooch" : @"normal bait")}: {baitname}");
         else
             Service.PrintDebug(@$"Started mooching with {baitname}");
 

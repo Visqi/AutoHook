@@ -179,24 +179,27 @@ public unsafe class BaitManager
     public bool IsSwimbaitFull() => GetSwimbaitCount() >= 3;
     public bool IsSwimbaitEmpty() => GetSwimbaitCount() == 0;
 
-    public bool IsMooching(int? fallbackId = null)
-    {
-        if (GameRes.MoochableFish.Any(f => f.Id == Current))
-            return true;
+    /// <summary>
+    /// Checks if the current bait on the line is a moochable fish (swimbait case).
+    /// For normal mooching, Current stays as the original bait, so this will return false.
+    /// Use the isMooching parameter in GetCurrentBaitMoochId to handle normal mooching.
+    /// </summary>
+    public bool IsMooching() => GameRes.MoochableFish.Any(f => f.Id == Current);
 
-        if (fallbackId.HasValue && fallbackId.Value > 0 && GameRes.MoochableFish.Any(f => f.Id == fallbackId.Value))
-            return true;
-
-        return false;
-    }
-
-    public int GetCurrentBaitMoochId(int? fallbackId = null)
+    /// <summary>
+    /// Gets the current bait/mooch ID on the line. Returns the fish ID if mooching/swimbait, otherwise returns the bait ID.
+    /// </summary>
+    /// <param name="fallbackId">Optional fallback ID (last catch) to use only when actually mooching</param>
+    /// <param name="isMooching">If actually mooching (mooch action was used)</param>
+    /// <returns>The current bait or mooch fish ID</returns>
+    public int GetCurrentBaitMoochId(int? fallbackId = null, bool isMooching = false)
     {
         var currentId = Current;
+
         if (GameRes.Fishes.Any(f => f.Id == currentId))
             return (int)currentId;
 
-        if (fallbackId.HasValue && fallbackId.Value > 0 && GameRes.Fishes.Any(f => f.Id == fallbackId.Value))
+        if (isMooching && fallbackId.HasValue && fallbackId.Value > 0 && GameRes.Fishes.Any(f => f.Id == fallbackId.Value))
             return fallbackId.Value;
 
         return (int)currentId;

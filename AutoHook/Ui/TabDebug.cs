@@ -80,8 +80,8 @@ public class TabDebug : BaseTab
                 ImGui.Text($"Current Bait: {Service.BaitManager.Current}");
                 ImGui.Text($"Current Swimbait: {Service.BaitManager.CurrentSwimBait}");
                 ImGui.Text($"Current BaitSwimbait: {Service.BaitManager.CurrentBaitSwimBait}");
-                ImGui.Text($"Curren2: {*(uint*)Service.BaitManager.Address}/{Service.BaitManager.GetCurrentBaitMoochId(Service.LastCatch?.Id)}");
-                ImGui.Text($"Is Mooching: {Service.BaitManager.IsMooching(Service.LastCatch?.Id)}");
+                ImGui.Text($"Current2: {*(uint*)Service.BaitManager.Address}/{Service.BaitManager.GetCurrentBaitMoochId(Service.LastCatch?.Id, false)}");
+                ImGui.Text($"Is Mooching (Swimbait): {Service.BaitManager.IsMooching()}");
                 ImGui.Text($"Last Catch: {Service.LastCatch?.Name ?? "None"} (ID: {Service.LastCatch?.Id ?? -1})");
                 ImGui.Text($"Current Swimbait: {string.Join(", ", Service.BaitManager.SwimbaitIds)}");
             }
