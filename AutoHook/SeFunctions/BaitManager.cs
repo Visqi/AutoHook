@@ -4,6 +4,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
 using Lumina.Excel.Sheets;
 using System.Runtime.InteropServices;
+using FishingState = AutoHook.Enums.FishingState;
 
 namespace AutoHook.SeFunctions;
 
