@@ -1,9 +1,9 @@
-﻿using System.Runtime.InteropServices;
-using Dalamud.Utility.Signatures;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
+﻿using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
 using Lumina.Excel.Sheets;
+using System.Runtime.InteropServices;
 
 namespace AutoHook.SeFunctions;
 
@@ -12,6 +12,7 @@ public unsafe class BaitManager
     public BaitManager()
     {
         Svc.Hook.InitializeFromAttributes(this);
+        Address = Svc.SigScanner.GetStaticAddressFromSig("8B 0D ?? ?? ?? ?? 3B D9 75");
     }
 
     private delegate byte ExecuteCommandDelegate(int id, int unk1, uint baitId, int unk2, int unk3);
@@ -20,6 +21,7 @@ public unsafe class BaitManager
     private readonly ExecuteCommandDelegate _executeCommand = null!;
 
     private const int FishingManagerOffset = 0x70;
+    public IntPtr Address;
 
     internal FishingManagerStruct* FishingMan
     {
@@ -175,6 +177,29 @@ public unsafe class BaitManager
 
     public bool IsSwimbaitFull() => GetSwimbaitCount() >= 3;
     public bool IsSwimbaitEmpty() => GetSwimbaitCount() == 0;
+
+    public bool IsMooching(int? fallbackId = null)
+    {
+        if (GameRes.MoochableFish.Any(f => f.Id == Current))
+            return true;
+
+        if (fallbackId.HasValue && fallbackId.Value > 0 && GameRes.MoochableFish.Any(f => f.Id == fallbackId.Value))
+            return true;
+
+        return false;
+    }
+
+    public int GetCurrentBaitMoochId(int? fallbackId = null)
+    {
+        var currentId = Current;
+        if (GameRes.Fishes.Any(f => f.Id == currentId))
+            return (int)currentId;
+
+        if (fallbackId.HasValue && fallbackId.Value > 0 && GameRes.Fishes.Any(f => f.Id == fallbackId.Value))
+            return fallbackId.Value;
+
+        return (int)currentId;
+    }
 
     public enum ChangeBaitReturn
     {

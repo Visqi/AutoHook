@@ -1,14 +1,14 @@
-﻿using System.Net.Http;
-using System.Text.RegularExpressions;
+﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Hooking;
+using Dalamud.Interface.Utility.Raii;
 using ECommons.Automation.NeoTaskManager;
 using ECommons.Throttlers;
-using Dalamud.Bindings.ImGui;
-using HtmlAgilityPack;
-using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using HtmlAgilityPack;
 using Lumina.Excel.Sheets;
+using System.Net.Http;
+using System.Text.RegularExpressions;
 
 namespace AutoHook.Ui;
 
@@ -36,7 +36,6 @@ public class TabDebug : BaseTab
 
     private unsafe byte ExecuteCommandDetour(int id, int unk1, uint baitId, int unk2, int unk3)
     {
-
         Svc.Log.Debug($"ExecuteCommandDetour: {id} {unk1} {baitId} {unk2} {unk3}");
         return _executeCommandHook!.Original(id, unk1, baitId, unk2, unk3);
     }
@@ -68,7 +67,7 @@ public class TabDebug : BaseTab
 
     private unsafe uint FishCaught => PlayerState.Instance()->NumFishCaught;
 
-    public override void Draw()
+    public override unsafe void Draw()
     {
         try
         {
@@ -78,6 +77,13 @@ public class TabDebug : BaseTab
             if (Player.Available)
             {
                 ImGui.Text($"Fish Caught: {FishCaught}");
+                ImGui.Text($"Current Bait: {Service.BaitManager.Current}");
+                ImGui.Text($"Current Swimbait: {Service.BaitManager.CurrentSwimBait}");
+                ImGui.Text($"Current BaitSwimbait: {Service.BaitManager.CurrentBaitSwimBait}");
+                ImGui.Text($"Curren2: {*(uint*)Service.BaitManager.Address}/{Service.BaitManager.GetCurrentBaitMoochId(Service.LastCatch?.Id)}");
+                ImGui.Text($"Is Mooching: {Service.BaitManager.IsMooching(Service.LastCatch?.Id)}");
+                ImGui.Text($"Last Catch: {Service.LastCatch?.Name ?? "None"} (ID: {Service.LastCatch?.Id ?? -1})");
+                ImGui.Text($"Current Swimbait: {string.Join(", ", Service.BaitManager.SwimbaitIds)}");
             }
 
             if (ImGui.Selectable($" {Service.Configuration.HookPresets.Folders.Count} Folders"))
@@ -119,8 +125,6 @@ public class TabDebug : BaseTab
             {
                 Service.BaitManager.ChangeBait((uint)_swimbaitId);
             }
-
-            ImGui.Text($"Current Swimbait: {string.Join(", ", Service.BaitManager.SwimbaitIds)}");
 
             if (ImGui.Button($"copy mooches"))
                 ImGui.SetClipboardText(string.Join("\n", FindRows<FishingBaitParameter>(x => x.Unknown0 != 0 && GetRow<Item>(x.Unknown0)?.ItemUICategory.RowId != 33).Select(x => $"[{x.Unknown0}] {GetRow<Item>(x.Unknown0)?.Singular}")));

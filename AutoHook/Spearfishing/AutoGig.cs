@@ -1,13 +1,13 @@
 ﻿using AutoHook.Spearfishing.Struct;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Windowing;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using Dalamud.Bindings.ImGui;
-using System.Numerics;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility;
+using Dalamud.Interface.Windowing;
 using ECommons.Automation;
 using ECommons.Automation.NeoTaskManager;
+using FFXIVClientStructs.FFXIV.Component.GUI;
+using System.Numerics;
 
 namespace AutoHook.Spearfishing;
 
@@ -202,7 +202,7 @@ internal class AutoGig : Window, IDisposable
     private BaseGig? CheckFish(SpearfishWindow.Info info)
     {
         Service.PrintDebug($"[AutoGig] CheckFish - currentNode: {currentNode}, Speed: {info.Speed}, Size: {info.Size}");
-        
+
         var fishes = _gigCfg.SelectedPreset?.GetGigCurrentNode(currentNode);
         Service.PrintDebug($"[AutoGig] GetGigCurrentNode returned {fishes?.Count ?? 0} fish(es)");
 
@@ -219,7 +219,7 @@ internal class AutoGig : Window, IDisposable
 
         var matched = fishes.FirstOrDefault(f => f.Fish?.Speed == info.Speed && f.Fish?.Size == info.Size);
         Service.PrintDebug($"[AutoGig] Matched fish: {(matched != null ? matched.Fish?.Name ?? "null" : "none")}, Enabled: {matched?.Enabled ?? false}");
-        
+
         return matched;
     }
 
@@ -253,7 +253,7 @@ internal class AutoGig : Window, IDisposable
     private unsafe void DrawFishHitbox(ImDrawListPtr drawList, float fishHitbox)
     {
         Service.PrintDebug($"[AutoGig] DrawFishHitbox - AutoGigDrawFishHitbox: {_gigCfg.AutoGigDrawFishHitbox}, fishHitbox: {fishHitbox}");
-        
+
         if (!_gigCfg.AutoGigDrawFishHitbox)
         {
             Service.PrintDebug("[AutoGig] DrawFishHitbox - Setting is disabled, not drawing");
