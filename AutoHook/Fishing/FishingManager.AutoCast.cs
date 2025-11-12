@@ -6,11 +6,9 @@ namespace AutoHook.Fishing;
 public partial class FishingManager
 {
     public AutoCastsConfig GetAutoCastCfg()
-    {
-        return Presets.SelectedPreset?.AutoCastsCfg.EnableAll ?? false
+        => Presets.SelectedPreset?.AutoCastsCfg.EnableAll ?? false
             ? Presets.SelectedPreset.AutoCastsCfg
             : Presets.DefaultPreset.AutoCastsCfg;
-    }
 
     private void CheckWhileFishingActions()
     {
@@ -32,11 +30,8 @@ public partial class FishingManager
     {
         var cfg = GetAutoCastCfg();
 
-        if (PlayerRes.HasStatus(IDs.Status.CollectorsGlove) && cfg.RecastAnimationCancel && cfg.TurnCollectOff &&
-            !cfg.CastCollect.Enabled)
-        {
+        if (PlayerRes.HasStatus(IDs.Status.CollectorsGlove) && cfg.RecastAnimationCancel && cfg.TurnCollectOff && !cfg.CastCollect.Enabled)
             PlayerRes.CastAction(IDs.Actions.Collect);
-        }
         else
         {
             cfg.TryCastAction(cfg.CastCollect);
@@ -47,11 +42,8 @@ public partial class FishingManager
     private void UseAutoCasts()
     {
         // if _lastStep is FishBit but currentState is FishingState.PoleReady, it means that the fish was hooked, but it escaped.
-        if (_lastStep.HasFlag(FishingSteps.None) || _lastStep.HasFlag(FishingSteps.BeganFishing)
-                                                 || _lastStep.HasFlag(FishingSteps.Quitting))
-        {
+        if (_lastStep.HasFlag(FishingSteps.None) || _lastStep.HasFlag(FishingSteps.BeganFishing) || _lastStep.HasFlag(FishingSteps.Quitting))
             return;
-        }
 
         if (!PlayerRes.IsCastAvailable() || Service.TaskManager.IsBusy)
             return;
@@ -77,10 +69,8 @@ public partial class FishingManager
         var blockMooch = lastFishCatchCfg is { Enabled: true, NeverMooch: true };
 
         if (TryUseSwimbait(acCfg, lastFishCatchCfg, blockMooch))
-        {
             if (acCfg.TryCastAction(acCfg.CastLine, true))
                 return;
-        }
 
         if (!blockMooch)
         {
@@ -102,20 +92,13 @@ public partial class FishingManager
     private bool TryUseSwimbait(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg, bool blockMooch)
     {
         if (Service.BaitManager.GetSwimbaitCount() is 0)
-        {
-            Service.PrintDebug("[Swimbait] No swimbait available");
             return false;
-        }
 
         var swimbaitIds = Service.BaitManager.SwimbaitIds;
-        Service.PrintDebug($"[Swimbait] Checking swimbait slots: [{string.Join(", ", swimbaitIds)}]");
-
         foreach (var (fishId, slotIndex) in swimbaitIds.WithIndex())
         {
             if (fishId == 0)
                 continue;
-
-            Service.PrintDebug($"[Swimbait] Checking slot {slotIndex} with fish ID: {fishId}");
 
             HookConfig? swimbaitMoochConfig = null;
             if (Presets.SelectedPreset != null)
@@ -141,30 +124,19 @@ public partial class FishingManager
             }
 
             var swimbaitCountForFish = Service.BaitManager.GetSwimbaitCountForFish(fishId);
-            Service.PrintDebug($"[Swimbait] Count for fish {fishId}: {swimbaitCountForFish}, Threshold: {swimbaitMoochConfig.SwimbaitCountThreshold}");
             if (swimbaitCountForFish < swimbaitMoochConfig.SwimbaitCountThreshold)
-            {
-                Service.PrintDebug($"[Swimbait] Count threshold not met, trying next slot");
                 continue;
-            }
 
             if (swimbaitMoochConfig.OnlyUseWhenNoMoochAvailable)
             {
-                Service.PrintDebug("[Swimbait] Checking 'only use when no mooch available' condition");
                 if (!blockMooch)
                 {
                     var canMooch = lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast();
                     if (canMooch)
-                    {
-                        Service.PrintDebug("[Swimbait] Mooch available for current fish, skipping swimbait");
                         continue;
-                    }
 
                     if (acCfg.CastMooch.IsAvailableToCast())
-                    {
-                        Service.PrintDebug("[Swimbait] Auto mooch available, skipping swimbait");
                         continue;
-                    }
                 }
             }
 
