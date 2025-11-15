@@ -579,6 +579,9 @@
 Важное примечание!!!
 Если Авто-Наживка (Общий или Пользовательский шаблон) не включена, удочка будет закинута стандартным образом и вы потеряете возможность использовать наживку перед броском (если таковая возможность была)</value>
   </data>
+  <data name="Global_Auto_Cast_Line" xml:space="preserve">
+    <value>Общий шаблон авто-ловли</value>
+  </data>
   <data name="Use_Thaliaks_Favor" xml:space="preserve">
     <value>Использовать "Расположение Талиака"</value>
   </data>
@@ -1135,7 +1138,7 @@
     <value>Использовать только в случае, если "Самодельная Приманка" или "Терпение" активны</value>
   </data>
   <data name="IgnoreMoochFishEyes" xml:space="preserve">
-    <value>"Рыбий Взор" будет использован и отменит приманивание рыбы наживкой</value>
+    <value>"Рыбий Взор" будет использован и отменит приманивание рыбы наживкой.</value>
   </data>
   <data name="StartActions" xml:space="preserve">
     <value>Начальные действия</value>
@@ -1230,10 +1233,10 @@
     <value>Стек приманки:</value>
   </data>
   <data name="UseLures" xml:space="preserve">
-    <value>Использовать блёсны:</value>
+    <value>Использовать приманки</value>
   </data>
   <data name="BigGameFishing" xml:space="preserve">
-    <value>Ловля крупной рыбы</value>
+    <value>Ловля Крупной Рыбы</value>
   </data>
   <data name="AmbitiousLure" xml:space="preserve">
     <value>Амбициозная Приманка</value>
@@ -1263,7 +1266,7 @@
     <value>Отменить подсечку, если лимит стека достиг предела без успешного улова</value>
   </data>
   <data name="LureType" xml:space="preserve">
-    <value>Тип приманки</value>
+    <value>Тип приманки:</value>
   </data>
   <data name="OnlyCastLarge" xml:space="preserve">
     <value>Использовать только в случае, если "Терпение"/"Призовой улов" активен</value>
@@ -1284,7 +1287,7 @@
     <value>Использовать "Запасливую Руку" лишь в том случае, если количество данного живца меньше чем (0-3)</value>
   </data>
   <data name="Swap_Preset_After_Swimbait" xml:space="preserve">
-    <value>Изменить шаблон после получения живца</value>
+    <value>Изменить шаблон после получения живца:</value>
   </data>
   <data name="WhenSwimbaitFills" xml:space="preserve">
     <value>Если количество живца заполнено</value>
@@ -1332,7 +1335,7 @@
     <value>Задержка перед отменой ловли рыбы (в мс)</value>
   </data>
   <data name="DelayBeforeCancelInfo" xml:space="preserve">
-    <value>Данная функция задерживает действия Отдыха, если ненужная рыба начинает клевать, но подсечка не использована </value>
+    <value>Данная функция задерживает действия Отдыха, если ненужная рыба начинает клевать, но подсечка не использована</value>
   </data>
   <data name="SwitchFishBait" xml:space="preserve">
     <value>Поменять приманку (по имени или ID)</value>
@@ -1344,7 +1347,7 @@
     <value>Шаблон сохранён в буфер</value>
   </data>
   <data name="RightClickOptions" xml:space="preserve">
-    <value>Щелкните ПКМ для настроек </value>
+    <value>Щелкните ПКМ для настроек</value>
   </data>
   <data name="PresetImported" xml:space="preserve">
     <value>Шаблон импортирован</value>
@@ -1377,13 +1380,13 @@
     <value>Нажмите здесь, чтобы открыть Wiki-страничку</value>
   </data>
   <data name="CommunityDescription" xml:space="preserve">
-    <value>Данная вкладка предназначена для шаблонов от сообщества. Вы можете загрузить пресеты из вики, или добавить туда собственные</value>
+    <value>Данная вкладка предназначена для шаблонов от сообщества. Вы можете загрузить пресеты из вики, или добавить туда собственные.</value>
   </data>
   <data name="UseIcActive" xml:space="preserve">
-    <value>Использовать только если "Идентичный Улов" активен:</value>
+    <value>Использовать только если "Идентичный Улов" активен</value>
   </data>
   <data name="UseSlapActive" xml:space="preserve">
-    <value>Использовать только если "Удар по Воде" активен:</value>
+    <value>Использовать только если "Удар по Воде" активен</value>
   </data>
   <data name="CantFishHere" xml:space="preserve">
     <value>Здесь нельзя ловить рыбу</value>
@@ -1422,7 +1425,7 @@
     <value>Выключить анимацию "Прикормки"</value>
   </data>
   <data name="ChumCancelHelp" xml:space="preserve">
-    <value>Экспериментальная функция, которая может работать не всегда (возможная причина - пинг). Действие "Трофеи" будет активировано.</value>
+    <value>Экспериментальная функция, которая может работать не всегда (возможная причина - пинг). Действие "Трофеи" будет активировано</value>
   </data>
   <data name="FishCaughtHelp" xml:space="preserve">
     <value>Параметры в случае, если рыба будет поймана</value>
@@ -1452,13 +1455,13 @@
     <value>Использовать приманку, если "Удар по Воде" активен:</value>
   </data>
   <data name="LureSSNotActive" xml:space="preserve">
-    <value>Использовать приманку, если "Удар по Воде" не активен:</value>
+    <value>Использовать приманку, если "Удар по Воде" не активен</value>
   </data>
   <data name="LureICActive" xml:space="preserve">
-    <value>Использовать приманку, если "Идентичный Улов" активен:</value>
+    <value>Использовать приманку, если "Идентичный Улов" активен</value>
   </data>
   <data name="LureICNotActive" xml:space="preserve">
-    <value>Использовать приманку, если "Идентичный Улов" не активен:</value>
+    <value>Использовать приманку, если "Идентичный Улов" не активен</value>
   </data>
   <data name="Prize_Catch_Options" xml:space="preserve">
     <value>Параметры "Призового Улова"</value>
