@@ -1274,6 +1274,9 @@
   <data name="SparefulHand" xml:space="preserve">
     <value>熟练妙招</value>
   </data>
+  <data name="SparefulHand_HelpText" xml:space="preserve">
+    <value></value>
+  </data>
   <data name="DelayBeforeCancel" xml:space="preserve">
     <value>延迟歇竿(毫秒)</value>
   </data>
