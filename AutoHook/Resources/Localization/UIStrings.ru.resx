@@ -120,4 +120,16 @@
   <data name="PresetAlreadyExist" xml:space="preserve">
     <value>Пресет с таким именем уже существует</value>
   </data>
+  <data name="AutoCastCordialPriorityHelpMarker" xml:space="preserve">
+    <value>Если Настойки нет в инвентаре, Вс. Настойка будет использована вместо неё</value>
+  </data>
+  <data name="ClickOpenWiki" xml:space="preserve">
+    <value>Нажмите здесь, чтобы открыть Wiki-страничку</value>
+  </data>
+  <data name="Reset_Counter_Bait_Swap" xml:space="preserve">
+    <value>Сбросить счетчик после замены приманки</value>
+  </data>
+  <data name="GPlabel" xml:space="preserve">
+    <value>ОС</value>
+  </data>
 </root>
