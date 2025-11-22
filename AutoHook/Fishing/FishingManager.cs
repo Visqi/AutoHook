@@ -193,7 +193,7 @@ public partial class FishingManager : IDisposable
     {
         var currentState = Service.BaitManager.FishingState;
 
-        if (!Service.Configuration.PluginEnabled)
+        if (!Service.Configuration.PluginEnabled || currentState == FishingState.NotFishing)
             return;
 
         if (currentState == FishingState.NotFishing)
