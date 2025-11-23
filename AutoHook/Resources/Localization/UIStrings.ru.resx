@@ -1138,7 +1138,7 @@
     <value>Использовать только в случае, если "Самодельная Приманка" или "Терпение" активны</value>
   </data>
   <data name="IgnoreMoochFishEyes" xml:space="preserve">
-    <value>"Рыбий Взор" будет использован и отменит приманивание рыбы наживкой.</value>
+    <value>Fish Eyes will be used and cancel the mooch attempt.</value>
   </data>
   <data name="StartActions" xml:space="preserve">
     <value>Начальные действия</value>
