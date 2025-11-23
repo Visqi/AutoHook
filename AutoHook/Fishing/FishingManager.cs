@@ -193,8 +193,22 @@ public partial class FishingManager : IDisposable
     {
         var currentState = Service.BaitManager.FishingState;
 
-        if (!Service.Configuration.PluginEnabled || currentState == FishingState.NotFishing)
+        if (!Service.Configuration.PluginEnabled)
             return;
+
+        if (currentState == FishingState.NotFishing)
+        {
+            if (Service.Configuration.AutoStartFishing && 
+                EzThrottler.Throttle("AutoStartFishing", 1000))
+            {
+                var autoCastCfg = GetAutoCastCfg();
+                if (autoCastCfg.EnableAll && autoCastCfg.CastLine.IsAvailableToCast() && PlayerRes.IsCastAvailable())
+                {
+                    StartFishing();
+                }
+            }
+            return;
+        }
 
         if (currentState != FishingState.Quit && _lastStep.HasFlag(FishingSteps.Quitting))
         {
