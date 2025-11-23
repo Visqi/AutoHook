@@ -1064,6 +1064,12 @@
   <data name="AntiAfkOption" xml:space="preserve">
     <value>Активация анти-AFK во время рыбалки</value>
   </data>
+  <data name="AutoStartFishing" xml:space="preserve">
+    <value>Включить авто-ловлю, если рыбалка не в процессе</value>
+  </data>
+  <data name="AutoStartFishingHelpText" xml:space="preserve">
+    <value>Запускает процесс авто-ловли, если процесс рыбалки не запущен. Отключите функцию, если вы хотите использовать авто-подсечку постоянно.</value>
+  </data>
   <data name="SwapTreeNodeButtons" xml:space="preserve">
     <value>Изменить древовидную структуру на кнопки</value>
   </data>
@@ -1426,6 +1432,12 @@
   </data>
   <data name="ChumCancelHelp" xml:space="preserve">
     <value>Экспериментальная функция, которая может работать не всегда (возможная причина - пинг). Действие "Трофеи" будет активировано</value>
+  </data>
+  <data name="TurnCollectOffWithoutAnimCancel" xml:space="preserve">
+    <value>Выключить "Перчатку Коллекционера", если функция Авто-Коллекционирования отключена</value>
+  </data>
+  <data name="TurnCollectOffWithoutAnimCancelHelp" xml:space="preserve">
+    <value>Автоматически отключает "Перчатку Коллекционера" если функция Авто-Коллекционирования отключена - вне зависимости от настроек отмены анимации</value>
   </data>
   <data name="FishCaughtHelp" xml:space="preserve">
     <value>Параметры в случае, если рыба будет поймана</value>
