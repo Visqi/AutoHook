@@ -192,6 +192,7 @@ public partial class FishingManager : IDisposable
 
     private void OnFrameworkUpdate(IFramework _)
     {
+        if (Svc.Objects.LocalPlayer == null || !Service.BaitManager.IsValid) return;
         var currentState = Service.BaitManager.FishingState;
 
         if (!Service.Configuration.PluginEnabled)

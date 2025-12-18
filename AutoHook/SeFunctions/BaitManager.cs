@@ -7,9 +7,11 @@ namespace AutoHook.SeFunctions;
 
 public unsafe class BaitManager
 {
-    internal FishingEventHandler* FishingMan => EventFramework.Instance()->EventHandlerModule.FishingEventHandler;
+    public bool IsValid => FishingMan != null;
 
-    public FishingState FishingState => FishingMan->State;
+    internal FishingEventHandler* FishingMan => EventFramework.Instance() is var ef && ef != null ? ef->EventHandlerModule.FishingEventHandler : null;
+
+    public FishingState FishingState => FishingMan is var fm && fm != null ? fm->State : FishingState.None;
 
     public uint? CurrentSwimBait => FishingMan->CurrentSelectedSwimBait switch
     {
