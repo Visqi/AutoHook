@@ -1,6 +1,6 @@
 ﻿using Dalamud.Bindings.ImGui;
 using ECommons.Throttlers;
-using static AutoHook.Enums.FishingState;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -31,7 +31,7 @@ public class AutoLures : BaseActionCast
         if (PlayerRes.GetStatusStacks(StatusId) >= LureStacks)
             return false;
 
-        if (Service.BaitManager.FishingState is not (NormalFishing or LureFishing))
+        if (Service.BaitManager.FishingState is not (FishingState.AmbitiousLure or FishingState.LineInWater))
             return false;
 
         if (OnlyCastLarge && !PlayerRes.HasAnyStatus([IDs.Status.AnglersFortune, IDs.Status.PrizeCatch]))

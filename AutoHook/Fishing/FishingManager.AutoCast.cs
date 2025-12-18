@@ -96,7 +96,7 @@ public partial class FishingManager
             return false;
 
         var swimbaitIds = Service.BaitManager.SwimbaitIds;
-        foreach (var (fishId, slotIndex) in swimbaitIds.WithIndex())
+        foreach (var (fishId, slotIndex) in swimbaitIds.ToArray().WithIndex())
         {
             if (fishId == 0)
                 continue;

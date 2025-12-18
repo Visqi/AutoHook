@@ -2,7 +2,6 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
-using Lumina.Excel.Sheets;
 
 namespace AutoHook;
 

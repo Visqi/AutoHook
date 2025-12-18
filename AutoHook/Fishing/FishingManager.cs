@@ -2,6 +2,7 @@ using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using System.Diagnostics;
 
 namespace AutoHook.Fishing;
@@ -14,7 +15,7 @@ public partial class FishingManager : IDisposable
     private double _timeout;
     private readonly Stopwatch _fishingTimer = new();
 
-    private FishingState _lastState = FishingState.NotFishing;
+    private FishingState _lastState = FishingState.None;
     private FishingSteps _lastStep = 0;
 
     private BaitFishClass? _lastCatch;
@@ -196,7 +197,7 @@ public partial class FishingManager : IDisposable
         if (!Service.Configuration.PluginEnabled)
             return;
 
-        if (currentState == FishingState.NotFishing)
+        if (currentState == FishingState.None)
         {
             if (Service.Configuration.AutoStartFishing && EzThrottler.Throttle("AutoStartFishing", 1000))
             {
@@ -209,12 +210,12 @@ public partial class FishingManager : IDisposable
             return;
         }
 
-        if (currentState != FishingState.Quit && _lastStep.HasFlag(FishingSteps.Quitting))
+        if (currentState != FishingState.Quitting && _lastStep.HasFlag(FishingSteps.Quitting))
         {
             if (PlayerRes.IsCastAvailable())
             {
                 PlayerRes.CastActionDelayed(IDs.Actions.Quit, ActionType.Action, @"Quit");
-                currentState = FishingState.Quit;
+                currentState = FishingState.Quitting;
             }
         }
 
@@ -223,7 +224,7 @@ public partial class FishingManager : IDisposable
         if (!_lastStep.HasFlag(FishingSteps.Quitting) && currentState == FishingState.PoleReady)
             CheckPluginActions();
 
-        if (currentState is FishingState.NormalFishing or FishingState.LureFishing)
+        if (currentState is FishingState.AmbitiousLure or FishingState.LineInWater)
         {
             CheckWhileFishingActions();
             CheckTimeout();
@@ -236,19 +237,19 @@ public partial class FishingManager : IDisposable
 
         switch (currentState)
         {
-            case FishingState.PullPoleIn: // If a hook is manually used before a bite, don't use auto cast
+            case FishingState.PullingPoleIn: // If a hook is manually used before a bite, don't use auto cast
                 if (_lastStep.HasFlag(FishingSteps.BeganFishing))
                     _lastStep = FishingSteps.None;
                 else AnimationCancel();
                 _fishingTimer.Reset();
                 break;
-            case FishingState.PoleOut:
+            case FishingState.CastingOut:
                 InitFinishing();
                 break;
             case FishingState.Bite:
                 if (!_lastStep.HasFlag(FishingSteps.FishBit)) Service.TaskManager.Enqueue(OnBite);
                 break;
-            case FishingState.Quit:
+            case FishingState.Quitting:
                 OnFishingStop();
                 break;
         }
@@ -299,7 +300,7 @@ public partial class FishingManager : IDisposable
     private void OnBeganFishing(bool mooching)
     {
         if (_lastStep.HasFlag(FishingSteps.BeganFishing) &&
-            (_lastState != FishingState.PoleReady || _lastState != FishingState.NotFishing))
+            (_lastState != FishingState.PoleReady || _lastState != FishingState.None))
             return;
 
         _isMooching = mooching;

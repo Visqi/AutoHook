@@ -12,6 +12,7 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.ImGuiMethods;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
 namespace AutoHook;
 
@@ -281,7 +282,7 @@ public class PluginUi : Window, IDisposable
             {
                 ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.Plugin_Disabled);
             }
-            else if (Service.BaitManager.FishingState == FishingState.NotFishing)
+            else if (Service.BaitManager.FishingState == FishingState.None)
             {
                 try
                 {
@@ -293,7 +294,7 @@ public class PluginUi : Window, IDisposable
                     }
                     else
                     {
-                        var baitId = Service.BaitManager.CurrentBaitSwimBait;
+                        var baitId = Service.BaitManager.Current;
                         var baitName = MultiString.GetItemName(baitId);
 
                         var hasBait = preset != null && preset.HasBaitOrMooch(baitId);
