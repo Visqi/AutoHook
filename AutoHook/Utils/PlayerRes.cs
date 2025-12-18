@@ -20,10 +20,10 @@ public static class PlayerRes
 
     public static bool HasStatus(uint statusID)
     {
-        if (Svc.ClientState.LocalPlayer?.StatusList == null)
+        if (Svc.Objects.LocalPlayer?.StatusList == null)
             return false;
 
-        foreach (var buff in Svc.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Svc.Objects.LocalPlayer.StatusList)
         {
             if (buff.StatusId == statusID)
                 return true;
@@ -34,10 +34,10 @@ public static class PlayerRes
 
     public static bool HasAnyStatus(uint[] statusIDs)
     {
-        if (Svc.ClientState.LocalPlayer?.StatusList == null)
+        if (Svc.Objects.LocalPlayer?.StatusList == null)
             return false;
 
-        return Svc.ClientState.LocalPlayer.StatusList.Any(buff => statusIDs.Contains(buff.StatusId));
+        return Svc.Objects.LocalPlayer.StatusList.Any(buff => statusIDs.Contains(buff.StatusId));
     }
 
     public static unsafe bool IsInActiveSpectralCurrent()
@@ -50,26 +50,26 @@ public static class PlayerRes
 
     public static uint GetCurrentGp()
     {
-        if (Svc.ClientState.LocalPlayer?.CurrentGp == null)
+        if (Svc.Objects.LocalPlayer?.CurrentGp == null)
             return 0;
 
-        return Svc.ClientState.LocalPlayer.CurrentGp;
+        return Svc.Objects.LocalPlayer.CurrentGp;
     }
 
     public static uint GetMaxGp()
     {
-        if (Svc.ClientState.LocalPlayer?.MaxGp == null)
+        if (Svc.Objects.LocalPlayer?.MaxGp == null)
             return 0;
 
-        return Svc.ClientState.LocalPlayer.MaxGp;
+        return Svc.Objects.LocalPlayer.MaxGp;
     }
 
     public static int GetStatusStacks(uint status)
     {
-        if (Svc.ClientState.LocalPlayer?.StatusList == null)
+        if (Svc.Objects.LocalPlayer?.StatusList == null)
             return 0;
 
-        foreach (var buff in Svc.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Svc.Objects.LocalPlayer.StatusList)
         {
             if (buff.StatusId == status)
                 return buff.Param;
@@ -80,10 +80,10 @@ public static class PlayerRes
 
     public static bool HasAnglersArtStacks(int amount)
     {
-        if (Svc.ClientState.LocalPlayer?.StatusList == null)
+        if (Svc.Objects.LocalPlayer?.StatusList == null)
             return false;
 
-        foreach (var buff in Svc.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Svc.Objects.LocalPlayer.StatusList)
         {
             if (buff.StatusId == IDs.Status.AnglersArt)
                 return buff.Param >= amount;
@@ -94,10 +94,10 @@ public static class PlayerRes
 
     public static float GetStatusTime(uint statusId)
     {
-        if (Svc.ClientState.LocalPlayer?.StatusList == null)
+        if (Svc.Objects.LocalPlayer?.StatusList == null)
             return 0;
 
-        foreach (var buff in Svc.ClientState.LocalPlayer.StatusList)
+        foreach (var buff in Svc.Objects.LocalPlayer.StatusList)
         {
             if (buff.StatusId == statusId)
                 return buff.RemainingTime;
@@ -193,7 +193,7 @@ public static class PlayerRes
         if (_blockCasting)
             return;
 
-        if (actionType is ActionType.Action or ActionType.Ability)
+        if (actionType is ActionType.Action or ActionType.EventAction)
         {
             if (!ActionTypeAvailable(actionId, actionType))
                 return;
@@ -274,8 +274,8 @@ public static class PlayerRes
         _blockCasting = false;
     }
 
-    private static int ConditionalDelay(uint id) =>
-        id switch
+    private static int ConditionalDelay(uint id)
+        => id switch
         {
             IDs.Actions.ThaliaksFavor => 1100,
             IDs.Actions.MakeshiftBait => 1100,

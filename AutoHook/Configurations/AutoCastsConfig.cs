@@ -1,5 +1,5 @@
-using System.ComponentModel;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using System.ComponentModel;
 
 namespace AutoHook.Configurations;
 

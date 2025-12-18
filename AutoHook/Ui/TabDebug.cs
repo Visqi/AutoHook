@@ -127,7 +127,7 @@ public class TabDebug : BaseTab
             }
 
             if (ImGui.Button($"copy mooches"))
-                ImGui.SetClipboardText(string.Join("\n", FindRows<FishingBaitParameter>(x => x.Unknown0 != 0 && GetRow<Item>(x.Unknown0)?.ItemUICategory.RowId != 33).Select(x => $"[{x.Unknown0}] {GetRow<Item>(x.Unknown0)?.Singular}")));
+                ImGui.SetClipboardText(string.Join("\n", FindRows<FishingBaitParameter>(x => x.Item.Value.ItemUICategory.RowId != 33).Select(x => $"[{x.Item.RowId}] {x.Item.Value.Singular}")));
 
             if (ImGui.CollapsingHeader("Get Wiki presets", ImGuiTreeNodeFlags.DefaultOpen))
             {

@@ -90,7 +90,7 @@ public unsafe class BaitManager
     {
         get
         {
-            if (GetRow<TerritoryType>(Player.Territory) is { TerritoryIntendedUse.RowId: 60 })
+            if (Player.Territory is { Value.TerritoryIntendedUse.RowId: 60 })
             {
                 var cosmicManager = WKSManager.Instance();
                 if (cosmicManager != null)
