@@ -5,7 +5,7 @@
     "Description": "It hooks the fish for you, can you believe it?",
     "InternalName": "AutoHook",
     "RepoUrl": "https://github.com/PunishXIV/AutoHook",
-    "MinimumDalamudVersion": "13.0.0.0",
+    "MinimumDalamudVersion": "14.0.0.0",
     "Tags": [ "Gathering", "Fishing" ],
     "AcceptsFeedback": false,
     "Changelog": "Click the Changelog button to see whats new",

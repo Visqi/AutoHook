@@ -192,12 +192,9 @@ public partial class FishingManager : IDisposable
 
     private void OnFrameworkUpdate(IFramework _)
     {
-        if (Svc.Objects.LocalPlayer == null || !Service.BaitManager.IsValid) return;
+        if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null || !Service.BaitManager.IsValid) return;
+
         var currentState = Service.BaitManager.FishingState;
-
-        if (!Service.Configuration.PluginEnabled)
-            return;
-
         if (currentState == FishingState.None)
         {
             if (Service.Configuration.AutoStartFishing && EzThrottler.Throttle("AutoStartFishing", 1000))

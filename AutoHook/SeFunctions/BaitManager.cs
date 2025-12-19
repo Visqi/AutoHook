@@ -9,17 +9,47 @@ public unsafe class BaitManager
 {
     public bool IsValid => FishingMan != null;
 
-    internal FishingEventHandler* FishingMan => EventFramework.Instance() is var ef && ef != null ? ef->EventHandlerModule.FishingEventHandler : null;
+    internal FishingEventHandler* FishingMan
+    {
+        get
+        {
+            var ef = EventFramework.Instance();
+            if (ef == null) return null;
+            var handler = ef->EventHandlerModule.FishingEventHandler;
+            if (handler == null) return null;
+            return handler;
+        }
+    }
 
     public FishingState FishingState => FishingMan is var fm && fm != null ? fm->State : FishingState.None;
 
-    public uint? CurrentSwimBait => FishingMan->CurrentSelectedSwimBait switch
+    public uint? CurrentSwimBait
     {
-        -1 => null,
-        _ => FishingMan->SwimBaitItemIds[FishingMan->CurrentSelectedSwimBait]
-    };
+        get
+        {
+            if (FishingMan == null) return null;
+            if (FishingMan->CurrentSelectedSwimBait == -1) return null;
+            if (FishingMan->CurrentSelectedSwimBait is < 0 or >= 3) return null;
+            return FishingMan->SwimBaitItemIds[FishingMan->CurrentSelectedSwimBait];
+        }
+    }
 
-    public Span<uint> SwimbaitIds => FishingMan->SwimBaitItemIds;
+    public Span<uint> SwimbaitIds
+    {
+        get
+        {
+            if (FishingMan == null)
+                return [];
+            try
+            {
+                return FishingMan->SwimBaitItemIds;
+            }
+            catch
+            {
+                return [];
+            }
+        }
+    }
 
     public uint CurrentBaitSwimBait => CurrentSwimBait ?? Current;
 
@@ -27,14 +57,24 @@ public unsafe class BaitManager
     {
         get
         {
-            if (Player.Territory is { Value.TerritoryIntendedUse.RowId: 60 })
+            try
             {
-                var cosmicManager = WKSManager.Instance();
-                if (cosmicManager != null)
-                    return cosmicManager->FishingBait;
-            }
+                if (Player.Territory is { Value.TerritoryIntendedUse.RowId: 60 })
+                {
+                    var cosmicManager = WKSManager.Instance();
+                    if (cosmicManager != null)
+                        return cosmicManager->FishingBait;
+                }
 
-            return PlayerState.Instance()->FishingBait;
+                var playerState = PlayerState.Instance();
+                if (playerState != null)
+                    return playerState->FishingBait;
+            }
+            catch
+            {
+                // Game state not ready
+            }
+            return 0;
         }
     }
 
@@ -83,8 +123,18 @@ public unsafe class BaitManager
         return GameMain.ExecuteCommand(701, 4, bait.Id, 0, 0) ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
     }
 
-    public int GetSwimbaitCount() => FishingMan->SwimBaitItemIds.ToArray().Count(id => id != 0);
-    public int GetSwimbaitCountForFish(uint fishId) => FishingMan->SwimBaitItemIds.ToArray().Count(id => id == fishId);
+    public int GetSwimbaitCount()
+    {
+        if (FishingMan == null) return 0;
+        return FishingMan->SwimBaitItemIds.ToArray().Count(id => id != 0);
+    }
+
+    public int GetSwimbaitCountForFish(uint fishId)
+    {
+        if (FishingMan == null) return 0;
+        return FishingMan->SwimBaitItemIds.ToArray().Count(id => id == fishId);
+    }
+
     public bool IsSwimbaitFull() => GetSwimbaitCount() >= 3;
     public bool IsSwimbaitEmpty() => GetSwimbaitCount() == 0;
 
