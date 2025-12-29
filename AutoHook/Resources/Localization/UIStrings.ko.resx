@@ -704,7 +704,7 @@
     <value>잡은 물고기</value>
   </data>
   <data name="Add_new_fish" xml:space="preserve">
-    <value>새로운 미끼 추가</value>
+    <value>새로운 물고기 추가</value>
   </data>
   <data name="Cast_Line" xml:space="preserve">
     <value>낚싯대 던지기</value>
