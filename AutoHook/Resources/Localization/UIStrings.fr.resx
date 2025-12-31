@@ -1327,4 +1327,7 @@ Vous pouvez également utiliser la commande /ahstart pour commencer. Essayez de 
   <data name="ChumCancelHelp" xml:space="preserve">
     <value>Expérimental et inconsistant (peut-être causé par le ping). L'action "Ramassage sous-marin" va être activée.</value>
   </data>
+  <data name="TurnCollectOffWithoutAnimCancel" xml:space="preserve">
+    <value>Désactive le Gant du collectionneur quand Collection automatique est désactivé</value>
+  </data>
 </root>
