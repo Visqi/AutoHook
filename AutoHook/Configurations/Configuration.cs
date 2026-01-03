@@ -49,6 +49,10 @@ public class Configuration : IPluginConfiguration
 
     [DefaultValue(false)] public bool AutoStartFishing = false;
 
+    [DefaultValue(true)] public bool DtrBarEnabled = true;
+
+    [DefaultValue(true)] public bool DtrShowCurrentPreset = true;
+
     // old config
     public List<BaitPresetConfig> BaitPresetList = [];
 

@@ -19,7 +19,7 @@ namespace AutoHook.Resources.Localization {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class UIStrings {
@@ -256,24 +256,6 @@ namespace AutoHook.Resources.Localization {
         internal static string AntiAfkOption {
             get {
                 return ResourceManager.GetString("AntiAfkOption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Automatically cast when not fishing.
-        /// </summary>
-        internal static string AutoStartFishing {
-            get {
-                return ResourceManager.GetString("AutoStartFishing", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Automatically casts line when not fishing. Disable if you keep AutoHook on at all times..
-        /// </summary>
-        internal static string AutoStartFishingHelpText {
-            get {
-                return ResourceManager.GetString("AutoStartFishingHelpText", resourceCulture);
             }
         }
         
@@ -584,6 +566,24 @@ namespace AutoHook.Resources.Localization {
         internal static string AutoPatience_Patience {
             get {
                 return ResourceManager.GetString("AutoPatience_Patience", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automatically cast when not fishing.
+        /// </summary>
+        internal static string AutoStartFishing {
+            get {
+                return ResourceManager.GetString("AutoStartFishing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automatically casts line when not fishing. Disable if you keep AutoHook on at all times..
+        /// </summary>
+        internal static string AutoStartFishingHelpText {
+            get {
+                return ResourceManager.GetString("AutoStartFishingHelpText", resourceCulture);
             }
         }
         
@@ -1261,6 +1261,33 @@ namespace AutoHook.Resources.Localization {
         internal static string DrawImportExport_Cancel {
             get {
                 return ResourceManager.GetString("DrawImportExport_Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Left click Enable/Disable - Right click toggle UI. Modifiers Alt, Ctrl, Shift allow left click and right click to cycle through presets.
+        /// </summary>
+        internal static string Dtr_Settings_Help_Text {
+            get {
+                return ResourceManager.GetString("Dtr_Settings_Help_Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show Dtr Bar.
+        /// </summary>
+        internal static string Dtr_Show {
+            get {
+                return ResourceManager.GetString("Dtr_Show", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show Preset in Dtr.
+        /// </summary>
+        internal static string Dtr_Show_Preset {
+            get {
+                return ResourceManager.GetString("Dtr_Show_Preset", resourceCulture);
             }
         }
         

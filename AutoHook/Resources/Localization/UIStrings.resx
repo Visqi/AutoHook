@@ -1573,4 +1573,13 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="GPlabel" xml:space="preserve">
     <value>GP</value>
   </data>
+  <data name="Dtr_Show" xml:space="preserve">
+    <value>Show Dtr Bar</value>
+  </data>
+  <data name="Dtr_Show_Preset" xml:space="preserve">
+    <value>Show Preset in Dtr</value>
+  </data>
+  <data name="Dtr_Settings_Help_Text" xml:space="preserve">
+    <value>Left click Enable/Disable - Right click toggle UI. Modifiers Alt, Ctrl, Shift allow left click and right click to cycle through presets</value>
+  </data>
 </root>
