@@ -51,7 +51,7 @@ public class Configuration : IPluginConfiguration
 
     [DefaultValue(false)] public bool DtrBarEnabled = false;
 
-    [DefaultValue(false)] public bool DtrShowCurrentPreset = false;
+    [DefaultValue(false)] public bool DtrPresetBarEnabled = false;
 
     // old config
     public List<BaitPresetConfig> BaitPresetList = [];

@@ -50,6 +50,7 @@ public class AutoHook : IDalamudPlugin
     public AutoHookIPC AutoHookIpc;
 
     public DtrBar AutoHookDtrBar { get; }
+    public DtrPresetBar AutoHookPresetDtrBar { get; }
 
     public AutoHook(IDalamudPluginInterface pluginInterface, IDtrBar dtrBar)
     {
@@ -84,7 +85,9 @@ public class AutoHook : IDalamudPlugin
         HookManager = new FishingManager();
         AutoHookIpc = new AutoHookIPC();
         AutoHookDtrBar = new DtrBar(dtrBar, _pluginUi);
+        AutoHookPresetDtrBar = new DtrPresetBar(dtrBar);
         Svc.Framework.Update += AutoHookDtrBar.Update;
+        Svc.Framework.Update += AutoHookPresetDtrBar.Update;
 
 #if (DEBUG)
         OnOpenConfigUi();
@@ -184,6 +187,7 @@ public class AutoHook : IDalamudPlugin
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;
         Svc.Framework.Update -= AutoHookDtrBar.Update;
+        Svc.Framework.Update -= AutoHookPresetDtrBar.Update;
 
         foreach (var (command, _) in CommandHelp)
         {

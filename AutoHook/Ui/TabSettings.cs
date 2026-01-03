@@ -70,9 +70,6 @@ public class TabSettings : BaseTab
 
         DrawUtil.Checkbox(UIStrings.Hide_Tab_Description, ref Service.Configuration.HideTabDescription);
 
-        DrawUtil.Checkbox(UIStrings.Dtr_Show, ref Service.Configuration.DtrBarEnabled, UIStrings.Dtr_Settings_Help_Text);
-        DrawUtil.Checkbox(UIStrings.Dtr_Show_Preset, ref Service.Configuration.DtrShowCurrentPreset);
-
         DrawUtil.Checkbox(UIStrings.Show_Current_Status_Header, ref Service.Configuration.ShowStatus);
 
         DrawUtil.Checkbox(UIStrings.Show_Chat_Logs, ref Service.Configuration.ShowChatLogs, UIStrings.Show_Chat_Logs_HelpText);
@@ -97,6 +94,10 @@ public class TabSettings : BaseTab
 
             ImGui.Text("Hello, you're cute!");
         });
+
+        DrawUtil.Checkbox(UIStrings.Dtr_Show, ref Service.Configuration.DtrBarEnabled, UIStrings.Dtr_Settings_Help_Text);
+        DrawUtil.Checkbox(UIStrings.Dtr_Show_Preset, ref Service.Configuration.DtrPresetBarEnabled, UIStrings.Dtr_Preset_Setting_Help);
+        DrawUtil.TextV(UIStrings.Dtr_Help);
     }
 
     private static void DrawDelayHook()

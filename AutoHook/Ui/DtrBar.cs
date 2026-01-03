@@ -23,38 +23,14 @@ public sealed class DtrBar : IDisposable
 
     private void HandleClick(DtrInteractionEvent @event)
     {
-        if (@event.ModifierKeys == ClickModifierKeys.None)
+        if (@event.ClickType == MouseClickType.Left)
         {
-            if (@event.ClickType == MouseClickType.Left)
-            {
-                Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;
-                Service.Configuration.Save();
-            }
-            else if (@event.ClickType == MouseClickType.Right)
-            {
-                _pluginUi.Toggle();
-            }
+            Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;
+            Service.Configuration.Save();
         }
-        else
+        else if (@event.ClickType == MouseClickType.Right)
         {
-            if (@event.ClickType == MouseClickType.Left)
-            {
-                if (Service.Configuration.HookPresets.SelectedPreset == null) return;
-                var totalPresets = Service.Configuration.HookPresets.CustomPresets.Count;
-                var selectedPresetIndex = Service.Configuration.HookPresets.CustomPresets.IndexOf(Service.Configuration.HookPresets.SelectedPreset!);
-                Service.Configuration.HookPresets.SelectedPreset = Service.Configuration.HookPresets.CustomPresets[(selectedPresetIndex - 1) % totalPresets];
-
-                Service.Configuration.Save();
-            }
-            else if (@event.ClickType == MouseClickType.Right)
-            {
-                if (Service.Configuration.HookPresets.SelectedPreset == null) return;
-                var totalPresets = Service.Configuration.HookPresets.CustomPresets.Count;
-                var selectedPresetIndex = Service.Configuration.HookPresets.CustomPresets.IndexOf(Service.Configuration.HookPresets.SelectedPreset!);
-                Service.Configuration.HookPresets.SelectedPreset = Service.Configuration.HookPresets.CustomPresets[(selectedPresetIndex + 1) % totalPresets];
-
-                Service.Configuration.Save();
-            }
+            _pluginUi.Toggle();
         }
     }
 
@@ -83,16 +59,8 @@ public sealed class DtrBar : IDisposable
             _dtrBarEntry.Shown = true;
         }
 
-        string text;
-        string pluginStatus = Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled;
-        if (Service.Configuration.DtrShowCurrentPreset)
-        {
-            text = $"{SeIconChar.BoxedStar.ToIconString()} {pluginStatus} - {Service.Configuration.HookPresets.SelectedPreset?.PresetName}";
-        }
-        else
-        {
-            text = $"{SeIconChar.BoxedStar.ToIconString()} {pluginStatus}";
-        }
+        var pluginStatus = Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled;
+        var text = $"{SeIconChar.BoxedStar.ToIconString()} {pluginStatus}";
 
         if (!string.Equals(text, _text, StringComparison.Ordinal))
         {
