@@ -1265,7 +1265,25 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Left click Enable/Disable - Right click toggle UI. Modifiers Alt, Ctrl, Shift allow left click and right click to cycle through presets.
+        ///   Looks up a localized string similar to Dtr positional order can be changed within dalamud settings..
+        /// </summary>
+        internal static string Dtr_Help {
+            get {
+                return ResourceManager.GetString("Dtr_Help", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Left click cycles forward, Right click backward cycles..
+        /// </summary>
+        internal static string Dtr_Preset_Setting_Help {
+            get {
+                return ResourceManager.GetString("Dtr_Preset_Setting_Help", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Left click Enable/Disable, Right click toggle UI..
         /// </summary>
         internal static string Dtr_Settings_Help_Text {
             get {
@@ -1283,7 +1301,7 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show Preset in Dtr.
+        ///   Looks up a localized string similar to Show Preset Dtr Bar.
         /// </summary>
         internal static string Dtr_Show_Preset {
             get {

@@ -1577,9 +1577,15 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
     <value>Show Dtr Bar</value>
   </data>
   <data name="Dtr_Show_Preset" xml:space="preserve">
-    <value>Show Preset in Dtr</value>
+    <value>Show Preset Dtr Bar</value>
   </data>
   <data name="Dtr_Settings_Help_Text" xml:space="preserve">
-    <value>Left click Enable/Disable - Right click toggle UI. Modifiers Alt, Ctrl, Shift allow left click and right click to cycle through presets</value>
+    <value>Left click Enable/Disable, Right click toggle UI.</value>
+  </data>
+  <data name="Dtr_Preset_Setting_Help" xml:space="preserve">
+    <value>Left click cycles forward, Right click backward cycles.</value>
+  </data>
+  <data name="Dtr_Help" xml:space="preserve">
+    <value>Dtr positional order can be changed within dalamud settings.</value>
   </data>
 </root>
