@@ -1,8 +1,10 @@
 ﻿using System.Globalization;
 using AutoHook.IPC;
 using AutoHook.Spearfishing;
+using AutoHook.Ui;
 using Dalamud.Game.Command;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using PunishLib;
 
 namespace AutoHook;
@@ -47,7 +49,9 @@ public class AutoHook : IDalamudPlugin
 
     public AutoHookIPC AutoHookIpc;
 
-    public AutoHook(IDalamudPluginInterface pluginInterface)
+    public DtrBar AutoHookDtrBar { get; }
+
+    public AutoHook(IDalamudPluginInterface pluginInterface, IDtrBar dtrBar)
     {
         ECommonsMain.Init(pluginInterface, this, Module.DalamudReflector, Module.ObjectFunctions);
         Service.Initialize(pluginInterface);
@@ -79,6 +83,8 @@ public class AutoHook : IDalamudPlugin
 
         HookManager = new FishingManager();
         AutoHookIpc = new AutoHookIPC();
+        AutoHookDtrBar = new DtrBar(dtrBar, _pluginUi);
+        Svc.Framework.Update += AutoHookDtrBar.Update;
 
 #if (DEBUG)
         OnOpenConfigUi();
@@ -177,6 +183,7 @@ public class AutoHook : IDalamudPlugin
         Svc.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;
+        Svc.Framework.Update -= AutoHookDtrBar.Update;
 
         foreach (var (command, _) in CommandHelp)
         {
