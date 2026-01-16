@@ -59,6 +59,12 @@ public sealed class DtrBar : IDisposable
             _dtrBarEntry.Shown = true;
         }
 
+        if (Player.Job != ECommons.ExcelServices.Job.FSH)
+        {
+            Clear();
+            return;
+        }
+
         var pluginStatus = Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled;
         var text = $"{SeIconChar.BoxedStar.ToIconString()} {pluginStatus}";
 

@@ -62,6 +62,12 @@ public sealed class DtrPresetBar : IDisposable
             _dtrBarEntry.Shown = true;
         }
 
+        if (Player.Job != ECommons.ExcelServices.Job.FSH)
+        {
+            Clear();
+            return;
+        }
+
         string text = $"{SeIconChar.Collectible.ToIconString()} {Service.Configuration.HookPresets.SelectedPreset?.PresetName}";
 
         if (!string.Equals(text, _text, StringComparison.Ordinal))

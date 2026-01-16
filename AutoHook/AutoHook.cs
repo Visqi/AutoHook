@@ -189,6 +189,9 @@ public class AutoHook : IDalamudPlugin
         Svc.Framework.Update -= AutoHookDtrBar.Update;
         Svc.Framework.Update -= AutoHookPresetDtrBar.Update;
 
+        AutoHookDtrBar.Dispose();
+        AutoHookPresetDtrBar.Dispose();
+
         foreach (var (command, _) in CommandHelp)
         {
             Svc.Commands.RemoveHandler(command);
