@@ -1573,4 +1573,19 @@
   <data name="GPlabel" xml:space="preserve">
     <value>ОС</value>
   </data>
+  <data name="Dtr_Show" xml:space="preserve">
+    <value>Показать инфо-панель</value>
+  </data>
+  <data name="Dtr_Show_Preset" xml:space="preserve">
+    <value>Показать пресет в инфо-панели</value>
+  </data>
+  <data name="Dtr_Settings_Help_Text" xml:space="preserve">
+    <value>ЛКМ (Вкл/Выкл), ПКМ - включить UI.</value>
+  </data>
+  <data name="Dtr_Preset_Setting_Help" xml:space="preserve">
+    <value>ЛКМ - следующий пресет, ПКМ - предыдущий пресет</value>
+  </data>
+  <data name="Dtr_Help" xml:space="preserve">
+    <value>Порядок в инфо-панели может быть изменён в настройках Dalamud.</value>
+  </data>
 </root>
