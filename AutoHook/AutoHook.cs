@@ -94,7 +94,7 @@ public class AutoHook : IDalamudPlugin
                 else if (evt.ClickType is MouseClickType.Right)
                     _pluginUi.Toggle();
             },
-            showCondition: () => Player.Job is ECommons.ExcelServices.Job.FSH
+            showCondition: () => Service.Configuration.DtrBarEnabled && Player.Job is ECommons.ExcelServices.Job.FSH
         );
 
         _ = new EzDtr2(() => $"AHP: {Service.Configuration.HookPresets.SelectedPreset?.PresetName ?? "null"}",
@@ -108,7 +108,7 @@ public class AutoHook : IDalamudPlugin
                 Service.Configuration.Save();
             },
             $"{Name}Presets",
-            () => Player.Job is ECommons.ExcelServices.Job.FSH && Service.Configuration.HookPresets.SelectedPreset != null
+            () => Service.Configuration.DtrPresetBarEnabled && Player.Job is ECommons.ExcelServices.Job.FSH && Service.Configuration.HookPresets.SelectedPreset != null
         );
 
 #if (DEBUG)
