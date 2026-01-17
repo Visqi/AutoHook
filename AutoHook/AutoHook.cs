@@ -1,11 +1,11 @@
-﻿using System.Globalization;
-using AutoHook.IPC;
+﻿using AutoHook.IPC;
 using AutoHook.Spearfishing;
-using AutoHook.Ui;
 using Dalamud.Game.Command;
+using Dalamud.Game.Gui.Dtr;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using PunishLib;
+using System.Globalization;
 
 namespace AutoHook;
 
@@ -49,9 +49,6 @@ public class AutoHook : IDalamudPlugin
 
     public AutoHookIPC AutoHookIpc;
 
-    public DtrBar AutoHookDtrBar { get; }
-    public DtrPresetBar AutoHookPresetDtrBar { get; }
-
     public AutoHook(IDalamudPluginInterface pluginInterface, IDtrBar dtrBar)
     {
         ECommonsMain.Init(pluginInterface, this, Module.DalamudReflector, Module.ObjectFunctions);
@@ -84,10 +81,35 @@ public class AutoHook : IDalamudPlugin
 
         HookManager = new FishingManager();
         AutoHookIpc = new AutoHookIPC();
-        AutoHookDtrBar = new DtrBar(dtrBar, _pluginUi);
-        AutoHookPresetDtrBar = new DtrPresetBar(dtrBar);
-        Svc.Framework.Update += AutoHookDtrBar.Update;
-        Svc.Framework.Update += AutoHookPresetDtrBar.Update;
+
+        _ = new EzDtr2(() =>
+            $"AH: {(Service.Configuration.PluginEnabled ? "Enabled" : "Disabled")}",
+            evt =>
+            {
+                if (evt.ClickType is MouseClickType.Left)
+                {
+                    Service.Configuration.PluginEnabled ^= true;
+                    Service.Configuration.Save();
+                }
+                else if (evt.ClickType is MouseClickType.Right)
+                    _pluginUi.Toggle();
+            },
+            showCondition: () => Player.Job is ECommons.ExcelServices.Job.FSH
+        );
+
+        _ = new EzDtr2(() => $"AHP: {Service.Configuration.HookPresets.SelectedPreset?.PresetName ?? "null"}",
+            evt =>
+            {
+                if (Service.Configuration.HookPresets.SelectedPreset == null) return;
+                var presets = Service.Configuration.HookPresets.CustomPresets;
+                var index = presets.IndexOf(Service.Configuration.HookPresets.SelectedPreset);
+                var direction = evt.ClickType == MouseClickType.Left ? 1 : -1;
+                Service.Configuration.HookPresets.SelectedPreset = presets[(index + direction + presets.Count) % presets.Count];
+                Service.Configuration.Save();
+            },
+            $"{Name}Presets",
+            () => Player.Job is ECommons.ExcelServices.Job.FSH && Service.Configuration.HookPresets.SelectedPreset != null
+        );
 
 #if (DEBUG)
         OnOpenConfigUi();
@@ -186,17 +208,11 @@ public class AutoHook : IDalamudPlugin
         Svc.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;
-        Svc.Framework.Update -= AutoHookDtrBar.Update;
-        Svc.Framework.Update -= AutoHookPresetDtrBar.Update;
-
-        AutoHookDtrBar.Dispose();
-        AutoHookPresetDtrBar.Dispose();
 
         foreach (var (command, _) in CommandHelp)
-        {
             Svc.Commands.RemoveHandler(command);
-        }
 
+        EzDtr2.DisposeAll();
         ECommonsMain.Dispose();
     }
 
