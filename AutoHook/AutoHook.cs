@@ -2,6 +2,7 @@
 using AutoHook.Spearfishing;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui.Dtr;
+using Dalamud.Game.Text;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using PunishLib;
@@ -83,7 +84,7 @@ public class AutoHook : IDalamudPlugin
         AutoHookIpc = new AutoHookIPC();
 
         _ = new EzDtr2(() =>
-            $"AH: {(Service.Configuration.PluginEnabled ? "Enabled" : "Disabled")}",
+            $"{((SeIconChar)0xE05E).ToIconString()} {(Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled)}",
             evt =>
             {
                 if (evt.ClickType is MouseClickType.Left)
@@ -97,7 +98,7 @@ public class AutoHook : IDalamudPlugin
             showCondition: () => Service.Configuration.DtrBarEnabled && Player.Job is ECommons.ExcelServices.Job.FSH
         );
 
-        _ = new EzDtr2(() => $"AHP: {Service.Configuration.HookPresets.SelectedPreset?.PresetName ?? "null"}",
+        _ = new EzDtr2(() => $"{SeIconChar.Collectible.ToIconString()} {Service.Configuration.HookPresets.SelectedPreset?.PresetName ?? $"{UIStrings.GlobalPreset}"}",
             evt =>
             {
                 if (Service.Configuration.HookPresets.SelectedPreset == null) return;
