@@ -1588,4 +1588,7 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="Dtr_Help" xml:space="preserve">
     <value>Dtr positional order can be changed within dalamud settings.</value>
   </data>
+  <data name="Multihook" xml:space="preserve">
+    <value>Multihook</value>
+  </data>
 </root>

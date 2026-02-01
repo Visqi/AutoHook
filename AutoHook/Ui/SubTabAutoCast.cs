@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -29,7 +29,8 @@ public class SubTabAutoCast
             acCfg.CastPatience,
             acCfg.CastPrizeCatch,
             acCfg.CastThaliaksFavor,
-            acCfg.CastBigGame
+            acCfg.CastBigGame,
+            acCfg.CastMultihook
         ];
 
         DrawHeader(acCfg);
@@ -132,7 +133,7 @@ public class SubTabAutoCast
         using (var item = ImRaii.Child("###AutoCastItems", new Vector2(0, 0), true))
         {
             foreach (var action in _actionsAvailable.OrderBy(x => x.GetType() == typeof(AutoCastLine))
-                         .ThenBy(x => x.GetType() == typeof(AutoMooch)).ThenBy(x => x.GetType() == typeof(AutoCollect))
+                         .ThenBy(x => x.GetType() == typeof(AutoMooch)).ThenBy(x => x.GetType() == typeof(AutoCollect)).ThenBy(x => x.GetType() == typeof(AutoMultiHook))
                          .ThenBy(x => x.Priority))
             {
                 try

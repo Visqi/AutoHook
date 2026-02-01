@@ -35,6 +35,7 @@ public static class IDs
             AmbitiousLure = 37594,
             ModestLure = 37595,
             TruthOcean = 7911,
+            MultiHook = 42059,
             None = 0;
     }
 

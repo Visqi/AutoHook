@@ -2386,6 +2386,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Multihook.
+        /// </summary>
+        internal static string Multihook {
+            get {
+                return ResourceManager.GetString("Multihook", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Use Natures Bounty before fish appears.
         /// </summary>
         internal static string NBBeforeFish {

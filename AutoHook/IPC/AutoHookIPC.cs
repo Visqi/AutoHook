@@ -1,4 +1,4 @@
-﻿using ECommons.EzIpcManager;
+using ECommons.EzIpcManager;
 
 namespace AutoHook.IPC;
 
@@ -29,7 +29,7 @@ public class AutoHookIPC
     {
         return _cfg.AutoStartFishing;
     }
-    
+
     [EzIPC]
     public void SetAutoStartFishing(bool state)
     {

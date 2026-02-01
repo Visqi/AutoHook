@@ -30,6 +30,7 @@ public class AutoCastsConfig
     public AutoPrizeCatch CastPrizeCatch = new();
     public AutoThaliaksFavor CastThaliaksFavor = new();
     public AutoBigGameFishing CastBigGame = new();
+    public AutoMultiHook CastMultihook = new();
     //public AutoLures CastLures = new();
 
     private List<BaseActionCast> GetAutoCastOrder()
@@ -44,7 +45,8 @@ public class AutoCastsConfig
             CastFishEyes,
             CastPrizeCatch,
             //CastCollect,
-            CastBigGame
+            CastBigGame,
+            CastMultihook,
         }.OrderBy(x => x.Priority).ToList();
 
         return output;
