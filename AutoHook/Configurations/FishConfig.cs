@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace AutoHook.Configurations;
 
@@ -19,6 +19,7 @@ public class FishConfig : BaseOption
     public AutoSurfaceSlap SurfaceSlap = new();
     public AutoMooch Mooch = new();
     public AutoSparefulHand SparefulHand = new();
+    public AutoMultiHook Multihook = new();
 
     public bool SwapBait = false;
     public BaitFishClass BaitToSwap = new();

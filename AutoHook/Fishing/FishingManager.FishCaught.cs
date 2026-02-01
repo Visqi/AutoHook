@@ -1,4 +1,4 @@
-﻿namespace AutoHook.Fishing;
+namespace AutoHook.Fishing;
 
 public partial class FishingManager
 {
@@ -37,6 +37,19 @@ public partial class FishingManager
 
         if (cast != null)
         {
+            var preset = Presets.SelectedPreset ?? Presets.DefaultPreset;
+            var multiHook = preset.AutoCastsCfg.CastMultihook;
+
+            if (lastFishCatchCfg.Multihook.Enabled && multiHook.CastCondition() &&
+                (!lastFishCatchCfg.Multihook.OnlyUseWhenIdenticalCastActive || cast == lastFishCatchCfg.IdenticalCast))
+            {
+                Service.TaskManager.Enqueue(() =>
+                    PlayerRes.CastActionDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));
+                Service.TaskManager.Enqueue(() =>
+                    PlayerRes.CastActionDelayed(cast.Id, cast.ActionType, cast.Name));
+                return true;
+            }
+
             PlayerRes.CastActionDelayed(cast.Id, cast.ActionType, cast.Name);
             return true;
         }

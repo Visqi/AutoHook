@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
@@ -43,6 +43,9 @@ public class SubTabFish
                     DrawUtil.SpacingSeparator();
 
                     DrawSurfaceSlapIdenticalCast(fish);
+                    ImGui.Spacing();
+
+                    DrawMultihook(fish);
                     ImGui.Spacing();
 
                     DrawMooch(fish);
@@ -144,6 +147,18 @@ public class SubTabFish
         }
 
         ImGui.PopID();
+    }
+
+    private static void DrawMultihook(FishConfig fishConfig)
+    {
+        using var _ = ImRaii.PushId("DrawMultihook");
+        using var tree = ImRaii.TreeNode(UIStrings.Multihook_Settings, ImGuiTreeNodeFlags.FramePadding);
+        if (!tree) return;
+        DrawUtil.DrawCheckboxTree(UIStrings.Use_Multihook, ref fishConfig.Multihook.Enabled, () =>
+        {
+            if (DrawUtil.Checkbox(UIStrings.OnlyUseWhenIdenticalCastIsActive, ref fishConfig.Multihook.OnlyUseWhenIdenticalCastActive))
+                Service.Save();
+        });
     }
 
     private static void DrawMooch(FishConfig fishConfig)
