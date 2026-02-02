@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
@@ -30,6 +30,9 @@ public class BaseBiteConfig(HookType type)
     public bool PrizeCatchReq;
     public bool PrizeCatchNotReq;
 
+    public bool OnlyWhenActiveMultihook;
+    public bool OnlyWhenNotActiveMultihook;
+
     public HookType HooksetType = type;
 
     public void DrawOptions(string biteName, bool enableSwap = false)
@@ -48,6 +51,8 @@ public class BaseBiteConfig(HookType type)
                     DrawUtil.DrawTreeNodeEx(UIStrings.Identical_Cast_Options, DrawIdenticalCast);
 
                     DrawUtil.DrawTreeNodeEx(UIStrings.Prize_Catch_Options, DrawPrizeCatch);
+
+                    DrawUtil.DrawTreeNodeEx(UIStrings.Multihook_Options, DrawMultihook);
 
                     ImGui.Unindent();
 
@@ -136,9 +141,36 @@ public class BaseBiteConfig(HookType type)
     {
         ImGui.Indent();
 
-        DrawUtil.Checkbox(UIStrings.Prize_Catch_Required, ref PrizeCatchReq);
+        if (DrawUtil.Checkbox(UIStrings.Prize_Catch_Required, ref PrizeCatchReq))
+        {
+            PrizeCatchReq = false;
+            Service.Save();
+        }
 
-        DrawUtil.Checkbox(UIStrings.PrizeCatchNotActive, ref PrizeCatchNotReq);
+        if (DrawUtil.Checkbox(UIStrings.PrizeCatchNotActive, ref PrizeCatchNotReq))
+        {
+            PrizeCatchNotReq = false;
+            Service.Save();
+        }
+
+        ImGui.Unindent();
+    }
+
+    private void DrawMultihook()
+    {
+        ImGui.Indent();
+
+        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenActiveMultihook, ref OnlyWhenActiveMultihook))
+        {
+            OnlyWhenNotActiveMultihook = false;
+            Service.Save();
+        }
+
+        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenNOTActiveMultihook, ref OnlyWhenNotActiveMultihook))
+        {
+            OnlyWhenActiveMultihook = false;
+            Service.Save();
+        }
 
         ImGui.Unindent();
     }

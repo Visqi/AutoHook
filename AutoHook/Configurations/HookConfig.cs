@@ -196,6 +196,9 @@ public class HookConfig : BaseOption
         if (!CheckPrizeCatch(hookType))
             return false;
 
+        if (!CheckMultihook(hookType))
+            return false;
+
         if (!CheckTimer(hookType, timePassed))
             return false;
 
@@ -258,6 +261,23 @@ public class HookConfig : BaseOption
         if (hookType.OnlyWhenNotActiveSlap && PlayerRes.HasStatus(IDs.Status.SurfaceSlap))
         {
             Service.Status = UIStrings.Status_SurfaceSlapNotRequired;
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool CheckMultihook(BaseBiteConfig hookType)
+    {
+        if (hookType.OnlyWhenActiveMultihook && !PlayerRes.HasMultihookAvailable())
+        {
+            Service.Status = UIStrings.Status_MultihookRequired;
+            return false;
+        }
+
+        if (hookType.OnlyWhenNotActiveMultihook && PlayerRes.HasMultihookAvailable())
+        {
+            Service.Status = UIStrings.Status_MultihookNotRequired;
             return false;
         }
 
