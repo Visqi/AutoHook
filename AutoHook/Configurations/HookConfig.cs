@@ -18,9 +18,7 @@ public class HookConfig : BaseOption
     //todo enable more hook settings based on the current status
     //List<BaseHookset> CustomHooksets = new();
 
-    public HookConfig()
-    {
-    }
+    public HookConfig() { }
 
     public HookConfig(BaitFishClass baitFish)
     {
@@ -114,12 +112,7 @@ public class HookConfig : BaseOption
                 }
             }*/
 
-        if (FishingManager.IntuitionStatus == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook)
-        {
-            return IntuitionHook;
-        }
-
-        return NormalHook;
+        return FishingManager.IntuitionStatus == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook ? IntuitionHook : NormalHook;
     }
 
     public HookType? GetHook(BiteType bite, double timePassed)
@@ -141,8 +134,8 @@ public class HookConfig : BaseOption
             if (hookset.UseTripleHook && hook.th.HooksetEnabled)
             {
                 if (CheckHookCondition(hook.th, timePassed))
-                    if (IsHookAvailable(hook.th, timePassed))
-                        return GetHookTypeForTime(hook.th, timePassed);
+                    if (GetHookTypeForTime(hook.th, timePassed) is { } ht && IsHookAvailable(hook.th, timePassed))
+                        return ht;
 
                 if (hookset.LetFishEscapeTripleHook && PlayerRes.GetCurrentGp() < 700)
                 {
@@ -157,8 +150,8 @@ public class HookConfig : BaseOption
             if (hookset.UseDoubleHook && hook.dh.HooksetEnabled)
             {
                 if (CheckHookCondition(hook.dh, timePassed))
-                    if (IsHookAvailable(hook.dh, timePassed))
-                        return GetHookTypeForTime(hook.dh, timePassed);
+                    if (GetHookTypeForTime(hook.dh, timePassed) is { } ht && IsHookAvailable(hook.dh, timePassed))
+                        return ht;
 
                 if (hookset.LetFishEscapeDoubleHook && PlayerRes.GetCurrentGp() < 400)
                 {
@@ -173,9 +166,13 @@ public class HookConfig : BaseOption
             if (hook.ph.HooksetEnabled)
             {
                 if (CheckHookCondition(hook.ph, timePassed))
-                    return IsHookAvailable(hook.ph, timePassed) ? GetHookTypeForTime(hook.ph, timePassed) : HookType.Normal;
-
-                Service.Status = $"(Normal/Patience Hook) {Service.Status}";
+                {
+                    if (GetHookTypeForTime(hook.ph, timePassed) is { } ht)
+                        return IsHookAvailable(hook.ph, timePassed) ? ht : HookType.Normal;
+                    Service.Status = "(Normal/Patience Hook) No hook type for current bite timer.";
+                }
+                else
+                    Service.Status = $"(Normal/Patience Hook) {Service.Status}";
             }
             else if (Service.Status == "")
                 Service.Status = UIStrings.Status_NoHookEnabled;
@@ -205,15 +202,10 @@ public class HookConfig : BaseOption
         return true;
     }
 
-    private HookType GetHookTypeForTime(BaseBiteConfig hookType, double timePassed)
+    private HookType? GetHookTypeForTime(BaseBiteConfig hookType, double timePassed)
     {
         if (hookType.UseMultipleHookTypesByTimer)
-        {
-            var timedHookType = GetTimedHookType(hookType, timePassed);
-            if (timedHookType.HasValue)
-                return timedHookType.Value;
-        }
-
+            return GetTimedHookType(hookType, timePassed) is { } timedHook ? timedHook : null;
         return hookType.HooksetType;
     }
 
@@ -248,8 +240,9 @@ public class HookConfig : BaseOption
 
     private bool IsHookAvailable(BaseBiteConfig hookType, double timePassed)
     {
-        var selectedHookType = GetHookTypeForTime(hookType, timePassed);
-        if (!PlayerRes.ActionTypeAvailable((uint)selectedHookType))
+        if (GetHookTypeForTime(hookType, timePassed) is not { } timedHook)
+            return false;
+        if (!PlayerRes.ActionTypeAvailable((uint)timedHook))
         {
             Service.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
             return false;
