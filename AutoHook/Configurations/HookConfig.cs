@@ -141,8 +141,8 @@ public class HookConfig : BaseOption
             if (hookset.UseTripleHook && hook.th.HooksetEnabled)
             {
                 if (CheckHookCondition(hook.th, timePassed))
-                    if (IsHookAvailable(hook.th))
-                        return hook.th.HooksetType;
+                    if (IsHookAvailable(hook.th, timePassed))
+                        return GetHookTypeForTime(hook.th, timePassed);
 
                 if (hookset.LetFishEscapeTripleHook && PlayerRes.GetCurrentGp() < 700)
                 {
@@ -157,8 +157,8 @@ public class HookConfig : BaseOption
             if (hookset.UseDoubleHook && hook.dh.HooksetEnabled)
             {
                 if (CheckHookCondition(hook.dh, timePassed))
-                    if (IsHookAvailable(hook.dh))
-                        return hook.dh.HooksetType;
+                    if (IsHookAvailable(hook.dh, timePassed))
+                        return GetHookTypeForTime(hook.dh, timePassed);
 
                 if (hookset.LetFishEscapeDoubleHook && PlayerRes.GetCurrentGp() < 400)
                 {
@@ -173,7 +173,7 @@ public class HookConfig : BaseOption
             if (hook.ph.HooksetEnabled)
             {
                 if (CheckHookCondition(hook.ph, timePassed))
-                    return IsHookAvailable(hook.ph) ? hook.ph.HooksetType : HookType.Normal;
+                    return IsHookAvailable(hook.ph, timePassed) ? GetHookTypeForTime(hook.ph, timePassed) : HookType.Normal;
 
                 Service.Status = $"(Normal/Patience Hook) {Service.Status}";
             }
@@ -205,11 +205,53 @@ public class HookConfig : BaseOption
         return true;
     }
 
-    private bool IsHookAvailable(BaseBiteConfig hookType)
+    private HookType GetHookTypeForTime(BaseBiteConfig hookType, double timePassed)
     {
-        if (!PlayerRes.ActionTypeAvailable((uint)hookType.HooksetType))
+        if (hookType.UseMultipleHookTypesByTimer)
         {
-            Service.Status = $"Not available. Normal hook will be used instead";
+            var timedHookType = GetTimedHookType(hookType, timePassed);
+            if (timedHookType.HasValue)
+                return timedHookType.Value;
+        }
+
+        return hookType.HooksetType;
+    }
+
+    private HookType? GetTimedHookType(BaseBiteConfig hookType, double timePassed)
+    {
+        bool InRange(bool enabled, double min, double max)
+        {
+            if (!enabled)
+                return false;
+
+            if (min > 0 && timePassed < min)
+                return false;
+
+            return max <= 0 || timePassed <= max;
+        }
+
+        // Highest value hook types first if multiple windows overlap
+        if (InRange(hookType.UseStellarHookTypeByTimer, hookType.StellarHookTypeMin, hookType.StellarHookTypeMax))
+            return HookType.Stellar;
+
+        if (InRange(hookType.UsePowerfulHookTypeByTimer, hookType.PowerfulHookTypeMin, hookType.PowerfulHookTypeMax))
+            return HookType.Powerful;
+
+        if (InRange(hookType.UsePrecisionHookTypeByTimer, hookType.PrecisionHookTypeMin, hookType.PrecisionHookTypeMax))
+            return HookType.Precision;
+
+        if (InRange(hookType.UseNormalHookTypeByTimer, hookType.NormalHookTypeMin, hookType.NormalHookTypeMax))
+            return HookType.Normal;
+
+        return null;
+    }
+
+    private bool IsHookAvailable(BaseBiteConfig hookType, double timePassed)
+    {
+        var selectedHookType = GetHookTypeForTime(hookType, timePassed);
+        if (!PlayerRes.ActionTypeAvailable((uint)selectedHookType))
+        {
+            Service.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
             return false;
         }
 

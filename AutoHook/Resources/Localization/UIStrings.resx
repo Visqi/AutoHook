@@ -1612,4 +1612,10 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="Multihook_Settings" xml:space="preserve">
     <value>Multihook Settings</value>
   </data>
+  <data name="Status_HookNotAvailableNormalWillBeUsed" xml:space="preserve">
+    <value>Not available. Normal hook will be used instead</value>
+  </data>
+  <data name="UseMutlipleHooksByTimer" xml:space="preserve">
+    <value>Use multiple hook types by timer</value>
+  </data>
 </root>
