@@ -72,6 +72,9 @@ public partial class FishingManager
         var guid = lastCatchCfg.UniqueId;
         var caughtCount = FishingHelper.GetFishCount(guid);
 
+        if (lastCatchCfg.SwapPresets && Presets.SelectedPreset?.PresetName == lastCatchCfg.PresetToSwap) // clear "already swapped"
+            FishingHelper.RemovePresetSwap(guid);
+
         if (lastCatchCfg.SwapPresets && !FishingHelper.SwappedPreset(guid) &&
             !_lastStep.HasFlag(FishingSteps.PresetSwapped))
         {

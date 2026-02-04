@@ -106,6 +106,12 @@ public partial class FishingManager
                 FishPresetSwapped.Add(guid);
         }
 
+        public static void RemovePresetSwap(Guid guid)
+        {
+            if (SwappedPreset(guid))
+                FishPresetSwapped.Remove(guid);
+        }
+
         public static int GetFishCount(Guid guid)
         {
             return !FishCount.ContainsKey(guid) ? 0 : FishCount[guid];
