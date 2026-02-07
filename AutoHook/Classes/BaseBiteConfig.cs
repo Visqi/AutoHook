@@ -187,13 +187,13 @@ public class BaseBiteConfig(HookType type)
 
         if (DrawUtil.Checkbox(UIStrings.Prize_Catch_Required, ref PrizeCatchReq))
         {
-            PrizeCatchReq = false;
+            PrizeCatchNotReq = false;
             Service.Save();
         }
 
         if (DrawUtil.Checkbox(UIStrings.PrizeCatchNotActive, ref PrizeCatchNotReq))
         {
-            PrizeCatchNotReq = false;
+            PrizeCatchReq = false;
             Service.Save();
         }
     }
