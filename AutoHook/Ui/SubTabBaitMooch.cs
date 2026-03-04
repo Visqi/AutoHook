@@ -59,7 +59,7 @@ public class SubTabBaitMooch
         for (var idx = 0; idx < list?.Count; idx++)
         {
             var hook = list[idx];
-            ImGui.PushID(@$"id###{idx}");
+            using var id = ImRaii.PushId(@$"id###{idx}");
 
             var baitName = !_preset.IsGlobal ? hook.BaitFish.Name :
                 isMooch ? UIStrings.All_Mooches : UIStrings.All_Baits;
@@ -76,8 +76,9 @@ public class SubTabBaitMooch
             if (ImGui.CollapsingHeader(@$"{baitName} {hookCounter}###{idx}"))
             {
                 ImGui.SetCursorPosX(x);
-                ImGui.BeginGroup();
-                if (!_preset.IsGlobal)
+                using (ImRaii.Group())
+                {
+                    if (!_preset.IsGlobal)
                 {
                     ImGui.Spacing();
                     DrawInputSearchBar(hook, isMooch);
@@ -109,13 +110,10 @@ public class SubTabBaitMooch
                     if (_preset.IsGlobal || hook.BaitFish.Id == GameRes.AllMoochesId || GameRes.MoochableFish.Any(f => f.Id == hook.BaitFish.Id))
                         DrawSwimbaitUsage(hook);
                 }
-
-                ImGui.EndGroup();
+                }
             }
 
             DrawUtil.SpacingSeparator();
-
-            ImGui.PopID();
         }
     }
 

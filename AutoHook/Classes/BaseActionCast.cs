@@ -102,7 +102,7 @@ public abstract class BaseActionCast
 
     public virtual void DrawConfig(List<BaseActionCast>? availableActs = null)
     {
-        ImGui.PushID(@$"{GetName()}_cfg");
+        using var cfgId = ImRaii.PushId(@$"{GetName()}_cfg");
 
         if (DrawOptions != null)
         {
@@ -121,10 +121,11 @@ public abstract class BaseActionCast
                 DrawGpThreshold();
                 DrawUpDownArrows(availableActs);
                 ImGui.SetCursorPosX(x);
-                ImGui.BeginGroup();
-                DrawOptions?.Invoke();
-                ImGui.Separator();
-                ImGui.EndGroup();
+                using (ImRaii.Group())
+                {
+                    DrawOptions?.Invoke();
+                    ImGui.Separator();
+                }
                 ImGui.TreePop();
             }
             else
@@ -148,7 +149,6 @@ public abstract class BaseActionCast
             DrawGpThreshold();
             DrawUpDownArrows(availableActs);
         }
-        ImGui.PopID();
     }
 
     public virtual void DrawConfigOptions()
@@ -208,14 +208,16 @@ public abstract class BaseActionCast
 
     public virtual void DrawGpThreshold()
     {
-        ImGui.PushID(@$"{GetName()}_gp");
+        using var gpId = ImRaii.PushId(@$"{GetName()}_gp");
         if (ImGui.Button(UIStrings.GPlabel))
         {
             ImGui.OpenPopup(strId: @"gp_cfg");
         }
 
-        if (ImGui.BeginPopup(@"gp_cfg"))
+        using (var popup = ImRaii.Popup(@"gp_cfg"))
         {
+            if (!popup.Success) return;
+
             using (var item = ImRaii.Child("###gp_cfg2", new Vector2(175, 125), true))
             {
                 if (ImGui.Button(@" X "))
@@ -252,10 +254,6 @@ public abstract class BaseActionCast
                     Service.Save();
                 }
             }
-
-            ImGui.EndPopup();
         }
-
-        ImGui.PopID();
     }
 }

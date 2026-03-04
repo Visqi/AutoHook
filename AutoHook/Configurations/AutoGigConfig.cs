@@ -1,4 +1,4 @@
-﻿using Dalamud.Interface;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Bindings.ImGui;
 
@@ -52,7 +52,7 @@ public class AutoGigConfig : BasePresetConfig
 
         foreach (var gig in Gigs)
         {
-            ImGui.PushID(gig.UniqueId.ToString());
+            using var gigId = ImRaii.PushId(gig.UniqueId.ToString());
             using (ImRaii.PushFont(UiBuilder.IconFont))
             {
                 var icon = FontAwesomeIcon.Trash.ToIconString();
@@ -79,13 +79,12 @@ public class AutoGigConfig : BasePresetConfig
             if (ImGui.TreeNodeEx($"{gig.Fish?.Name ?? UIStrings.None}", ImGuiTreeNodeFlags.FramePadding))
             {
                 ImGui.SetCursorPosX(x);
-                ImGui.BeginGroup();
-                gig.DrawOptions();
-                ImGui.EndGroup();
+                using (ImRaii.Group())
+                {
+                    gig.DrawOptions();
+                }
                 ImGui.TreePop();
             }
-
-            ImGui.PopID();
         }
     }
 }

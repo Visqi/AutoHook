@@ -48,13 +48,12 @@ public class TabFishingPresets : BaseTab
 
     private void DrawPresetGenTab()
     {
-        ImGui.PushID(@"PresetGen");
+        using var id = ImRaii.PushId(@"PresetGen");
         ImGui.SetNextItemWidth(500);
         if (ImGui.Begin(UIStrings.PresetGen, ref OpenPresetGen, ImGuiWindowFlags.AlwaysUseWindowPadding))
             PresetCreator.DrawPresetGenerator();
 
         ImGui.End();
-        ImGui.PopID();
     }
 
     public override void Draw()
@@ -165,20 +164,17 @@ public class TabFishingPresets : BaseTab
             }
 
             // Use orange color for folders containing the selected preset
-            if (containsSelectedPreset)
-                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
+            using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudOrange, containsSelectedPreset))
+            {
+                // Display folder name with item count
+                var displayName = $"{folder.FolderName} ({folder.PresetIds.Count})";
 
-            // Display folder name with item count
-            var displayName = $"{folder.FolderName} ({folder.PresetIds.Count})";
-
-            // Draw folder with tree node
-            isOpen = ImGui.TreeNodeEx(displayName,
-                ImGuiTreeNodeFlags.AllowItemOverlap |
-                ImGuiTreeNodeFlags.SpanAvailWidth |
-                (folder.IsExpanded ? ImGuiTreeNodeFlags.DefaultOpen : 0));
-
-            if (containsSelectedPreset)
-                ImGui.PopStyleColor();
+                // Draw folder with tree node
+                isOpen = ImGui.TreeNodeEx(displayName,
+                    ImGuiTreeNodeFlags.AllowItemOverlap |
+                    ImGuiTreeNodeFlags.SpanAvailWidth |
+                    (folder.IsExpanded ? ImGuiTreeNodeFlags.DefaultOpen : 0));
+            }
 
             // Handle drag and drop onto folder
             if (ImGui.BeginDragDropTarget())
@@ -546,7 +542,7 @@ public class TabFishingPresets : BaseTab
 
                         foreach (var preset in _tempImportFolder.Value.Presets)
                         {
-                            ImGui.PushID(preset.UniqueId.ToString());
+                            using var presetId = ImRaii.PushId(preset.UniqueId.ToString());
 
                             // Checkbox for selection
                             var isSelected = _selectedPresetsForImport[preset.UniqueId];
@@ -594,8 +590,6 @@ public class TabFishingPresets : BaseTab
                                 if (ImGui.IsItemHovered())
                                     ImGui.SetTooltip(UIStrings.RenamePreset);
                             }
-
-                            ImGui.PopID();
                         }
 
                         ImGui.Unindent(10);
@@ -701,35 +695,36 @@ public class TabFishingPresets : BaseTab
         ImGui.OpenPopup(UIStrings.CreateNewFolder);
 
         ImGui.SetNextWindowSize(new Vector2(300, 120));
-        if (ImGui.BeginPopupModal(UIStrings.CreateNewFolder, ref promptingForFolderName, ImGuiWindowFlags.NoResize))
+        using (var modal = ImRaii.PopupModal(UIStrings.CreateNewFolder, ref promptingForFolderName, ImGuiWindowFlags.NoResize))
         {
-            ImGui.Text(UIStrings.FolderNameHint);
-            ImGui.Separator();
-
-            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-            ImGui.InputText("##newFolderName", ref newFolderName, 100);
-
-            ImGui.Spacing();
-
-            if (ImGui.Button(UIStrings.Create, new Vector2(120, 0)))
+            if (modal.Success)
             {
-                if (!string.IsNullOrWhiteSpace(newFolderName))
+                ImGui.Text(UIStrings.FolderNameHint);
+                ImGui.Separator();
+
+                ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
+                ImGui.InputText("##newFolderName", ref newFolderName, 100);
+
+                ImGui.Spacing();
+
+                if (ImGui.Button(UIStrings.Create, new Vector2(120, 0)))
                 {
-                    _basePreset.AddNewFolder(newFolderName);
+                    if (!string.IsNullOrWhiteSpace(newFolderName))
+                    {
+                        _basePreset.AddNewFolder(newFolderName);
+                        newFolderName = string.Empty;
+                        promptingForFolderName = false;
+                    }
+                }
+
+                ImGui.SameLine();
+
+                if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0)))
+                {
                     newFolderName = string.Empty;
                     promptingForFolderName = false;
                 }
             }
-
-            ImGui.SameLine();
-
-            if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0)))
-            {
-                newFolderName = string.Empty;
-                promptingForFolderName = false;
-            }
-
-            ImGui.EndPopup();
         }
     }
 
@@ -739,53 +734,54 @@ public class TabFishingPresets : BaseTab
 
         ImGui.SetNextWindowSize(new Vector2(300, 120));
         var isOpen = true;
-        if (ImGui.BeginPopupModal(UIStrings.RenameFolder, ref isOpen, ImGuiWindowFlags.NoResize))
+        using (var modal = ImRaii.PopupModal(UIStrings.RenameFolder, ref isOpen, ImGuiWindowFlags.NoResize))
         {
-            ImGui.Text(UIStrings.EnterNewFolderName);
-            ImGui.Separator();
-
-            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-            ImGui.InputText("##renameFolderName", ref renameFolderName, 100);
-
-            ImGui.Spacing();
-
-            if (ImGui.Button(UIStrings.Rename, new Vector2(120, 0)))
+            if (modal.Success)
             {
-                if (!string.IsNullOrWhiteSpace(renameFolderName) && renameFolderId.HasValue)
+                ImGui.Text(UIStrings.EnterNewFolderName);
+                ImGui.Separator();
+
+                ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
+                ImGui.InputText("##renameFolderName", ref renameFolderName, 100);
+
+                ImGui.Spacing();
+
+                if (ImGui.Button(UIStrings.Rename, new Vector2(120, 0)))
                 {
-                    var folder = _basePreset.Folders.FirstOrDefault(f => f.UniqueId == renameFolderId.Value);
-                    if (folder != null)
+                    if (!string.IsNullOrWhiteSpace(renameFolderName) && renameFolderId.HasValue)
                     {
-                        folder.FolderName = renameFolderName;
-                        Service.Save();
+                        var folder = _basePreset.Folders.FirstOrDefault(f => f.UniqueId == renameFolderId.Value);
+                        if (folder != null)
+                        {
+                            folder.FolderName = renameFolderName;
+                            Service.Save();
+                        }
+                        renameFolderName = string.Empty;
+                        renameFolderId = null;
                     }
+                }
+
+                ImGui.SameLine();
+
+                if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0)))
+                {
+                    renameFolderName = string.Empty;
+                    renameFolderId = null;
+                }
+
+                if (!isOpen)
+                {
                     renameFolderName = string.Empty;
                     renameFolderId = null;
                 }
             }
-
-            ImGui.SameLine();
-
-            if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0)))
-            {
-                renameFolderName = string.Empty;
-                renameFolderId = null;
-            }
-
-            if (!isOpen)
-            {
-                renameFolderName = string.Empty;
-                renameFolderId = null;
-            }
-
-            ImGui.EndPopup();
         }
     }
 
     private void DrawFolderContextMenu(PresetFolder folder)
     {
-        if (!ImGui.BeginPopupContextItem(folder.UniqueId.ToString()))
-            return;
+        using var ctx = ImRaii.ContextPopupItem(folder.UniqueId.ToString());
+        if (!ctx.Success) return;
 
         if (ImGui.Selectable(UIStrings.Rename, false, ImGuiSelectableFlags.DontClosePopups))
         {
@@ -856,8 +852,6 @@ public class TabFishingPresets : BaseTab
             else
                 ImGui.SetTooltip(UIStrings.HoldShiftToDelete);
         }
-
-        ImGui.EndPopup();
     }
 
     public static void DrawPresetContext(BasePresetConfig preset)
@@ -865,8 +859,8 @@ public class TabFishingPresets : BaseTab
         if (preset == null)
             return;
 
-        if (!ImGui.BeginPopupContextItem(@$"PresetOptions###{preset.PresetName}"))
-            return;
+        using var ctx = ImRaii.ContextPopupItem(@$"PresetOptions###{preset.PresetName}");
+        if (!ctx.Success) return;
 
         var alreadySelected = _basePreset.SelectedPreset?.PresetName == preset.PresetName;
         if (ImGui.Selectable(!alreadySelected ? UIStrings.SetActive : UIStrings.Deselect))
@@ -905,8 +899,6 @@ public class TabFishingPresets : BaseTab
 
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             ImGui.SetTooltip(UIStrings.HoldShiftToDelete);
-
-        ImGui.EndPopup();
     }
 
     private static void CopyPreset(BasePresetConfig preset)

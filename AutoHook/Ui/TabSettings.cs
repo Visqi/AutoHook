@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Globalization;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -100,7 +100,7 @@ public class TabSettings : BaseTab
 
     private static void DrawDelayHook()
     {
-        ImGui.PushID("DrawDelayHook");
+        using var id = ImRaii.PushId("DrawDelayHook");
 
         ImGui.TextWrapped(UIStrings.Delay_when_hooking);
 
@@ -122,13 +122,11 @@ public class TabSettings : BaseTab
             max = Math.Clamp(max, min, 9999);
             Service.Save();
         }
-
-        ImGui.PopID();
     }
 
     private static void DrawDelayCasts()
     {
-        ImGui.PushID("DrawDelayCasts");
+        using var id = ImRaii.PushId("DrawDelayCasts");
 
         ImGui.TextWrapped(UIStrings.Delay_Between_Casts);
 
@@ -149,13 +147,11 @@ public class TabSettings : BaseTab
             max = Math.Clamp(max, min, 9999);
             Service.Save();
         }
-
-        ImGui.PopID();
     }
 
     private static void DrawDelayCancel()
     {
-        ImGui.PushID("DrawDelayCancel");
+        using var id = ImRaii.PushId("DrawDelayCancel");
 
         DrawUtil.TextV(UIStrings.DelayBeforeCancel);
         ImGui.SameLine();
@@ -178,8 +174,6 @@ public class TabSettings : BaseTab
             max = Math.Clamp(max, min, 9999);
             Service.Save();
         }
-
-        ImGui.PopID();
     }
 
     private void DrawLanguageSelector()

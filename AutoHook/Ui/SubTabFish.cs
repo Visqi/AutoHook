@@ -23,7 +23,7 @@ public class SubTabFish
         for (var idx = 0; idx < listOfFish.Count; idx++)
         {
             var fish = listOfFish[idx];
-            ImGui.PushID($"fishTab###{idx}");
+            using var id = ImRaii.PushId($"fishTab###{idx}");
 
             var count = FishingManager.FishingHelper.GetFishCount(fish.UniqueId);
             var fishCount = count > 0 ? $"({UIStrings.Caught_Counter} {count})" : "";
@@ -36,8 +36,9 @@ public class SubTabFish
             if (ImGui.CollapsingHeader($"{fish.Fish.Name} {fishCount}###a{idx}"))
             {
                 ImGui.SetCursorPosX(x);
-                ImGui.BeginGroup();
-                ImGui.Spacing();
+                using (ImRaii.Group())
+                {
+                    ImGui.Spacing();
                 DrawFishSearchBar(fish);
                 DrawDeleteButton(fish);
                 DrawUtil.SpacingSeparator();
@@ -65,11 +66,10 @@ public class SubTabFish
 
                 fish.IgnoreConditionSet = ConditionUi.DrawConditionSet(UIStrings.Ignore_When_Intuition, fish.IgnoreConditionSet, ConditionScope.FishIgnore);
 
-                ImGui.EndGroup();
+                }
             }
 
             ImGui.Spacing();
-            ImGui.PopID();
         }
     }
 
@@ -106,33 +106,31 @@ public class SubTabFish
     private static void DrawDeleteButton(FishConfig fishConfig)
     {
         ImGui.SameLine();
-        ImGui.PushFont(UiBuilder.IconFont);
-        if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash) && ImGui.GetIO().KeyShift)
+        using (ImRaii.PushFont(UiBuilder.IconFont))
         {
-            _preset.RemoveItem(fishConfig.UniqueId);
-            Service.Save();
+            if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash) && ImGui.GetIO().KeyShift)
+            {
+                _preset.RemoveItem(fishConfig.UniqueId);
+                Service.Save();
+            }
         }
-
-        ImGui.PopFont();
 
         ImGui.TooltipOnHover(UIStrings.HoldShiftToDelete);
     }
 
     private static void DrawFishSearchBar(FishConfig fishConfig)
     {
-        ImGui.PushID("DrawFishSearchBar");
+        using var _ = ImRaii.PushId("DrawFishSearchBar");
         DrawUtil.DrawComboSelector(
             GameRes.Fishes,
             (BaitFishClass fish) => $"[#{fish.Id}] {fish.Name}",
             fishConfig.Fish.Name,
             (BaitFishClass fish) => fishConfig.Fish = fish);
-
-        ImGui.PopID();
     }
 
     private static void DrawSurfaceSlapIdenticalCast(FishConfig fishConfig)
     {
-        ImGui.PushID($"{UIStrings.SurfaceSlapIdenticalCast}");
+        using var _ = ImRaii.PushId($"{UIStrings.SurfaceSlapIdenticalCast}");
 
         if (ImGui.TreeNodeEx(UIStrings.SurfaceSlapIdenticalCast, ImGuiTreeNodeFlags.FramePadding))
         {
@@ -142,8 +140,6 @@ public class SubTabFish
 
             ImGui.TreePop();
         }
-
-        ImGui.PopID();
     }
 
     private static void DrawMultihook(FishConfig fishConfig)
@@ -160,7 +156,7 @@ public class SubTabFish
 
     private static void DrawMooch(FishConfig fishConfig)
     {
-        ImGui.PushID(@"DrawMooch");
+        using var _ = ImRaii.PushId(@"DrawMooch");
         if (ImGui.TreeNodeEx(UIStrings.Mooch_Setting, ImGuiTreeNodeFlags.FramePadding))
         {
             fishConfig.Mooch.DrawConfig();
@@ -173,8 +169,6 @@ public class SubTabFish
 
             ImGui.TreePop();
         }
-
-        ImGui.PopID();
     }
 
     private static void DrawSparefulHand(FishConfig fishConfig)

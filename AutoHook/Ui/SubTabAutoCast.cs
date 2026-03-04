@@ -137,9 +137,8 @@ public class SubTabAutoCast
         {
             try
             {
-                ImGui.PushID(action.GetType().ToString());
+                using var id = ImRaii.PushId(action.GetType().ToString());
                 action.DrawConfig(_actionsAvailable);
-                ImGui.PopID();
             }
             catch (Exception e)
             {

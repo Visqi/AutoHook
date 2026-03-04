@@ -68,34 +68,33 @@ public class SubTabExtra
     public static void DrawBody(ExtraConfig config)
     {
         using var item = ImRaii.Child("###ExtraItems", new Vector2(0, 0), true);
-        ImGui.BeginGroup();
+        using (ImRaii.Group())
+        {
+            ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.BaitPresetPriorityWarning);
 
-        ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.BaitPresetPriorityWarning);
+            DrawUtil.SpacingSeparator();
 
-        DrawUtil.SpacingSeparator();
+            DrawUtil.DrawCheckboxTree(UIStrings.ForceBaitSwap, ref config.ForceBaitSwap,
+                () =>
+                {
+                    DrawUtil.TextV(UIStrings.SelectBaitStartFishing);
+                    DrawUtil.DrawComboSelector(
+                        GameRes.Baits,
+                        bait => $"[#{bait.Id}] {bait.Name}",
+                        $"{MultiString.GetItemName(config.ForcedBaitId)}",
+                        bait => config.ForcedBaitId = bait.Id);
+                }
+            );
 
-        DrawUtil.DrawCheckboxTree(UIStrings.ForceBaitSwap, ref config.ForceBaitSwap,
-            () =>
-            {
-                DrawUtil.TextV(UIStrings.SelectBaitStartFishing);
-                DrawUtil.DrawComboSelector(
-                    GameRes.Baits,
-                    bait => $"[#{bait.Id}] {bait.Name}",
-                    $"{MultiString.GetItemName(config.ForcedBaitId)}",
-                    bait => config.ForcedBaitId = bait.Id);
-            }
-        );
+            DrawUtil.SpacingSeparator();
 
-        DrawUtil.SpacingSeparator();
+            DrawTriggers(config);
 
-        DrawTriggers(config);
+            DrawUtil.SpacingSeparator();
 
-        DrawUtil.SpacingSeparator();
-
-        if (DrawUtil.Checkbox(UIStrings.Reset_counter_after_swapping_presets, ref config.ResetCounterPresetSwap))
-            Service.Save();
-
-        ImGui.EndGroup();
+            if (DrawUtil.Checkbox(UIStrings.Reset_counter_after_swapping_presets, ref config.ResetCounterPresetSwap))
+                Service.Save();
+        }
     }
 
     private static void DrawTriggers(ExtraConfig config)
@@ -272,7 +271,7 @@ public class SubTabExtra
 
     private static void DrawPresetSwap(ref bool enable, ref string presetName)
     {
-        ImGui.PushID(@$"{nameof(DrawPresetSwap)}");
+        using var _ = ImRaii.PushId(@$"{nameof(DrawPresetSwap)}");
 
         var text = presetName;
         DrawUtil.DrawCheckboxTree(UIStrings.Swap_Preset, ref enable,
@@ -287,12 +286,11 @@ public class SubTabExtra
         );
 
         presetName = text;
-        ImGui.PopID();
     }
 
     private static void DrawBaitSwap(ref bool enable, ref BaitFishClass baitSwap)
     {
-        ImGui.PushID(@$"{nameof(DrawBaitSwap)}");
+        using var _ = ImRaii.PushId(@$"{nameof(DrawBaitSwap)}");
 
         var newBait = baitSwap;
         DrawUtil.DrawCheckboxTree(UIStrings.Swap_Bait, ref enable,
@@ -307,6 +305,5 @@ public class SubTabExtra
         );
 
         baitSwap = newBait;
-        ImGui.PopID();
     }
 }

@@ -226,8 +226,6 @@ public class BaseBiteConfig(HookType type)
 
         DrawUtil.SpacingSeparator();
 
-        //ImGui.TextWrapped(UIStrings.ChumTimer);
-        ImGui.PushID(@"MoochTimer");
         using var id = ImRaii.PushId(@"MoochTimer");
         DrawUtil.Checkbox(UIStrings.EnableChumTimer, ref ChumTimerEnabled);
         SetupTimer(ref ChumMinHookTimer, ref ChumMaxHookTimer);

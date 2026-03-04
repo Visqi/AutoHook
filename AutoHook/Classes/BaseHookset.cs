@@ -1,6 +1,7 @@
-﻿using Dalamud.Interface.Colors;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Bindings.ImGui;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global
@@ -60,7 +61,7 @@ public class BaseHookset(uint requiredStatus)
 
     public void DrawOptions()
     {
-        ImGui.PushID(@"BaseHookset");
+        using var id = ImRaii.PushId(@"BaseHookset");
         if (RequiredStatus != 0)
         {
             ImGui.Spacing();
@@ -85,8 +86,6 @@ public class BaseHookset(uint requiredStatus)
         ImGui.Spacing();
 
         DrawStopCondition();
-
-        ImGui.PopID();
     }
 
     private void DrawPatience()
@@ -188,11 +187,9 @@ public class BaseHookset(uint requiredStatus)
 
     private void DrawLures()
     {
-        ImGui.PushID($"Lures");
+        using var id = ImRaii.PushId($"Lures");
 
         CastLures.DrawConfig();
-
-        ImGui.PopID();
     }
 
     private void DrawStopCondition()

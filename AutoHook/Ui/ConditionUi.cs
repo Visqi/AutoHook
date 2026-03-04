@@ -573,15 +573,17 @@ public static class ConditionUi
         var op = cond.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
         var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
         ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
-        if (ImGui.BeginCombo("##gp_op", label))
+        using (var combo = ImRaii.Combo("##gp_op", label))
         {
-            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
+            if (combo.Success)
             {
-                var sel = choice == op;
-                if (ImGui.Selectable(choice, sel))
-                    cond.Params["op"] = choice;
+                foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
+                {
+                    var sel = choice == op;
+                    if (ImGui.Selectable(choice, sel))
+                        cond.Params["op"] = choice;
+                }
             }
-            ImGui.EndCombo();
         }
     }
 
@@ -598,15 +600,17 @@ public static class ConditionUi
         var op = cond.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
         var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
         ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
-        if (ImGui.BeginCombo("##swimbait_op", label))
+        using (var combo = ImRaii.Combo("##swimbait_op", label))
         {
-            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
+            if (combo.Success)
             {
-                var sel = choice == op;
-                if (ImGui.Selectable(choice, sel))
-                    cond.Params["op"] = choice;
+                foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
+                {
+                    var sel = choice == op;
+                    if (ImGui.Selectable(choice, sel))
+                        cond.Params["op"] = choice;
+                }
             }
-            ImGui.EndCombo();
         }
     }
 
@@ -648,12 +652,14 @@ public static class ConditionUi
             _ => "Action"
         };
 
-        if (ImGui.BeginCombo("##act_type", label))
+        using (var combo = ImRaii.Combo("##act_type", label))
         {
-            if (ImGui.Selectable("Action", type == 0)) type = 0;
-            if (ImGui.Selectable("Item", type == 1)) type = 1;
-            if (ImGui.Selectable("Event", type == 2)) type = 2;
-            ImGui.EndCombo();
+            if (combo.Success)
+            {
+                if (ImGui.Selectable("Action", type == 0)) type = 0;
+                if (ImGui.Selectable("Item", type == 1)) type = 1;
+                if (ImGui.Selectable("Event", type == 2)) type = 2;
+            }
         }
 
         cond.Params["type"] = (long)type;
@@ -995,21 +1001,22 @@ public static class ConditionUi
         else
             label = "Any weather";
 
-        if (ImGui.BeginCombo("Weather", label))
+        using (var combo = ImRaii.Combo("Weather", label))
         {
-            foreach (var kv in unique.OrderBy(k => k.Key))
+            if (combo.Success)
             {
-                var id = kv.Value;
-                var name = kv.Key;
-                var sel = id == currentId;
-                if (ImGui.Selectable(name, sel))
+                foreach (var kv in unique.OrderBy(k => k.Key))
                 {
-                    currentId = id;
-                    cond.Params["ids"] = new List<object> { (long)id };
+                    var id = kv.Value;
+                    var name = kv.Key;
+                    var sel = id == currentId;
+                    if (ImGui.Selectable(name, sel))
+                    {
+                        currentId = id;
+                        cond.Params["ids"] = new List<object> { (long)id };
+                    }
                 }
             }
-
-            ImGui.EndCombo();
         }
     }
 
@@ -1035,21 +1042,23 @@ public static class ConditionUi
         }
 
         var label = LabelForRow(currentId);
-        if (ImGui.BeginCombo("Mission type", label))
+        using (var combo = ImRaii.Combo("Mission type", label))
         {
-            foreach (var row in sheet)
+            if (combo.Success)
             {
-                var name = MultiString.ParseSeString(row.Unknown0);
-                if (string.IsNullOrEmpty(name)) continue;
-                var id = row.RowId;
-                var sel = id == currentId;
-                if (ImGui.Selectable($"{id}: {name}", sel))
+                foreach (var row in sheet)
                 {
-                    currentId = id;
-                    cond.Params["ids"] = new List<object> { (long)id };
+                    var name = MultiString.ParseSeString(row.Unknown0);
+                    if (string.IsNullOrEmpty(name)) continue;
+                    var id = row.RowId;
+                    var sel = id == currentId;
+                    if (ImGui.Selectable($"{id}: {name}", sel))
+                    {
+                        currentId = id;
+                        cond.Params["ids"] = new List<object> { (long)id };
+                    }
                 }
             }
-            ImGui.EndCombo();
         }
     }
 
@@ -1059,12 +1068,14 @@ public static class ConditionUi
         mission = Math.Clamp(mission, 1, 3);
 
         ImGui.SetNextItemWidth(60 * ImGuiHelpers.GlobalScale);
-        if (ImGui.BeginCombo("Mission", $"{mission}"))
+        using (var combo = ImRaii.Combo("Mission", $"{mission}"))
         {
-            if (ImGui.Selectable("1", mission == 1)) { mission = 1; cond.Params["mission"] = (long)1; }
-            if (ImGui.Selectable("2", mission == 2)) { mission = 2; cond.Params["mission"] = (long)2; }
-            if (ImGui.Selectable("3", mission == 3)) { mission = 3; cond.Params["mission"] = (long)3; }
-            ImGui.EndCombo();
+            if (combo.Success)
+            {
+                if (ImGui.Selectable("1", mission == 1)) { mission = 1; cond.Params["mission"] = (long)1; }
+                if (ImGui.Selectable("2", mission == 2)) { mission = 2; cond.Params["mission"] = (long)2; }
+                if (ImGui.Selectable("3", mission == 3)) { mission = 3; cond.Params["mission"] = (long)3; }
+            }
         }
 
         ImGui.SameLine();
@@ -1080,15 +1091,17 @@ public static class ConditionUi
         var op = cond.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
         var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
         ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
-        if (ImGui.BeginCombo("##mission_op", label))
+        using (var combo = ImRaii.Combo("##mission_op", label))
         {
-            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
+            if (combo.Success)
             {
-                var sel = choice == op;
-                if (ImGui.Selectable(choice, sel))
-                    cond.Params["op"] = choice;
+                foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
+                {
+                    var sel = choice == op;
+                    if (ImGui.Selectable(choice, sel))
+                        cond.Params["op"] = choice;
+                }
             }
-            ImGui.EndCombo();
         }
     }
 

@@ -13,6 +13,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.ImGuiMethods;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using Dalamud.Utility;
 
 namespace AutoHook;
 
@@ -30,8 +31,7 @@ public class PluginUi : Window, IDisposable
 
     private static OpenWindow _selectedTab = OpenWindow.FishingPreset;
 
-    public PluginUi() : base(
-        $"{Service.PluginName} {Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? ""}###MainAutoHook")
+    public PluginUi() : base($"{Service.PluginName} {Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? ""}###MainAutoHook")
     {
         Service.WindowSystem.AddWindow(this);
 
@@ -40,7 +40,7 @@ public class PluginUi : Window, IDisposable
 
         TitleBarButtons.Add(new()
         {
-            Click = (m) => { OpenBrowser(@"https://ko-fi.com/initialdet"); },
+            Click = (m) => { Util.OpenLink(@"https://ko-fi.com/initialdet"); },
             Icon = FontAwesomeIcon.Heart,
             ShowTooltip = () => ImGui.SetTooltip("Support AutoHook"),
         });
@@ -71,69 +71,10 @@ public class PluginUi : Window, IDisposable
         {
             Svc.Log.Error(e.Message);
         }
-
-        //DrawOldLayout()
     }
-
-    private void DrawOldLayout()
-    {
-        DrawUtil.Info(UIStrings.StartActionHelpText);
-
-        ImGui.SameLine(0, 3);
-        if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Play, UIStrings.StartActions))
-            AutoHook.Plugin.HookManager.StartFishing();
-
-        ImGui.SameLine();
-
-        DrawUtil.Checkbox("###PluginEnable", ref Service.Configuration.PluginEnabled);
-
-        ImGui.SameLine(0, 1);
-
-        if (Service.Configuration.PluginEnabled)
-            ImGui.TextColored(ImGuiColors.HealerGreen, UIStrings.Plugin_Enabled);
-        else
-            ImGui.TextColored(ImGuiColors.DalamudRed, UIStrings.Plugin_Disabled);
-
-        ImGui.SameLine();
-
-        DrawChangelog();
-
-        /*if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(
-                "Start using your Auto Casts!\n\nYou can also use the command /ahstart to start fishing based on your Auto Cast settings. Try making a macro with it!");*/
-
-        if (Service.Configuration.ShowDebugConsole)
-        {
-            ImGui.Spacing();
-            if (ImGui.Button(UIStrings.Open_Console))
-                Service.OpenConsole = !Service.OpenConsole;
-#if DEBUG
-            ImGui.SameLine();
-            TestButtons();
-#endif
-            if (Service.OpenConsole)
-                Debug();
-        }
-
-        if (Service.Configuration.ShowStatus)
-        {
-            if (string.IsNullOrEmpty(Service.Status))
-            {
-                ImGui.Dummy(new Vector2(ImGui.GetFontSize()));
-            }
-            else
-            {
-                ImGui.TextColored(ImGuiColors.DalamudViolet, Service.Status);
-            }
-        }
-
-        ImGui.Spacing();
-        DrawTabs();
-    }
-
     private void Debug()
     {
-        ImGui.PushID(@"debug");
+        using var _ = ImRaii.PushId("debug");
         ImGui.SetNextItemWidth(300);
         if (ImGui.Begin($"DebugWIndows", ref Service.OpenConsole))
         {
@@ -156,7 +97,6 @@ public class PluginUi : Window, IDisposable
         }
 
         ImGui.End();
-        ImGui.PopID();
     }
 
     private void DrawNewLayout()
@@ -182,8 +122,7 @@ public class PluginUi : Window, IDisposable
             var regionSize = ImGui.GetContentRegionAvail();
             ImGui.PushStyleVar(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
 
-            using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight },
-                       false, ImGuiWindowFlags.NoDecoration))
+            using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight }, false, ImGuiWindowFlags.NoDecoration))
             {
                 if (ImGui.Selectable($"Start Actions"))
                     AutoHook.Plugin.HookManager.StartFishing();
@@ -202,12 +141,7 @@ public class PluginUi : Window, IDisposable
                             if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                                 Service.OpenConsole = !Service.OpenConsole;
 
-                            if (ImGui.IsItemHovered())
-                            {
-                                ImGui.BeginTooltip();
-                                ImGui.Text(UIStrings.ClickToToggle);
-                                ImGui.EndTooltip();
-                            }
+                            ImGui.TooltipOnHover(UIStrings.ClickToToggle);
                         });
                     }
                 }
@@ -220,28 +154,19 @@ public class PluginUi : Window, IDisposable
                     if (!tab.Enabled) continue;
 
                     if (ImGui.Selectable($"{tab.TabName}###{tab.TabName}Main", _selectedTab == tab.Type))
-                    {
                         _selectedTab = tab.Type;
-                    }
                 }
 
 #if DEBUG
-                if (ImGui.Selectable($"{debug.TabName}###{debug.TabName}Main",
-                        _selectedTab == debug.Type))
-                {
+                if (ImGui.Selectable($"{debug.TabName}###{debug.TabName}Main", _selectedTab == debug.Type))
                     _selectedTab = OpenWindow.Debug;
-                }
 #endif
 
                 if (ImGui.Selectable($"{UIStrings.AboutTab}"))
-                {
                     _selectedTab = OpenWindow.About;
-                }
 
                 if (ImGui.Selectable($"{UIStrings.Changelog}"))
-                {
                     _openChangelog = !_openChangelog;
-                }
             }
 
             ImGui.PopStyleVar();
@@ -257,8 +182,7 @@ public class PluginUi : Window, IDisposable
             }
             else
             {
-                var tab = _tabs.FirstOrDefault(x => x.Type == _selectedTab);
-                if (tab != null)
+                if (_tabs.FirstOrDefault(x => x.Type == _selectedTab) is { } tab)
                 {
                     tab.DrawHeader();
                     tab.Draw();
@@ -321,53 +245,7 @@ public class PluginUi : Window, IDisposable
         ImGui.Separator();
     }
 
-    private void DrawTabs()
-    {
-        try
-        {
-            if (ImGui.BeginTabBar(@"AutoHook###TabBars", ImGuiTabBarFlags.NoTooltip))
-            {
-                foreach (var tab in _tabs)
-                {
-                    if (!tab.Enabled) continue;
-
-                    if (ImGui.BeginTabItem($"{tab.TabName}###{tab.TabName}Main"))
-                    {
-                        ImGui.PushID($"{tab.TabName}MainId");
-                        tab.DrawHeader();
-                        tab.Draw();
-                        ImGui.PopID();
-                        ImGui.EndTabItem();
-                    }
-                }
-
-                if (ImGui.BeginTabItem(UIStrings.AboutTab))
-                {
-                    AboutTab.Draw("AutoHook");
-                    ImGui.EndTabItem();
-                }
-#if DEBUG
-                if (ImGui.BeginTabItem("Debug"))
-                {
-                    debug.DrawHeader();
-                    debug.Draw();
-                    ImGui.EndTabItem();
-                }
-#endif
-                ImGui.EndTabBar();
-            }
-        }
-        catch (Exception e)
-        {
-            Svc.Log.Error(e.Message);
-            ImGui.EndTabBar();
-        }
-    }
-
-    public override void OnClose()
-    {
-        Service.Save();
-    }
+    public override void OnClose() => Service.Save();
 
     public static void ShowKofi()
     {
@@ -377,16 +255,9 @@ public class PluginUi : Window, IDisposable
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0xAA000000 | 0x005E5BFF);
 
         if (ImGui.Button("Ko-fi"))
-        {
-            OpenBrowser(@"https://ko-fi.com/initialdet");
-        }
+            Util.OpenLink(@"https://ko-fi.com/initialdet");
 
         ImGui.PopStyleColor(3);
-    }
-
-    private static void OpenBrowser(string url)
-    {
-        Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
     }
 
     private bool _openChangelog = false;
@@ -453,20 +324,5 @@ public class PluginUi : Window, IDisposable
         }
 
         ImGui.End();
-    }
-
-    private static unsafe void TestButtons()
-    {
-        try
-        {
-            if (ImGui.Button("Check"))
-            {
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
     }
 }
