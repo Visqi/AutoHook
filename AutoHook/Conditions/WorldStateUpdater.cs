@@ -57,6 +57,7 @@ public sealed class WorldStateUpdater : IDisposable
         ws.Execute(CollectItemCounts());
         ws.Execute(CollectSwimbaitIds());
         ws.Execute(CollectPotCooldown());
+        ws.Execute(CollectZone());
 
         ws.Execute(new WorldState.OpBiteContext(biteContext.BiteTimeSeconds, biteContext.ChumActive));
         ws.Execute(new WorldState.OpIntuition(biteContext.IntuitionStatus, biteContext.IntuitionTimeRemaining));
@@ -297,4 +298,7 @@ public sealed class WorldStateUpdater : IDisposable
         catch { }
         return new WorldState.OpPotCooldown(off);
     }
+
+    private static unsafe WorldState.OpZone CollectZone()
+        => new(WeatherManager.Instance()->GetCurrentWeather(), Svc.ClientState.TerritoryType);
 }

@@ -280,7 +280,7 @@ public sealed class WorldState
         }
     }
 
-    public sealed record OpWeather(byte WeatherId, uint TerritoryId) : Operation
+    public sealed record OpZone(byte WeatherId, uint TerritoryId) : Operation
     {
         protected override void Exec(WorldState ws)
         {
