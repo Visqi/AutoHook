@@ -1235,7 +1235,7 @@ public static class ConditionUi
         });
     }
 
-    private static bool DrawStatusIconButton(uint statusId, string tooltip)
+    private static bool DrawStatusIconButton(uint statusId, string? tooltip = null)
     {
         var iconId = GetRow<Lumina.Excel.Sheets.Status>(statusId)?.Icon ?? 0;
         var tex = Svc.Texture.GetFromGameIcon(iconId);
@@ -1246,16 +1246,12 @@ public static class ConditionUi
         using var color = ImRaii.PushColor(ImGuiCol.Button, 0).Push(ImGuiCol.ButtonHovered, ImGui.GetColorU32(ImGuiCol.ButtonHovered)).Push(ImGuiCol.ButtonActive, ImGui.GetColorU32(ImGuiCol.ButtonActive));
         var clicked = ImGui.ImageButton(wrap.Handle, size);
 
-        if (ImGui.IsItemHovered())
-        {
-            var name = MultiString.GetStatusName(statusId);
-            ImGui.SetTooltip(string.IsNullOrEmpty(tooltip) ? name : tooltip);
-        }
+        ImGui.TooltipOnHover(tooltip ?? MultiString.GetStatusName(statusId));
 
         return clicked;
     }
 
-    private static bool DrawActionIconButton(uint actionId, string tooltip)
+    private static bool DrawActionIconButton(uint actionId, string? tooltip = null)
     {
         var iconId = GetRow<Lumina.Excel.Sheets.Action>(actionId)?.Icon ?? 0u;
         var tex = Svc.Texture.GetFromGameIcon(iconId);
@@ -1266,11 +1262,7 @@ public static class ConditionUi
         using var color = ImRaii.PushColor(ImGuiCol.Button, 0).Push(ImGuiCol.ButtonHovered, ImGui.GetColorU32(ImGuiCol.ButtonHovered)).Push(ImGuiCol.ButtonActive, ImGui.GetColorU32(ImGuiCol.ButtonActive));
         var clicked = ImGui.ImageButton(wrap.Handle, size);
 
-        if (ImGui.IsItemHovered())
-        {
-            var name = MultiString.GetActionName(actionId);
-            ImGui.SetTooltip(string.IsNullOrEmpty(tooltip) ? name : tooltip);
-        }
+        ImGui.TooltipOnHover(tooltip ?? MultiString.GetActionName(actionId));
 
         return clicked;
     }

@@ -1,4 +1,4 @@
-﻿using Dalamud.Interface;
+using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Bindings.ImGui;
@@ -53,10 +53,7 @@ public static class DrawUtil
         if (helpText != string.Empty)
         {
             if (hoverHelpText)
-            {
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip(helpText);
-            }
+                ImGui.TooltipOnHover(helpText);
             else
                 ImGuiComponents.HelpMarker(helpText);
         }
@@ -121,11 +118,7 @@ public static class DrawUtil
         HoveredTooltip(text);
     }
 
-    public static void HoveredTooltip(string text)
-    {
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(text);
-    }
+    public static void HoveredTooltip(string text) => ImGui.TooltipOnHover(text);
 
     public static bool SubCheckbox(string label, ref bool refValue, string helpText = "", bool hoverHelpText = false)
     {
@@ -147,10 +140,7 @@ public static class DrawUtil
         if (helpText != string.Empty)
         {
             if (hoverHelpText)
-            {
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip(helpText);
-            }
+                ImGui.TooltipOnHover(helpText);
             else
                 ImGuiComponents.HelpMarker(helpText);
         }
@@ -232,10 +222,7 @@ public static class DrawUtil
 
             ImGui.EndCombo();
         }
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(selectedItem);
-        }
+        ImGui.TooltipOnHover(selectedItem);
     }
 
     public static void DrawComboSelectorPreset(BasePreset presetList)
@@ -287,8 +274,7 @@ public static class DrawUtil
         }
         else if (selectedPreset != null)
         {
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip(UIStrings.RightClickToRename);
+            ImGui.TooltipOnHover(UIStrings.RightClickToRename);
 
             if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                 ImGui.OpenPopup(@$"PresetRenameName");
@@ -340,8 +326,7 @@ public static class DrawUtil
         }
 
         ImGui.PopFont();
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(UIStrings.AddNewPreset);
+        ImGui.TooltipOnHover(UIStrings.AddNewPreset);
     }
 
     private static BasePresetConfig? _tempImport;
@@ -359,8 +344,7 @@ public static class DrawUtil
                     Notify.Success(UIStrings.PresetExportedToTheClipboard);
                 }
 
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip(UIStrings.ExportPresetToClipboard);
+                ImGui.TooltipOnHover(UIStrings.ExportPresetToClipboard);
 
                 ImGui.SameLine();
             }
@@ -371,8 +355,7 @@ public static class DrawUtil
                     ImGui.OpenPopup(@"import_new_preset");
             }
 
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip(UIStrings.ImportPresetFromClipboard);
+            ImGui.TooltipOnHover(UIStrings.ImportPresetFromClipboard);
 
             using var popup = ImRaii.Popup("import_new_preset");
 
@@ -422,8 +405,7 @@ public static class DrawUtil
                     ImGui.OpenPopup(@"import_new_preset");
             }
 
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip(UIStrings.ImportPresetFromClipboard);
+            ImGui.TooltipOnHover(UIStrings.ImportPresetFromClipboard);
 
             using var popup = ImRaii.Popup("import_new_preset");
             if (popup.Success && _tempImport != null)
@@ -488,10 +470,7 @@ public static class DrawUtil
         }
 
         if (helpText != string.Empty)
-        {
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip(helpText);
-        }
+            ImGui.TooltipOnHover(helpText);
 
         ImGui.SameLine(0, 3);
         if (Service.Configuration.SwapToButtons)
@@ -516,8 +495,8 @@ public static class DrawUtil
                 ImGui.SameLine();
 
                 x = ImGui.GetCursorPosX();
-                if (ImGui.IsItemHovered() && helpText != string.Empty)
-                    ImGui.SetTooltip(helpText);
+                if (helpText != string.Empty)
+                    ImGui.TooltipOnHover(helpText);
 
                 ImGui.SetCursorPosX(x);
                 ImGui.BeginGroup();
@@ -553,8 +532,8 @@ public static class DrawUtil
             var x = ImGui.GetCursorPosX();
             if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap))
             {
-                if (ImGui.IsItemHovered() && helpText != string.Empty)
-                    ImGui.SetTooltip(helpText);
+                if (helpText != string.Empty)
+                    ImGui.TooltipOnHover(helpText);
 
                 ImGui.SetCursorPosX(x);
                 ImGui.BeginGroup();
@@ -565,8 +544,8 @@ public static class DrawUtil
                 ImGui.EndGroup();
                 ImGui.TreePop();
             }
-            else if (ImGui.IsItemHovered() && helpText != string.Empty)
-                ImGui.SetTooltip(helpText);
+            else if (helpText != string.Empty)
+                ImGui.TooltipOnHover(helpText);
         }
 
         ImGui.PopID();
@@ -589,8 +568,8 @@ public static class DrawUtil
             ImGui.OpenPopup(popupName);
         }
 
-        if (ImGui.IsItemHovered() && helpText != string.Empty)
-            ImGui.SetTooltip(helpText);
+        if (helpText != string.Empty)
+            ImGui.TooltipOnHover(helpText);
 
         if (ImGui.BeginPopup(popupName, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Tooltip))
         {
@@ -614,8 +593,8 @@ public static class DrawUtil
             ImGui.OpenPopup(popupName);
         }
 
-        if (ImGui.IsItemHovered() && helpText != string.Empty)
-            ImGui.SetTooltip(helpText);
+        if (helpText != string.Empty)
+            ImGui.TooltipOnHover(helpText);
 
         if (ImGui.BeginPopup(popupName, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Tooltip))
         {

@@ -115,8 +115,7 @@ public class SubTabFish
 
         ImGui.PopFont();
 
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(UIStrings.HoldShiftToDelete);
+        ImGui.TooltipOnHover(UIStrings.HoldShiftToDelete);
     }
 
     private static void DrawFishSearchBar(FishConfig fishConfig)
@@ -200,8 +199,7 @@ public class SubTabFish
             Service.Save();
         }
 
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(UIStrings.OnlyUseIfSwimbaitCountLessThanHelpText);
+        ImGui.TooltipOnHover(UIStrings.OnlyUseIfSwimbaitCountLessThanHelpText);
     }
 
     private static void DrawSwapBait(FishConfig fishConfig)

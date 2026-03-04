@@ -373,8 +373,7 @@ public class TabFishingPresets : BaseTab
             ImGui.EndDragDropTarget();
         }
 
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(UIStrings.RightClickOptions);
+        ImGui.TooltipOnHover(UIStrings.RightClickOptions);
 
         DrawPresetContext(preset);
     }
@@ -447,8 +446,7 @@ public class TabFishingPresets : BaseTab
             ImGui.EndDragDropTarget();
         }
 
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(UIStrings.RightClickOptions);
+        ImGui.TooltipOnHover(UIStrings.RightClickOptions);
 
         DrawPresetContext(preset);
     }
@@ -467,16 +465,12 @@ public class TabFishingPresets : BaseTab
     {
         if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowsSpin))
             OpenPresetGen = !OpenPresetGen;
-
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(UIStrings.PresetGenerator);
+        ImGui.TooltipOnHover(UIStrings.PresetGenerator);
 
         ImGui.SameLine(0, 3);
         if (ImGuiComponents.IconButton(FontAwesomeIcon.FolderPlus))
             promptingForFolderName = true;
-
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(UIStrings.CreateFolder);
+        ImGui.TooltipOnHover(UIStrings.CreateFolder);
 
         ImGui.SameLine(0, 3);
         DrawUtil.DrawAddNewPresetButton(_basePreset);
@@ -515,8 +509,7 @@ public class TabFishingPresets : BaseTab
                 }
             }
 
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip(UIStrings.ImportPresetOrFolder);
+            ImGui.TooltipOnHover(UIStrings.ImportPresetOrFolder);
 
             using var popup = ImRaii.Popup("import_new_preset");
 

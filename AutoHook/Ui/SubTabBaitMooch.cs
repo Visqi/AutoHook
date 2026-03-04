@@ -144,8 +144,7 @@ public class SubTabBaitMooch
                 hookConfig.BaitFish = list.Single(x => x.Id == Service.WorldState.CurrentBaitId);
         }
 
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(UIStrings.UIUseCurrentBait);
+        ImGui.TooltipOnHover(UIStrings.UIUseCurrentBait);
     }
 
     private static void DrawDeleteButton(HookConfig hookConfig)
@@ -198,8 +197,7 @@ public class SubTabBaitMooch
                     Service.Save();
                 }
 
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip(countHelpText);
+                ImGui.TooltipOnHover(countHelpText);
 
                 ImGui.Spacing();
 
