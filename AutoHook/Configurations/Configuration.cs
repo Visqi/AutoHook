@@ -209,7 +209,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = "IntuitionActive",
+                                    TypeId = ConditionId.IntuitionActive,
                                     Params = []
                                 }
                             ]
@@ -243,7 +243,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = "IntuitionActive",
+                                    TypeId = ConditionId.IntuitionActive,
                                     Params = []
                                 }
                             ]
@@ -286,7 +286,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = "SpectralActive",
+                                    TypeId = ConditionId.SpectralActive,
                                     Params = []
                                 }
                             ]
@@ -320,7 +320,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = "SpectralActive",
+                                    TypeId = ConditionId.SpectralActive,
                                     Params = []
                                 }
                             ]
@@ -357,7 +357,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = "StatusStacks",
+                                    TypeId = ConditionId.StatusStacks,
                                     Params = new Dictionary<string, object>
                                     {
                                         ["ids"] = new List<object> { (long)IDs.Status.AnglersArt },
@@ -403,7 +403,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = "SwimbaitCount",
+                                    TypeId = ConditionId.SwimbaitCount,
                                     Params = new Dictionary<string, object>
                                     {
                                         ["val"] = 3,
@@ -444,7 +444,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = "SwimbaitCount",
+                                    TypeId = ConditionId.SwimbaitCount,
                                     Params = new Dictionary<string, object>
                                     {
                                         ["val"] = 0,
@@ -500,7 +500,7 @@ public class Configuration : IPluginConfiguration
             {
                 var cond = new Condition
                 {
-                    TypeId = "StatusActive",
+                    TypeId = ConditionId.StatusActive,
                     Params = new Dictionary<string, object>
                     {
                         ["ids"] = new List<object> { (long)statusId }
@@ -558,9 +558,9 @@ public class Configuration : IPluginConfiguration
 
             // Timers
             if (b.HookTimerEnabled)
-                AddRange("BiteTimer", b.MinHookTimer, b.MaxHookTimer);
+                AddRange(ConditionId.BiteTimer, b.MinHookTimer, b.MaxHookTimer);
             if (b.ChumTimerEnabled)
-                AddRange("ChumTimer", b.ChumMinHookTimer, b.ChumMaxHookTimer);
+                AddRange(ConditionId.ChumTimer, b.ChumMinHookTimer, b.ChumMaxHookTimer);
 
             if (group.Conditions.Count > 0)
                 set.Groups.Add(group);
@@ -588,16 +588,16 @@ public class Configuration : IPluginConfiguration
         var set = lures.ConditionSet ??= new ConditionSet();
         var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
 
-        void AddStatus(uint statusId, bool inverse)
-        {
-            var cond = new Condition
+            void AddStatus(uint statusId, bool inverse)
             {
-                TypeId = "StatusActive",
-                Params = new Dictionary<string, object>
+                var cond = new Condition
                 {
-                    ["ids"] = new List<object> { (long)statusId }
-                }
-            };
+                    TypeId = ConditionId.StatusActive,
+                    Params = new Dictionary<string, object>
+                    {
+                        ["ids"] = new List<object> { (long)statusId }
+                    }
+                };
             if (inverse)
                 cond.Params["inv"] = true;
             group.Conditions.Add(cond);
@@ -629,7 +629,7 @@ public class Configuration : IPluginConfiguration
         var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
         var cond = new Condition
         {
-            TypeId = "IntuitionActive",
+            TypeId = ConditionId.IntuitionActive,
             Params = []
         };
         group.Conditions.Add(cond);
@@ -646,7 +646,7 @@ public class Configuration : IPluginConfiguration
         var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
         var cond = new Condition
         {
-            TypeId = "StatusActive",
+            TypeId = ConditionId.StatusActive,
             Params = new Dictionary<string, object>
             {
                 ["ids"] = new List<object> { (long)IDs.Status.IdenticalCast }

@@ -14,7 +14,7 @@ public static class ConditionTypes
         // Params: "ids" = list of status IDs (any), optional "inv" = true for "condition not true"
         registry.Register(new ConditionTypeDef
         {
-            Id = "StatusActive",
+            Id = ConditionId.StatusActive,
             Name = "Status",
             Category = "Status",
             Evaluate = (w, p) =>
@@ -29,7 +29,7 @@ public static class ConditionTypes
         // Params: "ids" = list, "minStacks" = optional int, "op" = >,>=,<,<=,=, "inv" = optional
         registry.Register(new ConditionTypeDef
         {
-            Id = "StatusStacks",
+            Id = ConditionId.StatusStacks,
             Name = "Status stacks",
             Category = "Status",
             Evaluate = (w, p) =>
@@ -47,7 +47,7 @@ public static class ConditionTypes
         // Params: "val" = int, "op" = one of >, >=, <, <=, =, "inv" = optional
         registry.Register(new ConditionTypeDef
         {
-            Id = "Gp",
+            Id = ConditionId.Gp,
             Name = "GP",
             Category = "Player",
             Evaluate = (w, p) =>
@@ -63,7 +63,7 @@ public static class ConditionTypes
         // Params: "r" = ranges, "inv" = optional
         registry.Register(new ConditionTypeDef
         {
-            Id = "BiteTimer",
+            Id = ConditionId.BiteTimer,
             Name = "Bite timer",
             Category = "Time",
             Evaluate = (w, p) =>
@@ -83,7 +83,7 @@ public static class ConditionTypes
         // ---- Chum timer ----
         registry.Register(new ConditionTypeDef
         {
-            Id = "ChumTimer",
+            Id = ConditionId.ChumTimer,
             Name = "Chum timer",
             Category = "Time",
             Evaluate = (w, p) =>
@@ -104,7 +104,7 @@ public static class ConditionTypes
         // ---- Intuition ----
         registry.Register(new ConditionTypeDef
         {
-            Id = "IntuitionActive",
+            Id = ConditionId.IntuitionActive,
             Name = "Fisher's Intuition",
             Category = "Fishing",
             Evaluate = (w, p) =>
@@ -117,7 +117,7 @@ public static class ConditionTypes
         // Params: "sec" = seconds remaining, "op" = >,>=,<,<=,=, "inv" = optional
         registry.Register(new ConditionTypeDef
         {
-            Id = "IntuitionTime",
+            Id = ConditionId.IntuitionTime,
             Name = "Intuition time",
             Category = "Fishing",
             Evaluate = (w, p) =>
@@ -135,7 +135,7 @@ public static class ConditionTypes
         // ---- Spectral ----
         registry.Register(new ConditionTypeDef
         {
-            Id = "SpectralActive",
+            Id = ConditionId.SpectralActive,
             Name = "Spectral current",
             Category = "Fishing",
             Evaluate = (w, p) =>
@@ -149,7 +149,7 @@ public static class ConditionTypes
         // Params: "ids" = list of weather IDs (by name), "inv" = optional
         registry.Register(new ConditionTypeDef
         {
-            Id = "Weather",
+            Id = ConditionId.Weather,
             Name = "Weather",
             Category = "World",
             Evaluate = (w, p) =>
@@ -187,7 +187,7 @@ public static class ConditionTypes
         // Params: "id", "type", "inv" = optional
         registry.Register(new ConditionTypeDef
         {
-            Id = "ActionAvailable",
+            Id = ConditionId.ActionAvailable,
             Name = "Action",
             Category = "Player",
             Evaluate = (w, p) =>
@@ -203,7 +203,7 @@ public static class ConditionTypes
         // ---- Multihook (duty action) ----
         registry.Register(new ConditionTypeDef
         {
-            Id = "MultihookAvailable",
+            Id = ConditionId.MultihookAvailable,
             Name = "Multihook",
             Category = "Fishing",
             Evaluate = (w, p) =>
@@ -217,7 +217,7 @@ public static class ConditionTypes
         // Params: "ids" = list of IKDPlayerMissionCondition row IDs (any of Mission1/2/3Type matches), "inv" = optional
         registry.Register(new ConditionTypeDef
         {
-            Id = "OceanMissionType",
+            Id = ConditionId.OceanMissionType,
             Name = "Ocean mission type",
             Category = "Fishing",
             Evaluate = (w, p) =>
@@ -234,7 +234,7 @@ public static class ConditionTypes
         // Params: "mission" = 1/2/3, "val" = required progress (ushort), "op" = >,>=,<,<=,=, "inv" = optional
         registry.Register(new ConditionTypeDef
         {
-            Id = "OceanMissionProgress",
+            Id = ConditionId.OceanMissionProgress,
             Name = "Ocean mission progress",
             Category = "Fishing",
             Evaluate = (w, p) =>
@@ -258,7 +258,7 @@ public static class ConditionTypes
         // Params: "val" = count, "op" = >,>=,<,<=,=, "inv" = optional
         registry.Register(new ConditionTypeDef
         {
-            Id = "SwimbaitCount",
+            Id = ConditionId.SwimbaitCount,
             Name = "Swimbait count",
             Category = "Fishing",
             Evaluate = (w, p) =>

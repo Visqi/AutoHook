@@ -174,7 +174,7 @@ internal class AutoGig : Window, IDisposable
         if (!Service.WorldState.HasStatus(IDs.Status.NaturesBounty) && fish.UseNaturesBounty)
             PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
 
-        var centerX = (_uiSize.X / 2);
+        var centerX = _uiSize.X / 2;
 
         float fishHitbox = 0;
 
@@ -185,9 +185,9 @@ internal class AutoGig : Window, IDisposable
 
         // did i fucking do it?
         if (info.InverseDirection)
-            fishHitbox = (node->X * _uiScale) + (node->Width * node->ScaleX * _uiScale * (0.5f + (fish.RightOffset / 10)));
+            fishHitbox = node->X * _uiScale + node->Width * node->ScaleX * _uiScale * (0.5f + fish.RightOffset / 10);
         else
-            fishHitbox = (node->X * _uiScale) + (node->Width * node->ScaleX * _uiScale * (0.4f - (fish.LeftOffset / 10)));
+            fishHitbox = node->X * _uiScale + node->Width * node->ScaleX * _uiScale * (0.4f - fish.LeftOffset / 10);
 
         Service.PrintDebug($"[AutoGig] GigFish - Drawing hitbox at {fishHitbox}, centerX: {centerX}, gigHitbox: {gigHitbox}");
         DrawFishHitbox(drawList, fishHitbox);

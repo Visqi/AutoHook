@@ -225,7 +225,7 @@ public class PluginUi : Window, IDisposable
                     }
                 }
 
-#if (DEBUG)
+#if DEBUG
                 if (ImGui.Selectable($"{debug.TabName}###{debug.TabName}Main",
                         _selectedTab == debug.Type))
                 {

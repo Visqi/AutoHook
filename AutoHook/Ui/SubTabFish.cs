@@ -4,6 +4,7 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Bindings.ImGui;
+using clib.Extensions;
 
 namespace AutoHook.Ui;
 
@@ -62,7 +63,6 @@ public class SubTabFish
                 DrawStopAfter(fish);
                 ImGui.Spacing();
 
-                // Advanced ignore conditions (ConditionSet-based, with presets)
                 fish.IgnoreConditionSet = ConditionUi.DrawConditionSet(UIStrings.Ignore_When_Intuition, fish.IgnoreConditionSet, ConditionScope.FishIgnore);
 
                 ImGui.EndGroup();
@@ -93,7 +93,7 @@ public class SubTabFish
 
         if (ImGui.Button($"{UIStrings.AddLastCatch} {Service.LastCatch.Name ?? "-"}"))
         {
-            if (Service.LastCatch.Id is 0 or (-1))
+            if (Service.LastCatch.Id is 0 or -1)
                 return;
             if (list.Any(x => x.Fish.Id == Service.LastCatch.Id))
                 return;

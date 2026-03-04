@@ -118,7 +118,7 @@ public class AutoHook : IDalamudPlugin
             () => Service.Configuration.DtrPresetBarEnabled && Player.Job is ECommons.ExcelServices.Job.FSH && Service.Configuration.HookPresets.SelectedPreset != null
         );
 
-#if (DEBUG)
+#if DEBUG
         OnOpenConfigUi();
 #endif
     }

@@ -11,7 +11,7 @@ public partial class FishingManager
     // ReSharper disable once UnusedMember.Local
     private void CheckFishingState()
     {
-#if (DEBUG)
+#if DEBUG
         if (!EzThrottler.Throttle(@"FishingState", 500))
             return;
 

@@ -220,8 +220,7 @@ public static class ConditionUi
             set.ExprSelectionEnd = end;
         }
 
-        // Palette for adding tokens
-        ImGui.TextColored(ImGuiColors.DalamudGrey, "Add:");
+        ImGui.TextColored(ImGuiColors.DalamudGrey, $"{UIStrings.Add}:");
         ImGui.SameLine();
 
         // Group chips A, B, C...
@@ -320,29 +319,21 @@ public static class ConditionUi
             group.CombineMode = mode == ConditionCombineMode.All ? ConditionCombineMode.Any : ConditionCombineMode.All;
         ImGui.TooltipOnHover($"Evaluate: {(mode is ConditionCombineMode.All ? "AND" : "OR")} - {(mode is ConditionCombineMode.All ? "all" : "any")} must be true");
 
-        // Add condition button on same line
         ImGui.SameLine();
         if (ImGuiComponents.IconButton(FontAwesomeIcon.PlusCircle))
         {
             group.Conditions.Add(new Condition
             {
-                TypeId = GetScopedTypes(scope).FirstOrDefault()?.Id ?? "StatusActive",
+                TypeId = GetScopedTypes(scope).FirstOrDefault()?.Id ?? ConditionId.StatusActive,
                 Params = []
             });
         }
 
-        // Delete/clear group button on same line
         ImGui.SameLine();
-        var io = ImGui.GetIO();
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash))
         {
-            if (io.KeyShift)
-            {
-                // Signal to caller to delete this group entirely
+            if (ImGui.GetIO().KeyShift)
                 return true;
-            }
-
-            // No Shift: just clear conditions in this group
             group.Conditions.Clear();
         }
         ImGui.TooltipOnHover("Click: clear conditions in this group\nShift+Click: delete group");
@@ -395,63 +386,58 @@ public static class ConditionUi
         }
     }
 
+    private static readonly HashSet<string> HookScopeIds =
+    [
+        ConditionId.StatusActive, ConditionId.StatusStacks, ConditionId.BiteTimer, ConditionId.ChumTimer,
+        ConditionId.IntuitionActive, ConditionId.IntuitionTime, ConditionId.SpectralActive,
+        ConditionId.Gp, ConditionId.MultihookAvailable, ConditionId.Weather,
+        ConditionId.OceanMissionType, ConditionId.OceanMissionProgress, ConditionId.SwimbaitCount,
+    ];
+
+    private static readonly HashSet<string> AutoCordialScopeIds =
+    [
+        ConditionId.StatusActive, ConditionId.Gp,
+    ];
+
+    private static readonly HashSet<string> FishIgnoreScopeIds =
+    [
+        ConditionId.StatusActive, ConditionId.IntuitionActive, ConditionId.IntuitionTime,
+        ConditionId.SpectralActive, ConditionId.Weather,
+        ConditionId.OceanMissionType, ConditionId.OceanMissionProgress,
+    ];
+
     private static IEnumerable<ConditionTypeDef> GetScopedTypes(ConditionScope scope)
     {
         var all = Conditions.Conditions.Registry.All;
-
-        return scope switch
+        var allowed = scope switch
         {
-            ConditionScope.Hook => all.Where(d => d.Id is "StatusActive" or "StatusStacks" or "BiteTimer" or "ChumTimer"
-                                                      or "IntuitionActive" or "IntuitionTime" or "SpectralActive"
-                                                      or "Gp" or "MultihookAvailable" or "Weather"
-                                                      or "OceanMissionType" or "OceanMissionProgress"
-                                                      or "SwimbaitCount"),
-            ConditionScope.AutoCordial => all.Where(d => d.Id is "StatusActive" or "Gp"),
-            ConditionScope.FishIgnore => all.Where(d => d.Id is "StatusActive" or "IntuitionActive" or "IntuitionTime"
-                                                             or "SpectralActive" or "Weather"
-                                                             or "OceanMissionType" or "OceanMissionProgress"),
-            _ => all
+            ConditionScope.Hook => HookScopeIds,
+            ConditionScope.AutoCordial => AutoCordialScopeIds,
+            ConditionScope.FishIgnore => FishIgnoreScopeIds,
+            _ => null,
         };
+        return allowed == null ? all : all.Where(d => allowed.Contains(d.Id));
     }
+
+    private static readonly Dictionary<string, Action<Condition>> DrawParamHandlers = new()
+    {
+        [ConditionId.StatusActive] = DrawStatusIdParam,
+        [ConditionId.StatusStacks] = DrawStatusStacksParams,
+        [ConditionId.Gp] = DrawGpParams,
+        [ConditionId.SwimbaitCount] = DrawSwimbaitCountParams,
+        [ConditionId.BiteTimer] = DrawRangeParams,
+        [ConditionId.ChumTimer] = DrawRangeParams,
+        [ConditionId.IntuitionTime] = DrawIntuitionTimeParams,
+        [ConditionId.Weather] = DrawWeatherParams,
+        [ConditionId.ActionAvailable] = DrawActionAvailableParams,
+        [ConditionId.OceanMissionType] = DrawMissionTypeParams,
+        [ConditionId.OceanMissionProgress] = DrawMissionProgressParams,
+    };
 
     private static void DrawParams(Condition cond)
     {
-        switch (cond.TypeId)
-        {
-            case "StatusActive":
-                DrawStatusIdParam(cond);
-                break;
-            case "StatusStacks":
-                DrawStatusStacksParams(cond);
-                break;
-            case "Gp":
-                DrawGpParams(cond);
-                break;
-            case "SwimbaitCount":
-                DrawSwimbaitCountParams(cond);
-                break;
-            case "BiteTimer":
-            case "ChumTimer":
-                DrawRangeParams(cond);
-                break;
-            case "IntuitionTime":
-                DrawIntuitionTimeParams(cond);
-                break;
-            case "Weather":
-                DrawWeatherParams(cond);
-                break;
-            case "ActionAvailable":
-                DrawActionAvailableParams(cond);
-                break;
-            case "OceanMissionType":
-                DrawMissionTypeParams(cond);
-                break;
-            case "OceanMissionProgress":
-                DrawMissionProgressParams(cond);
-                break;
-            default:
-                break;
-        }
+        if (DrawParamHandlers.TryGetValue(cond.TypeId, out var draw))
+            draw(cond);
     }
 
     private static void DrawInverseToggle(Condition cond)
@@ -1187,11 +1173,11 @@ public static class ConditionUi
 
         if (DrawStatusIconButton(IDs.Status.FishersIntuition, "Ignore when Fisher's Intuition is active"))
         {
-            if (!group.Conditions.Any(c => c.TypeId == "IntuitionActive"))
+            if (!group.Conditions.Any(c => c.TypeId == ConditionId.IntuitionActive))
             {
                 group.Conditions.Add(new Condition
                 {
-                    TypeId = "IntuitionActive",
+                    TypeId = ConditionId.IntuitionActive,
                     Params = []
                 });
             }
@@ -1201,7 +1187,7 @@ public static class ConditionUi
     private static void AddStatusPreset(ConditionSet set, ConditionGroup group, uint statusId, bool inverse)
     {
 
-        foreach (var c in group.Conditions.Where(c => c.TypeId == "StatusActive"))
+        foreach (var c in group.Conditions.Where(c => c.TypeId == ConditionId.StatusActive))
         {
             var ids = GetIds(c.Params);
             var inv = GetBool(c.Params, "inv", false);
@@ -1211,7 +1197,7 @@ public static class ConditionUi
 
         var cond = new Condition
         {
-            TypeId = "StatusActive",
+            TypeId = ConditionId.StatusActive,
             Params = new Dictionary<string, object>
             {
                 ["ids"] = new List<object> { (long)statusId }
@@ -1225,12 +1211,12 @@ public static class ConditionUi
 
     private static void AddMultihookPreset(ConditionSet set, ConditionGroup group)
     {
-        if (group.Conditions.Any(c => c.TypeId == "MultihookAvailable"))
+        if (group.Conditions.Any(c => c.TypeId == ConditionId.MultihookAvailable))
             return;
 
         group.Conditions.Add(new Condition
         {
-            TypeId = "MultihookAvailable",
+            TypeId = ConditionId.MultihookAvailable,
             Params = []
         });
     }

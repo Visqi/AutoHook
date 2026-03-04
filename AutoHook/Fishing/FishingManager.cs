@@ -285,7 +285,7 @@ public partial class FishingManager : IDisposable
     private void OnBeganFishing(bool mooching)
     {
         if (Ws.FishingStep.HasFlag(FishingSteps.BeganFishing) &&
-            (Ws.PreviousFishingState != FishingState.PoleReady && Ws.PreviousFishingState != FishingState.None))
+            Ws.PreviousFishingState != FishingState.PoleReady && Ws.PreviousFishingState != FishingState.None)
             return;
 
         Ws.Execute(new WorldState.OpSetSessionIsMooching(mooching));
@@ -369,7 +369,7 @@ public partial class FishingManager : IDisposable
         Service.TaskManager.EnqueueDelay(delay);
         Service.TaskManager.Enqueue(() =>
             PlayerRes.CastActionDelayed((uint)hook, ActionType.Action, @$"{hook}"));
-        Service.Status = (@$"Using {hook} hook. (Bite: {bite})");
+        Service.Status = @$"Using {hook} hook. (Bite: {bite})";
     }
 
     private void OnCatch(uint fishId, uint amount)
