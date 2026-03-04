@@ -1,3 +1,4 @@
+using AutoHook.Conditions;
 using Dalamud.Game;
 using Dalamud.Plugin;
 using Dalamud.Interface.Windowing;
@@ -13,6 +14,9 @@ public class Service
     public const string PluginName = "AutoHook";
 
     public const string GlobalPresetName = "Global Preset";
+
+    /// <summary>Single WorldState instance, set from AutoHook and used by all systems.</summary>
+    public static WorldState WorldState { get; set; } = null!;
 
     public static BaitManager BaitManager { get; set; } = null!;
     public static Configuration Configuration { get; set; } = null!;

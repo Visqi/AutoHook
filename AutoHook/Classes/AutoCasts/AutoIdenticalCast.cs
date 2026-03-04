@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Classes.AutoCasts;
@@ -24,13 +24,13 @@ public class AutoIdenticalCast : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (PlayerRes.HasStatus(IDs.Status.IdenticalCast) || PlayerRes.HasStatus(IDs.Status.SurfaceSlap))
+        if (Service.WorldState.HasStatus(IDs.Status.IdenticalCast) || Service.WorldState.HasStatus(IDs.Status.SurfaceSlap))
             return false;
 
         if (OnlyWhenCordialAvailable && PlayerRes.ActionOnCoolDown(IDs.Item.HiCordial, ActionType.Item))
             return false;
 
-        if (OnlyUseUnderPatience && !PlayerRes.HasStatus(IDs.Status.AnglersFortune))
+        if (OnlyUseUnderPatience && !Service.WorldState.HasStatus(IDs.Status.AnglersFortune))
             return false;
 
         return true;

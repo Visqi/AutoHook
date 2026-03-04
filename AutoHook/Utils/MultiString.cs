@@ -21,7 +21,7 @@ public readonly struct MultiString
 
     public static string GetItemName(uint id)
     {
-        string itemName = string.Empty;
+        var itemName = string.Empty;
         try
         {
             itemName = ParseSeString(GetRow<Item>(id)?.Name);

@@ -156,11 +156,9 @@ public class CustomPresetConfig : BasePresetConfig
                 SubTabExtra.DrawExtraTab(this);
         }
 
-        using (var tabAutoCast = ImRaii.TabItem(UIStrings.Auto_Casts))
-        {
-            DrawUtil.HoveredTooltip(UIStrings.AutoCastsHelp);
-            if (tabAutoCast)
-                SubTabAutoCast.DrawAutoCastTab(this);
-        }
+        using var tabAutoCast = ImRaii.TabItem(UIStrings.Auto_Casts);
+        DrawUtil.HoveredTooltip(UIStrings.AutoCastsHelp);
+        if (tabAutoCast)
+            SubTabAutoCast.DrawAutoCastTab(this);
     }
 }

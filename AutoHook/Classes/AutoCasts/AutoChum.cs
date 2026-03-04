@@ -1,4 +1,4 @@
-﻿namespace AutoHook.Classes.AutoCasts;
+namespace AutoHook.Classes.AutoCasts;
 
 public class AutoChum : BaseActionCast
 {
@@ -17,11 +17,11 @@ public class AutoChum : BaseActionCast
 
     public override bool CastCondition()
     {
-        var hasIntuition = PlayerRes.HasStatus(IDs.Status.FishersIntuition);
+        var hasIntuition = Service.WorldState.HasStatus(IDs.Status.FishersIntuition);
         if (!hasIntuition && _onlyUseWithIntuition)
             return false;
 
-        if (hasIntuition && _onlyUseWithIntuition && PlayerRes.GetStatusTime(IDs.Status.FishersIntuition) <= _useWhenIntuitionExceeds)
+        if (hasIntuition && _onlyUseWithIntuition && Service.WorldState.GetStatusTime(IDs.Status.FishersIntuition) <= _useWhenIntuitionExceeds)
             return false;
 
         return true;

@@ -63,14 +63,14 @@ public abstract class BaseActionCast
         if (!Enabled)
             return false;
 
-        if (DoesCancelMooch() && PlayerRes.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch)
+        if (DoesCancelMooch() && Service.WorldState.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch)
         {
             return false;
         }
 
         var condition = CastCondition();
 
-        var currentGp = PlayerRes.GetCurrentGp();
+        var currentGp = Service.WorldState.CurrentGp;
 
         bool hasGp;
 
@@ -79,7 +79,7 @@ public abstract class BaseActionCast
         else
             hasGp = currentGp <= GpThreshold;
 
-        var actionAvailable = PlayerRes.ActionTypeAvailable(Id, ActionType);
+        var actionAvailable = Service.WorldState.ActionAvailable(Id, ActionType);
 
         if (EzThrottler.Throttle("LogActions", 1000))
             Service.PrintVerbose(

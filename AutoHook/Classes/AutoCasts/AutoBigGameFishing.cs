@@ -1,4 +1,4 @@
-﻿namespace AutoHook.Classes.AutoCasts;
+namespace AutoHook.Classes.AutoCasts;
 
 public class AutoBigGameFishing : BaseActionCast
 {
@@ -16,15 +16,15 @@ public class AutoBigGameFishing : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (PlayerRes.HasStatus(IDs.Status.BigGameFishing))
+        if (Service.WorldState.HasStatus(IDs.Status.BigGameFishing))
             return false;
 
         var slapOrIc = true;
         if (WithIdenticalC || WithSlap)
-            slapOrIc = WithIdenticalC && PlayerRes.HasStatus(IDs.Status.IdenticalCast) ||
-                       WithSlap && PlayerRes.HasStatus(IDs.Status.SurfaceSlap);
+            slapOrIc = WithIdenticalC && Service.WorldState.HasStatus(IDs.Status.IdenticalCast) ||
+                       WithSlap && Service.WorldState.HasStatus(IDs.Status.SurfaceSlap);
 
-        bool hasStacks = PlayerRes.HasAnglersArtStacks(AnglersStacks);
+        var hasStacks = Service.WorldState.HasAnglersArtStacks(AnglersStacks);
 
         return hasStacks && slapOrIc;
     }

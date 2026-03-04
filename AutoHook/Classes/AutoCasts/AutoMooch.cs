@@ -20,7 +20,7 @@ public class AutoMooch : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (OnlyMoochIntuition && !PlayerRes.HasStatus(IDs.Status.FishersIntuition))
+        if (OnlyMoochIntuition && !Service.WorldState.HasStatus(IDs.Status.FishersIntuition))
             return false;
 
         if (Mooch2.IsAvailableToCast())
@@ -30,7 +30,7 @@ public class AutoMooch : BaseActionCast
             return true;
         }
 
-        if (PlayerRes.ActionTypeAvailable(IDs.Actions.Mooch))
+        if (Service.WorldState.ActionAvailable(IDs.Actions.Mooch))
         {
             Service.PrintDebug(@$"Mooch Available, casting normal mooch");
             Id = IDs.Actions.Mooch;

@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -25,11 +25,11 @@ public class AutoFishEyes : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (PlayerRes.HasStatus(IDs.Status.FishEyes))
+        if (Service.WorldState.HasStatus(IDs.Status.FishEyes))
             return false;
 
-        if (OnlyWhenMakeShiftUp && !PlayerRes.HasStatus(IDs.Status.MakeshiftBait) &&
-            !PlayerRes.HasStatus(IDs.Status.AnglersFortune))
+        if (OnlyWhenMakeShiftUp && !Service.WorldState.HasStatus(IDs.Status.MakeshiftBait) &&
+            !Service.WorldState.HasStatus(IDs.Status.AnglersFortune))
             return false;
 
         return true;

@@ -1,10 +1,12 @@
-﻿using AutoHook.IPC;
+using AutoHook.Conditions;
+using AutoHook.IPC;
 using AutoHook.Spearfishing;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui.Dtr;
 using Dalamud.Game.Text;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using ECommons.EzDTR;
 using PunishLib;
 using System.Globalization;
 
@@ -46,6 +48,8 @@ public class AutoHook : IDalamudPlugin
 
     private static AutoGig _autoGig = null!;
 
+    private readonly WorldStateUpdater _wsSync;
+
     public readonly FishingManager HookManager;
 
     public AutoHookIPC AutoHookIpc;
@@ -57,9 +61,11 @@ public class AutoHook : IDalamudPlugin
         PunishLibMain.Init(pluginInterface, "AutoHook",
             new AboutPlugin() { Developer = "InitialDet", Sponsor = "https://ko-fi.com/initialdet" });
         Plugin = this;
+        Service.WorldState = new WorldState();
         Service.BaitManager = new BaitManager();
         Service.TugType = new SeTugType(Svc.SigScanner);
-        Svc.PluginInterface.UiBuilder.Draw += Service.WindowSystem.Draw;
+        _wsSync = new WorldStateUpdater();
+        Svc.PluginInterface.UiBuilder.Draw += () => { _wsSync.Update(); Service.WindowSystem.Draw(); };
         Svc.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
 
@@ -83,7 +89,7 @@ public class AutoHook : IDalamudPlugin
         HookManager = new FishingManager();
         AutoHookIpc = new AutoHookIPC();
 
-        _ = new EzDtr2(() =>
+        _ = new EzDtr(() =>
             $"{((SeIconChar)0xE05E).ToIconString()} {(Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled)}",
             evt =>
             {
@@ -98,7 +104,7 @@ public class AutoHook : IDalamudPlugin
             showCondition: () => Service.Configuration.DtrBarEnabled && Player.Job is ECommons.ExcelServices.Job.FSH
         );
 
-        _ = new EzDtr2(() => $"{SeIconChar.Collectible.ToIconString()} {Service.Configuration.HookPresets.SelectedPreset?.PresetName ?? $"{UIStrings.GlobalPreset}"}",
+        _ = new EzDtr(() => $"{SeIconChar.Collectible.ToIconString()} {Service.Configuration.HookPresets.SelectedPreset?.PresetName ?? $"{UIStrings.GlobalPreset}"}",
             evt =>
             {
                 if (Service.Configuration.HookPresets.SelectedPreset == null) return;
@@ -213,7 +219,6 @@ public class AutoHook : IDalamudPlugin
         foreach (var (command, _) in CommandHelp)
             Svc.Commands.RemoveHandler(command);
 
-        EzDtr2.DisposeAll();
         ECommonsMain.Dispose();
     }
 

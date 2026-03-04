@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -21,7 +21,7 @@ public class AutoSparefulHand : BaseActionCast
         // Check swimbait count for this specific fish if limit is set
         if (SwimbaitCountLimit > 0 && FishIdToCheck.HasValue)
         {
-            var currentSwimbaitCount = Service.BaitManager.GetSwimbaitCountForFish(FishIdToCheck.Value);
+            var currentSwimbaitCount = Service.WorldState.GetSwimbaitCountForFish(FishIdToCheck.Value);
             if (currentSwimbaitCount >= SwimbaitCountLimit)
                 return false;
         }

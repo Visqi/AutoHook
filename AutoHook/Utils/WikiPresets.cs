@@ -2,8 +2,6 @@
 using HtmlAgilityPack;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using static FFXIVClientStructs.FFXIV.Client.LayoutEngine.LayoutManager;
-using static FFXIVClientStructs.FFXIV.Client.UI.RaptureAtkHistory.Delegates;
 
 namespace AutoHook.Utils;
 
@@ -77,7 +75,7 @@ public static partial class WikiPresets
 
     static async Task<(List<string> presets, List<string> presetsSf)> ExtractBase64FromWikiPage(string url)
     {
-        string wikiPageContent = await httpClient.GetStringAsync(url);
+        var wikiPageContent = await httpClient.GetStringAsync(url);
         var presets = Ah().Matches(wikiPageContent)
             .Select(match => match.Groups[1].Value)
             .ToList();

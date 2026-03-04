@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Hooking;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.Automation.NeoTaskManager;
@@ -77,12 +77,12 @@ public class TabDebug : BaseTab
             if (Player.Available)
             {
                 ImGui.Text($"Fish Caught: {FishCaught}");
-                ImGui.Text($"Current Bait: {Service.BaitManager.Current}");
-                ImGui.Text($"Current Swimbait: {Service.BaitManager.CurrentSwimBait}");
-                ImGui.Text($"Current BaitSwimbait: {Service.BaitManager.CurrentBaitSwimBait}");
-                ImGui.Text($"Is Mooching (Swimbait): {Service.BaitManager.IsMooching()}");
+                ImGui.Text($"Current Bait: {Service.WorldState.CurrentBaitId}");
+                ImGui.Text($"Current Swimbait: {Service.WorldState.CurrentSwimbaitId}");
+                ImGui.Text($"Current BaitSwimbait: {Service.WorldState.CurrentBaitSwimBait}");
+                ImGui.Text($"Is Mooching (Swimbait): {Service.WorldState.IsMooching}");
                 ImGui.Text($"Last Catch: {Service.LastCatch?.Name ?? "None"} (ID: {Service.LastCatch?.Id ?? -1})");
-                ImGui.Text($"Current Swimbait: {string.Join(", ", Service.BaitManager.SwimbaitIds.ToArray())}");
+                ImGui.Text($"Current Swimbait: {string.Join(", ", Service.WorldState.SwimbaitIds.ToArray())}");
             }
 
             if (ImGui.Selectable($" {Service.Configuration.HookPresets.Folders.Count} Folders"))
@@ -108,7 +108,7 @@ public class TabDebug : BaseTab
                 {
                     var fishList = GameRes.Fishes;
 
-                    string allKeys = $"[{string.Join(", ", fishList.Select(f => f.Id))}]";
+                    var allKeys = $"[{string.Join(", ", fishList.Select(f => f.Id))}]";
                     ImGui.SetClipboardText(allKeys);
                 }
 
@@ -227,7 +227,7 @@ public class TabDebug : BaseTab
 
     static async Task<List<string>> ExtractBase64FromWikiPage(string url)
     {
-        string wikiPageContent = await httpClient.GetStringAsync(url);
+        var wikiPageContent = await httpClient.GetStringAsync(url);
         return [.. Regex.Matches(wikiPageContent, regex).Select(match => match.Groups[1].Value)];
     }
 
@@ -246,9 +246,9 @@ public class TabDebug : BaseTab
             Svc.Log.Debug("WKSManager pointer is null.");
             return;
         }
-        for (int offset = 1; offset <= 10000; offset++)
+        for (var offset = 1; offset <= 10000; offset++)
         {
-            uint value = *(uint*)((byte*)cosmicManager + offset);
+            var value = *(uint*)((byte*)cosmicManager + offset);
             if (value == 45949)
             {
                 Svc.Log.Debug($"Match found at offset 0x{offset:X}: {value}");

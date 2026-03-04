@@ -1,3 +1,4 @@
+using AutoHook.Conditions;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using ECommons.Throttlers;
@@ -15,7 +16,7 @@ public partial class FishingManager
             return;
 
         Service.PrintDebug(
-            @$"[HookManager] Fishing State: {Service.BaitManager.FishingState}, LastStep: {_lastStep}");
+            @$"[HookManager] Fishing State: {Ws.FishingState}, LastStep: {Ws.FishingStep}");
 #endif
     }
 
@@ -36,7 +37,7 @@ public partial class FishingManager
         if (GetAutoCastCfg().RecastAnimationCancel)
             PlayerRes.CastAction(IDs.Actions.Collect);
 
-        if (PlayerRes.HasStatus(IDs.Status.Salvage) && GetAutoCastCfg().ChumAnimationCancel)
+        if (Ws.HasStatus(IDs.Status.Salvage) && GetAutoCastCfg().ChumAnimationCancel)
             PlayerRes.CastAction(IDs.Actions.Salvage);
     }
 
@@ -53,15 +54,15 @@ public partial class FishingManager
                 var text = messageSe.TextValue;
                 if (GetHookCfg().GetHookset().CastLures.LureTarget != LureTarget.NotSpecial)
                 {
-                    // Check if a special fish is found
-                    _lureSuccess = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
-
-                    if (_lureSuccess)
+                    var success = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
+                    Ws.Execute(new WorldState.OpSetLureSuccess(success));
+                    if (success)
                         return;
                 }
                 if (GetHookCfg().GetHookset().CastLures.LureTarget is LureTarget.Any or LureTarget.NotSpecial)
                 {
-                    _lureSuccess = FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess };
+                    var success = FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess };
+                    Ws.Execute(new WorldState.OpSetLureSuccess(success));
                 }
             }
             else if (type is SystemAlert)

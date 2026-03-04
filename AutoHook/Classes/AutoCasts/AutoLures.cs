@@ -1,4 +1,5 @@
-﻿using Dalamud.Bindings.ImGui;
+using AutoHook.Conditions;
+using Dalamud.Bindings.ImGui;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
@@ -14,12 +15,18 @@ public class AutoLures : BaseActionCast
     public AutoLures() : base(UIStrings.UseLures, IDs.Actions.AmbitiousLure)
     { }
 
-    public bool OnlyWhenActiveSlap;
-    public bool OnlyWhenNotActiveSlap;
+    public bool OnlyWhenActiveSlap;    // legacy
+    public bool OnlyWhenNotActiveSlap; // legacy
 
-    public bool OnlyWhenActiveIdentical;
-    public bool OnlyWhenNotActiveIdentical;
+    public bool OnlyWhenActiveIdentical;    // legacy
+    public bool OnlyWhenNotActiveIdentical; // legacy
     public bool OnlyCastLarge;
+
+    /// <summary>
+    /// Optional ConditionSet backing the legacy lure flags (v6+).
+    /// When non-empty, evaluated in addition to the basic lure checks.
+    /// </summary>
+    public ConditionSet? ConditionSet { get; set; }
 
     public override string GetName()
         => Name = UIStrings.UseLures;
@@ -28,26 +35,35 @@ public class AutoLures : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (PlayerRes.GetStatusStacks(StatusId) >= LureStacks)
+        if (Service.WorldState.GetStatusStacks(StatusId) >= LureStacks)
             return false;
 
-        if (Service.BaitManager.FishingState is not (FishingState.AmbitiousLure or FishingState.LineInWater))
+        if (Service.WorldState.FishingState is not (FishingState.AmbitiousLure or FishingState.LineInWater))
             return false;
 
-        if (OnlyCastLarge && !PlayerRes.HasAnyStatus([IDs.Status.AnglersFortune, IDs.Status.PrizeCatch]))
+        if (OnlyCastLarge && !Service.WorldState.HasAnyStatus([IDs.Status.AnglersFortune, IDs.Status.PrizeCatch]))
             return false;
 
-        if (OnlyWhenActiveIdentical && !PlayerRes.HasStatus(IDs.Status.IdenticalCast))
-            return false;
+        // Prefer ConditionSet when present; fall back to legacy flags otherwise
+        if (ConditionSet is { Groups.Count: > 0 })
+        {
+            if (!ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+                return false;
+        }
+        else
+        {
+            if (OnlyWhenActiveIdentical && !Service.WorldState.HasStatus(IDs.Status.IdenticalCast))
+                return false;
 
-        if (OnlyWhenNotActiveIdentical && PlayerRes.HasStatus(IDs.Status.IdenticalCast))
-            return false;
+            if (OnlyWhenNotActiveIdentical && Service.WorldState.HasStatus(IDs.Status.IdenticalCast))
+                return false;
 
-        if (OnlyWhenActiveSlap && !PlayerRes.HasStatus(IDs.Status.SurfaceSlap))
-            return false;
+            if (OnlyWhenActiveSlap && !Service.WorldState.HasStatus(IDs.Status.SurfaceSlap))
+                return false;
 
-        if (OnlyWhenNotActiveSlap && PlayerRes.HasStatus(IDs.Status.SurfaceSlap))
-            return false;
+            if (OnlyWhenNotActiveSlap && Service.WorldState.HasStatus(IDs.Status.SurfaceSlap))
+                return false;
+        }
 
         return true;
     }
@@ -117,7 +133,7 @@ public class AutoLures : BaseActionCast
         if (!EzThrottler.Check("CastingLure"))
             return;
 
-        if (PlayerRes.GetStatusStacks(StatusId) >= LureStacks && CancelAttempt && !lureSuccess)
+        if (Service.WorldState.GetStatusStacks(StatusId) >= LureStacks && CancelAttempt && !lureSuccess)
         {
             PlayerRes.CastActionDelayed(IDs.Actions.Rest);
             return;

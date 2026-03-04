@@ -73,84 +73,80 @@ public class TabFishingPresets : BaseTab
 
     private void DrawList()
     {
-        using (var table = ImRaii.Table($"###PresetTable", 2, ImGuiTableFlags.Resizable))
+        using var table = ImRaii.Table($"###PresetTable", 2, ImGuiTableFlags.Resizable);
+        if (!table)
+            return;
+
+        ImGui.TableSetupColumn($"###OptionColumn", ImGuiTableColumnFlags.WidthStretch, 2f);
+        ImGui.TableNextColumn();
+        using (var left = ImRaii.Child($"###OptionSide"))
+            DrawPresetOptions(displayed);
+
+        ImGui.TableSetupColumn($"###PresetColumn", ImGuiTableColumnFlags.WidthStretch, 1f);
+        ImGui.TableNextColumn();
+        using var right = ImRaii.Child($"###PresetSide");
+        DrawPresetButtons();
+
+        ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
+        ImGui.InputTextWithHint("##PresetSearch", UIStrings.Search_Hint, ref _searchFilter, 128);
+
+        if (promptingForFolderName)
         {
-            if (!table)
-                return;
+            DrawCreateFolderPopup();
+        }
 
-            ImGui.TableSetupColumn($"###OptionColumn", ImGuiTableColumnFlags.WidthStretch, 2f);
-            ImGui.TableNextColumn();
-            using (var left = ImRaii.Child($"###OptionSide"))
-                DrawPresetOptions(displayed);
+        if (renameFolderId != null)
+        {
+            DrawRenameFolderPopup();
+        }
 
-            ImGui.TableSetupColumn($"###PresetColumn", ImGuiTableColumnFlags.WidthStretch, 1f);
-            ImGui.TableNextColumn();
-            using (var right = ImRaii.Child($"###PresetSide"))
+        using var list = ImRaii.ListBox("preset_list", ImGui.GetContentRegionAvail());
+        if (!list)
+            return;
+
+        var searchActive = !string.IsNullOrWhiteSpace(_searchFilter);
+        bool MatchesSearch(string name) => !searchActive || name.Contains(_searchFilter.Trim().ToLowerInvariant(), StringComparison.InvariantCultureIgnoreCase);
+
+        DrawUtil.Info(UIStrings.GlobalPresetHelpText);
+        ImGui.SameLine(0, 4);
+        if ((!searchActive || MatchesSearch(UIStrings.GlobalPreset)) && ImGui.Selectable(UIStrings.GlobalPreset, displayed?.PresetName == _basePreset.DefaultPreset.PresetName, ImGuiSelectableFlags.AllowDoubleClick))
+            displayed = _basePreset.DefaultPreset;
+
+        ImGui.Separator();
+
+        // Draw folders
+        for (var folderIndex = 0; folderIndex < _basePreset.Folders.Count; folderIndex++)
+        {
+            var folder = _basePreset.Folders[folderIndex];
+            if (searchActive)
             {
-                DrawPresetButtons();
-
-                ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                ImGui.InputTextWithHint("##PresetSearch", UIStrings.Search_Hint, ref _searchFilter, 128);
-
-                if (promptingForFolderName)
+                var folderNameMatches = MatchesSearch(folder.FolderName);
+                var anyPresetMatches = folder.PresetIds.Any(id =>
                 {
-                    DrawCreateFolderPopup();
-                }
-
-                if (renameFolderId != null)
-                {
-                    DrawRenameFolderPopup();
-                }
-
-                using var list = ImRaii.ListBox("preset_list", ImGui.GetContentRegionAvail());
-                if (!list)
-                    return;
-
-                var searchActive = !string.IsNullOrWhiteSpace(_searchFilter);
-                bool MatchesSearch(string name) => !searchActive || name.Contains(_searchFilter.Trim().ToLowerInvariant(), StringComparison.InvariantCultureIgnoreCase);
-
-                DrawUtil.Info(UIStrings.GlobalPresetHelpText);
-                ImGui.SameLine(0, 4);
-                if ((!searchActive || MatchesSearch(UIStrings.GlobalPreset)) && ImGui.Selectable(UIStrings.GlobalPreset, displayed?.PresetName == _basePreset.DefaultPreset.PresetName, ImGuiSelectableFlags.AllowDoubleClick))
-                    displayed = _basePreset.DefaultPreset;
-
-                ImGui.Separator();
-
-                // Draw folders
-                for (var folderIndex = 0; folderIndex < _basePreset.Folders.Count; folderIndex++)
-                {
-                    var folder = _basePreset.Folders[folderIndex];
-                    if (searchActive)
-                    {
-                        var folderNameMatches = MatchesSearch(folder.FolderName);
-                        var anyPresetMatches = folder.PresetIds.Any(id =>
-                        {
-                            var p = _basePreset.CustomPresets.FirstOrDefault(c => c.UniqueId == id);
-                            return p != null && MatchesSearch(p.PresetName);
-                        });
-                        if (!folderNameMatches && !anyPresetMatches)
-                            continue;
-                    }
-
-                    DrawFolder(folder, folderIndex);
-                }
-
-                // Draw non-folder presets
-                for (var i = 0; i < _basePreset.PresetList.Count; i++)
-                {
-                    var preset = _basePreset.PresetList[i];
-
-                    // Skip presets that are inside a folder
-                    if (_basePreset.IsPresetInAnyFolder(preset.UniqueId))
-                        continue;
-
-                    if (searchActive && !MatchesSearch(preset.PresetName))
-                        continue;
-
-                    if (preset is CustomPresetConfig customPreset)
-                        DrawItem(customPreset, i);
-                }
+                    var p = _basePreset.CustomPresets.FirstOrDefault(c => c.UniqueId == id);
+                    return p != null && MatchesSearch(p.PresetName);
+                });
+                if (!folderNameMatches && !anyPresetMatches)
+                    continue;
             }
+
+            DrawFolder(folder, folderIndex);
+        }
+
+        // Draw non-folder presets
+        for (var i = 0; i < _basePreset.PresetList.Count; i++)
+        {
+            var preset = _basePreset.PresetList[i];
+
+            // Skip presets that are inside a folder
+            if (_basePreset.IsPresetInAnyFolder(preset.UniqueId))
+                continue;
+
+            if (searchActive && !MatchesSearch(preset.PresetName))
+                continue;
+
+            if (preset is CustomPresetConfig customPreset)
+                DrawItem(customPreset, i);
         }
     }
 
@@ -162,7 +158,7 @@ public class TabFishingPresets : BaseTab
             var icon = folder.IsExpanded ? FontAwesomeIcon.FolderOpen : FontAwesomeIcon.Folder;
 
             // Check if this folder contains the selected preset
-            bool containsSelectedPreset = false;
+            var containsSelectedPreset = false;
             if (_basePreset.SelectedPreset != null)
             {
                 containsSelectedPreset = folder.PresetIds.Contains(_basePreset.SelectedPreset.UniqueId);
@@ -173,7 +169,7 @@ public class TabFishingPresets : BaseTab
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
 
             // Display folder name with item count
-            string displayName = $"{folder.FolderName} ({folder.PresetIds.Count})";
+            var displayName = $"{folder.FolderName} ({folder.PresetIds.Count})";
 
             // Draw folder with tree node
             isOpen = ImGui.TreeNodeEx(displayName,
@@ -345,14 +341,14 @@ public class TabFishingPresets : BaseTab
                     try
                     {
                         // Find where to place in the folder
-                        int targetIndex = folder.PresetIds.IndexOf(preset.UniqueId);
+                        var targetIndex = folder.PresetIds.IndexOf(preset.UniqueId);
                         if (targetIndex >= 0)
                         {
                             // Create a new list to avoid modifying the collection during enumeration
                             var newPresetIds = new List<Guid>(folder.PresetIds);
 
                             // Find the current index of the preset being moved
-                            int currentIndex = newPresetIds.IndexOf(presetId);
+                            var currentIndex = newPresetIds.IndexOf(presetId);
 
                             // Only reorder if the preset is in this folder
                             if (currentIndex >= 0)
@@ -437,7 +433,7 @@ public class TabFishingPresets : BaseTab
                     var targetPreset = _basePreset.CustomPresets[i];
                     if (draggedPreset != null && targetPreset != null)
                     {
-                        int draggedIndex = _basePreset.CustomPresets.IndexOf(draggedPreset);
+                        var draggedIndex = _basePreset.CustomPresets.IndexOf(draggedPreset);
                         if (draggedIndex >= 0)
                         {
                             _basePreset.SwapIndex(draggedIndex, i);
@@ -560,7 +556,7 @@ public class TabFishingPresets : BaseTab
                             ImGui.PushID(preset.UniqueId.ToString());
 
                             // Checkbox for selection
-                            bool isSelected = _selectedPresetsForImport[preset.UniqueId];
+                            var isSelected = _selectedPresetsForImport[preset.UniqueId];
                             if (ImGui.Checkbox("##selectPreset", ref isSelected))
                             {
                                 _selectedPresetsForImport[preset.UniqueId] = isSelected;
@@ -618,7 +614,7 @@ public class TabFishingPresets : BaseTab
                     if (ImGui.Button(UIStrings.Import, new Vector2(120, 0)))
                     {
                         // Count how many presets are actually selected for import
-                        int selectedCount = _tempImportFolder.Value.Presets.Count(p => _selectedPresetsForImport[p.UniqueId]);
+                        var selectedCount = _tempImportFolder.Value.Presets.Count(p => _selectedPresetsForImport[p.UniqueId]);
 
                         // Create a new folder with the selected count in its name if no presets are selected
                         if (selectedCount == 0)
@@ -634,7 +630,7 @@ public class TabFishingPresets : BaseTab
                             if (_selectedPresetsForImport[preset.UniqueId])
                             {
                                 // Apply the new name if it was changed
-                                if (_presetImportNames.TryGetValue(preset.UniqueId, out string? newName))
+                                if (_presetImportNames.TryGetValue(preset.UniqueId, out var newName))
                                 {
                                     preset.PresetName = newName;
                                 }
@@ -749,7 +745,7 @@ public class TabFishingPresets : BaseTab
         ImGui.OpenPopup(UIStrings.RenameFolder);
 
         ImGui.SetNextWindowSize(new Vector2(300, 120));
-        bool isOpen = true;
+        var isOpen = true;
         if (ImGui.BeginPopupModal(UIStrings.RenameFolder, ref isOpen, ImGuiWindowFlags.NoResize))
         {
             ImGui.Text(UIStrings.EnterNewFolderName);
@@ -850,7 +846,7 @@ public class TabFishingPresets : BaseTab
             Notify.Success(UIStrings.FolderExported);
         }
 
-        bool isEmpty = folder.PresetIds.Count == 0;
+        var isEmpty = folder.PresetIds.Count == 0;
         using (var disabled = ImRaii.Disabled(!isEmpty || !ImGui.GetIO().KeyShift))
         {
             if (ImGui.Selectable(UIStrings.Delete, false, ImGuiSelectableFlags.DontClosePopups))

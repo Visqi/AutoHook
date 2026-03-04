@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -15,7 +15,7 @@ public class AutoCollect : BaseActionCast
     public override string GetName()
         => Name = UIStrings.Collect;
 
-    public override bool CastCondition() => !PlayerRes.HasStatus(IDs.Status.CollectorsGlove);
+    public override bool CastCondition() => !Service.WorldState.HasStatus(IDs.Status.CollectorsGlove);
 
     //protected override DrawOptionsDelegate DrawOptions => () =>
     //{

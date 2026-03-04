@@ -1,4 +1,4 @@
-﻿using ECommons.Throttlers;
+using ECommons.Throttlers;
 
 namespace AutoHook.Fishing;
 
@@ -22,16 +22,16 @@ public partial class FishingManager
         if (!hookCfg.Enabled)
             return;
 
-        Service.TaskManager.Enqueue(() => hookCfg.GetHookset().CastLures.TryCasting(_lureSuccess));
+        Service.TaskManager.Enqueue(() => hookCfg.GetHookset().CastLures.TryCasting(Ws.LureSuccess));
     }
 
     private void CastCollect()
     {
         var cfg = GetAutoCastCfg();
 
-        if (PlayerRes.HasStatus(IDs.Status.CollectorsGlove) && cfg.RecastAnimationCancel && cfg.TurnCollectOff && !cfg.CastCollect.Enabled)
+        if (Ws.HasStatus(IDs.Status.CollectorsGlove) && cfg.RecastAnimationCancel && cfg.TurnCollectOff && !cfg.CastCollect.Enabled)
             PlayerRes.CastAction(IDs.Actions.Collect);
-        else if (PlayerRes.HasStatus(IDs.Status.CollectorsGlove) && cfg.TurnCollectOffWithoutAnimCancel && !cfg.CastCollect.Enabled)
+        else if (Ws.HasStatus(IDs.Status.CollectorsGlove) && cfg.TurnCollectOffWithoutAnimCancel && !cfg.CastCollect.Enabled)
             PlayerRes.CastAction(IDs.Actions.Collect);
         else
         {
@@ -42,11 +42,10 @@ public partial class FishingManager
 
     private void UseAutoCasts()
     {
-        // if _lastStep is FishBit but currentState is FishingState.PoleReady, it means that the fish was hooked, but it escaped.
-        if (_lastStep.HasFlag(FishingSteps.None) || _lastStep.HasFlag(FishingSteps.BeganFishing) || _lastStep.HasFlag(FishingSteps.Quitting))
+        if (Ws.FishingStep.HasFlag(FishingSteps.None) || Ws.FishingStep.HasFlag(FishingSteps.BeganFishing) || Ws.FishingStep.HasFlag(FishingSteps.Quitting))
             return;
 
-        if (!PlayerRes.IsCastAvailable() || Service.TaskManager.IsBusy)
+        if (!Ws.IsCastAvailable() || Service.TaskManager.IsBusy)
             return;
 
         Service.TaskManager.Enqueue(() =>
@@ -92,10 +91,10 @@ public partial class FishingManager
 
     private bool TryUseSwimbait(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg, bool blockMooch)
     {
-        if (Service.BaitManager.GetSwimbaitCount() is 0)
+        if (Ws.GetSwimbaitCount() is 0)
             return false;
 
-        var swimbaitIds = Service.BaitManager.SwimbaitIds;
+        var swimbaitIds = Ws.SwimbaitIds;
         foreach (var (fishId, slotIndex) in swimbaitIds.ToArray().WithIndex())
         {
             if (fishId == 0)
@@ -124,7 +123,7 @@ public partial class FishingManager
                 }
             }
 
-            var swimbaitCountForFish = Service.BaitManager.GetSwimbaitCountForFish(fishId);
+            var swimbaitCountForFish = Ws.GetSwimbaitCountForFish(fishId);
             if (swimbaitCountForFish < swimbaitMoochConfig.SwimbaitCountThreshold)
                 continue;
 

@@ -3738,6 +3738,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Swap/Stop Rules:.
+        /// </summary>
+        internal static string SwapStopRules {
+            get {
+                return ResourceManager.GetString("SwapStopRules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Swap Tree Node to Buttons.
         /// </summary>
         internal static string SwapTreeNodeButtons {

@@ -174,98 +174,94 @@ public class PluginUi : Window, IDisposable
 
         using (var style = ImRaii.PushStyle(ImGuiStyleVar.CellPadding, new Vector2(5, 0)))
         {
-            using (var table = ImRaii.Table("###MainTable", 2, ImGuiTableFlags.Resizable))
+            using var table = ImRaii.Table("###MainTable", 2, ImGuiTableFlags.Resizable);
+            ImGui.TableSetupColumn("##LeftColumn", ImGuiTableColumnFlags.WidthFixed, ImGui.GetWindowWidth() / 3);
+
+            ImGui.TableNextColumn();
+
+            var regionSize = ImGui.GetContentRegionAvail();
+            ImGui.PushStyleVar(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
+
+            using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight },
+                       false, ImGuiWindowFlags.NoDecoration))
             {
-                ImGui.TableSetupColumn("##LeftColumn", ImGuiTableColumnFlags.WidthFixed, ImGui.GetWindowWidth() / 3);
+                if (ImGui.Selectable($"Start Actions"))
+                    AutoHook.Plugin.HookManager.StartFishing();
 
-                ImGui.TableNextColumn();
-
-                var regionSize = ImGui.GetContentRegionAvail();
-                ImGui.PushStyleVar(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
-
-                using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight },
-                           false, ImGuiWindowFlags.NoDecoration))
+                using (var c = ImRaii.Child("logo", new(0, 125f.Scale())))
                 {
-                    if (ImGui.Selectable($"Start Actions"))
-                        AutoHook.Plugin.HookManager.StartFishing();
-
-                    using (var c = ImRaii.Child("logo", new(0, 125f.Scale())))
+                    if (Svc.Texture.GetFromManifestResource(Assembly.GetExecutingAssembly(), $"AutoHook.Assets.Fishy{(Service.Configuration.PluginEnabled ? "" : "_g")}.png").TryGetWrap(out var image, out var _))
                     {
-                        if (Svc.Texture.GetFromManifestResource(Assembly.GetExecutingAssembly(), $"AutoHook.Assets.Fishy{(Service.Configuration.PluginEnabled ? "" : "_g")}.png").TryGetWrap(out var image, out var _))
+                        ImGuiEx.LineCentered("###AHLogo", () =>
                         {
-                            ImGuiEx.LineCentered("###AHLogo", () =>
+                            ImGui.Image(image.Handle, new(125f.Scale(), 125f.Scale()));
+
+                            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                                Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;
+
+                            if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                                Service.OpenConsole = !Service.OpenConsole;
+
+                            if (ImGui.IsItemHovered())
                             {
-                                ImGui.Image(image.Handle, new(125f.Scale(), 125f.Scale()));
-
-                                if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
-                                    Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;
-
-                                if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-                                    Service.OpenConsole = !Service.OpenConsole;
-
-                                if (ImGui.IsItemHovered())
-                                {
-                                    ImGui.BeginTooltip();
-                                    ImGui.Text(UIStrings.ClickToToggle);
-                                    ImGui.EndTooltip();
-                                }
-                            });
-                        }
-                    }
-
-                    ImGui.Spacing();
-                    ImGui.Separator();
-
-                    foreach (var tab in _tabs)
-                    {
-                        if (!tab.Enabled) continue;
-
-                        if (ImGui.Selectable($"{tab.TabName}###{tab.TabName}Main", _selectedTab == tab.Type))
-                        {
-                            _selectedTab = tab.Type;
-                        }
-                    }
-
-#if (DEBUG)
-                    if (ImGui.Selectable($"{debug.TabName}###{debug.TabName}Main",
-                            _selectedTab == debug.Type))
-                    {
-                        _selectedTab = OpenWindow.Debug;
-                    }
-#endif
-
-                    if (ImGui.Selectable($"{UIStrings.AboutTab}"))
-                    {
-                        _selectedTab = OpenWindow.About;
-                    }
-
-                    if (ImGui.Selectable($"{UIStrings.Changelog}"))
-                    {
-                        _openChangelog = !_openChangelog;
+                                ImGui.BeginTooltip();
+                                ImGui.Text(UIStrings.ClickToToggle);
+                                ImGui.EndTooltip();
+                            }
+                        });
                     }
                 }
 
-                ImGui.PopStyleVar();
+                ImGui.Spacing();
+                ImGui.Separator();
 
-                ImGui.TableNextColumn();
-                using (var rightChild = ImRaii.Child($"###AhRight", Vector2.Zero, false))
+                foreach (var tab in _tabs)
                 {
-                    if (_selectedTab == OpenWindow.About)
-                        AboutTab.Draw("AutoHook");
-                    else if (_selectedTab == OpenWindow.Debug)
+                    if (!tab.Enabled) continue;
+
+                    if (ImGui.Selectable($"{tab.TabName}###{tab.TabName}Main", _selectedTab == tab.Type))
                     {
-                        debug.DrawHeader();
-                        debug.Draw();
+                        _selectedTab = tab.Type;
                     }
-                    else
-                    {
-                        var tab = _tabs.FirstOrDefault(x => x.Type == _selectedTab);
-                        if (tab != null)
-                        {
-                            tab.DrawHeader();
-                            tab.Draw();
-                        }
-                    }
+                }
+
+#if (DEBUG)
+                if (ImGui.Selectable($"{debug.TabName}###{debug.TabName}Main",
+                        _selectedTab == debug.Type))
+                {
+                    _selectedTab = OpenWindow.Debug;
+                }
+#endif
+
+                if (ImGui.Selectable($"{UIStrings.AboutTab}"))
+                {
+                    _selectedTab = OpenWindow.About;
+                }
+
+                if (ImGui.Selectable($"{UIStrings.Changelog}"))
+                {
+                    _openChangelog = !_openChangelog;
+                }
+            }
+
+            ImGui.PopStyleVar();
+
+            ImGui.TableNextColumn();
+            using var rightChild = ImRaii.Child($"###AhRight", Vector2.Zero, false);
+            if (_selectedTab == OpenWindow.About)
+                AboutTab.Draw("AutoHook");
+            else if (_selectedTab == OpenWindow.Debug)
+            {
+                debug.DrawHeader();
+                debug.Draw();
+            }
+            else
+            {
+                var tab = _tabs.FirstOrDefault(x => x.Type == _selectedTab);
+                if (tab != null)
+                {
+                    tab.DrawHeader();
+                    tab.Draw();
                 }
             }
         }
@@ -282,7 +278,7 @@ public class PluginUi : Window, IDisposable
             {
                 ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.Plugin_Disabled);
             }
-            else if (Service.BaitManager.FishingState == FishingState.None)
+            else if (Service.WorldState.FishingState == FishingState.None)
             {
                 try
                 {
@@ -294,7 +290,7 @@ public class PluginUi : Window, IDisposable
                     }
                     else
                     {
-                        var baitId = Service.BaitManager.Current;
+                        var baitId = Service.WorldState.CurrentBaitId;
                         var baitName = MultiString.GetItemName(baitId);
 
                         var hasBait = preset != null && preset.HasBaitOrMooch(baitId);
@@ -433,27 +429,25 @@ public class PluginUi : Window, IDisposable
 
                 ImGui.Separator();
 
-                using (var item = ImRaii.Child("###old_versions", new Vector2(0, 0), true))
+                using var item = ImRaii.Child("###old_versions", new Vector2(0, 0), true);
+                for (var i = 1; i < changes.Count; i++)
                 {
-                    for (var i = 1; i < changes.Count; i++)
+                    if (!ImGui.TreeNode($"{changes[i].VersionNumber}"))
+                        continue;
+
+                    foreach (var mainChange in changes[i].Main)
+                        ImGui.TextWrapped($"- {mainChange}");
+
+                    if (changes[i].Minor.Count > 0)
                     {
-                        if (!ImGui.TreeNode($"{changes[i].VersionNumber}"))
-                            continue;
+                        ImGui.Spacing();
+                        ImGui.TextWrapped("Minor Changes");
 
-                        foreach (var mainChange in changes[i].Main)
-                            ImGui.TextWrapped($"- {mainChange}");
-
-                        if (changes[i].Minor.Count > 0)
-                        {
-                            ImGui.Spacing();
-                            ImGui.TextWrapped("Minor Changes");
-
-                            foreach (var minorChange in changes[i].Minor)
-                                ImGui.TextWrapped($"- {minorChange}");
-                        }
-
-                        ImGui.TreePop();
+                        foreach (var minorChange in changes[i].Minor)
+                            ImGui.TextWrapped($"- {minorChange}");
                     }
+
+                    ImGui.TreePop();
                 }
             }
         }

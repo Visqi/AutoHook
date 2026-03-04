@@ -18,60 +18,58 @@ public class SubTabFish
 
         DrawDescription(listOfFish);
 
-        using (var item = ImRaii.Child("###FishItems", new Vector2(0, 0), true))
+        using var item = ImRaii.Child("###FishItems", new Vector2(0, 0), true);
+        for (var idx = 0; idx < listOfFish.Count; idx++)
         {
-            for (var idx = 0; idx < listOfFish.Count; idx++)
+            var fish = listOfFish[idx];
+            ImGui.PushID($"fishTab###{idx}");
+
+            var count = FishingManager.FishingHelper.GetFishCount(fish.UniqueId);
+            var fishCount = count > 0 ? $"({UIStrings.Caught_Counter} {count})" : "";
+
+            if (DrawUtil.Checkbox($"###checkbox{idx}", ref fish.Enabled))
+                Service.Save();
+
+            ImGui.SameLine(0, 6);
+            var x = ImGui.GetCursorPosX();
+            if (ImGui.CollapsingHeader($"{fish.Fish.Name} {fishCount}###a{idx}"))
             {
-                var fish = listOfFish[idx];
-                ImGui.PushID($"fishTab###{idx}");
-
-                var count = FishingManager.FishingHelper.GetFishCount(fish.UniqueId);
-                var fishCount = count > 0 ? $"({UIStrings.Caught_Counter} {count})" : "";
-
-                if (DrawUtil.Checkbox($"###checkbox{idx}", ref fish.Enabled))
-                    Service.Save();
-
-                ImGui.SameLine(0, 6);
-                var x = ImGui.GetCursorPosX();
-                if (ImGui.CollapsingHeader($"{fish.Fish.Name} {fishCount}###a{idx}"))
-                {
-                    ImGui.SetCursorPosX(x);
-                    ImGui.BeginGroup();
-                    ImGui.Spacing();
-                    DrawFishSearchBar(fish);
-                    DrawDeleteButton(fish);
-                    DrawUtil.SpacingSeparator();
-
-                    DrawSurfaceSlapIdenticalCast(fish);
-                    ImGui.Spacing();
-
-                    DrawMultihook(fish);
-                    ImGui.Spacing();
-
-                    DrawMooch(fish);
-                    ImGui.Spacing();
-
-                    DrawSparefulHand(fish);
-                    ImGui.Spacing();
-
-                    DrawSwapBait(fish);
-                    ImGui.Spacing();
-
-                    DrawSwapPreset(fish);
-                    ImGui.Spacing();
-
-                    DrawStopAfter(fish);
-                    ImGui.Spacing();
-
-                    if (DrawUtil.Checkbox(UIStrings.Ignore_When_Intuition, ref fish.IgnoreOnIntuition))
-                        Service.Save();
-
-                    ImGui.EndGroup();
-                }
-
+                ImGui.SetCursorPosX(x);
+                ImGui.BeginGroup();
                 ImGui.Spacing();
-                ImGui.PopID();
+                DrawFishSearchBar(fish);
+                DrawDeleteButton(fish);
+                DrawUtil.SpacingSeparator();
+
+                DrawSurfaceSlapIdenticalCast(fish);
+                ImGui.Spacing();
+
+                DrawMultihook(fish);
+                ImGui.Spacing();
+
+                DrawMooch(fish);
+                ImGui.Spacing();
+
+                DrawSparefulHand(fish);
+                ImGui.Spacing();
+
+                DrawSwapBait(fish);
+                ImGui.Spacing();
+
+                DrawSwapPreset(fish);
+                ImGui.Spacing();
+
+                DrawStopAfter(fish);
+                ImGui.Spacing();
+
+                // Advanced ignore conditions (ConditionSet-based, with presets)
+                fish.IgnoreConditionSet = ConditionUi.DrawConditionSet(UIStrings.Ignore_When_Intuition, fish.IgnoreConditionSet, ConditionScope.FishIgnore);
+
+                ImGui.EndGroup();
             }
+
+            ImGui.Spacing();
+            ImGui.PopID();
         }
     }
 

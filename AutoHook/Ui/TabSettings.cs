@@ -42,10 +42,8 @@ public class TabSettings : BaseTab
 
     public override void Draw()
     {
-        using (var item = ImRaii.Child("SettingItems", new Vector2(0, 0), true))
-        {
-            DrawConfigs();
-        }
+        using var item = ImRaii.Child("SettingItems", new Vector2(0, 0), true);
+        DrawConfigs();
     }
 
     private void DrawConfigs()

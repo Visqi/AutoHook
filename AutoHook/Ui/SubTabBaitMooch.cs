@@ -25,12 +25,10 @@ public class SubTabBaitMooch
                 DrawBody(preset.ListOfBaits, false);
         }
 
-        using (var tabMooch = ImRaii.TabItem(UIStrings.Mooch))
-        {
-            DrawUtil.HoveredTooltip(UIStrings.MoochTabHelpText);
-            if (tabMooch)
-                DrawBody(preset.ListOfMooch, true);
-        }
+        using var tabMooch = ImRaii.TabItem(UIStrings.Mooch);
+        DrawUtil.HoveredTooltip(UIStrings.MoochTabHelpText);
+        if (tabMooch)
+            DrawBody(preset.ListOfMooch, true);
     }
 
     private static void DrawBody(List<HookConfig> list, bool isMooch)
@@ -57,71 +55,67 @@ public class SubTabBaitMooch
             ImGui.Spacing();
         }
 
-        using (var items = ImRaii.Child($"###BaitMoochItems", Vector2.Zero, false))
+        using var items = ImRaii.Child($"###BaitMoochItems", Vector2.Zero, false);
+        for (var idx = 0; idx < list?.Count; idx++)
         {
-            for (int idx = 0; idx < list?.Count; idx++)
+            var hook = list[idx];
+            ImGui.PushID(@$"id###{idx}");
+
+            var baitName = !_preset.IsGlobal ? hook.BaitFish.Name :
+                isMooch ? UIStrings.All_Mooches : UIStrings.All_Baits;
+
+            var count = FishingManager.FishingHelper.GetFishCount(hook.UniqueId);
+            var hookCounter = count > 0 ? @$"({UIStrings.Hooked_Counter} {count})" : "";
+
+            if (DrawUtil.Checkbox($"###checkbox{idx}", ref hook.Enabled, UIStrings.EnabledConfigArrowhelpMarker,
+                    true))
+                Service.Save();
+
+            ImGui.SameLine(0, 6);
+            var x = ImGui.GetCursorPosX();
+            if (ImGui.CollapsingHeader(@$"{baitName} {hookCounter}###{idx}"))
             {
-                var hook = list[idx];
-                ImGui.PushID(@$"id###{idx}");
-
-                string baitName = !_preset.IsGlobal ? hook.BaitFish.Name :
-                    isMooch ? UIStrings.All_Mooches : UIStrings.All_Baits;
-
-                var count = FishingManager.FishingHelper.GetFishCount(hook.UniqueId);
-                var hookCounter = count > 0 ? @$"({UIStrings.Hooked_Counter} {count})" : "";
-
-                if (DrawUtil.Checkbox($"###checkbox{idx}", ref hook.Enabled, UIStrings.EnabledConfigArrowhelpMarker,
-                        true))
-                    Service.Save();
-
-                ImGui.SameLine(0, 6);
-                var x = ImGui.GetCursorPosX();
-                if (ImGui.CollapsingHeader(@$"{baitName} {hookCounter}###{idx}"))
+                ImGui.SetCursorPosX(x);
+                ImGui.BeginGroup();
+                if (!_preset.IsGlobal)
                 {
-                    ImGui.SetCursorPosX(x);
-                    ImGui.BeginGroup();
-                    if (!_preset.IsGlobal)
-                    {
-                        ImGui.Spacing();
-                        DrawInputSearchBar(hook, isMooch);
-                        ImGui.SameLine();
-                        DrawDeleteButton(hook);
-                        ImGui.Spacing();
-                    }
-
-                    //rewrite TabBarsBaitMooch using ImRaii
-                    using (var tabBarsBaitMooch = ImRaii.TabBar(@"TabBarsBaitMooch", ImGuiTabBarFlags.NoTooltip))
-                    {
-                        if (tabBarsBaitMooch)
-                        {
-                            using (var tabDefault = ImRaii.TabItem($"{UIStrings.DefaultSubTab}###Default"))
-                            {
-                                if (tabDefault)
-                                    hook.NormalHook.DrawOptions();
-                            }
-
-                            using (var tabIntuition = ImRaii.TabItem($"{UIStrings.Intuition}###Intuition"))
-                            {
-                                if (tabIntuition)
-                                    hook.IntuitionHook.DrawOptions();
-                            }
-                        }
-                    }
-
-                    if (isMooch)
-                    {
-                        ImGui.Spacing();
-                        if (_preset.IsGlobal || hook.BaitFish.Id == GameRes.AllMoochesId || GameRes.MoochableFish.Any(f => f.Id == hook.BaitFish.Id))
-                            DrawSwimbaitUsage(hook);
-                    }
-
-                    ImGui.EndGroup();
+                    ImGui.Spacing();
+                    DrawInputSearchBar(hook, isMooch);
+                    ImGui.SameLine();
+                    DrawDeleteButton(hook);
+                    ImGui.Spacing();
                 }
 
-                DrawUtil.SpacingSeparator();
+                //rewrite TabBarsBaitMooch using ImRaii
+                using (var tabBarsBaitMooch = ImRaii.TabBar(@"TabBarsBaitMooch", ImGuiTabBarFlags.NoTooltip))
+                {
+                    if (tabBarsBaitMooch)
+                    {
+                        using (var tabDefault = ImRaii.TabItem($"{UIStrings.DefaultSubTab}###Default"))
+                        {
+                            if (tabDefault)
+                                hook.NormalHook.DrawOptions();
+                        }
 
-                ImGui.PopID();
+                        using var tabIntuition = ImRaii.TabItem($"{UIStrings.Intuition}###Intuition");
+                        if (tabIntuition)
+                            hook.IntuitionHook.DrawOptions();
+                    }
+                }
+
+                if (isMooch)
+                {
+                    ImGui.Spacing();
+                    if (_preset.IsGlobal || hook.BaitFish.Id == GameRes.AllMoochesId || GameRes.MoochableFish.Any(f => f.Id == hook.BaitFish.Id))
+                        DrawSwimbaitUsage(hook);
+                }
+
+                ImGui.EndGroup();
             }
+
+            DrawUtil.SpacingSeparator();
+
+            ImGui.PopID();
         }
     }
 
@@ -146,8 +140,8 @@ public class SubTabBaitMooch
 
         if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowLeft))
         {
-            if (Service.BaitManager.Current > 0) // just make sure bait is bait
-                hookConfig.BaitFish = list.Single(x => x.Id == Service.BaitManager.Current);
+            if (Service.WorldState.CurrentBaitId > 0) // just make sure bait is bait
+                hookConfig.BaitFish = list.Single(x => x.Id == Service.WorldState.CurrentBaitId);
         }
 
         if (ImGui.IsItemHovered())

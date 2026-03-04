@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -25,26 +25,26 @@ public class AutoMakeShiftBait : BaseActionCast
         if (!Enabled)
             return false;
 
-        if (PlayerRes.HasStatus(IDs.Status.MakeshiftBait))
+        if (Service.WorldState.HasStatus(IDs.Status.MakeshiftBait))
             return false;
 
-        if (PlayerRes.HasStatus(IDs.Status.PrizeCatch))
+        if (Service.WorldState.HasStatus(IDs.Status.PrizeCatch))
             return false;
 
-        if (PlayerRes.HasStatus(IDs.Status.AnglersFortune))
+        if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune))
             return false;
 
-        if (!PlayerRes.HasStatus(IDs.Status.FishersIntuition) && _onlyUseWithIntuition)
+        if (!Service.WorldState.HasStatus(IDs.Status.FishersIntuition) && _onlyUseWithIntuition)
             return false;
 
-        if (PlayerRes.IsMoochAvailable() && OnlyWhenMoochNotUp)
+        if (Service.WorldState.IsMoochAvailable() && OnlyWhenMoochNotUp)
             return false;
 
         if (UseOnlyWhenMoochIIOnCD && !PlayerRes.ActionOnCoolDown(IDs.Actions.Mooch2))
             return false;
 
-        bool available = PlayerRes.ActionTypeAvailable(IDs.Actions.MakeshiftBait);
-        bool hasStacks = PlayerRes.HasAnglersArtStacks(MakeshiftBaitStacks);
+        var available = Service.WorldState.ActionAvailable(IDs.Actions.MakeshiftBait);
+        var hasStacks = Service.WorldState.HasAnglersArtStacks(MakeshiftBaitStacks);
 
         return hasStacks && available;
     }

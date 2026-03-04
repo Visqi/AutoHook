@@ -130,22 +130,20 @@ public class SubTabAutoCast
 
         ImGui.TextColored(ImGuiColors.DalamudOrange, UIStrings.Auto_Cast_Sort_Notice);
 
-        using (var item = ImRaii.Child("###AutoCastItems", new Vector2(0, 0), true))
+        using var item = ImRaii.Child("###AutoCastItems", new Vector2(0, 0), true);
+        foreach (var action in _actionsAvailable.OrderBy(x => x.GetType() == typeof(AutoCastLine))
+                     .ThenBy(x => x.GetType() == typeof(AutoMooch)).ThenBy(x => x.GetType() == typeof(AutoCollect)).ThenBy(x => x.GetType() == typeof(AutoMultiHook))
+                     .ThenBy(x => x.Priority))
         {
-            foreach (var action in _actionsAvailable.OrderBy(x => x.GetType() == typeof(AutoCastLine))
-                         .ThenBy(x => x.GetType() == typeof(AutoMooch)).ThenBy(x => x.GetType() == typeof(AutoCollect)).ThenBy(x => x.GetType() == typeof(AutoMultiHook))
-                         .ThenBy(x => x.Priority))
+            try
             {
-                try
-                {
-                    ImGui.PushID(action.GetType().ToString());
-                    action.DrawConfig(_actionsAvailable);
-                    ImGui.PopID();
-                }
-                catch (Exception e)
-                {
-                    Svc.Log.Error(e.ToString());
-                }
+                ImGui.PushID(action.GetType().ToString());
+                action.DrawConfig(_actionsAvailable);
+                ImGui.PopID();
+            }
+            catch (Exception e)
+            {
+                Svc.Log.Error(e.ToString());
             }
         }
     }

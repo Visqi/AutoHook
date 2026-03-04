@@ -1,4 +1,5 @@
-﻿using Dalamud.Configuration;
+using Dalamud.Configuration;
+using AutoHook.Conditions;
 using Newtonsoft.Json;
 using System.ComponentModel;
 using System.IO.Compression;
@@ -11,7 +12,7 @@ namespace AutoHook.Configurations;
 [Serializable]
 public class Configuration : IPluginConfiguration
 {
-    public int Version { get; set; } = 5;
+    public int Version { get; set; } = 6;
     public string CurrentLanguage { get; set; } = @"en";
 
     public bool HideLocButtonn = true;
@@ -54,7 +55,7 @@ public class Configuration : IPluginConfiguration
     [DefaultValue(false)] public bool DtrPresetBarEnabled = false;
 
     // old config
-    public List<BaitPresetConfig> BaitPresetList = [];
+    public List<BaitPresetConfig> BaitPresetList = []; // legacy
 
     public void Save()
     {
@@ -110,6 +111,24 @@ public class Configuration : IPluginConfiguration
             Save();
             Version = 5;
         }
+
+        if (Version == 5)
+        {
+            Service.PrintDebug(@$"[Configuration] Updating to v6");
+
+            try
+            {
+                MigrateConditionsToConditionSets();
+                MigrateExtraToTriggers();
+            }
+            catch (Exception e)
+            {
+                Service.PrintDebug(@$"[Configuration] v6 migration failed: {e.Message}");
+            }
+
+            Save();
+            Version = 6;
+        }
     }
 
     private static void SetFieldNewClass(HookConfig newOne, BaitConfig old)
@@ -130,6 +149,511 @@ public class Configuration : IPluginConfiguration
                 targetField.SetValue(newOne, value);
             }
         }
+    }
+
+    /// <summary>
+    /// v6 migration: populate ConditionSet-backed fields from legacy flags/timers.
+    /// This keeps old fields for backward compat while enabling the new condition engine.
+    /// </summary>
+    private void MigrateConditionsToConditionSets()
+    {
+        void MigratePreset(CustomPresetConfig preset)
+        {
+            foreach (var hook in preset.ListOfBaits)
+            {
+                MigrateHookConfig(hook);
+            }
+
+            foreach (var hook in preset.ListOfMooch)
+            {
+                MigrateHookConfig(hook);
+            }
+
+            foreach (var fish in preset.ListOfFish)
+            {
+                MigrateFishConfig(fish);
+            }
+
+            MigrateAutoCordial(preset.AutoCastsCfg.CastCordial);
+        }
+
+        MigratePreset(HookPresets.DefaultPreset);
+        foreach (var preset in HookPresets.CustomPresets)
+            MigratePreset(preset);
+    }
+
+    /// <summary>
+    /// v6 migration: convert legacy ExtraConfig flags (intuition, spectral, angler's art, swimbait)
+    /// into generic trigger-based ExtraConfig.Triggers using ConditionSets.
+    /// </summary>
+    private void MigrateExtraToTriggers()
+    {
+        void MigratePreset(CustomPresetConfig preset)
+        {
+            var extra = preset.ExtraCfg;
+            if (extra == null)
+                return;
+
+            // Intuition gained
+            if ((extra.SwapPresetIntuitionGain || extra.SwapBaitIntuitionGain) && extra.Triggers.Count < 16)
+            {
+                var set = new ConditionSet
+                {
+                    CombineMode = ConditionCombineMode.All,
+                    Groups =
+                    [
+                        new()
+                        {
+                            CombineMode = ConditionCombineMode.All,
+                            Conditions =
+                            [
+                                new()
+                                {
+                                    TypeId = "IntuitionActive",
+                                    Params = []
+                                }
+                            ]
+                        }
+                    ]
+                };
+
+                extra.Triggers.Add(new ExtraTrigger
+                {
+                    ConditionSet = set,
+                    SwapPreset = extra.SwapPresetIntuitionGain,
+                    PresetToSwap = extra.PresetToSwapIntuitionGain,
+                    SwapBait = extra.SwapBaitIntuitionGain,
+                    BaitToSwap = extra.BaitToSwapIntuitionGain,
+                    StopAction = ExtraStopAction.None,
+                });
+            }
+
+            // Intuition lost
+            if ((extra.SwapPresetIntuitionLost || extra.SwapBaitIntuitionLost || extra.QuitOnIntuitionLost || extra.StopOnIntuitionLost) && extra.Triggers.Count < 16)
+            {
+                var set = new ConditionSet
+                {
+                    CombineMode = ConditionCombineMode.All,
+                    Groups =
+                    [
+                        new()
+                        {
+                            CombineMode = ConditionCombineMode.All,
+                            Conditions =
+                            [
+                                new()
+                                {
+                                    TypeId = "IntuitionActive",
+                                    Params = []
+                                }
+                            ]
+                        }
+                    ]
+                };
+
+                var stop = ExtraStopAction.None;
+                if (extra.QuitOnIntuitionLost)
+                    stop = ExtraStopAction.QuitFishing;
+                else if (extra.StopOnIntuitionLost)
+                    stop = ExtraStopAction.StopOnly;
+
+                // OnLose Intuition = (NOT IntuitionActive)
+                set.Groups[0].Conditions[0].Params["inv"] = true;
+
+                extra.Triggers.Add(new ExtraTrigger
+                {
+                    ConditionSet = set,
+                    SwapPreset = extra.SwapPresetIntuitionLost,
+                    PresetToSwap = extra.PresetToSwapIntuitionLost,
+                    SwapBait = extra.SwapBaitIntuitionLost,
+                    BaitToSwap = extra.BaitToSwapIntuitionLost,
+                    StopAction = stop,
+                });
+            }
+
+            // Spectral gained
+            if ((extra.SwapPresetSpectralCurrentGain || extra.SwapBaitSpectralCurrentGain) && extra.Triggers.Count < 16)
+            {
+                var set = new ConditionSet
+                {
+                    CombineMode = ConditionCombineMode.All,
+                    Groups =
+                    [
+                        new()
+                        {
+                            CombineMode = ConditionCombineMode.All,
+                            Conditions =
+                            [
+                                new()
+                                {
+                                    TypeId = "SpectralActive",
+                                    Params = []
+                                }
+                            ]
+                        }
+                    ]
+                };
+
+                extra.Triggers.Add(new ExtraTrigger
+                {
+                    ConditionSet = set,
+                    SwapPreset = extra.SwapPresetSpectralCurrentGain,
+                    PresetToSwap = extra.PresetToSwapSpectralCurrentGain,
+                    SwapBait = extra.SwapBaitSpectralCurrentGain,
+                    BaitToSwap = extra.BaitToSwapSpectralCurrentGain,
+                    StopAction = ExtraStopAction.None,
+                });
+            }
+
+            // Spectral lost
+            if ((extra.SwapPresetSpectralCurrentLost || extra.SwapBaitSpectralCurrentLost) && extra.Triggers.Count < 16)
+            {
+                var set = new ConditionSet
+                {
+                    CombineMode = ConditionCombineMode.All,
+                    Groups =
+                    [
+                        new()
+                        {
+                            CombineMode = ConditionCombineMode.All,
+                            Conditions =
+                            [
+                                new()
+                                {
+                                    TypeId = "SpectralActive",
+                                    Params = []
+                                }
+                            ]
+                        }
+                    ]
+                };
+
+                // OnLose Spectral = (NOT SpectralActive)
+                set.Groups[0].Conditions[0].Params["inv"] = true;
+
+                extra.Triggers.Add(new ExtraTrigger
+                {
+                    ConditionSet = set,
+                    SwapPreset = extra.SwapPresetSpectralCurrentLost,
+                    PresetToSwap = extra.PresetToSwapSpectralCurrentLost,
+                    SwapBait = extra.SwapBaitSpectralCurrentLost,
+                    BaitToSwap = extra.BaitToSwapSpectralCurrentLost,
+                    StopAction = ExtraStopAction.None,
+                });
+            }
+
+            // Angler's Art stacks reached
+            if ((extra.SwapPresetAnglersArt || extra.SwapBaitAnglersArt || extra.StopAfterAnglersArt) && extra.AnglerStackQtd > 0 && extra.Triggers.Count < 16)
+            {
+                var set = new ConditionSet
+                {
+                    CombineMode = ConditionCombineMode.All,
+                    Groups =
+                    [
+                        new()
+                        {
+                            CombineMode = ConditionCombineMode.All,
+                            Conditions =
+                            [
+                                new()
+                                {
+                                    TypeId = "StatusStacks",
+                                    Params = new Dictionary<string, object>
+                                    {
+                                        ["ids"] = new List<object> { (long)IDs.Status.AnglersArt },
+                                        ["minStacks"] = extra.AnglerStackQtd,
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                };
+
+                var stop = ExtraStopAction.None;
+                if (extra.StopAfterAnglersArt)
+                {
+                    stop = extra.AnglerStopFishingStep == FishingSteps.Quitting
+                        ? ExtraStopAction.QuitFishing
+                        : ExtraStopAction.StopOnly;
+                }
+
+                extra.Triggers.Add(new ExtraTrigger
+                {
+                    ConditionSet = set,
+                    SwapPreset = extra.SwapPresetAnglersArt,
+                    PresetToSwap = extra.PresetToSwapAnglersArt,
+                    SwapBait = extra.SwapBaitAnglersArt,
+                    BaitToSwap = extra.BaitToSwapAnglersArt,
+                    StopAction = stop,
+                });
+            }
+
+            // Swimbait fills
+            if (extra.SwimbaitFillsAction != SwimbaitAction.None && extra.Triggers.Count < 16)
+            {
+                var set = new ConditionSet
+                {
+                    CombineMode = ConditionCombineMode.All,
+                    Groups =
+                    [
+                        new()
+                        {
+                            CombineMode = ConditionCombineMode.All,
+                            Conditions =
+                            [
+                                new()
+                                {
+                                    TypeId = "SwimbaitCount",
+                                    Params = new Dictionary<string, object>
+                                    {
+                                        ["val"] = 3,
+                                        ["above"] = true,
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                };
+
+                var stop = extra.SwimbaitFillsAction == SwimbaitAction.Stop
+                    ? ExtraStopAction.StopOnly
+                    : ExtraStopAction.None;
+
+                extra.Triggers.Add(new ExtraTrigger
+                {
+                    ConditionSet = set,
+                    SwapPreset = extra.SwimbaitFillsAction == SwimbaitAction.SwapPreset,
+                    PresetToSwap = extra.PresetToSwapSwimbaitFills,
+                    SwapBait = false,
+                    StopAction = stop,
+                });
+            }
+
+            // Swimbait runs out
+            if (extra.SwimbaitRunsOutAction != SwimbaitAction.None && extra.Triggers.Count < 16)
+            {
+                var set = new ConditionSet
+                {
+                    CombineMode = ConditionCombineMode.All,
+                    Groups =
+                    [
+                        new()
+                        {
+                            CombineMode = ConditionCombineMode.All,
+                            Conditions =
+                            [
+                                new()
+                                {
+                                    TypeId = "SwimbaitCount",
+                                    Params = new Dictionary<string, object>
+                                    {
+                                        ["val"] = 0,
+                                        ["above"] = false,
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                };
+
+                var stop = extra.SwimbaitRunsOutAction == SwimbaitAction.Stop
+                    ? ExtraStopAction.StopOnly
+                    : ExtraStopAction.None;
+
+                extra.Triggers.Add(new ExtraTrigger
+                {
+                    ConditionSet = set,
+                    SwapPreset = extra.SwimbaitRunsOutAction == SwimbaitAction.SwapPreset,
+                    PresetToSwap = extra.PresetToSwapSwimbaitRunsOut,
+                    SwapBait = false,
+                    StopAction = stop,
+                });
+            }
+        }
+
+        MigratePreset(HookPresets.DefaultPreset);
+        foreach (var preset in HookPresets.CustomPresets)
+            MigratePreset(preset);
+    }
+
+    private static void MigrateHookConfig(HookConfig hook)
+    {
+        if (hook == null) return;
+        MigrateHookset(hook.NormalHook);
+        MigrateHookset(hook.IntuitionHook);
+    }
+
+    private static void MigrateHookset(BaseHookset hookset)
+    {
+        if (hookset == null) return;
+
+        void MigrateBite(BaseBiteConfig b)
+        {
+            if (b == null) return;
+            // Do not overwrite existing ConditionSets
+            if (b.ConditionSet is { Groups.Count: > 0 }) return;
+
+            var set = b.ConditionSet ??= new ConditionSet();
+            var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
+
+            void AddStatus(uint statusId, bool inverse)
+            {
+                var cond = new Condition
+                {
+                    TypeId = "StatusActive",
+                    Params = new Dictionary<string, object>
+                    {
+                        ["ids"] = new List<object> { (long)statusId }
+                    }
+                };
+                if (inverse)
+                    cond.Params["inv"] = true;
+                group.Conditions.Add(cond);
+            }
+
+            void AddRange(string typeId, double min, double max)
+            {
+                if (min <= 0 && max <= 0)
+                    return;
+                var cond = new Condition
+                {
+                    TypeId = typeId,
+                    Params = new Dictionary<string, object>
+                    {
+                        // "r": [min, max]; max 0 => no upper bound
+                        ["r"] = new List<object> { min, max }
+                    }
+                };
+                group.Conditions.Add(cond);
+            }
+
+            // Surface Slap
+            if (b.OnlyWhenActiveSlap)
+                AddStatus(IDs.Status.SurfaceSlap, inverse: false);
+            if (b.OnlyWhenNotActiveSlap)
+                AddStatus(IDs.Status.SurfaceSlap, inverse: true);
+
+            // Identical Cast
+            if (b.OnlyWhenActiveIdentical)
+                AddStatus(IDs.Status.IdenticalCast, inverse: false);
+            if (b.OnlyWhenNotActiveIdentical)
+                AddStatus(IDs.Status.IdenticalCast, inverse: true);
+
+            // Prize Catch
+            if (b.PrizeCatchReq)
+                AddStatus(IDs.Status.PrizeCatch, inverse: false);
+            if (b.PrizeCatchNotReq)
+                AddStatus(IDs.Status.PrizeCatch, inverse: true);
+
+            // Multihook: only map the positive case; negative case remains on legacy flag.
+            if (b.OnlyWhenActiveMultihook)
+            {
+                var cond = new Condition
+                {
+                    TypeId = "MultihookAvailable",
+                    Params = []
+                };
+                group.Conditions.Add(cond);
+            }
+
+            // Timers
+            if (b.HookTimerEnabled)
+                AddRange("BiteTimer", b.MinHookTimer, b.MaxHookTimer);
+            if (b.ChumTimerEnabled)
+                AddRange("ChumTimer", b.ChumMinHookTimer, b.ChumMaxHookTimer);
+
+            if (group.Conditions.Count > 0)
+                set.Groups.Add(group);
+        }
+
+        MigrateBite(hookset.TripleWeak);
+        MigrateBite(hookset.TripleStrong);
+        MigrateBite(hookset.TripleLegendary);
+        MigrateBite(hookset.DoubleWeak);
+        MigrateBite(hookset.DoubleStrong);
+        MigrateBite(hookset.DoubleLegendary);
+        MigrateBite(hookset.PatienceWeak);
+        MigrateBite(hookset.PatienceStrong);
+        MigrateBite(hookset.PatienceLegendary);
+
+        // AutoLures: map its legacy flags into a ConditionSet on the action itself.
+        MigrateLures(hookset.CastLures);
+    }
+
+    private static void MigrateLures(AutoLures lures)
+    {
+        if (lures == null) return;
+        if (lures.ConditionSet is { Groups.Count: > 0 }) return;
+
+        var set = lures.ConditionSet ??= new ConditionSet();
+        var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
+
+        void AddStatus(uint statusId, bool inverse)
+        {
+            var cond = new Condition
+            {
+                TypeId = "StatusActive",
+                Params = new Dictionary<string, object>
+                {
+                    ["ids"] = new List<object> { (long)statusId }
+                }
+            };
+            if (inverse)
+                cond.Params["inv"] = true;
+            group.Conditions.Add(cond);
+        }
+
+        // Surface Slap
+        if (lures.OnlyWhenActiveSlap)
+            AddStatus(IDs.Status.SurfaceSlap, inverse: false);
+        if (lures.OnlyWhenNotActiveSlap)
+            AddStatus(IDs.Status.SurfaceSlap, inverse: true);
+
+        // Identical Cast
+        if (lures.OnlyWhenActiveIdentical)
+            AddStatus(IDs.Status.IdenticalCast, inverse: false);
+        if (lures.OnlyWhenNotActiveIdentical)
+            AddStatus(IDs.Status.IdenticalCast, inverse: true);
+
+        if (group.Conditions.Count > 0)
+            set.Groups.Add(group);
+    }
+
+    private static void MigrateFishConfig(FishConfig fish)
+    {
+        if (fish == null) return;
+        if (fish.IgnoreConditionSet is { Groups.Count: > 0 }) return;
+        if (!fish.IgnoreOnIntuition) return;
+
+        var set = fish.IgnoreConditionSet ??= new ConditionSet();
+        var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
+        var cond = new Condition
+        {
+            TypeId = "IntuitionActive",
+            Params = []
+        };
+        group.Conditions.Add(cond);
+        set.Groups.Add(group);
+    }
+
+    private static void MigrateAutoCordial(AutoCordial cordial)
+    {
+        if (cordial == null) return;
+        if (cordial.OvercapConditionSet is { Groups.Count: > 0 }) return;
+        if (!cordial.AllowOvercapIC) return;
+
+        var set = cordial.OvercapConditionSet ??= new ConditionSet();
+        var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
+        var cond = new Condition
+        {
+            TypeId = "StatusActive",
+            Params = new Dictionary<string, object>
+            {
+                ["ids"] = new List<object> { (long)IDs.Status.IdenticalCast }
+            }
+        };
+        group.Conditions.Add(cond);
+        set.Groups.Add(group);
     }
 
     public void Initiate()
@@ -181,14 +705,15 @@ public class Configuration : IPluginConfiguration
 
     public static string ExportPreset(BasePresetConfig preset)
     {
-        var exported = CompressString(JsonConvert.SerializeObject(preset,
+        var exported = CompressString(JsonConvert.SerializeObject(
+            preset,
             new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore }));
 
         // check if preset is type of AutoGigConfig or CustomPresetConfig
         if (preset is AutoGigConfig)
             return ExportPrefixSf + exported;
         else if (preset is CustomPresetConfig)
-            return ExportPrefixV4 + exported;
+            return ExportPrefixV6 + exported;
 
         return "Something went wrong while exporting the preset";
     }
@@ -282,13 +807,19 @@ public class Configuration : IPluginConfiguration
     [NonSerialized] public static string ExportPrefixV2 = "AH_";
     [NonSerialized] public static string ExportPrefixV3 = "AH3_";
     [NonSerialized] public static string ExportPrefixV4 = "AH4_";
+    [NonSerialized] public static string ExportPrefixV6 = "AH6_";
     [NonSerialized] public static string ExportPrefixSf = "AHSF1_";
     [NonSerialized] public static string ExportPrefixFolder = "AHFOLDER_";
 
     [NonSerialized]
     private static readonly List<string> ExportPrefixes =
     [
-        ExportPrefixV2, ExportPrefixV3, ExportPrefixV4, ExportPrefixSf, ExportPrefixFolder
+        ExportPrefixV2,
+        ExportPrefixV3,
+        ExportPrefixV4,
+        ExportPrefixV6,
+        ExportPrefixSf,
+        ExportPrefixFolder
     ];
 
     public static string CompressString(string s)

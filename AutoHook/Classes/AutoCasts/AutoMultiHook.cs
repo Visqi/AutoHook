@@ -16,7 +16,7 @@ public class AutoMultiHook : BaseActionCast
         if (DutyActionManager.GetInstanceIfReady() is not null and var dm)
             for (var i = 0; i < dm->NumValidSlots; i++)
                 if (dm->ActionId[i] is IDs.Actions.MultiHook && dm->CurCharges[i] > 0)
-                    return !OnlyUseWhenIdenticalCastActive || PlayerRes.HasStatus(IDs.Status.IdenticalCast);
+                    return !OnlyUseWhenIdenticalCastActive || Service.WorldState.HasStatus(IDs.Status.IdenticalCast);
         return false;
     }
 

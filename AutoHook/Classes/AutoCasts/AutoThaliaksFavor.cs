@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -19,21 +19,21 @@ public class AutoThaliaksFavor : BaseActionCast
 
     public override bool CastCondition()
     {
-        bool allowedToUseThaliaks = true;
-        bool hasStacks = PlayerRes.HasAnglersArtStacks(ThaliaksFavorStacks);
+        var allowedToUseThaliaks = true;
+        var hasStacks = Service.WorldState.HasAnglersArtStacks(ThaliaksFavorStacks);
 
-        bool notOvercaped = (PlayerRes.GetCurrentGp() + ThaliaksFavorRecover) < PlayerRes.GetMaxGp();
+        var notOvercaped = (Service.WorldState.CurrentGp + ThaliaksFavorRecover) < Service.WorldState.MaxGp;
 
         if (UseWhenCordialCD)
         {
             var cordialConfig = AutoHook.Plugin.HookManager.GetAutoCastCfg().CastCordial;
-            bool hasCordial = false;
+            var hasCordial = false;
             foreach (var cordial in cordialConfig._cordialList)
             {
-                hasCordial |= PlayerRes.HaveCordialInInventory(cordial.Item1);
+                hasCordial |= Service.WorldState.HaveCordialInInventory(cordial.Item1);
             }
 
-            bool cordialAvailable = cordialConfig.Enabled && PlayerRes.IsPotOffCooldown() && hasCordial;
+            var cordialAvailable = cordialConfig.Enabled && Service.WorldState.IsPotOffCooldown && hasCordial;
 
             allowedToUseThaliaks = !cordialAvailable;
         }

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -26,10 +26,10 @@ public class AutoCastLine : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (OnlyCastWithFishEyes && !PlayerRes.HasStatus(IDs.Status.FishEyes))
+        if (OnlyCastWithFishEyes && !Service.WorldState.HasStatus(IDs.Status.FishEyes))
             return false;
 
-        if (OnlyCastLarge && !PlayerRes.HasAnyStatus([IDs.Status.AnglersFortune, IDs.Status.PrizeCatch]))
+        if (OnlyCastLarge && !Service.WorldState.HasAnyStatus([IDs.Status.AnglersFortune, IDs.Status.PrizeCatch]))
             return false;
 
         return true;

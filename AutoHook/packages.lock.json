@@ -16,15 +16,46 @@
       },
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.1.0.21, )",
-        "resolved": "3.1.0.21",
-        "contentHash": "gZx/+dwdKqBWMAww9MypeLElAL2Qw8baATR5TAZqaq8wNwaawm6j/tk57K8t9E3IKYHezxBW9+WRzye44YLh7w=="
+        "requested": "[3.1.0.27, )",
+        "resolved": "3.1.0.27",
+        "contentHash": "PkA+aVOf+fHaxxpWM8jZCwBVX3TvNY+rJd7amKYZuVdeF7qpR2jPs0ZYQMejeIY4jUOdRKhaGErqq3ZV9HXZjg=="
       },
       "HtmlAgilityPack": {
         "type": "Direct",
         "requested": "[1.12.4, )",
         "resolved": "1.12.4",
         "contentHash": "ljqvBabvFwKoLniuoQKO8b5bJfJweKLs4fUNS/V5dsvpo0A8MlJqxxn9XVmP2DaskbUXty6IYaWAi1SArGIMeQ=="
+      },
+      "CSVFile": {
+        "type": "Transitive",
+        "resolved": "3.2.1",
+        "contentHash": "hXWPP7BGA8DS+UxdDEjAsLPdo6OUiCdaCiprxuRxpTy3nwI9DqwNWxaC5imfyD3kCb9/S2mW35s7f08uaokTUA=="
+      },
+      "CsvHelper": {
+        "type": "Transitive",
+        "resolved": "30.0.1",
+        "contentHash": "rcZtgbWR+As4G3Vpgx0AMNmShGuQLFjkHAPIIflzrfkJCx8/AOd4m96ZRmiU1Wi39qS5UVjV0P8qdgqOo5Cwyg=="
+      },
+      "LuminaSupplemental.Excel": {
+        "type": "Transitive",
+        "resolved": "4.1.1",
+        "contentHash": "wD4p7TPzIHzWWzcYqTgWgyluJsU+h19UFzd5grhLr2Mc5pXnbcwiuMsJksP2TxJLcHsTmvBVGH02f7/VmkLqcA==",
+        "dependencies": {
+          "CSVFile": "3.2.1",
+          "CsvHelper": "30.0.1",
+          "Sylvan.Data.Csv": "1.4.3"
+        }
+      },
+      "Sylvan.Data.Csv": {
+        "type": "Transitive",
+        "resolved": "1.4.3",
+        "contentHash": "ZUFTqs5doO9aGrR2g0tjASSfxaMUnsxRBXCYFvDRn74XfIc0PUZ0FYRbI3Yu/4W/IFc/DBKH30OOeZ2xGqGyFQ=="
+      },
+      "clib": {
+        "type": "Project",
+        "dependencies": {
+          "LuminaSupplemental.Excel": "[4.1.1, )"
+        }
       },
       "punishlib": {
         "type": "Project",

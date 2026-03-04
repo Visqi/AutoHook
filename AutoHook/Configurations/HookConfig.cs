@@ -106,13 +106,13 @@ public class HookConfig : BaseOption
 
             foreach (var preset in requiredStatusPreset)
             {
-                if (PlayerRes.HasStatus(preset.RequiredStatus) && preset.UseCustomStatusHook)
+                if (Service.WorldState.HasStatus(preset.RequiredStatus) && preset.UseCustomStatusHook)
                 {
                     return preset;
                 }
             }*/
 
-        return FishingManager.IntuitionStatus == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook ? IntuitionHook : NormalHook;
+        return Service.WorldState.IntuitionStatus == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook ? IntuitionHook : NormalHook;
     }
 
     public HookType? GetHook(BiteType bite, double timePassed)
@@ -137,7 +137,7 @@ public class HookConfig : BaseOption
                     if (GetHookTypeForTime(hook.th, timePassed) is { } ht && IsHookAvailable(hook.th, timePassed))
                         return ht;
 
-                if (hookset.LetFishEscapeTripleHook && PlayerRes.GetCurrentGp() < 700)
+                if (hookset.LetFishEscapeTripleHook && Service.WorldState.CurrentGp < 700)
                 {
                     Service.Status = "Not enough GP to use Triple Hook, Letting fish escape is enabled";
                     return HookType.None;
@@ -153,7 +153,7 @@ public class HookConfig : BaseOption
                     if (GetHookTypeForTime(hook.dh, timePassed) is { } ht && IsHookAvailable(hook.dh, timePassed))
                         return ht;
 
-                if (hookset.LetFishEscapeDoubleHook && PlayerRes.GetCurrentGp() < 400)
+                if (hookset.LetFishEscapeDoubleHook && Service.WorldState.CurrentGp < 400)
                 {
                     Service.Status = "Not enough GP to use Double Hook, Letting fish escape is enabled";
                     return HookType.None;
@@ -184,21 +184,11 @@ public class HookConfig : BaseOption
 
     private bool CheckHookCondition(BaseBiteConfig hookType, double timePassed)
     {
-        if (!CheckIdenticalCast(hookType))
-            return false;
+        // ConditionSet is the single source of truth; legacy bools exist only for migration.
+        if (hookType.ConditionSet is { Groups.Count: > 0 })
+            return hookType.ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry);
 
-        if (!CheckSurfaceSlap(hookType))
-            return false;
-
-        if (!CheckPrizeCatch(hookType))
-            return false;
-
-        if (!CheckMultihook(hookType))
-            return false;
-
-        if (!CheckTimer(hookType, timePassed))
-            return false;
-
+        // No conditions configured – treat as always allowed.
         return true;
     }
 
@@ -242,7 +232,7 @@ public class HookConfig : BaseOption
     {
         if (GetHookTypeForTime(hookType, timePassed) is not { } timedHook)
             return false;
-        if (!PlayerRes.ActionTypeAvailable((uint)timedHook))
+        if (!Service.WorldState.ActionAvailable((uint)timedHook))
         {
             Service.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
             return false;
@@ -253,13 +243,13 @@ public class HookConfig : BaseOption
 
     private bool CheckIdenticalCast(BaseBiteConfig hookType)
     {
-        if (hookType.OnlyWhenActiveIdentical && !PlayerRes.HasStatus(IDs.Status.IdenticalCast))
+        if (hookType.OnlyWhenActiveIdentical && !Service.WorldState.HasStatus(IDs.Status.IdenticalCast))
         {
             Service.Status = UIStrings.Status_IdenticalCastRequired;
             return false;
         }
 
-        if (hookType.OnlyWhenNotActiveIdentical && PlayerRes.HasStatus(IDs.Status.IdenticalCast))
+        if (hookType.OnlyWhenNotActiveIdentical && Service.WorldState.HasStatus(IDs.Status.IdenticalCast))
         {
             Service.Status = UIStrings.Status_IdenticalCastNotRequired;
             return false;
@@ -270,13 +260,13 @@ public class HookConfig : BaseOption
 
     private bool CheckPrizeCatch(BaseBiteConfig hookType)
     {
-        if (hookType.PrizeCatchReq && !PlayerRes.HasStatus(IDs.Status.PrizeCatch))
+        if (hookType.PrizeCatchReq && !Service.WorldState.HasStatus(IDs.Status.PrizeCatch))
         {
             Service.Status = UIStrings.Status_PrizeCatchRequired;
             return false;
         }
 
-        if (hookType.PrizeCatchNotReq && PlayerRes.HasStatus(IDs.Status.PrizeCatch))
+        if (hookType.PrizeCatchNotReq && Service.WorldState.HasStatus(IDs.Status.PrizeCatch))
         {
             Service.Status = UIStrings.Status_PrizeCatchNotRequired;
             return false;
@@ -287,13 +277,13 @@ public class HookConfig : BaseOption
 
     private bool CheckSurfaceSlap(BaseBiteConfig hookType)
     {
-        if (hookType.OnlyWhenActiveSlap && !PlayerRes.HasStatus(IDs.Status.SurfaceSlap))
+        if (hookType.OnlyWhenActiveSlap && !Service.WorldState.HasStatus(IDs.Status.SurfaceSlap))
         {
             Service.Status = UIStrings.Status_SurfaceSlapRequired;
             return false;
         }
 
-        if (hookType.OnlyWhenNotActiveSlap && PlayerRes.HasStatus(IDs.Status.SurfaceSlap))
+        if (hookType.OnlyWhenNotActiveSlap && Service.WorldState.HasStatus(IDs.Status.SurfaceSlap))
         {
             Service.Status = UIStrings.Status_SurfaceSlapNotRequired;
             return false;
@@ -304,13 +294,13 @@ public class HookConfig : BaseOption
 
     private bool CheckMultihook(BaseBiteConfig hookType)
     {
-        if (hookType.OnlyWhenActiveMultihook && !PlayerRes.HasMultihookAvailable())
+        if (hookType.OnlyWhenActiveMultihook && !Service.WorldState.HasMultihookAvailable())
         {
             Service.Status = UIStrings.Status_MultihookRequired;
             return false;
         }
 
-        if (hookType.OnlyWhenNotActiveMultihook && PlayerRes.HasMultihookAvailable())
+        if (hookType.OnlyWhenNotActiveMultihook && Service.WorldState.HasMultihookAvailable())
         {
             Service.Status = UIStrings.Status_MultihookNotRequired;
             return false;
@@ -324,7 +314,7 @@ public class HookConfig : BaseOption
         double minimumTime = 0;
         double maximumTime = 0;
 
-        if (PlayerRes.HasStatus(IDs.Status.Chum))
+        if (Service.WorldState.HasStatus(IDs.Status.Chum))
         {
             if (hookType.ChumTimerEnabled)
             {

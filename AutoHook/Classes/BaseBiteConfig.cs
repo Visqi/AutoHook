@@ -1,4 +1,5 @@
 using Dalamud.Bindings.ImGui;
+using AutoHook.Conditions;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
@@ -14,16 +15,16 @@ public class BaseBiteConfig(HookType type)
 
     public bool EnableHooksetSwap;
 
-    public bool HookTimerEnabled;
-    public double MinHookTimer;
-    public double MaxHookTimer;
+    public bool HookTimerEnabled; // legacy
+    public double MinHookTimer;   // legacy
+    public double MaxHookTimer;   // legacy
 
-    public bool ChumTimerEnabled;
-    public double ChumMinHookTimer;
-    public double ChumMaxHookTimer;
+    public bool ChumTimerEnabled;   // legacy
+    public double ChumMinHookTimer; // legacy
+    public double ChumMaxHookTimer; // legacy
 
-    public bool OnlyWhenActiveSlap;
-    public bool OnlyWhenNotActiveSlap;
+    public bool OnlyWhenActiveSlap;    // legacy
+    public bool OnlyWhenNotActiveSlap; // legacy
 
     public bool OnlyWhenActiveIdentical;
     public bool OnlyWhenNotActiveIdentical;
@@ -33,6 +34,12 @@ public class BaseBiteConfig(HookType type)
 
     public bool OnlyWhenActiveMultihook;
     public bool OnlyWhenNotActiveMultihook;
+
+    /// <summary>
+    /// Optional condition set backing the legacy flags/timers.
+    /// When non-empty, it is evaluated in addition to the old booleans.
+    /// </summary>
+    public ConditionSet? ConditionSet { get; set; }
 
     public HookType HooksetType = type;
 
@@ -62,21 +69,13 @@ public class BaseBiteConfig(HookType type)
         DrawUtil.DrawCheckboxTree(biteName, ref HooksetEnabled,
             () =>
             {
-                DrawUtil.DrawTreeNodeEx(UIStrings.Conditions, () =>
-                {
-                    using var indent = ImRaii.PushIndent();
-                    DrawUtil.DrawTreeNodeEx(UIStrings.Surface_Slap_Options, DrawSurfaceSwap);
-                    DrawUtil.DrawTreeNodeEx(UIStrings.Identical_Cast_Options, DrawIdenticalCast);
-                    DrawUtil.DrawTreeNodeEx(UIStrings.Prize_Catch_Options, DrawPrizeCatch);
-                    DrawUtil.DrawTreeNodeEx(UIStrings.Multihook_Options, DrawMultihook);
-
-                }, UIStrings.Conditions_HelpText);
+                // Advanced condition editor (ConditionSet-based, with presets)
+                ConditionSet = Ui.ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, Ui.ConditionScope.Hook);
 
                 if (EnableHooksetSwap)
                     DrawUtil.DrawTreeNodeEx(UIStrings.HookType, DrawBite, UIStrings.HookWillBeUsedIfPatienceIsNotUp);
 
                 DrawUtil.DrawTreeNodeEx(UIStrings.HookingTimer, DrawTimers, UIStrings.HookingTimerHelpText);
-
             });
     }
 

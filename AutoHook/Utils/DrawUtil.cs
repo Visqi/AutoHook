@@ -136,7 +136,7 @@ public static class DrawUtil
 
     public static bool Checkbox(string label, ref bool refValue, string helpText = "", bool hoverHelpText = false)
     {
-        bool clicked = false;
+        var clicked = false;
 
         if (ImGui.Checkbox($"{label}", ref refValue))
         {
@@ -272,15 +272,13 @@ public static class DrawUtil
                         ? ImGuiColors.DalamudYellow
                         : ImGuiColors.DalamudWhite;
 
-                    using (var a = ImRaii.PushColor(ImGuiCol.Text, color))
+                    using var a = ImRaii.PushColor(ImGuiCol.Text, color);
+                    if (ImGui.Selectable(itemName, false))
                     {
-                        if (ImGui.Selectable(itemName, false))
-                        {
-                            presetList.SelectedGuid = item.UniqueId.ToString();
-                            _filterText = "";
-                            Service.Save();
-                            ImGui.CloseCurrentPopup();
-                        }
+                        presetList.SelectedGuid = item.UniqueId.ToString();
+                        _filterText = "";
+                        Service.Save();
+                        ImGui.CloseCurrentPopup();
                     }
                 }
             }
@@ -578,7 +576,7 @@ public static class DrawUtil
     {
         ImGui.PushID(popupName);
 
-        int indexOfId = popupName.IndexOf('#');
+        var indexOfId = popupName.IndexOf('#');
         if (indexOfId != -1)
         {
             popupName = popupName[..indexOfId];

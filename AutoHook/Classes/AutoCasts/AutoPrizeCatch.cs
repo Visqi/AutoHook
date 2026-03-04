@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -29,19 +29,19 @@ public class AutoPrizeCatch : BaseActionCast
 
         var slapOrIc = true;
         if (UseOnlyWithIdenticalCast || UseOnlyWithActiveSlap)
-            slapOrIc = UseOnlyWithIdenticalCast && PlayerRes.HasStatus(IDs.Status.IdenticalCast) ||
-                    UseOnlyWithActiveSlap && PlayerRes.HasStatus(IDs.Status.SurfaceSlap);
+            slapOrIc = UseOnlyWithIdenticalCast && Service.WorldState.HasStatus(IDs.Status.IdenticalCast) ||
+                    UseOnlyWithActiveSlap && Service.WorldState.HasStatus(IDs.Status.SurfaceSlap);
 
-        if (PlayerRes.HasStatus(IDs.Status.MakeshiftBait))
+        if (Service.WorldState.HasStatus(IDs.Status.MakeshiftBait))
             return false;
 
-        if (PlayerRes.HasStatus(IDs.Status.PrizeCatch))
+        if (Service.WorldState.HasStatus(IDs.Status.PrizeCatch))
             return false;
 
-        if (PlayerRes.HasStatus(IDs.Status.AnglersFortune))
+        if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune))
             return false;
 
-        return slapOrIc && PlayerRes.ActionTypeAvailable(IDs.Actions.PrizeCatch);
+        return slapOrIc && Service.WorldState.ActionAvailable(IDs.Actions.PrizeCatch);
     }
 
     protected override DrawOptionsDelegate DrawOptions => () =>

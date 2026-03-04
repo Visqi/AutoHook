@@ -2,7 +2,7 @@
 
 public class AutoReleaseFish : BaseActionCast
 {
-    public AutoReleaseFish() : base(UIStrings.ReleaseAllFish, Data.IDs.Actions.Release)
+    public AutoReleaseFish() : base(UIStrings.ReleaseAllFish, IDs.Actions.Release)
     {
         HelpText = UIStrings.ReleaseAllFishHelpText;
 

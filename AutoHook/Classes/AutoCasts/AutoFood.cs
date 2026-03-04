@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -9,22 +9,12 @@ public class AutoFood : BaseActionCast //todo
     public override int Priority { get; set; } = 7;
     public override bool IsExcludedPriority { get; set; } = false;
 
-    public AutoFood() : base(UIStrings.Food_Buff, 0, ActionType.Item)
-    {
-    }
+    public AutoFood() : base(UIStrings.Food_Buff, 0, ActionType.Item) { }
 
     public override string GetName()
         => Name = UIStrings.Food_Buff;
 
-    public override bool CastCondition()
-    {
-        if (PlayerRes.GetStatusTime(IDs.Status.FoodBuff) > SecondsRemaining)
-        {
-            return false;
-        }
-
-        return true;
-    }
+    public override bool CastCondition() => Service.WorldState.GetStatusTime(IDs.Status.FoodBuff) <= SecondsRemaining;
 
     /*protected override DrawOptionsDelegate DrawOptions => () =>
     {

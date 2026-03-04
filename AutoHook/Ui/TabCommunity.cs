@@ -111,7 +111,7 @@ public class TabCommunity : BaseTab
                             ? n
                             : tab;
 
-                        var importedGuids = new List<System.Guid>();
+                        var importedGuids = new List<Guid>();
                         var imported = 0;
                         var skipped = 0;
 

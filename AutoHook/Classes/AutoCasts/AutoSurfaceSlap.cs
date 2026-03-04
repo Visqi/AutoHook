@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -17,7 +17,7 @@ public class AutoSurfaceSlap : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (PlayerRes.HasStatus(IDs.Status.IdenticalCast) || PlayerRes.HasStatus(IDs.Status.SurfaceSlap))
+        if (Service.WorldState.HasStatus(IDs.Status.IdenticalCast) || Service.WorldState.HasStatus(IDs.Status.SurfaceSlap))
             return false;
 
         return true;

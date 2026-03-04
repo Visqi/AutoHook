@@ -1618,4 +1618,7 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="UseMutlipleHooksByTimer" xml:space="preserve">
     <value>Use multiple hook types by timer</value>
   </data>
+  <data name="SwapStopRules" xml:space="preserve">
+    <value>Swap/Stop Rules:</value>
+  </data>
 </root>

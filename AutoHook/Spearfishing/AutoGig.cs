@@ -1,4 +1,4 @@
-﻿using AutoHook.Spearfishing.Struct;
+using AutoHook.Spearfishing.Struct;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface.Colors;
@@ -121,7 +121,7 @@ internal class AutoGig : Window, IDisposable
             return;
         }
 
-        bool isOpen = _addon != null && _addon->Base.WindowNode != null;
+        var isOpen = _addon != null && _addon->Base.WindowNode != null;
 
         if (!isOpen)
             return;
@@ -135,7 +135,7 @@ internal class AutoGig : Window, IDisposable
 
         if (_gigCfg is { AutoGigEnabled: true, })
         {
-            if (!PlayerRes.HasStatus(IDs.Status.NaturesBounty) && _gigCfg.NatureBountyBeforeFish)
+            if (!Service.WorldState.HasStatus(IDs.Status.NaturesBounty) && _gigCfg.NatureBountyBeforeFish)
                 PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
 
             GigFish(_addon->Fish1, _addon->Fish1Node);
@@ -171,7 +171,7 @@ internal class AutoGig : Window, IDisposable
             return;
         }
 
-        if (!PlayerRes.HasStatus(IDs.Status.NaturesBounty) && fish.UseNaturesBounty)
+        if (!Service.WorldState.HasStatus(IDs.Status.NaturesBounty) && fish.UseNaturesBounty)
             PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
 
         var centerX = (_uiSize.X / 2);
@@ -233,11 +233,11 @@ internal class AutoGig : Window, IDisposable
         if (!_gigCfg.AutoGigDrawGigHitbox)
             return;
 
-        int space = gigHitbox;
+        var space = gigHitbox;
 
-        float startX = _uiSize.X / 2;
-        float centerY = _addon->FishLines->Y * _uiScale;
-        float endY = _addon->FishLines->Height * _uiScale;
+        var startX = _uiSize.X / 2;
+        var centerY = _addon->FishLines->Y * _uiScale;
+        var endY = _addon->FishLines->Height * _uiScale;
 
         //Hitbox left
         var lineStart = _uiPos + new Vector2(startX - space, centerY);

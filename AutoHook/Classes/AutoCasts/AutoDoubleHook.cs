@@ -7,7 +7,7 @@ public class AutoDoubleHook : BaseActionCast
     public override int Priority { get; set; } = 5;
     public override bool IsExcludedPriority { get; set; } = false;
 
-    public AutoDoubleHook() : base(UIStrings.Double_Hook, Data.IDs.Actions.DoubleHook, ActionType.Action)
+    public AutoDoubleHook() : base(UIStrings.Double_Hook, IDs.Actions.DoubleHook, ActionType.Action)
     {
     }
 

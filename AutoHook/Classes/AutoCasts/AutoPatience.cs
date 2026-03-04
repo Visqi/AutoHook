@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Classes.AutoCasts;
@@ -22,13 +22,13 @@ public class AutoPatience : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (PlayerRes.HasStatus(IDs.Status.AnglersFortune) && PlayerRes.GetStatusTime(IDs.Status.AnglersFortune) > RefreshEarlyTime)
+        if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune) && Service.WorldState.GetStatusTime(IDs.Status.AnglersFortune) > RefreshEarlyTime)
             return false;
 
-        if (PlayerRes.HasStatus(IDs.Status.PrizeCatch))
+        if (Service.WorldState.HasStatus(IDs.Status.PrizeCatch))
             return false;
 
-        if (PlayerRes.HasStatus(IDs.Status.MakeshiftBait))
+        if (Service.WorldState.HasStatus(IDs.Status.MakeshiftBait))
             return false;
 
         if (UseOnlyWhenMoochIIOnCD && !PlayerRes.ActionOnCoolDown(IDs.Actions.Mooch2))

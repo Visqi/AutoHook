@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using AutoHook.Conditions;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -12,9 +13,14 @@ public class AutoCordial : BaseActionCast
 
     public bool InvertCordialPriority;
 
-    public bool AllowOvercapIC;
+    public bool AllowOvercapIC; // legacy
 
     public bool IgnoreTimeWindow;
+
+    /// <summary>
+    /// Optional condition set for "allow overcap" logic (v6+ configs).
+    /// </summary>
+    public ConditionSet? OvercapConditionSet { get; set; }
 
     public override bool RequiresTimeWindow() => !IgnoreTimeWindow;
 
@@ -54,7 +60,7 @@ public class AutoCordial : BaseActionCast
 
         foreach (var (id, recovery) in cordialList)
         {
-            if (!PlayerRes.HaveCordialInInventory(id))
+            if (!Service.WorldState.HaveCordialInInventory(id))
                 continue;
 
             Id = id;
@@ -75,10 +81,12 @@ public class AutoCordial : BaseActionCast
 
     private bool CheckNotOvercaped(uint recovery)
     {
-        if (AllowOvercapIC && PlayerRes.HasStatus(IDs.Status.IdenticalCast))
+        // ConditionSet is the single source of truth; legacy AllowOvercapIC is migration-only.
+        if (OvercapConditionSet is { Groups.Count: > 0 } &&
+            OvercapConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
             return true;
 
-        return PlayerRes.GetCurrentGp() + recovery <= PlayerRes.GetMaxGp();
+        return Service.WorldState.CurrentGp + recovery <= Service.WorldState.MaxGp;
     }
 
     protected override DrawOptionsDelegate DrawOptions => () =>
@@ -90,15 +98,13 @@ public class AutoCordial : BaseActionCast
 
         if (!IsSpearFishing)
         {
-            if (DrawUtil.Checkbox(UIStrings.Allow_Gp_Overcap, ref AllowOvercapIC))
-            {
-                Service.Save();
-            }
-
             if (DrawUtil.Checkbox(UIStrings.CordialOutsideTimeWindow, ref IgnoreTimeWindow, UIStrings.CordialOutsideTimeWindowHelpText))
             {
                 Service.Save();
             }
+
+            // Advanced overcap conditions (ConditionSet-based, with presets)
+            OvercapConditionSet = Ui.ConditionUi.DrawConditionSet("Overcap conditions", OvercapConditionSet, Ui.ConditionScope.AutoCordial);
         }
     };
 

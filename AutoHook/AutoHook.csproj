@@ -23,6 +23,7 @@
         <PackageReference Include="ECommons" Version="3.1.0.27" />
         <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
         <ProjectReference Include="..\PunishLib\PunishLib\PunishLib.csproj" />
+		<ProjectReference Include="..\clib\clib.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -65,35 +65,33 @@ internal class TabAutoGig : BaseTab
 
     public override void Draw()
     {
-        using (var items = ImRaii.Child($"###ag_cfg1", Vector2.Zero, true))
+        using var items = ImRaii.Child($"###ag_cfg1", Vector2.Zero, true);
+        if (_gigCfg.SelectedPreset is { } selectedPreset)
         {
-            if (_gigCfg.SelectedPreset is { } selectedPreset)
+            if (_gigCfg.CatchAll)
             {
-                if (_gigCfg.CatchAll)
-                {
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.CatchAllNotice);
-                }
-
-                // add new gig button
-                if (ImGui.Button(UIStrings.Add_new_fish))
-                {
-                    selectedPreset.AddItem(new BaseGig(0));
-                    Service.Save();
-                }
-
-                ImGui.SameLine();
-
-                ImGui.SetNextItemWidth(90);
-                if (ImGui.InputInt(UIStrings.GigHitbox, ref selectedPreset.HitboxSize))
-                {
-                    selectedPreset.HitboxSize = Math.Max(0, Math.Min(selectedPreset.HitboxSize, 300));
-                    Service.Save();
-                }
-
-                DrawUtil.SpacingSeparator();
-
-                selectedPreset.DrawOptions();
+                ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.CatchAllNotice);
             }
+
+            // add new gig button
+            if (ImGui.Button(UIStrings.Add_new_fish))
+            {
+                selectedPreset.AddItem(new BaseGig(0));
+                Service.Save();
+            }
+
+            ImGui.SameLine();
+
+            ImGui.SetNextItemWidth(90);
+            if (ImGui.InputInt(UIStrings.GigHitbox, ref selectedPreset.HitboxSize))
+            {
+                selectedPreset.HitboxSize = Math.Max(0, Math.Min(selectedPreset.HitboxSize, 300));
+                Service.Save();
+            }
+
+            DrawUtil.SpacingSeparator();
+
+            selectedPreset.DrawOptions();
         }
     }
 
