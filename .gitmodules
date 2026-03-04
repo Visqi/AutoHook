@@ -1,3 +1,6 @@
 [submodule "PunishLib"]
 	path = PunishLib
 	url = https://github.com/PunishXIV/PunishLib
+[submodule "clib"]
+	path = clib
+	url = https://github.com/Jaksuhn/clib/
