@@ -1,7 +1,4 @@
-using System.Collections.Generic;
 using AutoHook.Conditions;
-using AutoHook.Data;
-using AutoHook.Enums;
 using Newtonsoft.Json;
 
 namespace AutoHook.Configurations;

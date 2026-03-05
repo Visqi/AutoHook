@@ -1,4 +1,3 @@
-using AutoHook.Conditions;
 using AutoHook.Ui;
 
 namespace AutoHook.Classes.AutoCasts;

@@ -1,4 +1,3 @@
-using AutoHook.Conditions;
 using Dalamud.Bindings.ImGui;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
