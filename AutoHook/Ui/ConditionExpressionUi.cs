@@ -1,31 +1,20 @@
-using System.Text;
 using AutoHook.Conditions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
+using ExprToken = AutoHook.Conditions.ConditionExpression.Token;
+using ExprTokenKind = AutoHook.Conditions.ConditionExpression.TokenKind;
 
 namespace AutoHook.Ui;
-
 public static class ConditionExpressionUi
 {
-    internal enum ExprTokenKind
-    {
-        Group,
-        And,
-        Or,
-        LParen,
-        RParen,
-    }
-
-    internal readonly record struct ExprToken(ExprTokenKind Kind, int GroupIndex = 0);
-
     public static void DrawExpressionEditor(ConditionSet set)
     {
         ImGui.NewLine();
         ImGui.TextColored(ImGuiColors.DalamudGrey, "Expression:");
 
-        var tokens = ParseExpressionTokens(set.Expression, set.Groups.Count);
-        var invalidFlags = ValidateExpressionTokens(tokens);
+        var tokens = ConditionExpression.ParseTokens(set.Expression, set.Groups.Count);
+        var invalidFlags = ConditionExpression.ValidateTokens(tokens);
         var selStart = set.ExprSelectionStart;
         var selEnd = set.ExprSelectionEnd;
         var changed = false;
@@ -41,7 +30,7 @@ public static class ConditionExpressionUi
             {
                 using var _ = ImRaii.PushId(i);
 
-                var label = GetTokenLabel(tokens[i]);
+                var label = ConditionExpression.GetTokenLabel(tokens[i]);
                 var isSelected = selStart.HasValue && selEnd.HasValue && i >= selStart && i <= selEnd;
                 var isInvalid = i < invalidFlags.Length && invalidFlags[i];
 
@@ -202,7 +191,7 @@ public static class ConditionExpressionUi
             }
             else
             {
-                set.Expression = BuildExpression(tokens);
+                set.Expression = ConditionExpression.BuildExpression(tokens);
 
                 // Clamp selection to new token count
                 if (set.ExprSelectionStart.HasValue && set.ExprSelectionEnd.HasValue)
@@ -217,175 +206,4 @@ public static class ConditionExpressionUi
             }
         }
     }
-
-    internal static List<ExprToken> ParseExpressionTokens(string? expr, int groupCount)
-    {
-        var tokens = new List<ExprToken>();
-        if (string.IsNullOrWhiteSpace(expr))
-            return tokens;
-
-        var s = expr;
-        var len = s.Length;
-        var pos = 0;
-
-        void SkipWs()
-        {
-            while (pos < len && char.IsWhiteSpace(s[pos])) pos++;
-        }
-
-        bool Match(string token)
-        {
-            SkipWs();
-            if (pos + token.Length > len) return false;
-            for (var i = 0; i < token.Length; i++)
-            {
-                if (s[pos + i] != token[i])
-                    return false;
-            }
-            pos += token.Length;
-            return true;
-        }
-
-        while (pos < len)
-        {
-            SkipWs();
-            if (pos >= len) break;
-
-            if (Match("&&"))
-            {
-                tokens.Add(new ExprToken(ExprTokenKind.And));
-                continue;
-            }
-
-            if (Match("||"))
-            {
-                tokens.Add(new ExprToken(ExprTokenKind.Or));
-                continue;
-            }
-
-            var ch = s[pos];
-            if (ch == '(')
-            {
-                tokens.Add(new ExprToken(ExprTokenKind.LParen));
-                pos++;
-                continue;
-            }
-
-            if (ch == ')')
-            {
-                tokens.Add(new ExprToken(ExprTokenKind.RParen));
-                pos++;
-                continue;
-            }
-
-            if (char.IsLetter(ch))
-            {
-                var c = char.ToUpperInvariant(ch);
-                var idx = c - 'A';
-                if (idx >= 0 && idx < groupCount)
-                    tokens.Add(new ExprToken(ExprTokenKind.Group, idx));
-                pos++;
-                continue;
-            }
-
-            pos++;
-        }
-
-        return tokens;
-    }
-
-    internal static bool[] ValidateExpressionTokens(List<ExprToken> tokens)
-    {
-        var invalid = new bool[tokens.Count];
-        if (tokens.Count == 0) return invalid;
-
-        var last = ExprTokenKind.LParen;
-        var depth = 0;
-
-        for (var i = 0; i < tokens.Count; i++)
-        {
-            var t = tokens[i];
-            switch (t.Kind)
-            {
-                case ExprTokenKind.Group:
-                    if (last is ExprTokenKind.Group or ExprTokenKind.RParen)
-                        invalid[i] = true;
-                    last = ExprTokenKind.Group;
-                    break;
-
-                case ExprTokenKind.And:
-                case ExprTokenKind.Or:
-                    if (i == 0 || last is ExprTokenKind.And or ExprTokenKind.Or or ExprTokenKind.LParen)
-                        invalid[i] = true;
-                    last = t.Kind;
-                    break;
-
-                case ExprTokenKind.LParen:
-                    if (last is ExprTokenKind.Group or ExprTokenKind.RParen)
-                        invalid[i] = true;
-                    depth++;
-                    last = ExprTokenKind.LParen;
-                    break;
-
-                case ExprTokenKind.RParen:
-                    if (depth <= 0 || last is ExprTokenKind.And or ExprTokenKind.Or or ExprTokenKind.LParen)
-                        invalid[i] = true;
-                    else
-                        depth--;
-                    last = ExprTokenKind.RParen;
-                    break;
-            }
-        }
-
-        if (tokens.Count > 0)
-        {
-            var lastIdx = tokens.Count - 1;
-            if (tokens[lastIdx].Kind is ExprTokenKind.And or ExprTokenKind.Or or ExprTokenKind.LParen)
-                invalid[lastIdx] = true;
-        }
-
-        if (depth > 0)
-        {
-            for (var i = tokens.Count - 1; i >= 0 && depth > 0; i--)
-            {
-                if (tokens[i].Kind == ExprTokenKind.LParen)
-                {
-                    invalid[i] = true;
-                    depth--;
-                }
-            }
-        }
-
-        return invalid;
-    }
-
-    internal static string GetTokenLabel(ExprToken token)
-    {
-        return token.Kind switch
-        {
-            ExprTokenKind.Group => ((char)('A' + token.GroupIndex)).ToString(),
-            ExprTokenKind.And => "&&",
-            ExprTokenKind.Or => "||",
-            ExprTokenKind.LParen => "(",
-            ExprTokenKind.RParen => ")",
-            _ => "?",
-        };
-    }
-
-    internal static string BuildExpression(List<ExprToken> tokens)
-    {
-        if (tokens.Count == 0)
-            return string.Empty;
-
-        var sb = new StringBuilder();
-        for (var i = 0; i < tokens.Count; i++)
-        {
-            if (i > 0)
-                sb.Append(' ');
-            sb.Append(GetTokenLabel(tokens[i]));
-        }
-
-        return sb.ToString();
-    }
 }
-

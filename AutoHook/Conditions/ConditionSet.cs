@@ -49,7 +49,7 @@ public class ConditionSet
         {
             try
             {
-                if (EvaluateExpression(Expression!, values, out var result))
+                if (ConditionExpression.TryEvaluate(Expression, values, out var result))
                     return result;
             }
             catch
@@ -68,103 +68,5 @@ public class ConditionSet
         foreach (var v in values)
             if (!v) return false;
         return true;
-    }
-
-    private static bool EvaluateExpression(string expr, bool[] groupValues, out bool result)
-    {
-        result = false;
-        if (groupValues.Length == 0)
-            return false;
-
-        var s = expr;
-        var len = s.Length;
-        var pos = 0;
-
-        bool ParseExpr() => ParseOr();
-
-        bool ParseOr()
-        {
-            var left = ParseAnd();
-            while (true)
-            {
-                SkipWs();
-                if (Match("||"))
-                {
-                    var right = ParseAnd();
-                    left = left || right;
-                }
-                else
-                    break;
-            }
-            return left;
-        }
-
-        bool ParseAnd()
-        {
-            var left = ParseTerm();
-            while (true)
-            {
-                SkipWs();
-                if (Match("&&"))
-                {
-                    var right = ParseTerm();
-                    left = left && right;
-                }
-                else
-                    break;
-            }
-            return left;
-        }
-
-        bool ParseTerm()
-        {
-            SkipWs();
-            if (Match("("))
-            {
-                var v = ParseOr();
-                SkipWs();
-                if (!Match(")"))
-                    throw new FormatException("Missing )");
-                return v;
-            }
-
-            SkipWs();
-            if (pos < len && char.IsLetter(s[pos]))
-            {
-                var c = char.ToUpperInvariant(s[pos++]);
-                var idx = c - 'A';
-                return idx >= 0 && idx < groupValues.Length && groupValues[idx];
-            }
-
-            throw new FormatException("Unexpected token");
-        }
-
-        void SkipWs()
-        {
-            while (pos < len && char.IsWhiteSpace(s[pos])) pos++;
-        }
-
-        bool Match(string token)
-        {
-            SkipWs();
-            if (pos + token.Length > len) return false;
-            for (var i = 0; i < token.Length; i++)
-            {
-                if (s[pos + i] != token[i])
-                    return false;
-            }
-            pos += token.Length;
-            return true;
-        }
-
-        try
-        {
-            result = ParseExpr();
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
     }
 }
