@@ -645,8 +645,7 @@ public class Configuration : IPluginConfiguration
     }
 
     /// <summary>
-    /// v7 migration: convert legacy AutoIdenticalCast flags (Patience / Cordial) into ConditionSet-based rules.
-    /// After this, the booleans are effectively legacy-only and can be removed from the UI.
+    /// v6 migration: convert legacy AutoIdenticalCast flags (Patience / Cordial) into ConditionSet-based rules.
     /// </summary>
     private static void MigrateAutoIdenticalCast(AutoIdenticalCast ic)
     {
