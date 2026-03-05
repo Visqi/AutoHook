@@ -56,8 +56,7 @@ public class Configuration : IPluginConfiguration
 
     [DefaultValue(false)] public bool DtrPresetBarEnabled = false;
 
-    // old config
-    public List<BaitPresetConfig> BaitPresetList = []; // legacy
+    [Obsolete("Legacy config")] public List<BaitPresetConfig> BaitPresetList = [];
 
     public void Save()
     {

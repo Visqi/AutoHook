@@ -15,16 +15,14 @@ public class BaseBiteConfig(HookType type)
 
     public bool EnableHooksetSwap;
 
-    public bool HookTimerEnabled; // legacy
-    public double MinHookTimer;   // legacy
-    public double MaxHookTimer;   // legacy
-
-    public bool ChumTimerEnabled;   // legacy
-    public double ChumMinHookTimer; // legacy
-    public double ChumMaxHookTimer; // legacy
-
-    public bool OnlyWhenActiveSlap;    // legacy
-    public bool OnlyWhenNotActiveSlap; // legacy
+    [Obsolete("Legacy config")] public bool HookTimerEnabled;
+    [Obsolete("Legacy config")] public double MinHookTimer;
+    [Obsolete("Legacy config")] public double MaxHookTimer;
+    [Obsolete("Legacy config")] public bool ChumTimerEnabled;
+    [Obsolete("Legacy config")] public double ChumMinHookTimer;
+    [Obsolete("Legacy config")] public double ChumMaxHookTimer;
+    [Obsolete("Legacy config")] public bool OnlyWhenActiveSlap;
+    [Obsolete("Legacy config")] public bool OnlyWhenNotActiveSlap;
 
     public bool OnlyWhenActiveIdentical;
     public bool OnlyWhenNotActiveIdentical;
@@ -61,6 +59,9 @@ public class BaseBiteConfig(HookType type)
     public double StellarHookTypeMin;
     public double StellarHookTypeMax;
 
+    private static bool HasActiveConditionSet(ConditionSet? set)
+        => set is { Groups.Count: > 0 } && set.Groups.Any(g => g.Conditions.Count > 0);
+
     public void DrawOptions(string biteName, bool enableSwap = false)
     {
         EnableHooksetSwap = enableSwap;
@@ -75,7 +76,8 @@ public class BaseBiteConfig(HookType type)
                 if (EnableHooksetSwap)
                     DrawUtil.DrawTreeNodeEx(UIStrings.HookType, DrawBite, UIStrings.HookWillBeUsedIfPatienceIsNotUp);
 
-                DrawUtil.DrawTreeNodeEx(UIStrings.HookingTimer, DrawTimers, UIStrings.HookingTimerHelpText);
+                if (!HasActiveConditionSet(ConditionSet))
+                    DrawUtil.DrawTreeNodeEx(UIStrings.HookingTimer, DrawTimers, UIStrings.HookingTimerHelpText);
             });
     }
 

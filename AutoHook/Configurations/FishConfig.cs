@@ -8,12 +8,8 @@ public class FishConfig : BaseOption
     [DefaultValue(true)]
     public bool Enabled = true;
 
-    public bool IgnoreOnIntuition = false; // legacy
+    [Obsolete("Legacy config")] public bool IgnoreOnIntuition = false;
 
-    /// <summary>
-    /// Optional "ignore when" condition set (v6+ configs), e.g. IntuitionActive.
-    /// Evaluated in addition to legacy IgnoreOnIntuition flag.
-    /// </summary>
     public ConditionSet? IgnoreConditionSet { get; set; }
 
     public BaitFishClass Fish = new();

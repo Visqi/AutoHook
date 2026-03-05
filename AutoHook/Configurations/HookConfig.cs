@@ -185,12 +185,10 @@ public class HookConfig : BaseOption
 
     private bool CheckHookCondition(BaseBiteConfig hookType, double timePassed)
     {
-        // ConditionSet is the single source of truth; legacy bools exist only for migration.
         if (hookType.ConditionSet is { Groups.Count: > 0 })
             return hookType.ConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry);
 
-        // No conditions configured – treat as always allowed.
-        return true;
+        return CheckTimer(hookType, timePassed);
     }
 
     private HookType? GetHookTypeForTime(BaseBiteConfig hookType, double timePassed)
@@ -236,74 +234,6 @@ public class HookConfig : BaseOption
         if (!Service.WorldState.ActionAvailable((uint)timedHook))
         {
             Service.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool CheckIdenticalCast(BaseBiteConfig hookType)
-    {
-        if (hookType.OnlyWhenActiveIdentical && !Service.WorldState.HasStatus(IDs.Status.IdenticalCast))
-        {
-            Service.Status = UIStrings.Status_IdenticalCastRequired;
-            return false;
-        }
-
-        if (hookType.OnlyWhenNotActiveIdentical && Service.WorldState.HasStatus(IDs.Status.IdenticalCast))
-        {
-            Service.Status = UIStrings.Status_IdenticalCastNotRequired;
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool CheckPrizeCatch(BaseBiteConfig hookType)
-    {
-        if (hookType.PrizeCatchReq && !Service.WorldState.HasStatus(IDs.Status.PrizeCatch))
-        {
-            Service.Status = UIStrings.Status_PrizeCatchRequired;
-            return false;
-        }
-
-        if (hookType.PrizeCatchNotReq && Service.WorldState.HasStatus(IDs.Status.PrizeCatch))
-        {
-            Service.Status = UIStrings.Status_PrizeCatchNotRequired;
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool CheckSurfaceSlap(BaseBiteConfig hookType)
-    {
-        if (hookType.OnlyWhenActiveSlap && !Service.WorldState.HasStatus(IDs.Status.SurfaceSlap))
-        {
-            Service.Status = UIStrings.Status_SurfaceSlapRequired;
-            return false;
-        }
-
-        if (hookType.OnlyWhenNotActiveSlap && Service.WorldState.HasStatus(IDs.Status.SurfaceSlap))
-        {
-            Service.Status = UIStrings.Status_SurfaceSlapNotRequired;
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool CheckMultihook(BaseBiteConfig hookType)
-    {
-        if (hookType.OnlyWhenActiveMultihook && !Service.WorldState.HasMultihookAvailable())
-        {
-            Service.Status = UIStrings.Status_MultihookRequired;
-            return false;
-        }
-
-        if (hookType.OnlyWhenNotActiveMultihook && Service.WorldState.HasMultihookAvailable())
-        {
-            Service.Status = UIStrings.Status_MultihookNotRequired;
             return false;
         }
 
