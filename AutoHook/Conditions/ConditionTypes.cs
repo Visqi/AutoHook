@@ -3,11 +3,97 @@ using Lumina.Excel.Sheets;
 
 namespace AutoHook.Conditions;
 
-/// <summary>
-/// Built-in condition type definitions. Params use minimal keys; only non-default are serialized.
-/// </summary>
 public static class ConditionTypes
 {
+    public readonly record struct StatusActiveParams(IReadOnlyList<uint> Ids, bool Invert);
+    public readonly record struct GpParams(int Value, string Op, bool Invert);
+    public readonly record struct RangeParams(IReadOnlyList<(double Min, double Max)> Ranges, bool Invert);
+    public readonly record struct IntuitionTimeParams(int Seconds, string Op, bool Invert);
+
+    public static StatusActiveParams GetStatusActiveParams(IReadOnlyDictionary<string, object> p)
+    {
+        var ids = GetStatusIds(p);
+        var inv = GetBool(p, "inv", false);
+        return new StatusActiveParams(ids, inv);
+    }
+
+    public static Dictionary<string, object> ToParams(StatusActiveParams args)
+    {
+        var dict = new Dictionary<string, object>();
+        if (args.Ids.Count > 0)
+            dict["ids"] = args.Ids.Select(id => (object)(long)id).ToList();
+        if (args.Invert)
+            dict["inv"] = true;
+        return dict;
+    }
+
+    public static GpParams GetGpParams(IReadOnlyDictionary<string, object> p)
+    {
+        var value = GetInt(p, "val", 0);
+        var op = GetOp(p, "op", ">=");
+        var inv = GetBool(p, "inv", false);
+        return new GpParams(value, op, inv);
+    }
+
+    public static Dictionary<string, object> ToParams(GpParams args)
+    {
+        var dict = new Dictionary<string, object>
+        {
+            ["val"] = (long)args.Value
+        };
+        if (!string.IsNullOrEmpty(args.Op) && args.Op != ">=")
+            dict["op"] = args.Op;
+        if (args.Invert)
+            dict["inv"] = true;
+        return dict;
+    }
+
+    public static RangeParams GetRangeParams(IReadOnlyDictionary<string, object> p)
+    {
+        var ranges = GetRanges(p);
+        var inv = GetBool(p, "inv", false);
+        return new RangeParams(ranges, inv);
+    }
+
+    public static Dictionary<string, object> ToParams(RangeParams args)
+    {
+        var dict = new Dictionary<string, object>();
+        if (args.Ranges.Count > 0)
+        {
+            var list = new List<object>(args.Ranges.Count * 2);
+            foreach (var (min, max) in args.Ranges)
+            {
+                list.Add(min);
+                list.Add(max);
+            }
+            dict["r"] = list;
+        }
+        if (args.Invert)
+            dict["inv"] = true;
+        return dict;
+    }
+
+    public static IntuitionTimeParams GetIntuitionTimeParams(IReadOnlyDictionary<string, object> p)
+    {
+        var sec = GetDouble(p, "sec", 0);
+        var op = GetOp(p, "op", ">=");
+        var inv = GetBool(p, "inv", false);
+        var secondsInt = (int)Math.Floor(sec);
+        return new IntuitionTimeParams(secondsInt, op, inv);
+    }
+
+    public static Dictionary<string, object> ToParams(IntuitionTimeParams args)
+    {
+        var dict = new Dictionary<string, object>();
+        if (args.Seconds != 0)
+            dict["sec"] = (long)args.Seconds;
+        if (!string.IsNullOrEmpty(args.Op) && args.Op != ">=")
+            dict["op"] = args.Op;
+        if (args.Invert)
+            dict["inv"] = true;
+        return dict;
+    }
+
     public static void RegisterAll(ConditionRegistry registry)
     {
         // ---- Status ----
@@ -17,12 +103,14 @@ public static class ConditionTypes
             Id = ConditionId.StatusActive,
             Name = "Status",
             Category = "Status",
+            Description = "Checks whether any of the selected statuses are currently active.",
+            AllowedScopes = ConditionScopeFlags.All,
             Evaluate = (w, p) =>
             {
-                var ids = GetStatusIds(p);
-                if (ids.Count == 0) return GetBool(p, "inv", false);
-                var result = ids.Any(w.HasStatus);
-                return GetBool(p, "inv", false) ? !result : result;
+                var args = GetStatusActiveParams(p);
+                if (args.Ids.Count == 0) return args.Invert;
+                var result = args.Ids.Any(w.HasStatus);
+                return args.Invert ? !result : result;
             },
         });
 
@@ -32,6 +120,8 @@ public static class ConditionTypes
             Id = ConditionId.StatusStacks,
             Name = "Status stacks",
             Category = "Status",
+            Description = "Checks stacks for selected statuses against a threshold.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
                 var ids = GetStatusIds(p);
@@ -50,12 +140,13 @@ public static class ConditionTypes
             Id = ConditionId.Gp,
             Name = "GP",
             Category = "Player",
+            Description = "Compares current GP against a value.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCordial | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
-                var val = GetInt(p, "val", 0);
-                var op = GetOp(p, "op", ">=");
-                var result = CompareInt((int)w.CurrentGp, val, op);
-                return GetBool(p, "inv", false) ? !result : result;
+                var args = GetGpParams(p);
+                var result = CompareInt((int)w.CurrentGp, args.Value, args.Op);
+                return args.Invert ? !result : result;
             },
         });
 
@@ -66,9 +157,12 @@ public static class ConditionTypes
             Id = ConditionId.BiteTimer,
             Name = "Bite timer",
             Category = "Time",
+            Description = "Checks current bite timer (seconds since bite) against one or more ranges.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
-                var ranges = GetRanges(p);
+                var args = GetRangeParams(p);
+                var ranges = args.Ranges;
                 if (ranges.Count == 0) return true;
                 var t = w.BiteTimeSeconds;
                 var result = false;
@@ -76,7 +170,7 @@ public static class ConditionTypes
                 {
                     if (t >= min && (max <= 0 || t <= max)) { result = true; break; }
                 }
-                return GetBool(p, "inv", false) ? !result : result;
+                return args.Invert ? !result : result;
             },
         });
 
@@ -86,10 +180,13 @@ public static class ConditionTypes
             Id = ConditionId.ChumTimer,
             Name = "Chum timer",
             Category = "Time",
+            Description = "Checks bite timer while Chum is active against one or more ranges.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
-                if (!w.ChumActive) return GetBool(p, "inv", false);
-                var ranges = GetRanges(p);
+                var args = GetRangeParams(p);
+                if (!w.ChumActive) return args.Invert;
+                var ranges = args.Ranges;
                 if (ranges.Count == 0) return true;
                 var t = w.BiteTimeSeconds;
                 var result = false;
@@ -97,7 +194,7 @@ public static class ConditionTypes
                 {
                     if (t >= min && (max <= 0 || t <= max)) { result = true; break; }
                 }
-                return GetBool(p, "inv", false) ? !result : result;
+                return args.Invert ? !result : result;
             },
         });
 
@@ -107,6 +204,8 @@ public static class ConditionTypes
             Id = ConditionId.IntuitionActive,
             Name = "Fisher's Intuition",
             Category = "Fishing",
+            Description = "Checks whether Fisher's Intuition is currently active.",
+            AllowedScopes = ConditionScopeFlags.All,
             Evaluate = (w, p) =>
             {
                 var result = w.IntuitionStatus == IntuitionStatus.Active;
@@ -120,15 +219,16 @@ public static class ConditionTypes
             Id = ConditionId.IntuitionTime,
             Name = "Intuition time",
             Category = "Fishing",
+            Description = "Compares remaining Fisher's Intuition time against a value.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
-                if (w.IntuitionStatus != IntuitionStatus.Active) return GetBool(p, "inv", false);
-                var sec = GetDouble(p, "sec", 0);
-                var op = GetOp(p, "op", ">=");
+                var args = GetIntuitionTimeParams(p);
+                if (w.IntuitionStatus != IntuitionStatus.Active) return args.Invert;
                 var lhs = (int)Math.Floor(w.IntuitionTimeRemaining);
-                var rhs = (int)Math.Floor(sec);
-                var result = CompareInt(lhs, rhs, op);
-                return GetBool(p, "inv", false) ? !result : result;
+                var rhs = args.Seconds;
+                var result = CompareInt(lhs, rhs, args.Op);
+                return args.Invert ? !result : result;
             },
         });
 
@@ -138,6 +238,8 @@ public static class ConditionTypes
             Id = ConditionId.SpectralActive,
             Name = "Spectral current",
             Category = "Fishing",
+            Description = "Checks whether a spectral current is currently active.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
                 var result = w.SpectralCurrentStatus == SpectralCurrentStatus.Active;
@@ -152,6 +254,8 @@ public static class ConditionTypes
             Id = ConditionId.Weather,
             Name = "Weather",
             Category = "World",
+            Description = "Checks current weather (by name) against one or more weather entries.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
                 var ids = GetWeatherIds(p);
@@ -190,6 +294,8 @@ public static class ConditionTypes
             Id = ConditionId.ActionAvailable,
             Name = "Action",
             Category = "Player",
+            Description = "Checks whether an action/item/event action is currently usable.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
                 var id = GetUInt(p, "id", 0);
@@ -206,6 +312,8 @@ public static class ConditionTypes
             Id = ConditionId.MultihookAvailable,
             Name = "Multihook",
             Category = "Fishing",
+            Description = "Checks whether the Multihook duty action has at least one charge.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
                 var result = w.ActionAvailable(IDs.Actions.MultiHook, ActionType.EventAction);
@@ -220,6 +328,8 @@ public static class ConditionTypes
             Id = ConditionId.OceanMissionType,
             Name = "Ocean mission type",
             Category = "Fishing",
+            Description = "Matches current ocean fishing mission types (slots 1–3) against selected entries.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
                 var ids = GetIds(p);
@@ -237,6 +347,8 @@ public static class ConditionTypes
             Id = ConditionId.OceanMissionProgress,
             Name = "Ocean mission progress",
             Category = "Fishing",
+            Description = "Compares progress of a selected ocean fishing mission (1–3) against a value.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
                 var slot = GetInt(p, "mission", 1);
@@ -261,6 +373,8 @@ public static class ConditionTypes
             Id = ConditionId.OceanRoute,
             Name = "Ocean route",
             Category = "Fishing",
+            Description = "Matches the current ocean fishing route against selected routes.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
                 var ids = GetIds(p);
@@ -278,6 +392,8 @@ public static class ConditionTypes
             Id = ConditionId.OceanZone,
             Name = "Ocean zone",
             Category = "Fishing",
+            Description = "Matches the current ocean fishing zone index (1–3).",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
                 var wanted = GetInt(p, "zone", 0);
@@ -294,6 +410,8 @@ public static class ConditionTypes
             Id = ConditionId.SwimbaitCount,
             Name = "Swimbait count",
             Category = "Fishing",
+            Description = "Compares current swimbait count against a value.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
                 var val = GetInt(p, "val", 0);
@@ -312,6 +430,8 @@ public static class ConditionTypes
             Id = ConditionId.OceanLastFishPoints,
             Name = "Last ocean fish points",
             Category = "Fishing",
+            Description = "Compares the points value of the last caught ocean fish in the current zone against a value.",
+            AllowedScopes = ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast,
             Evaluate = (w, p) =>
             {
                 var points = GetLastOceanFishPointsValue(w);

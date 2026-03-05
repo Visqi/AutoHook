@@ -386,29 +386,18 @@ public static class ConditionUi
         }
     }
 
-    private static readonly HashSet<string> AutoCordialScopeIds =
-    [
-        ConditionId.StatusActive, ConditionId.Gp,
-    ];
-
-    private static readonly HashSet<string> FishIgnoreScopeIds =
-    [
-        ConditionId.StatusActive, ConditionId.IntuitionActive, ConditionId.IntuitionTime,
-        ConditionId.SpectralActive, ConditionId.Weather,
-        ConditionId.OceanMissionType, ConditionId.OceanMissionProgress,
-        ConditionId.OceanLastFishPoints, ConditionId.OceanRoute, ConditionId.OceanZone,
-    ];
-
     private static IEnumerable<ConditionTypeDef> GetScopedTypes(ConditionScope scope)
     {
         var all = Conditions.Conditions.Registry.All;
-        var allowed = scope switch
+        var flag = scope switch
         {
-            ConditionScope.AutoCordial => AutoCordialScopeIds,
-            ConditionScope.FishIgnore => FishIgnoreScopeIds,
-            _ => null,
+            ConditionScope.Hook => ConditionScopeFlags.Hook,
+            ConditionScope.AutoCordial => ConditionScopeFlags.AutoCordial,
+            ConditionScope.FishIgnore => ConditionScopeFlags.FishIgnore,
+            ConditionScope.AutoCast => ConditionScopeFlags.AutoCast,
+            _ => ConditionScopeFlags.All,
         };
-        return allowed == null ? all : all.Where(d => allowed.Contains(d.Id));
+        return all.Where(d => (d.AllowedScopes & flag) != 0);
     }
 
     private static readonly Dictionary<string, Action<Condition>> DrawParamHandlers = new()
