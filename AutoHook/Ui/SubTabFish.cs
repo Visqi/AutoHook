@@ -134,9 +134,9 @@ public class SubTabFish
 
         if (ImGui.TreeNodeEx(UIStrings.SurfaceSlapIdenticalCast, ImGuiTreeNodeFlags.FramePadding))
         {
-            fishConfig.SurfaceSlap.DrawConfig();
+            fishConfig.SurfaceSlap.DrawConfigWithLabel(UIStrings.UseSurfaceSlap);
 
-            fishConfig.IdenticalCast.DrawConfig();
+            fishConfig.IdenticalCast.DrawConfigWithLabel(UIStrings.UseIdenticalCast);
 
             ImGui.TreePop();
         }

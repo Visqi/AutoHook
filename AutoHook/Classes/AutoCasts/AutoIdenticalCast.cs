@@ -18,12 +18,10 @@ public class AutoIdenticalCast : BaseActionCast
     public override bool DoesCancelMooch() => true;
 
     public AutoIdenticalCast() : base(UIStrings.Identical_Cast, IDs.Actions.IdenticalCast, ActionType.Action)
-    {
-        HelpText = UIStrings.OverridesSurfaceSlap;
-    }
+        => HelpText = UIStrings.OverridesSurfaceSlap;
 
     public override string GetName()
-        => Name = UIStrings.UseIdenticalCast;
+        => Name = UIStrings.Identical_Cast;
 
     public override bool CastCondition()
     {

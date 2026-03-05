@@ -101,12 +101,15 @@ public abstract class BaseActionCast
     public abstract bool IsExcludedPriority { get; set; }
 
     public virtual void DrawConfig(List<BaseActionCast>? availableActs = null)
+        => DrawConfigWithLabel(GetName(), availableActs);
+
+    public void DrawConfigWithLabel(string label, List<BaseActionCast>? availableActs = null)
     {
-        using var cfgId = ImRaii.PushId(@$"{GetName()}_cfg");
+        using var cfgId = ImRaii.PushId(@$"{label}_cfg");
 
         if (DrawOptions != null)
         {
-            if (DrawUtil.Checkbox(@$"###{GetName()}", ref Enabled, HelpText, true))
+            if (DrawUtil.Checkbox(@$"###{label}", ref Enabled, HelpText, true))
             {
                 Service.PrintDebug(@$"[BaseAction] {Name} - {(Enabled ? @"Enabled" : @"Disabled")}");
                 Service.Save();
@@ -115,7 +118,7 @@ public abstract class BaseActionCast
             ImGui.SameLine(0, 3);
 
             var x = ImGui.GetCursorPosX();
-            if (ImGui.TreeNodeEx(@$"{GetName()}", ImGuiTreeNodeFlags.FramePadding))
+            if (ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.FramePadding))
             {
                 ImGui.SameLine(200 * ImGui.GetIO().FontGlobalScale * (ImGui.GetFontSize() / 12f));
                 DrawGpThreshold();
@@ -137,14 +140,14 @@ public abstract class BaseActionCast
         }
         else
         {
-            if (DrawUtil.Checkbox(@$"###{GetName()}", ref Enabled, HelpText, true))
+            if (DrawUtil.Checkbox(@$"###{label}", ref Enabled, HelpText, true))
             {
                 Service.PrintDebug(@$"[BaseAction] {Name} - {(Enabled ? @"Enabled" : @"Disabled")}");
                 Service.Save();
             }
 
             ImGui.SameLine(0, 28);
-            ImGui.Text(@$"{GetName()}");
+            ImGui.Text(label);
             ImGui.SameLine(200 * ImGui.GetIO().FontGlobalScale * (ImGui.GetFontSize() / 12f));
             DrawGpThreshold();
             DrawUpDownArrows(availableActs);
