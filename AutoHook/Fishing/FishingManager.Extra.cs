@@ -232,7 +232,7 @@ public partial class FishingManager
             if (trig.ConditionSet == null)
                 continue;
 
-            var current = trig.ConditionSet.Evaluate(Ws, Conditions.Conditions.Registry);
+            var current = trig.ConditionSet.Evaluate(Ws, ConditionRegistry.Registry);
             var last = i < extraCfg.LastTriggerStates.Count ? extraCfg.LastTriggerStates[i] : current;
 
             var fire = !last && current;

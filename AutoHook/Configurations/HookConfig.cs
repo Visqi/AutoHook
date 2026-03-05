@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using AutoHook.Conditions;
 
 namespace AutoHook.Configurations;
 
@@ -186,7 +187,7 @@ public class HookConfig : BaseOption
     {
         // ConditionSet is the single source of truth; legacy bools exist only for migration.
         if (hookType.ConditionSet is { Groups.Count: > 0 })
-            return hookType.ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry);
+            return hookType.ConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry);
 
         // No conditions configured – treat as always allowed.
         return true;

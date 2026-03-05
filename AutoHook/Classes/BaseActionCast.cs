@@ -54,7 +54,7 @@ public abstract class BaseActionCast
 
     protected bool EvaluateConditionSet()
         => ConditionSet is not { Groups.Count: > 0 }
-           || ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry);
+           || ConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry);
 
     public virtual void SetThreshold(int newCost)
     {

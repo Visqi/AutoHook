@@ -79,7 +79,7 @@ public class AutoCordial : BaseActionCast
     private bool CheckNotOvercaped(uint recovery)
     {
         if (OvercapConditionSet is { Groups.Count: > 0 } &&
-            OvercapConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+            OvercapConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry))
             return true;
 
         return Service.WorldState.CurrentGp + recovery <= Service.WorldState.MaxGp;

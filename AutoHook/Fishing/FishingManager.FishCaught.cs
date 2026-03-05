@@ -21,7 +21,7 @@ public partial class FishingManager
 
         // Ignore logic is entirely driven by the condition set; legacy bools are used only for migration.
         if (lastFishCatchCfg.IgnoreConditionSet is { Groups.Count: > 0 } &&
-            lastFishCatchCfg.IgnoreConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+            lastFishCatchCfg.IgnoreConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry))
             return false;
 
         var caughtCount = FishingHelper.GetFishCount(lastFishCatchCfg.UniqueId);

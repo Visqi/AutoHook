@@ -1,18 +1,20 @@
-namespace AutoHook.Conditions;
+using System.Reflection;
 
-public class ConditionTypeDef
-{
-    public string Id { get; init; } = "";
-    public string Name { get; init; } = "";
-    public string Category { get; init; } = "";
-    public string Description { get; init; } = "";
-    public ConditionScopeFlags AllowedScopes { get; init; } = ConditionScopeFlags.All;
-    public Func<WorldState, IReadOnlyDictionary<string, object>, bool> Evaluate { get; init; } = (_, _) => false;
-}
+namespace AutoHook.Conditions;
 
 public class ConditionRegistry
 {
+    public static ConditionRegistry Registry { get; } = new();
+
+    static ConditionRegistry() => Assembly.GetExecutingAssembly().GetTypes().Where(t => !t.IsAbstract && typeof(IConditionDefinition).IsAssignableFrom(t))
+        .Select(t => Activator.CreateInstance(t) as IConditionDefinition)
+        .Where(def => def != null)
+        .ForEach(def => Registry.Register(def!.ToTypeDef()));
+
+    private ConditionRegistry() { }
+
     private readonly Dictionary<string, ConditionTypeDef> _byId = [];
+    private readonly Dictionary<Type, string> _idByType = [];
 
     public void Register(ConditionTypeDef def)
     {
@@ -23,6 +25,27 @@ public class ConditionRegistry
     public ConditionTypeDef? Get(string typeId) => _byId.TryGetValue(typeId, out var d) ? d : null;
 
     public IReadOnlyCollection<ConditionTypeDef> All => _byId.Values;
+
+    public string GetId(Type type)
+    {
+        if (_idByType.TryGetValue(type, out var id)) return id;
+        if (Activator.CreateInstance(type) is not IConditionDefinition def) return string.Empty;
+        _idByType[type] = def.Id;
+        return def.Id;
+    }
+
+    public string GetId<T>() where T : IConditionDefinition => GetId(typeof(T));
+}
+
+public class ConditionTypeDef
+{
+    public string Id { get; init; } = "";
+    public string Name { get; init; } = "";
+    public string Category { get; init; } = "";
+    public string Description { get; init; } = "";
+    public ConditionScopeFlags AllowedScopes { get; init; } = ConditionScopeFlags.All;
+    public Action<Condition>? DrawParams { get; init; }
+    public Func<WorldState, IReadOnlyDictionary<string, object>, bool> Evaluate { get; init; } = (_, _) => false;
 }
 
 [Flags]

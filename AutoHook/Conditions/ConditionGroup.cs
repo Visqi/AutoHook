@@ -10,7 +10,6 @@ public class ConditionGroup
     [JsonProperty("m")]
     public ConditionCombineMode CombineMode { get; set; } = ConditionCombineMode.All;
 
-    /// <summary>Only store conditions that are actually added</summary>
     [JsonProperty("c")]
     public List<Condition> Conditions { get; set; } = [];
 
@@ -19,14 +18,8 @@ public class ConditionGroup
         if (Conditions.Count == 0) return true;
 
         if (CombineMode == ConditionCombineMode.All)
-        {
-            foreach (var c in Conditions)
-                if (!c.Evaluate(world, registry)) return false;
-            return true;
-        }
-
-        foreach (var c in Conditions)
-            if (c.Evaluate(world, registry)) return true;
-        return false;
+            return Conditions.All(c => c.Evaluate(world, registry));
+        else
+            return Conditions.Any(c => c.Evaluate(world, registry));
     }
 }

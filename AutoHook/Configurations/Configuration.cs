@@ -1,5 +1,7 @@
 using Dalamud.Configuration;
 using AutoHook.Conditions;
+using AutoHook.Conditions.Definitions;
+using static AutoHook.Conditions.ConditionRegistry;
 using Newtonsoft.Json;
 using System.ComponentModel;
 using System.IO.Compression;
@@ -210,7 +212,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = ConditionId.IntuitionActive,
+                                    TypeId = Registry.GetId<IntuitionActiveCD>(),
                                     Params = []
                                 }
                             ]
@@ -244,7 +246,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = ConditionId.IntuitionActive,
+                                    TypeId = Registry.GetId<IntuitionActiveCD>(),
                                     Params = []
                                 }
                             ]
@@ -287,7 +289,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = ConditionId.SpectralActive,
+                                    TypeId = Registry.GetId<SpectralActiveCD>(),
                                     Params = []
                                 }
                             ]
@@ -321,7 +323,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = ConditionId.SpectralActive,
+                                    TypeId = Registry.GetId<SpectralActiveCD>(),
                                     Params = []
                                 }
                             ]
@@ -358,7 +360,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = ConditionId.StatusStacks,
+                                    TypeId = Registry.GetId<StatusStacksCD>(),
                                     Params = new Dictionary<string, object>
                                     {
                                         ["ids"] = new List<object> { (long)IDs.Status.AnglersArt },
@@ -404,7 +406,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = ConditionId.SwimbaitCount,
+                                    TypeId = Registry.GetId<SwimbaitCountCD>(),
                                     Params = new Dictionary<string, object>
                                     {
                                         ["val"] = 3,
@@ -445,7 +447,7 @@ public class Configuration : IPluginConfiguration
                             [
                                 new()
                                 {
-                                    TypeId = ConditionId.SwimbaitCount,
+                                    TypeId = Registry.GetId<SwimbaitCountCD>(),
                                     Params = new Dictionary<string, object>
                                     {
                                         ["val"] = 0,
@@ -501,7 +503,7 @@ public class Configuration : IPluginConfiguration
             {
                 var cond = new Condition
                 {
-                    TypeId = ConditionId.StatusActive,
+                    TypeId = Registry.GetId<StatusActiveCD>(),
                     Params = new Dictionary<string, object>
                     {
                         ["ids"] = new List<object> { (long)statusId }
@@ -551,7 +553,7 @@ public class Configuration : IPluginConfiguration
             {
                 var cond = new Condition
                 {
-                    TypeId = "MultihookAvailable",
+                    TypeId = Registry.GetId<MultihookAvailableCD>(),
                     Params = []
                 };
                 group.Conditions.Add(cond);
@@ -559,9 +561,9 @@ public class Configuration : IPluginConfiguration
 
             // Timers
             if (b.HookTimerEnabled)
-                AddRange(ConditionId.BiteTimer, b.MinHookTimer, b.MaxHookTimer);
+                AddRange(Registry.GetId<BiteTimerCD>(), b.MinHookTimer, b.MaxHookTimer);
             if (b.ChumTimerEnabled)
-                AddRange(ConditionId.ChumTimer, b.ChumMinHookTimer, b.ChumMaxHookTimer);
+                AddRange(Registry.GetId<ChumTimerCD>(), b.ChumMinHookTimer, b.ChumMaxHookTimer);
 
             if (group.Conditions.Count > 0)
                 set.Groups.Add(group);
@@ -589,16 +591,16 @@ public class Configuration : IPluginConfiguration
         var set = lures.ConditionSet ??= new ConditionSet();
         var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
 
-            void AddStatus(uint statusId, bool inverse)
+        void AddStatus(uint statusId, bool inverse)
+        {
+            var cond = new Condition
             {
-                var cond = new Condition
+                TypeId = Registry.GetId<StatusActiveCD>(),
+                Params = new Dictionary<string, object>
                 {
-                    TypeId = ConditionId.StatusActive,
-                    Params = new Dictionary<string, object>
-                    {
-                        ["ids"] = new List<object> { (long)statusId }
-                    }
-                };
+                    ["ids"] = new List<object> { (long)statusId }
+                }
+            };
             if (inverse)
                 cond.Params["inv"] = true;
             group.Conditions.Add(cond);
@@ -628,11 +630,11 @@ public class Configuration : IPluginConfiguration
 
         var set = fish.IgnoreConditionSet ??= new ConditionSet();
         var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-        var cond = new Condition
-        {
-            TypeId = ConditionId.IntuitionActive,
-            Params = []
-        };
+                var cond = new Condition
+                {
+                    TypeId = Registry.GetId<IntuitionActiveCD>(),
+                    Params = []
+                };
         group.Conditions.Add(cond);
         set.Groups.Add(group);
     }
@@ -647,7 +649,7 @@ public class Configuration : IPluginConfiguration
         var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
         var cond = new Condition
         {
-            TypeId = ConditionId.StatusActive,
+            TypeId = Registry.GetId<StatusActiveCD>(),
             Params = new Dictionary<string, object>
             {
                 ["ids"] = new List<object> { (long)IDs.Status.IdenticalCast }
@@ -680,7 +682,7 @@ public class Configuration : IPluginConfiguration
         {
             group.Conditions.Add(new Condition
             {
-                TypeId = ConditionId.StatusActive,
+                TypeId = Registry.GetId<StatusActiveCD>(),
                 Params = new Dictionary<string, object>
                 {
                     ["ids"] = new List<object> { (long)IDs.Status.AnglersFortune }
@@ -699,7 +701,7 @@ public class Configuration : IPluginConfiguration
                 [
                     new Condition
                     {
-                        TypeId = ConditionId.ActionAvailable,
+                        TypeId = Registry.GetId<ActionAvailableCD>(),
                         Params = new Dictionary<string, object>
                         {
                             ["id"] = (long)IDs.Item.Cordial,
@@ -708,7 +710,7 @@ public class Configuration : IPluginConfiguration
                     },
                     new Condition
                     {
-                        TypeId = ConditionId.ActionAvailable,
+                        TypeId = Registry.GetId<ActionAvailableCD>(),
                         Params = new Dictionary<string, object>
                         {
                             ["id"] = (long)IDs.Item.HQCordial,
@@ -717,7 +719,7 @@ public class Configuration : IPluginConfiguration
                     },
                     new Condition
                     {
-                        TypeId = ConditionId.ActionAvailable,
+                        TypeId = Registry.GetId<ActionAvailableCD>(),
                         Params = new Dictionary<string, object>
                         {
                             ["id"] = (long)IDs.Item.HiCordial,
@@ -726,7 +728,7 @@ public class Configuration : IPluginConfiguration
                     },
                     new Condition
                     {
-                        TypeId = ConditionId.ActionAvailable,
+                        TypeId = Registry.GetId<ActionAvailableCD>(),
                         Params = new Dictionary<string, object>
                         {
                             ["id"] = (long)IDs.Item.WateredCordial,
@@ -735,7 +737,7 @@ public class Configuration : IPluginConfiguration
                     },
                     new Condition
                     {
-                        TypeId = ConditionId.ActionAvailable,
+                        TypeId = Registry.GetId<ActionAvailableCD>(),
                         Params = new Dictionary<string, object>
                         {
                             ["id"] = (long)IDs.Item.HQWateredCordial,
