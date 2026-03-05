@@ -10,8 +10,6 @@ public class AutoMooch : BaseActionCast
 
     [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyMoochIntuition = false;
 
-    public ConditionSet? ConditionSet { get; set; }
-
     public override bool RequiresTimeWindow() => true;
 
     public AutoMooch() : base(UIStrings.AutoMooch, IDs.Actions.Mooch, ActionType.Action)
@@ -22,8 +20,7 @@ public class AutoMooch : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (ConditionSet is { Groups.Count: > 0 } &&
-            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+        if (!EvaluateConditionSet())
             return false;
 
         if (Mooch2.IsAvailableToCast())

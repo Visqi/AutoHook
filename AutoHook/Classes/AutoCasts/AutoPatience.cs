@@ -11,23 +11,18 @@ public class AutoPatience : BaseActionCast
 
     [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseOnlyWhenMoochIIOnCD;
 
-    public ConditionSet? ConditionSet { get; set; }
     public override bool RequiresTimeWindow() => true;
 
     public override bool DoesCancelMooch() => true;
 
-    public AutoPatience() : base(UIStrings.AutoPatience_Patience, IDs.Actions.Patience2, ActionType.Action)
-    {
-        HelpText = UIStrings.CancelsCurrentMooch;
-    }
+    public AutoPatience() : base(UIStrings.AutoPatience_Patience, IDs.Actions.Patience2, ActionType.Action) => HelpText = UIStrings.CancelsCurrentMooch;
 
     public override string GetName()
         => Name = UIStrings.AutoPatience_Patience;
 
     public override bool CastCondition()
     {
-        if (ConditionSet is { Groups.Count: > 0 } &&
-            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+        if (!EvaluateConditionSet())
             return false;
 
         if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune) && Service.WorldState.GetStatusTime(IDs.Status.AnglersFortune) > RefreshEarlyTime)

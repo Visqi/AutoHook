@@ -15,8 +15,6 @@ public class AutoCastLine : BaseActionCast
 
     public override bool RequiresTimeWindow() => true;
 
-    public ConditionSet? ConditionSet { get; set; }
-
     public AutoCastLine() : base(UIStrings.AutoCastLine_Auto_Cast_Line, IDs.Actions.Cast)
     {
         Enabled = true;
@@ -27,7 +25,7 @@ public class AutoCastLine : BaseActionCast
 
     public override bool IsExcludedPriority { get; set; } = true;
 
-    public override bool CastCondition() => ConditionSet is not { Groups.Count: > 0 } || ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry);
+    public override bool CastCondition() => EvaluateConditionSet();
 
     public override string GetName() => Name = UIStrings.AutoCastLine_Auto_Cast_Line;
 

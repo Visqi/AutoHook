@@ -8,16 +8,13 @@ public class AutoMultiHook : BaseActionCast
 {
     [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyUseWhenIdenticalCastActive;
 
-    public ConditionSet? ConditionSet { get; set; }
-
     public AutoMultiHook() : base(UIStrings.Multihook, IDs.Actions.MultiHook) { }
 
     public override int Priority { get; set; } = 0;
     public override bool IsExcludedPriority { get; set; } = true;
     public override unsafe bool CastCondition()
     {
-        if (ConditionSet is { Groups.Count: > 0 } &&
-            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+        if (!EvaluateConditionSet())
             return false;
 
         if (DutyActionManager.GetInstanceIfReady() is not null and var dm)

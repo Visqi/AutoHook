@@ -10,8 +10,6 @@ public class AutoBigGameFishing : BaseActionCast
     [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool WithIdenticalC = false;
     [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool WithSlap = false;
 
-    public ConditionSet? ConditionSet { get; set; }
-
     public AutoBigGameFishing() : base(UIStrings.BigGameFishing, IDs.Actions.BigGameFishing) { }
 
     public override string GetName()
@@ -19,8 +17,7 @@ public class AutoBigGameFishing : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (ConditionSet is { Groups.Count: > 0 } &&
-            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+        if (!EvaluateConditionSet())
             return false;
 
         if (Service.WorldState.HasStatus(IDs.Status.BigGameFishing))

@@ -11,7 +11,6 @@ public class AutoThaliaksFavor : BaseActionCast
     public int ThaliaksFavorStacks = 3;
     public int ThaliaksFavorRecover = 150;
 
-    public ConditionSet? ConditionSet { get; set; }
 
     public AutoThaliaksFavor(bool isSpearfishing = false) : base(UIStrings.Thaliaks_Favor, IDs.Actions.ThaliaksFavor, ActionType.Action)
     {
@@ -24,8 +23,7 @@ public class AutoThaliaksFavor : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (ConditionSet is { Groups.Count: > 0 } &&
-            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+        if (!EvaluateConditionSet())
             return false;
 
         var allowedToUseThaliaks = true;

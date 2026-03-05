@@ -12,8 +12,6 @@ public class AutoMakeShiftBait : BaseActionCast
     [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenMoochNotUp;
     [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseOnlyWhenMoochIIOnCD;
 
-    public ConditionSet? ConditionSet { get; set; }
-
     public override bool RequiresTimeWindow() => true;
 
     public AutoMakeShiftBait() : base(UIStrings.MakeShift_Bait, IDs.Actions.MakeshiftBait, ActionType.Action)
@@ -24,8 +22,7 @@ public class AutoMakeShiftBait : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (ConditionSet is { Groups.Count: > 0 } &&
-            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+        if (!EvaluateConditionSet())
             return false;
 
         if (Service.WorldState.HasStatus(IDs.Status.MakeshiftBait))

@@ -10,8 +10,6 @@ public class AutoPrizeCatch : BaseActionCast
     [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseOnlyWithIdenticalCast = false;
     [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseOnlyWithActiveSlap = false;
 
-    public ConditionSet? ConditionSet { get; set; }
-
     public override bool DoesCancelMooch() => true;
 
     public AutoPrizeCatch() : base(UIStrings.Prize_Catch, IDs.Actions.PrizeCatch, ActionType.Action)
@@ -24,8 +22,7 @@ public class AutoPrizeCatch : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (ConditionSet is { Groups.Count: > 0 } &&
-            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+        if (!EvaluateConditionSet())
             return false;
 
         if (!Enabled)

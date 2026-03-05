@@ -48,9 +48,7 @@ public class AutoCastsConfig
             CastPrizeCatch,
             //CastCollect,
             CastBigGame,
-            CastSurfaceSlap,
             CastMultihook,
-            CastIdenticalCast,
         }.OrderBy(x => x.Priority).ToList();
 
         return output;

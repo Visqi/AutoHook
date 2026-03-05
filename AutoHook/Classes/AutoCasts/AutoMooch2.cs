@@ -15,5 +15,4 @@ public class AutoMooch2 : BaseActionCast
         => Name = UIStrings.UseMoochII;
 
     public override bool CastCondition() => true;
-
 }

@@ -13,8 +13,6 @@ public class AutoIdenticalCast : BaseActionCast
     public bool OnlyUseAfterXAmount;
     public int CaughtAmountLimit = 1;
 
-    public ConditionSet? ConditionSet { get; set; }
-
     public override bool DoesCancelMooch() => true;
 
     public AutoIdenticalCast() : base(UIStrings.Identical_Cast, IDs.Actions.IdenticalCast, ActionType.Action)
@@ -23,14 +21,7 @@ public class AutoIdenticalCast : BaseActionCast
     public override string GetName()
         => Name = UIStrings.Identical_Cast;
 
-    public override bool CastCondition()
-    {
-        if (ConditionSet is { Groups.Count: > 0 } &&
-            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
-            return false;
-
-        return !Service.WorldState.HasStatus(IDs.Status.IdenticalCast) && !Service.WorldState.HasStatus(IDs.Status.SurfaceSlap);
-    }
+    public override bool CastCondition() => EvaluateConditionSet() && !Service.WorldState.HasStatus(IDs.Status.IdenticalCast) && !Service.WorldState.HasStatus(IDs.Status.SurfaceSlap);
 
     public bool IsAvailableToCast(int caughtAmount) => (!OnlyUseAfterXAmount || caughtAmount >= CaughtAmountLimit) && IsAvailableToCast();
 

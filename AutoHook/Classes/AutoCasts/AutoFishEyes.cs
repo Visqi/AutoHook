@@ -13,8 +13,6 @@ public class AutoFishEyes : BaseActionCast
 
     public bool IgnoreMooch;
 
-    public ConditionSet? ConditionSet { get; set; }
-
     public override bool DoesCancelMooch() => !IgnoreMooch;
 
     public override bool RequiresTimeWindow() => true;
@@ -23,14 +21,7 @@ public class AutoFishEyes : BaseActionCast
 
     public override string GetName() => Name = UIStrings.Fish_Eyes;
 
-    public override bool CastCondition()
-    {
-        if (ConditionSet is { Groups.Count: > 0 } &&
-            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
-            return false;
-
-        return !Service.WorldState.HasStatus(IDs.Status.FishEyes);
-    }
+    public override bool CastCondition() => EvaluateConditionSet() && !Service.WorldState.HasStatus(IDs.Status.FishEyes);
 
     protected override DrawOptionsDelegate DrawOptions => () =>
     {

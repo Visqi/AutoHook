@@ -21,8 +21,6 @@ public class AutoLures : BaseActionCast
 
     public bool OnlyCastLarge;
 
-    public ConditionSet? ConditionSet { get; set; }
-
     public override string GetName()
         => Name = UIStrings.UseLures;
 
@@ -39,27 +37,7 @@ public class AutoLures : BaseActionCast
         if (OnlyCastLarge && !Service.WorldState.HasAnyStatus([IDs.Status.AnglersFortune, IDs.Status.PrizeCatch]))
             return false;
 
-        if (ConditionSet is { Groups.Count: > 0 })
-        {
-            if (!ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
-                return false;
-        }
-        else
-        {
-            if (OnlyWhenActiveIdentical && !Service.WorldState.HasStatus(IDs.Status.IdenticalCast))
-                return false;
-
-            if (OnlyWhenNotActiveIdentical && Service.WorldState.HasStatus(IDs.Status.IdenticalCast))
-                return false;
-
-            if (OnlyWhenActiveSlap && !Service.WorldState.HasStatus(IDs.Status.SurfaceSlap))
-                return false;
-
-            if (OnlyWhenNotActiveSlap && Service.WorldState.HasStatus(IDs.Status.SurfaceSlap))
-                return false;
-        }
-
-        return true;
+        return EvaluateConditionSet();
     }
 
     protected override DrawOptionsDelegate DrawOptions => () =>

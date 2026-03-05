@@ -1,3 +1,4 @@
+using AutoHook.Conditions;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -49,12 +50,16 @@ public abstract class BaseActionCast
 
     [NonSerialized] public ActionType ActionType;
 
+    public ConditionSet? ConditionSet { get; set; }
+
+    protected bool EvaluateConditionSet()
+        => ConditionSet is not { Groups.Count: > 0 }
+           || ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry);
+
     public virtual void SetThreshold(int newCost)
     {
         var actionCost = Id == IDs.Actions.ThaliaksFavor ? 0 : (int)PlayerRes.CastActionCost(Id, ActionType);
-
         GpThreshold = (newCost < 0) ? 0 : Math.Max(newCost, actionCost);
-
         Service.Save();
     }
 
@@ -69,16 +74,8 @@ public abstract class BaseActionCast
         }
 
         var condition = CastCondition();
-
         var currentGp = Service.WorldState.CurrentGp;
-
-        bool hasGp;
-
-        if (GpThresholdAbove)
-            hasGp = currentGp >= GpThreshold;
-        else
-            hasGp = currentGp <= GpThreshold;
-
+        var hasGp = GpThresholdAbove ? currentGp >= GpThreshold : currentGp <= GpThreshold;
         var actionAvailable = Service.WorldState.ActionAvailable(Id, ActionType);
 
         if (EzThrottler.Throttle("LogActions", 1000))
@@ -164,9 +161,7 @@ public abstract class BaseActionCast
         if (availableActs is null || IsExcludedPriority) return;
 
         if (GetPriority() == 0) //failsafe I guess
-        {
             Priority = availableActs.MaxBy(x => x.Priority)!.Priority + 1;
-        }
 
         ImGui.NextColumn();
 
@@ -217,46 +212,42 @@ public abstract class BaseActionCast
             ImGui.OpenPopup(strId: @"gp_cfg");
         }
 
-        using (var popup = ImRaii.Popup(@"gp_cfg"))
+        using var popup = ImRaii.Popup(@"gp_cfg");
+        if (!popup.Success) return;
+
+        using var item = ImRaii.Child("###gp_cfg2", new Vector2(175, 125), true);
+        if (ImGui.Button(@" X "))
+            ImGui.CloseCurrentPopup();
+        ImGui.SameLine();
+        ImGui.TextColored(ImGuiColors.DalamudYellow, @$"GP - {GetName()}");
+
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(
+                @$"{GetName()} {UIStrings.WillBeUsedWhenYourGPIsEqualOr} {(GpThresholdAbove ? UIStrings.Above : UIStrings.Below)} {GpThreshold}");
+
+        ImGui.Separator();
+        if (ImGui.RadioButton(UIStrings.Above, GpThresholdAbove))
         {
-            if (!popup.Success) return;
+            GpThresholdAbove = true;
+            Service.Save();
+        }
 
-            using (var item = ImRaii.Child("###gp_cfg2", new Vector2(175, 125), true))
-            {
-                if (ImGui.Button(@" X "))
-                    ImGui.CloseCurrentPopup();
-                ImGui.SameLine();
-                ImGui.TextColored(ImGuiColors.DalamudYellow, @$"GP - {GetName()}");
+        //ImGui.SameLine();
 
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip(
-                        @$"{GetName()} {UIStrings.WillBeUsedWhenYourGPIsEqualOr} {(GpThresholdAbove ? UIStrings.Above : UIStrings.Below)} {GpThreshold}");
+        if (ImGui.RadioButton(UIStrings.Below, !GpThresholdAbove))
+        {
+            GpThresholdAbove = false;
+            Service.Save();
+        }
 
-                ImGui.Separator();
-                if (ImGui.RadioButton(UIStrings.Above, GpThresholdAbove))
-                {
-                    GpThresholdAbove = true;
-                    Service.Save();
-                }
+        //ImGui.SameLine();
 
-                //ImGui.SameLine();
-
-                if (ImGui.RadioButton(UIStrings.Below, !GpThresholdAbove))
-                {
-                    GpThresholdAbove = false;
-                    Service.Save();
-                }
-
-                //ImGui.SameLine();
-
-                ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
-                if (ImGui.InputInt(UIStrings.GP, ref GpThreshold, 1, 1))
-                {
-                    GpThreshold = Math.Max(GpThreshold, 0);
-                    SetThreshold(GpThreshold);
-                    Service.Save();
-                }
-            }
+        ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
+        if (ImGui.InputInt(UIStrings.GP, ref GpThreshold, 1, 1))
+        {
+            GpThreshold = Math.Max(GpThreshold, 0);
+            SetThreshold(GpThreshold);
+            Service.Save();
         }
     }
 }
