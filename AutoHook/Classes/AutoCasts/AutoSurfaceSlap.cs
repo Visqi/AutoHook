@@ -4,32 +4,20 @@ namespace AutoHook.Classes.AutoCasts;
 
 public class AutoSurfaceSlap : BaseActionCast
 {
-
     public override bool DoesCancelMooch() => true;
 
-    public AutoSurfaceSlap() : base(UIStrings.Surface_Slap, IDs.Actions.SurfaceSlap, ActionType.Action)
-    {
-        HelpText = UIStrings.OverridesIdenticalCast;
-    }
+    public AutoSurfaceSlap() : base(UIStrings.Surface_Slap, IDs.Actions.SurfaceSlap, ActionType.Action) => HelpText = UIStrings.OverridesIdenticalCast;
 
     public override string GetName()
         => Name = UIStrings.UseSurfaceSlap;
 
     public override bool CastCondition()
-    {
-        if (Service.WorldState.HasStatus(IDs.Status.IdenticalCast) || Service.WorldState.HasStatus(IDs.Status.SurfaceSlap))
-            return false;
-
-        return true;
-    }
+        => !Service.WorldState.HasStatus(IDs.Status.IdenticalCast) && !Service.WorldState.HasStatus(IDs.Status.SurfaceSlap);
 
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
-        if (DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref DontCancelMooch,
-                UIStrings.IdenticalCast_HelpText, true))
-        {
+        if (DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref DontCancelMooch, UIStrings.IdenticalCast_HelpText, true))
             Service.Save();
-        }
     };
 
     public override int Priority { get; set; } = 15;

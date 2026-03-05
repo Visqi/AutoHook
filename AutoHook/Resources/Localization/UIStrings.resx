@@ -1621,4 +1621,7 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="SwapStopRules" xml:space="preserve">
     <value>Swap/Stop Rules:</value>
   </data>
+  <data name="OnlyUseWhenMakeshiftBaitActive" xml:space="preserve">
+    <value>Only use when Makeshift Bait active</value>
+  </data>
 </root>

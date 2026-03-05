@@ -30,7 +30,8 @@ public class SubTabAutoCast
             acCfg.CastPrizeCatch,
             acCfg.CastThaliaksFavor,
             acCfg.CastBigGame,
-            acCfg.CastMultihook
+            acCfg.CastMultihook,
+            acCfg.CastIdenticalCast,
         ];
 
         DrawHeader(acCfg);

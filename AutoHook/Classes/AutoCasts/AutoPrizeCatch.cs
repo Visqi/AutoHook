@@ -1,13 +1,16 @@
+using AutoHook.Conditions;
+using AutoHook.Ui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
 public class AutoPrizeCatch : BaseActionCast
 {
-    public bool UseWhenMoochIIOnCD = false;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseWhenMoochIIOnCD = false;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseOnlyWithIdenticalCast = false;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseOnlyWithActiveSlap = false;
 
-    public bool UseOnlyWithIdenticalCast = false;
-    public bool UseOnlyWithActiveSlap = false;
+    public ConditionSet? ConditionSet { get; set; }
 
     public override bool DoesCancelMooch() => true;
 
@@ -21,16 +24,12 @@ public class AutoPrizeCatch : BaseActionCast
 
     public override bool CastCondition()
     {
+        if (ConditionSet is { Groups.Count: > 0 } &&
+            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+            return false;
+
         if (!Enabled)
             return false;
-
-        if (UseWhenMoochIIOnCD && !PlayerRes.ActionOnCoolDown(IDs.Actions.Mooch2))
-            return false;
-
-        var slapOrIc = true;
-        if (UseOnlyWithIdenticalCast || UseOnlyWithActiveSlap)
-            slapOrIc = UseOnlyWithIdenticalCast && Service.WorldState.HasStatus(IDs.Status.IdenticalCast) ||
-                    UseOnlyWithActiveSlap && Service.WorldState.HasStatus(IDs.Status.SurfaceSlap);
 
         if (Service.WorldState.HasStatus(IDs.Status.MakeshiftBait))
             return false;
@@ -41,17 +40,12 @@ public class AutoPrizeCatch : BaseActionCast
         if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune))
             return false;
 
-        return slapOrIc && Service.WorldState.ActionAvailable(IDs.Actions.PrizeCatch);
+        return Service.WorldState.ActionAvailable(IDs.Actions.PrizeCatch);
     }
 
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
-        DrawUtil.Checkbox(UIStrings.AutoCastExtraOptionPrizeCatch,
-            ref UseWhenMoochIIOnCD, UIStrings.ExtraOptionPrizeCatchHelpMarker);
-
-        DrawUtil.Checkbox(UIStrings.UseIcActive, ref UseOnlyWithIdenticalCast);
-
-        DrawUtil.Checkbox(UIStrings.UseSlapActive, ref UseOnlyWithActiveSlap);
+        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
     };
 
     public override int Priority { get; set; } = 13;

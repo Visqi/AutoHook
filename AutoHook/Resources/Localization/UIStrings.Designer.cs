@@ -2746,6 +2746,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Only use when Makeshift Bait active.
+        /// </summary>
+        internal static string OnlyUseWhenMakeshiftBaitActive {
+            get {
+                return ResourceManager.GetString("OnlyUseWhenMakeshiftBaitActive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Only use when no regular mooch is available.
         /// </summary>
         internal static string OnlyUseWhenNoMoochAvailable {

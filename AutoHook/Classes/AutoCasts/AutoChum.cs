@@ -1,48 +1,26 @@
+using AutoHook.Conditions;
+using AutoHook.Ui;
+
 namespace AutoHook.Classes.AutoCasts;
 
 public class AutoChum : BaseActionCast
 {
-    public bool _onlyUseWithIntuition;
-    public int _useWhenIntuitionExceeds = 0;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool _onlyUseWithIntuition;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public int _useWhenIntuitionExceeds = 0;
+
+    public ConditionSet? ConditionSet { get; set; }
 
     public override bool DoesCancelMooch() => true;
 
-    public AutoChum() : base(UIStrings.Chum, IDs.Actions.Chum)
-    {
-        HelpText = UIStrings.CancelsCurrentMooch;
-    }
+    public AutoChum() : base(UIStrings.Chum, IDs.Actions.Chum) => HelpText = UIStrings.CancelsCurrentMooch;
 
-    public override string GetName()
-        => Name = UIStrings.Chum;
+    public override string GetName() => Name = UIStrings.Chum;
 
-    public override bool CastCondition()
-    {
-        var hasIntuition = Service.WorldState.HasStatus(IDs.Status.FishersIntuition);
-        if (!hasIntuition && _onlyUseWithIntuition)
-            return false;
-
-        if (hasIntuition && _onlyUseWithIntuition && Service.WorldState.GetStatusTime(IDs.Status.FishersIntuition) <= _useWhenIntuitionExceeds)
-            return false;
-
-        return true;
-    }
+    public override bool CastCondition() => ConditionSet is not { Groups.Count: > 0 } || ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry);
 
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
-        if (DrawUtil.Checkbox(UIStrings.OnlyUseWhenFisherSIntutionIsActive, ref _onlyUseWithIntuition))
-        {
-            Service.Save();
-        }
-
-        if (_onlyUseWithIntuition)
-        {
-            var time = _useWhenIntuitionExceeds;
-            if (DrawUtil.EditNumberField(UIStrings.UseWhenIntuitionTimeIsEqualOrGreaterThan, ref time))
-            {
-                _useWhenIntuitionExceeds = Math.Max(0, Math.Min(time, 999));
-                Service.Save();
-            }
-        }
+        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
     };
 
     public override int Priority { get; set; } = 1;

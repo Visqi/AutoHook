@@ -1,9 +1,10 @@
+using AutoHook.Classes.AutoCasts;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using System.ComponentModel;
 
 namespace AutoHook.Configurations;
 
-public class AutoCastsConfig
+    public class AutoCastsConfig
 {
     public bool EnableAll = false;
 
@@ -25,15 +26,17 @@ public class AutoCastsConfig
     public AutoCollect CastCollect = new();
     public AutoCordial CastCordial = new();
     public AutoFishEyes CastFishEyes = new();
-    public AutoMakeShiftBait CastMakeShiftBait = new();
-    public AutoPatience CastPatience = new();
-    public AutoPrizeCatch CastPrizeCatch = new();
-    public AutoThaliaksFavor CastThaliaksFavor = new();
-    public AutoBigGameFishing CastBigGame = new();
-    public AutoMultiHook CastMultihook = new();
+        public AutoMakeShiftBait CastMakeShiftBait = new();
+        public AutoPatience CastPatience = new();
+        public AutoPrizeCatch CastPrizeCatch = new();
+        public AutoThaliaksFavor CastThaliaksFavor = new();
+        public AutoBigGameFishing CastBigGame = new();
+        public AutoMultiHook CastMultihook = new();
+        /// <summary>Global Identical Cast (not tied to a specific fish).</summary>
+        public AutoIdenticalCast CastIdenticalCast = new();
     //public AutoLures CastLures = new();
 
-    private List<BaseActionCast> GetAutoCastOrder()
+        private List<BaseActionCast> GetAutoCastOrder()
     {
         var output = new List<BaseActionCast>
         {
@@ -44,9 +47,10 @@ public class AutoCastsConfig
             CastChum,
             CastFishEyes,
             CastPrizeCatch,
-            //CastCollect,
+                //CastCollect,
             CastBigGame,
-            CastMultihook,
+                CastMultihook,
+                CastIdenticalCast,
         }.OrderBy(x => x.Priority).ToList();
 
         return output;

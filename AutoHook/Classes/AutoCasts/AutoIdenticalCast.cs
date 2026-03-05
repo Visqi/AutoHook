@@ -1,3 +1,5 @@
+using AutoHook.Conditions;
+using AutoHook.Ui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Dalamud.Bindings.ImGui;
 
@@ -5,12 +7,13 @@ namespace AutoHook.Classes.AutoCasts;
 
 public class AutoIdenticalCast : BaseActionCast
 {
-    public bool OnlyUseUnderPatience;
-
-    public bool OnlyWhenCordialAvailable;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyUseUnderPatience;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenCordialAvailable;
 
     public bool OnlyUseAfterXAmount;
     public int CaughtAmountLimit = 1;
+
+    public ConditionSet? ConditionSet { get; set; }
 
     public override bool DoesCancelMooch() => true;
 
@@ -24,44 +27,21 @@ public class AutoIdenticalCast : BaseActionCast
 
     public override bool CastCondition()
     {
-        if (Service.WorldState.HasStatus(IDs.Status.IdenticalCast) || Service.WorldState.HasStatus(IDs.Status.SurfaceSlap))
+        if (ConditionSet is { Groups.Count: > 0 } &&
+            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
             return false;
 
-        if (OnlyWhenCordialAvailable && PlayerRes.ActionOnCoolDown(IDs.Item.HiCordial, ActionType.Item))
-            return false;
-
-        if (OnlyUseUnderPatience && !Service.WorldState.HasStatus(IDs.Status.AnglersFortune))
-            return false;
-
-        return true;
+        return !Service.WorldState.HasStatus(IDs.Status.IdenticalCast) && !Service.WorldState.HasStatus(IDs.Status.SurfaceSlap);
     }
 
-    public bool IsAvailableToCast(int caughtAmount)
-    {
-        if (OnlyUseAfterXAmount && caughtAmount < CaughtAmountLimit)
-            return false;
-
-        return IsAvailableToCast();
-    }
+    public bool IsAvailableToCast(int caughtAmount) => (!OnlyUseAfterXAmount || caughtAmount >= CaughtAmountLimit) && IsAvailableToCast();
 
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
-        if (DrawUtil.Checkbox(UIStrings.Only_When_Patience_Active, ref OnlyUseUnderPatience))
-        {
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.Only_use_when_Cordial_is_available, ref OnlyWhenCordialAvailable))
-        {
-            Service.Save();
-        }
-
         var stack = CaughtAmountLimit;
 
         if (DrawUtil.Checkbox(UIStrings.Only_use_when_the_fish_is_caught, ref OnlyUseAfterXAmount))
-        {
             Service.Save();
-        }
 
         ImGui.SameLine();
 
@@ -72,11 +52,9 @@ public class AutoIdenticalCast : BaseActionCast
             Service.Save();
         }
 
-        if (DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref DontCancelMooch,
-                UIStrings.IdenticalCast_HelpText, true))
-        {
+        if (DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref DontCancelMooch, UIStrings.IdenticalCast_HelpText, true))
             Service.Save();
-        }
+        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
     };
 
     public override int Priority { get; set; } = 8;

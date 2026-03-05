@@ -1,4 +1,5 @@
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using Lumina.Excel.Sheets;
 
 namespace AutoHook.Conditions;
@@ -270,6 +271,43 @@ public static class ConditionTypes
                 return GetBool(p, "inv", false) ? !result : result;
             },
         });
+
+        // ---- Last ocean fish points (current zone) ----
+        // Params: "val" = points threshold, "op" = >,>=,<,<=,=, "inv" = optional
+        // Uses FishData for current zone; last non-zero ItemId entry's points per fish (TotalPoints / (Nq+Hq)).
+        registry.Register(new ConditionTypeDef
+        {
+            Id = ConditionId.OceanLastFishPoints,
+            Name = "Last ocean fish points",
+            Category = "Fishing",
+            Evaluate = (w, p) =>
+            {
+                var points = GetLastOceanFishPointsValue(w);
+                if (points == null) return GetBool(p, "inv", false);
+                var val = GetInt(p, "val", 0);
+                var op = GetOp(p, "op", ">=");
+                var result = CompareInt(points.Value, val, op);
+                return GetBool(p, "inv", false) ? !result : result;
+            },
+        });
+    }
+
+    /// <summary>Points per fish for the last (most recent) fish entry in the current ocean fishing zone, or null if not applicable.</summary>
+    private static int? GetLastOceanFishPointsValue(WorldState w)
+    {
+        var of = w.OceanFishing;
+        if (of.FishData == null || of.FishData.Count < 60) return null;
+        var zone = (int)Math.Clamp(of.CurrentZone, 0, 2);
+        var start = zone * 20;
+        for (var i = start + 19; i >= start; i--)
+        {
+            var f = of.FishData[i];
+            if (f.ItemId == 0) continue;
+            var count = f.NqAmount + f.HqAmount;
+            if (count == 0) return (int)f.TotalPoints;
+            return (int)(f.TotalPoints / count);
+        }
+        return null;
     }
 
     private static List<uint> GetMissionTypeIds(IReadOnlyDictionary<string, object> p)

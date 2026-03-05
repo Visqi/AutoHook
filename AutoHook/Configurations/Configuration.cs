@@ -175,6 +175,7 @@ public class Configuration : IPluginConfiguration
             }
 
             MigrateAutoCordial(preset.AutoCastsCfg.CastCordial);
+            MigrateAutoIdenticalCast(preset.AutoCastsCfg.CastIdenticalCast);
         }
 
         MigratePreset(HookPresets.DefaultPreset);
@@ -654,6 +655,116 @@ public class Configuration : IPluginConfiguration
         };
         group.Conditions.Add(cond);
         set.Groups.Add(group);
+    }
+
+    /// <summary>
+    /// v7 migration: convert legacy AutoIdenticalCast flags (Patience / Cordial) into ConditionSet-based rules.
+    /// After this, the booleans are effectively legacy-only and can be removed from the UI.
+    /// </summary>
+    private static void MigrateAutoIdenticalCast(AutoIdenticalCast ic)
+    {
+        if (ic == null) return;
+        // If user already configured a ConditionSet, don't touch it.
+        if (ic.ConditionSet is { Groups.Count: > 0 }) return;
+
+        var anyLegacy = ic.OnlyUseUnderPatience || ic.OnlyWhenCordialAvailable;
+        if (!anyLegacy) return;
+
+        var set = ic.ConditionSet ??= new ConditionSet();
+
+        // Build a single group that ANDs Patience + (any cordial available) if both are set;
+        // or just the one that is set.
+        var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
+
+        if (ic.OnlyUseUnderPatience)
+        {
+            group.Conditions.Add(new Condition
+            {
+                TypeId = ConditionId.StatusActive,
+                Params = new Dictionary<string, object>
+                {
+                    ["ids"] = new List<object> { (long)IDs.Status.AnglersFortune }
+                }
+            });
+        }
+
+        if (ic.OnlyWhenCordialAvailable)
+        {
+            // OR of any cordial item being available.
+            // Achieve this by a subgroup with CombineMode.Any over multiple ActionAvailable conditions.
+            var cordialGroup = new ConditionGroup
+            {
+                CombineMode = ConditionCombineMode.Any,
+                Conditions =
+                [
+                    new Condition
+                    {
+                        TypeId = ConditionId.ActionAvailable,
+                        Params = new Dictionary<string, object>
+                        {
+                            ["id"] = (long)IDs.Item.Cordial,
+                            ["type"] = 1L, // ActionType.Item
+                        }
+                    },
+                    new Condition
+                    {
+                        TypeId = ConditionId.ActionAvailable,
+                        Params = new Dictionary<string, object>
+                        {
+                            ["id"] = (long)IDs.Item.HQCordial,
+                            ["type"] = 1L,
+                        }
+                    },
+                    new Condition
+                    {
+                        TypeId = ConditionId.ActionAvailable,
+                        Params = new Dictionary<string, object>
+                        {
+                            ["id"] = (long)IDs.Item.HiCordial,
+                            ["type"] = 1L,
+                        }
+                    },
+                    new Condition
+                    {
+                        TypeId = ConditionId.ActionAvailable,
+                        Params = new Dictionary<string, object>
+                        {
+                            ["id"] = (long)IDs.Item.WateredCordial,
+                            ["type"] = 1L,
+                        }
+                    },
+                    new Condition
+                    {
+                        TypeId = ConditionId.ActionAvailable,
+                        Params = new Dictionary<string, object>
+                        {
+                            ["id"] = (long)IDs.Item.HQWateredCordial,
+                            ["type"] = 1L,
+                        }
+                    },
+                ]
+            };
+
+            // Represent cordialGroup as a single logical term "C" in Expression by
+            // appending it as another group, and using Expression to AND A && C if needed.
+            // For simplicity, if we already have a Patience condition, we just AND it with
+            // "(B || C || D ...)" by using the Expression over the two groups.
+            if (group.Conditions.Count == 0)
+            {
+                // Only cordial flag set: just use cordialGroup as the sole group.
+                set.Groups.Add(cordialGroup);
+                return;
+            }
+
+            // Both patience + cordial: group index 0 = patience, index 1 = cordialGroup
+            set.Groups.Add(group);
+            set.Groups.Add(cordialGroup);
+            set.Expression = "A && B";
+            return;
+        }
+
+        if (group.Conditions.Count > 0)
+            set.Groups.Add(group);
     }
 
     public void Initiate()

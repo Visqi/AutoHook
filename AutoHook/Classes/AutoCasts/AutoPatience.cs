@@ -1,3 +1,5 @@
+using AutoHook.Conditions;
+using AutoHook.Ui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Dalamud.Bindings.ImGui;
 
@@ -5,9 +7,11 @@ namespace AutoHook.Classes.AutoCasts;
 
 public class AutoPatience : BaseActionCast
 {
-    //public bool EnableMakeshiftPatience;
     public int RefreshEarlyTime = 0;
-    public bool UseOnlyWhenMoochIIOnCD;
+
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseOnlyWhenMoochIIOnCD;
+
+    public ConditionSet? ConditionSet { get; set; }
     public override bool RequiresTimeWindow() => true;
 
     public override bool DoesCancelMooch() => true;
@@ -22,28 +26,18 @@ public class AutoPatience : BaseActionCast
 
     public override bool CastCondition()
     {
+        if (ConditionSet is { Groups.Count: > 0 } &&
+            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+            return false;
+
         if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune) && Service.WorldState.GetStatusTime(IDs.Status.AnglersFortune) > RefreshEarlyTime)
             return false;
 
-        if (Service.WorldState.HasStatus(IDs.Status.PrizeCatch))
-            return false;
-
-        if (Service.WorldState.HasStatus(IDs.Status.MakeshiftBait))
-            return false;
-
-        if (UseOnlyWhenMoochIIOnCD && !PlayerRes.ActionOnCoolDown(IDs.Actions.Mooch2))
-            return false;
-
-        return true;
+        return !Service.WorldState.HasStatus(IDs.Status.PrizeCatch);
     }
 
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
-        /*if (DrawUtil.Checkbox(UIStrings.TabAutoCasts_DrawExtraOptionsPatience, ref EnableMakeshiftPatience))
-        {
-            Service.Save();
-        }*/
-
         if (ImGui.RadioButton(UIStrings.Patience_I, Id == IDs.Actions.Patience))
         {
             Id = IDs.Actions.Patience;
@@ -63,10 +57,7 @@ public class AutoPatience : BaseActionCast
             Service.Save();
         }
 
-        if (DrawUtil.Checkbox(UIStrings.AutoCastExtraOptionPatience, ref UseOnlyWhenMoochIIOnCD))
-        {
-            Service.Save();
-        }
+        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
     };
 
     public override int Priority { get; set; } = 12;

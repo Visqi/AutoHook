@@ -6,10 +6,7 @@ public class AutoSparefulHand : BaseActionCast
 {
     public int SwimbaitCountLimit { get; set; } = 3;
 
-    public AutoSparefulHand() : base(UIStrings.SparefulHand, IDs.Actions.SparefulHand, ActionType.Action)
-    {
-        HelpText = UIStrings.SparefulHand_HelpText;
-    }
+    public AutoSparefulHand() : base(UIStrings.SparefulHand, IDs.Actions.SparefulHand, ActionType.Action) => HelpText = UIStrings.SparefulHand_HelpText;
 
     public override string GetName()
         => Name = UIStrings.SparefulHand;

@@ -1,12 +1,17 @@
+using AutoHook.Conditions;
+using AutoHook.Ui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
 public class AutoThaliaksFavor : BaseActionCast
 {
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseWhenCordialCD;
+
     public int ThaliaksFavorStacks = 3;
     public int ThaliaksFavorRecover = 150;
-    public bool UseWhenCordialCD;
+
+    public ConditionSet? ConditionSet { get; set; }
 
     public AutoThaliaksFavor(bool isSpearfishing = false) : base(UIStrings.Thaliaks_Favor, IDs.Actions.ThaliaksFavor, ActionType.Action)
     {
@@ -19,24 +24,14 @@ public class AutoThaliaksFavor : BaseActionCast
 
     public override bool CastCondition()
     {
+        if (ConditionSet is { Groups.Count: > 0 } &&
+            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+            return false;
+
         var allowedToUseThaliaks = true;
         var hasStacks = Service.WorldState.HasAnglersArtStacks(ThaliaksFavorStacks);
 
         var notOvercaped = (Service.WorldState.CurrentGp + ThaliaksFavorRecover) < Service.WorldState.MaxGp;
-
-        if (UseWhenCordialCD)
-        {
-            var cordialConfig = AutoHook.Plugin.HookManager.GetAutoCastCfg().CastCordial;
-            var hasCordial = false;
-            foreach (var cordial in cordialConfig._cordialList)
-            {
-                hasCordial |= Service.WorldState.HaveCordialInInventory(cordial.Item1);
-            }
-
-            var cordialAvailable = cordialConfig.Enabled && Service.WorldState.IsPotOffCooldown && hasCordial;
-
-            allowedToUseThaliaks = !cordialAvailable;
-        }
 
         return hasStacks && notOvercaped && allowedToUseThaliaks; // dont use if its going to overcap gp
     }
@@ -50,9 +45,7 @@ public class AutoThaliaksFavor : BaseActionCast
             ThaliaksFavorStacks = Math.Max(3, Math.Min(stack, 10));
             Service.Save();
         }
-
-        if (DrawUtil.Checkbox(UIStrings.ThaliaksCordialOffCd, ref UseWhenCordialCD, UIStrings.Use_Cordials_First_Help))
-            Service.Save();
+        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
     };
 
     public override int Priority { get; set; } = 16;

@@ -1,3 +1,5 @@
+using AutoHook.Conditions;
+using AutoHook.Ui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
@@ -5,42 +7,31 @@ namespace AutoHook.Classes.AutoCasts;
 public class AutoMakeShiftBait : BaseActionCast
 {
     public int MakeshiftBaitStacks = 5;
-    public bool _onlyUseWithIntuition;
 
-    public bool OnlyWhenMoochNotUp;
-    public bool UseOnlyWhenMoochIIOnCD;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool _onlyUseWithIntuition;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenMoochNotUp;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseOnlyWhenMoochIIOnCD;
+
+    public ConditionSet? ConditionSet { get; set; }
 
     public override bool RequiresTimeWindow() => true;
 
     public AutoMakeShiftBait() : base(UIStrings.MakeShift_Bait, IDs.Actions.MakeshiftBait, ActionType.Action)
-    {
-        HelpText = UIStrings.TabAutoCasts_DrawMakeShiftBait_HelpText;
-    }
+        => HelpText = UIStrings.TabAutoCasts_DrawMakeShiftBait_HelpText;
 
     public override string GetName()
         => Name = UIStrings.MakeShift_Bait;
 
     public override bool CastCondition()
     {
-        if (!Enabled)
+        if (ConditionSet is { Groups.Count: > 0 } &&
+            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
             return false;
 
         if (Service.WorldState.HasStatus(IDs.Status.MakeshiftBait))
             return false;
 
         if (Service.WorldState.HasStatus(IDs.Status.PrizeCatch))
-            return false;
-
-        if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune))
-            return false;
-
-        if (!Service.WorldState.HasStatus(IDs.Status.FishersIntuition) && _onlyUseWithIntuition)
-            return false;
-
-        if (Service.WorldState.IsMoochAvailable() && OnlyWhenMoochNotUp)
-            return false;
-
-        if (UseOnlyWhenMoochIIOnCD && !PlayerRes.ActionOnCoolDown(IDs.Actions.Mooch2))
             return false;
 
         var available = Service.WorldState.ActionAvailable(IDs.Actions.MakeshiftBait);
@@ -59,20 +50,7 @@ public class AutoMakeShiftBait : BaseActionCast
             Service.Save();
         }
 
-        if (DrawUtil.Checkbox(UIStrings.OnlyUseWhenFisherSIntutionIsActive, ref _onlyUseWithIntuition))
-        {
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyWhenMoochNotAvailable, ref OnlyWhenMoochNotUp))
-        {
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.AutoCastExtraOptionMakeshiftBait, ref UseOnlyWhenMoochIIOnCD))
-        {
-            Service.Save();
-        }
+        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
     };
 
     public override int Priority { get; set; } = 9;

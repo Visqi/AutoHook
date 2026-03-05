@@ -1,32 +1,34 @@
+using AutoHook.Conditions;
+using AutoHook.Ui;
+
 namespace AutoHook.Classes.AutoCasts;
 
 public class AutoBigGameFishing : BaseActionCast
 {
     public int AnglersStacks = 2;
 
-    public bool WithIdenticalC = false;
-    public bool WithSlap = false;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool WithIdenticalC = false;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool WithSlap = false;
 
-    public AutoBigGameFishing() : base(UIStrings.BigGameFishing, IDs.Actions.BigGameFishing)
-    {
-    }
+    public ConditionSet? ConditionSet { get; set; }
+
+    public AutoBigGameFishing() : base(UIStrings.BigGameFishing, IDs.Actions.BigGameFishing) { }
 
     public override string GetName()
         => Name = UIStrings.BigGameFishing;
 
     public override bool CastCondition()
     {
+        if (ConditionSet is { Groups.Count: > 0 } &&
+            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
+            return false;
+
         if (Service.WorldState.HasStatus(IDs.Status.BigGameFishing))
             return false;
 
-        var slapOrIc = true;
-        if (WithIdenticalC || WithSlap)
-            slapOrIc = WithIdenticalC && Service.WorldState.HasStatus(IDs.Status.IdenticalCast) ||
-                       WithSlap && Service.WorldState.HasStatus(IDs.Status.SurfaceSlap);
-
         var hasStacks = Service.WorldState.HasAnglersArtStacks(AnglersStacks);
 
-        return hasStacks && slapOrIc;
+        return hasStacks;
     }
 
     protected override DrawOptionsDelegate DrawOptions => () =>
@@ -38,8 +40,7 @@ public class AutoBigGameFishing : BaseActionCast
             Service.Save();
         }
 
-        DrawUtil.Checkbox(UIStrings.UseIcActive, ref WithIdenticalC);
-        DrawUtil.Checkbox(UIStrings.UseSlapActive, ref WithSlap);
+        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
     };
 
     public override int Priority { get; set; } = 18;

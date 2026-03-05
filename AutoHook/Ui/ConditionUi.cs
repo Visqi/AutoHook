@@ -14,6 +14,7 @@ public enum ConditionScope
     Hook,
     AutoCordial,
     FishIgnore,
+    AutoCast,
 }
 
 public static class ConditionUi
@@ -392,6 +393,7 @@ public static class ConditionUi
         ConditionId.IntuitionActive, ConditionId.IntuitionTime, ConditionId.SpectralActive,
         ConditionId.Gp, ConditionId.MultihookAvailable, ConditionId.Weather,
         ConditionId.OceanMissionType, ConditionId.OceanMissionProgress, ConditionId.SwimbaitCount,
+        ConditionId.OceanLastFishPoints,
     ];
 
     private static readonly HashSet<string> AutoCordialScopeIds =
@@ -404,6 +406,7 @@ public static class ConditionUi
         ConditionId.StatusActive, ConditionId.IntuitionActive, ConditionId.IntuitionTime,
         ConditionId.SpectralActive, ConditionId.Weather,
         ConditionId.OceanMissionType, ConditionId.OceanMissionProgress,
+        ConditionId.OceanLastFishPoints,
     ];
 
     private static IEnumerable<ConditionTypeDef> GetScopedTypes(ConditionScope scope)
@@ -432,6 +435,7 @@ public static class ConditionUi
         [ConditionId.ActionAvailable] = DrawActionAvailableParams,
         [ConditionId.OceanMissionType] = DrawMissionTypeParams,
         [ConditionId.OceanMissionProgress] = DrawMissionProgressParams,
+        [ConditionId.OceanLastFishPoints] = DrawOceanLastFishPointsParams,
     };
 
     private static void DrawParams(Condition cond)
@@ -614,6 +618,33 @@ public static class ConditionUi
         }
     }
 
+    private static void DrawOceanLastFishPointsParams(Condition cond)
+    {
+        var val = GetInt(cond.Params, "val", 300);
+        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
+        if (ImGui.InputInt("Points", ref val))
+        {
+            cond.Params["val"] = (long)Math.Max(0, val);
+        }
+
+        ImGui.SameLine();
+        var op = cond.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
+        var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
+        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
+        using (var combo = ImRaii.Combo("##ocean_points_op", label))
+        {
+            if (combo.Success)
+            {
+                foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
+                {
+                    var sel = choice == op;
+                    if (ImGui.Selectable(choice, sel))
+                        cond.Params["op"] = choice;
+                }
+            }
+        }
+    }
+
     private static void DrawRangeParams(Condition cond)
     {
         var ranges = GetRanges(cond.Params);
@@ -652,6 +683,8 @@ public static class ConditionUi
             _ => "Action"
         };
 
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
         using (var combo = ImRaii.Combo("##act_type", label))
         {
             if (combo.Success)
@@ -1122,17 +1155,17 @@ public static class ConditionUi
             case ConditionScope.FishIgnore:
                 DrawFishPresets(set, group);
                 break;
+            case ConditionScope.AutoCast:
+                DrawAutoCastPresets(set, group);
+                break;
         }
     }
 
     private static void DrawHookPresets(ConditionSet set, ConditionGroup group)
     {
-        ImGui.TextColored(ImGuiColors.DalamudGrey, "Presets:");
+        ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.Presets_);
 
-        if (DrawActionIconButton(IDs.Actions.SurfaceSlap,
-                ImGui.GetIO().KeyShift
-                    ? "Require Surface Slap NOT active (Shift held)"
-                    : "Require Surface Slap active (hold Shift for NOT active)"))
+        if (DrawActionIconButton(IDs.Actions.SurfaceSlap, UIStrings.UseSlapActive))
         {
             var inverse = ImGui.GetIO().KeyShift;
             AddStatusPreset(set, group, IDs.Status.SurfaceSlap, inverse);
@@ -1140,10 +1173,7 @@ public static class ConditionUi
 
         ImGui.SameLine();
 
-        if (DrawActionIconButton(IDs.Actions.IdenticalCast,
-                ImGui.GetIO().KeyShift
-                    ? "Require Identical Cast NOT active (Shift held)"
-                    : "Require Identical Cast active (hold Shift for NOT active)"))
+        if (DrawActionIconButton(IDs.Actions.IdenticalCast, UIStrings.UseIcActive))
         {
             var inverse = ImGui.GetIO().KeyShift;
             AddStatusPreset(set, group, IDs.Status.IdenticalCast, inverse);
@@ -1151,10 +1181,7 @@ public static class ConditionUi
 
         ImGui.SameLine();
 
-        if (DrawActionIconButton(IDs.Actions.PrizeCatch,
-                ImGui.GetIO().KeyShift
-                    ? "Require Prize Catch NOT active (Shift held)"
-                    : "Require Prize Catch active (hold Shift for NOT active)"))
+        if (DrawActionIconButton(IDs.Actions.PrizeCatch, UIStrings.Use_Prize_Catch_HelpText))
         {
             var inverse = ImGui.GetIO().KeyShift;
             AddStatusPreset(set, group, IDs.Status.PrizeCatch, inverse);
@@ -1162,27 +1189,86 @@ public static class ConditionUi
 
         ImGui.SameLine();
 
-        if (DrawActionIconButton(IDs.Actions.MultiHook, "Require Multihook available"))
+        if (DrawActionIconButton(IDs.Actions.MultiHook, UIStrings.OnlyHookWhenActiveMultihook))
             AddMultihookPreset(set, group);
+    }
+
+    private static void DrawAutoCastPresets(ConditionSet set, ConditionGroup group)
+    {
+        ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.Presets_);
+
+        if (DrawActionIconButton(IDs.Actions.IdenticalCast, UIStrings.UseIcActive))
+            AddStatusPreset(set, group, IDs.Status.IdenticalCast, ImGui.GetIO().KeyShift);
+
+        ImGui.SameLine();
+
+        if (DrawActionIconButton(IDs.Actions.SurfaceSlap, UIStrings.UseSlapActive))
+            AddStatusPreset(set, group, IDs.Status.SurfaceSlap, ImGui.GetIO().KeyShift);
+
+        ImGui.SameLine();
+
+        if (DrawStatusIconButton(IDs.Status.FishersIntuition, UIStrings.OnlyUseWhenFisherSIntutionIsActive))
+        {
+            var inverse = ImGui.GetIO().KeyShift;
+            if (!group.Conditions.Any(c => c.TypeId == ConditionId.IntuitionActive))
+            {
+                var cond = new Condition
+                {
+                    TypeId = ConditionId.IntuitionActive,
+                    Params = inverse
+                        ? new Dictionary<string, object> { ["inv"] = true }
+                        : []
+                };
+                group.Conditions.Add(cond);
+            }
+            else if (inverse)
+            {
+                foreach (var c in group.Conditions.Where(c => c.TypeId == ConditionId.IntuitionActive))
+                    c.Params["inv"] = true;
+            }
+        }
+
+        ImGui.SameLine();
+
+        if (DrawStatusIconButton(IDs.Status.AnglersFortune, UIStrings.Only_When_Patience_Active))
+            AddStatusPreset(set, group, IDs.Status.AnglersFortune, ImGui.GetIO().KeyShift);
+
+        ImGui.SameLine();
+
+        if (DrawStatusIconButton(IDs.Status.MakeshiftBait, UIStrings.OnlyUseWhenMakeshiftBaitActive))
+            AddStatusPreset(set, group, IDs.Status.MakeshiftBait, ImGui.GetIO().KeyShift);
+
+        ImGui.SameLine();
+
+        if (DrawActionIconButton(IDs.Actions.Mooch2, UIStrings.AutoCastExtraOptionPatience))
+        {
+            if (!group.Conditions.Any(c => c.TypeId == ConditionId.ActionAvailable && c.Params.TryGetValue("id", out var idObj) && Convert.ToUInt32(idObj) == IDs.Actions.Mooch2))
+            {
+                group.Conditions.Add(new Condition
+                {
+                    TypeId = ConditionId.ActionAvailable,
+                    Params = new Dictionary<string, object>
+                    {
+                        ["id"] = (long)IDs.Actions.Mooch2,
+                        ["type"] = 0L,
+                        ["inv"] = true
+                    }
+                });
+            }
+        }
     }
 
     private static void DrawCordialPresets(ConditionSet set, ConditionGroup group)
     {
-        ImGui.TextColored(ImGuiColors.DalamudGrey, "Presets:");
+        ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.Presets_);
 
-        if (DrawActionIconButton(IDs.Actions.IdenticalCast,
-                ImGui.GetIO().KeyShift
-                    ? "Allow overcap when Identical Cast is NOT active (Shift held)"
-                    : "Allow overcap when Identical Cast is active (hold Shift for NOT active)"))
-        {
-            var inverse = ImGui.GetIO().KeyShift;
-            AddStatusPreset(set, group, IDs.Status.IdenticalCast, inverse);
-        }
+        if (DrawActionIconButton(IDs.Actions.IdenticalCast, UIStrings.Allow_Gp_Overcap))
+            AddStatusPreset(set, group, IDs.Status.IdenticalCast, ImGui.GetIO().KeyShift);
     }
 
     private static void DrawFishPresets(ConditionSet set, ConditionGroup group)
     {
-        ImGui.TextColored(ImGuiColors.DalamudGrey, "Presets:");
+        ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.Presets_);
 
         if (DrawStatusIconButton(IDs.Status.FishersIntuition, "Ignore when Fisher's Intuition is active"))
         {

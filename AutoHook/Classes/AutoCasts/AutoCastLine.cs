@@ -1,18 +1,21 @@
 using System.ComponentModel;
+using AutoHook.Conditions;
+using AutoHook.Ui;
 
 namespace AutoHook.Classes.AutoCasts;
 
 public class AutoCastLine : BaseActionCast
 {
-    public bool OnlyCastWithFishEyes = false;
-
-    public bool OnlyCastLarge = false;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyCastWithFishEyes = false;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyCastLarge = false;
 
     [DefaultValue(true)] public bool IgnoreMooch = true;
 
     public override bool DoesCancelMooch() => !IgnoreMooch;
 
     public override bool RequiresTimeWindow() => true;
+
+    public ConditionSet? ConditionSet { get; set; }
 
     public AutoCastLine() : base(UIStrings.AutoCastLine_Auto_Cast_Line, IDs.Actions.Cast)
     {
@@ -24,28 +27,15 @@ public class AutoCastLine : BaseActionCast
 
     public override bool IsExcludedPriority { get; set; } = true;
 
-    public override bool CastCondition()
-    {
-        if (OnlyCastWithFishEyes && !Service.WorldState.HasStatus(IDs.Status.FishEyes))
-            return false;
+    public override bool CastCondition() => ConditionSet is not { Groups.Count: > 0 } || ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry);
 
-        if (OnlyCastLarge && !Service.WorldState.HasAnyStatus([IDs.Status.AnglersFortune, IDs.Status.PrizeCatch]))
-            return false;
-
-        return true;
-    }
-
-    public override string GetName()
-        => Name = UIStrings.AutoCastLine_Auto_Cast_Line;
+    public override string GetName() => Name = UIStrings.AutoCastLine_Auto_Cast_Line;
 
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
-        DrawUtil.Checkbox(UIStrings.AutoCastOnlyUnderFishEyes, ref OnlyCastWithFishEyes,
-            UIStrings.AutoCastOnlyUnderFishEyesHelpText);
-
-        DrawUtil.Checkbox(UIStrings.OnlyCastLarge, ref OnlyCastLarge);
-
         DrawUtil.Checkbox(UIStrings.IgnoreMooch, ref IgnoreMooch,
             UIStrings.IgnoreMoochHelpText);
+
+        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
     };
 }

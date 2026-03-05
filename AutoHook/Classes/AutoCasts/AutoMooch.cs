@@ -1,3 +1,5 @@
+using AutoHook.Conditions;
+using AutoHook.Ui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
@@ -6,21 +8,22 @@ public class AutoMooch : BaseActionCast
 {
     public AutoMooch2 Mooch2 = new();
 
-    public bool OnlyMoochIntuition = false;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyMoochIntuition = false;
+
+    public ConditionSet? ConditionSet { get; set; }
 
     public override bool RequiresTimeWindow() => true;
 
     public AutoMooch() : base(UIStrings.AutoMooch, IDs.Actions.Mooch, ActionType.Action)
-    {
-        HelpText = UIStrings.AutoMooch_HelpText;
-    }
+        => HelpText = UIStrings.AutoMooch_HelpText;
 
     public override string GetName()
         => Name = UIStrings.AutoMooch;
 
     public override bool CastCondition()
     {
-        if (OnlyMoochIntuition && !Service.WorldState.HasStatus(IDs.Status.FishersIntuition))
+        if (ConditionSet is { Groups.Count: > 0 } &&
+            !ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
             return false;
 
         if (Mooch2.IsAvailableToCast())
@@ -43,11 +46,7 @@ public class AutoMooch : BaseActionCast
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
         Mooch2.DrawConfig(null);
-        if (DrawUtil.Checkbox(UIStrings.TabAutoCasts_DrawExtraOptionsAutoMooch_Extra_Only_Active,
-                ref OnlyMoochIntuition))
-        {
-            Service.Save();
-        }
+        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
     };
 
     public override int Priority { get; set; } = 10;

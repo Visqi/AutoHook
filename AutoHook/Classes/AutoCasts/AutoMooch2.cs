@@ -9,20 +9,11 @@ public class AutoMooch2 : BaseActionCast
 
     public override bool RequiresTimeWindow() => true;
 
-    public AutoMooch2() : base(UIStrings.UseMoochII, IDs.Actions.Mooch2, ActionType.Action)
-    {
-    }
+    public AutoMooch2() : base(UIStrings.UseMoochII, IDs.Actions.Mooch2, ActionType.Action) { }
 
     public override string GetName()
         => Name = UIStrings.UseMoochII;
 
-    public override bool CastCondition()
-    {
-        return true;
-    }
+    public override bool CastCondition() => true;
 
-    /*protected override DrawOptionsDelegate DrawOptions => () =>
-    {
-
-    };*/
 }

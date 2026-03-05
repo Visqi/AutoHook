@@ -13,13 +13,10 @@ public class AutoCordial : BaseActionCast
 
     public bool InvertCordialPriority;
 
-    public bool AllowOvercapIC; // legacy
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool AllowOvercapIC;
 
     public bool IgnoreTimeWindow;
 
-    /// <summary>
-    /// Optional condition set for "allow overcap" logic (v6+ configs).
-    /// </summary>
     public ConditionSet? OvercapConditionSet { get; set; }
 
     public override bool RequiresTimeWindow() => !IgnoreTimeWindow;
@@ -81,7 +78,6 @@ public class AutoCordial : BaseActionCast
 
     private bool CheckNotOvercaped(uint recovery)
     {
-        // ConditionSet is the single source of truth; legacy AllowOvercapIC is migration-only.
         if (OvercapConditionSet is { Groups.Count: > 0 } &&
             OvercapConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
             return true;
@@ -92,18 +88,13 @@ public class AutoCordial : BaseActionCast
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
         if (DrawUtil.Checkbox(UIStrings.AutoCastCordialPriority, ref InvertCordialPriority))
-        {
             Service.Save();
-        }
 
         if (!IsSpearFishing)
         {
             if (DrawUtil.Checkbox(UIStrings.CordialOutsideTimeWindow, ref IgnoreTimeWindow, UIStrings.CordialOutsideTimeWindowHelpText))
-            {
                 Service.Save();
-            }
 
-            // Advanced overcap conditions (ConditionSet-based, with presets)
             OvercapConditionSet = Ui.ConditionUi.DrawConditionSet("Overcap conditions", OvercapConditionSet, Ui.ConditionScope.AutoCordial);
         }
     };

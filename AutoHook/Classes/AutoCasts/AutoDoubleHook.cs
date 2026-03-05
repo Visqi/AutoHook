@@ -7,20 +7,9 @@ public class AutoDoubleHook : BaseActionCast
     public override int Priority { get; set; } = 5;
     public override bool IsExcludedPriority { get; set; } = false;
 
-    public AutoDoubleHook() : base(UIStrings.Double_Hook, IDs.Actions.DoubleHook, ActionType.Action)
-    {
-    }
+    public AutoDoubleHook() : base(UIStrings.Double_Hook, IDs.Actions.DoubleHook, ActionType.Action) { }
 
-    public override string GetName()
-        => Name = UIStrings.Double_Hook;
+    public override string GetName() => Name = UIStrings.Double_Hook;
 
-    public override bool CastCondition()
-    {
-        return true;
-    }
-
-    /*protected override DrawOptionsDelegate DrawOptions => () =>
-    {
-
-    };*/
+    public override bool CastCondition() => true;
 }

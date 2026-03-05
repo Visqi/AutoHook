@@ -12,20 +12,15 @@ public class AutoLures : BaseActionCast
 
     public LureTarget LureTarget;
 
-    public AutoLures() : base(UIStrings.UseLures, IDs.Actions.AmbitiousLure)
-    { }
+    public AutoLures() : base(UIStrings.UseLures, IDs.Actions.AmbitiousLure) { }
 
-    public bool OnlyWhenActiveSlap;    // legacy
-    public bool OnlyWhenNotActiveSlap; // legacy
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenActiveSlap;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenNotActiveSlap;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenActiveIdentical;
+    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenNotActiveIdentical;
 
-    public bool OnlyWhenActiveIdentical;    // legacy
-    public bool OnlyWhenNotActiveIdentical; // legacy
     public bool OnlyCastLarge;
 
-    /// <summary>
-    /// Optional ConditionSet backing the legacy lure flags (v6+).
-    /// When non-empty, evaluated in addition to the basic lure checks.
-    /// </summary>
     public ConditionSet? ConditionSet { get; set; }
 
     public override string GetName()
@@ -44,7 +39,6 @@ public class AutoLures : BaseActionCast
         if (OnlyCastLarge && !Service.WorldState.HasAnyStatus([IDs.Status.AnglersFortune, IDs.Status.PrizeCatch]))
             return false;
 
-        // Prefer ConditionSet when present; fall back to legacy flags otherwise
         if (ConditionSet is { Groups.Count: > 0 })
         {
             if (!ConditionSet.Evaluate(Service.WorldState, Conditions.Conditions.Registry))
