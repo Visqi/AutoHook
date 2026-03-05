@@ -1,5 +1,6 @@
-using System.ComponentModel;
 using AutoHook.Conditions;
+using AutoHook.Conditions.Definitions;
+using System.ComponentModel;
 
 namespace AutoHook.Configurations;
 
@@ -61,20 +62,35 @@ public class HookConfig : BaseOption
             { BiteType.Legendary, (hookset.TripleLegendary, hookset.DoubleLegendary, hookset.PatienceLegendary) }
         };
 
-        if (hookDictionary.TryGetValue(bite, out var hook))
+        if (!hookDictionary.TryGetValue(bite, out var hook)) return;
+
+        var maxSec = max + 1;
+        var biteTimerId = ConditionRegistry.Registry.GetId<BiteTimerCD>();
+        foreach (var biteCfg in new[] { hook.ph, hook.dh, hook.th })
+            SetBiteTimerInConditionSet(biteCfg, biteTimerId, min, maxSec);
+    }
+
+    private static void SetBiteTimerInConditionSet(BaseBiteConfig biteCfg, string biteTimerId, double min, double max)
+    {
+        var set = biteCfg.ConditionSet ??= new ConditionSet();
+        Condition? found = null;
+        foreach (var group in set.Groups)
         {
-            hook.ph.MinHookTimer = min;
-            hook.ph.MaxHookTimer = max + 1;
-            hook.ph.HookTimerEnabled = true;
-
-            hook.dh.MinHookTimer = min;
-            hook.dh.MaxHookTimer = max + 1;
-            hook.dh.HookTimerEnabled = true;
-
-            hook.th.MinHookTimer = min;
-            hook.th.MaxHookTimer = max + 1;
-            hook.th.HookTimerEnabled = true;
+            found = group.Conditions.FirstOrDefault(c => c.TypeId == biteTimerId);
+            if (found != null) break;
         }
+        if (found != null)
+        {
+            found.Params["r"] = new List<object> { min, max };
+            return;
+        }
+        var newGroup = new ConditionGroup { CombineMode = ConditionCombineMode.Any };
+        newGroup.Conditions.Add(new Condition
+        {
+            TypeId = biteTimerId,
+            Params = new Dictionary<string, object> { ["r"] = new List<object> { min, max } }
+        });
+        set.Groups.Add(newGroup);
     }
 
     public void ResetAllHooksets()
@@ -184,19 +200,12 @@ public class HookConfig : BaseOption
     }
 
     private bool CheckHookCondition(BaseBiteConfig hookType, double timePassed)
-    {
-        if (hookType.ConditionSet is { Groups.Count: > 0 })
-            return hookType.ConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry);
-
-        return CheckTimer(hookType, timePassed);
-    }
+        => hookType.ConditionSet is not { Groups.Count: > 0 } || hookType.ConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry);
 
     private HookType? GetHookTypeForTime(BaseBiteConfig hookType, double timePassed)
-    {
-        if (hookType.UseMultipleHookTypesByTimer)
-            return GetTimedHookType(hookType, timePassed) is { } timedHook ? timedHook : null;
-        return hookType.HooksetType;
-    }
+        => hookType.UseMultipleHookTypesByTimer
+            ? GetTimedHookType(hookType, timePassed) is { } timedHook ? timedHook : null
+            : (HookType?)hookType.HooksetType;
 
     private HookType? GetTimedHookType(BaseBiteConfig hookType, double timePassed)
     {
@@ -240,54 +249,8 @@ public class HookConfig : BaseOption
         return true;
     }
 
-    private bool CheckTimer(BaseBiteConfig hookType, double timePassed)
-    {
-        double minimumTime = 0;
-        double maximumTime = 0;
+    public override void DrawOptions() { }
 
-        if (Service.WorldState.HasStatus(IDs.Status.Chum))
-        {
-            if (hookType.ChumTimerEnabled)
-            {
-                minimumTime = hookType.ChumMinHookTimer;
-                maximumTime = hookType.ChumMaxHookTimer;
-            }
-        }
-        else if (hookType.HookTimerEnabled)
-        {
-            minimumTime = hookType.MinHookTimer;
-            maximumTime = hookType.MaxHookTimer;
-        }
-
-        if (minimumTime > 0 && timePassed < minimumTime)
-        {
-            Service.Status =
-                $"Skipping bite - Minimum time has not been met - Current: {timePassed} < Min: {minimumTime}";
-            return false;
-        }
-
-        if (maximumTime > 0 && timePassed > maximumTime)
-        {
-            Service.Status =
-                $"Skipping bite - Maximum time has been exceeded - Current: {timePassed} > Max: {maximumTime}";
-            return false;
-        }
-
-        return true;
-    }
-
-    public override void DrawOptions()
-    {
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return obj is HookConfig settings &&
-               BaitFish == settings.BaitFish;
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(UniqueId);
-    }
+    public override bool Equals(object? obj) => obj is HookConfig settings && BaitFish == settings.BaitFish;
+    public override int GetHashCode() => HashCode.Combine(UniqueId);
 }

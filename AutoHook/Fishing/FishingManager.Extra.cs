@@ -13,18 +13,9 @@ public partial class FishingManager
 
     private void CheckExtraActions(ExtraConfig extraCfg)
     {
-        // New trigger-based system takes precedence when configured.
+        // Only trigger-based behavior runs at runtime. Legacy Extra fields are migration-only.
         if (extraCfg.Triggers.Count > 0)
-        {
             RunExtraTriggers(extraCfg);
-            return;
-        }
-
-        // Legacy behavior for existing configs without triggers.
-        CheckIntuition(extraCfg);
-        CheckSpectral(extraCfg);
-        CheckAnglersArt(extraCfg);
-        CheckSwimbait(extraCfg);
     }
 
     private void CheckSpectral(ExtraConfig extraCfg)

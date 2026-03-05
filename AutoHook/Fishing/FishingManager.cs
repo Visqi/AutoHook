@@ -434,14 +434,7 @@ public partial class FishingManager : IDisposable
             }
         }
 
-        if (extra.StopAfterAnglersArt && extra.Enabled)
-        {
-            if (!Ws.HasAnglersArtStacks(extra.AnglerStackQtd))
-                return;
-
-            Ws.Execute(new WorldState.OpOrFishingStep(extra.AnglerStopFishingStep));
-            Service.PrintChat(@$"[Extra] Angler's Stack Reached: Stopping fishing");
-        }
+        // Extra stop conditions run only via Triggers; legacy fields are migration-only.
     }
 
     private void OnFishingStop()

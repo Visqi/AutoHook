@@ -1,9 +1,9 @@
-using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
+using System.Numerics;
 
 namespace AutoHook.Ui;
 
@@ -38,32 +38,32 @@ public class SubTabFish
                 using (ImRaii.Group())
                 {
                     ImGui.Spacing();
-                DrawFishSearchBar(fish);
-                DrawDeleteButton(fish);
-                DrawUtil.SpacingSeparator();
+                    DrawFishSearchBar(fish);
+                    DrawDeleteButton(fish);
+                    DrawUtil.SpacingSeparator();
 
-                DrawSurfaceSlapIdenticalCast(fish);
-                ImGui.Spacing();
+                    DrawSurfaceSlapIdenticalCast(fish);
+                    ImGui.Spacing();
 
-                DrawMultihook(fish);
-                ImGui.Spacing();
+                    DrawMultihook(fish);
+                    ImGui.Spacing();
 
-                DrawMooch(fish);
-                ImGui.Spacing();
+                    DrawMooch(fish);
+                    ImGui.Spacing();
 
-                DrawSparefulHand(fish);
-                ImGui.Spacing();
+                    DrawSparefulHand(fish);
+                    ImGui.Spacing();
 
-                DrawSwapBait(fish);
-                ImGui.Spacing();
+                    DrawSwapBait(fish);
+                    ImGui.Spacing();
 
-                DrawSwapPreset(fish);
-                ImGui.Spacing();
+                    DrawSwapPreset(fish);
+                    ImGui.Spacing();
 
-                DrawStopAfter(fish);
-                ImGui.Spacing();
+                    DrawStopAfter(fish);
+                    ImGui.Spacing();
 
-                fish.IgnoreConditionSet = ConditionUi.DrawConditionSet(UIStrings.Ignore_When_Intuition, fish.IgnoreConditionSet, ConditionScope.FishIgnore);
+                    fish.IgnoreConditionSet = ConditionUi.DrawConditionSet(UIStrings.Ignore_When_Intuition, fish.IgnoreConditionSet, ConditionScope.FishIgnore);
 
                 }
             }
@@ -146,11 +146,7 @@ public class SubTabFish
         using var _ = ImRaii.PushId("DrawMultihook");
         using var tree = ImRaii.TreeNode(UIStrings.Multihook_Settings, ImGuiTreeNodeFlags.FramePadding);
         if (!tree) return;
-        DrawUtil.DrawCheckboxTree(UIStrings.Use_Multihook, ref fishConfig.Multihook.Enabled, () =>
-        {
-            if (DrawUtil.Checkbox(UIStrings.OnlyUseWhenIdenticalCastIsActive, ref fishConfig.Multihook.OnlyUseWhenIdenticalCastActive))
-                Service.Save();
-        });
+        DrawUtil.DrawCheckboxTree(UIStrings.Use_Multihook, ref fishConfig.Multihook.Enabled, () => fishConfig.Multihook.DrawConfig());
     }
 
     private static void DrawMooch(FishConfig fishConfig)
@@ -254,8 +250,8 @@ public class SubTabFish
                 ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
                 if (ImGui.InputInt(UIStrings.TimeS, ref fishConfig.SwapPresetCount))
                 {
-                if (fishConfig.SwapPresetCount < 1)
-                    fishConfig.SwapPresetCount = 1;
+                    if (fishConfig.SwapPresetCount < 1)
+                        fishConfig.SwapPresetCount = 1;
 
                     Service.Save();
                 }

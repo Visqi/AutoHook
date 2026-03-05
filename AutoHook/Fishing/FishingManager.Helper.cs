@@ -1,25 +1,13 @@
 using AutoHook.Conditions;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
-using ECommons.Throttlers;
 using Lumina.Excel.Sheets;
 
 namespace AutoHook.Fishing;
 
 public partial class FishingManager
 {
-    // ReSharper disable once UnusedMember.Local
-    private void CheckFishingState()
-    {
-#if DEBUG
-        if (!EzThrottler.Throttle(@"FishingState", 500))
-            return;
-
-        Service.PrintDebug(
-            @$"[HookManager] Fishing State: {Ws.FishingState}, LastStep: {Ws.FishingStep}");
-#endif
-    }
-
+    // TODO: upgrade this
     private static void ResetAfkTimer()
     {
         if (!Service.Configuration.ResetAfkTimer)

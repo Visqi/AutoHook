@@ -59,7 +59,7 @@ public partial class FishingManager
 
         if (cast != null)
         {
-            if (multiHook.Enabled && multiHook.CastCondition() && (!multiHook.OnlyUseWhenIdenticalCastActive || cast == lastFishCatchCfg.IdenticalCast))
+            if (multiHook.Enabled && multiHook.CastCondition())
             {
                 Service.TaskManager.Enqueue(() =>
                     PlayerRes.CastActionDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));

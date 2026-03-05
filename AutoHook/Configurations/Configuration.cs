@@ -1,13 +1,13 @@
-using Dalamud.Configuration;
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
-using static AutoHook.Conditions.ConditionRegistry;
-using Newtonsoft.Json;
-using System.ComponentModel;
-using System.IO.Compression;
-using System.IO;
 using AutoHook.Configurations.old_config;
 using AutoHook.Spearfishing;
+using Dalamud.Configuration;
+using Newtonsoft.Json;
+using System.ComponentModel;
+using System.IO;
+using System.IO.Compression;
+using static AutoHook.Conditions.ConditionRegistry;
 
 namespace AutoHook.Configurations;
 
@@ -58,10 +58,7 @@ public class Configuration : IPluginConfiguration
 
     [Obsolete("Legacy config")] public List<BaitPresetConfig> BaitPresetList = [];
 
-    public void Save()
-    {
-        Svc.PluginInterface!.SavePluginConfig(this);
-    }
+    public void Save() => Svc.PluginInterface.SavePluginConfig(this);
 
     public void UpdateVersion()
     {
@@ -158,22 +155,11 @@ public class Configuration : IPluginConfiguration
     /// </summary>
     private void MigrateConditionsToConditionSets()
     {
-        void MigratePreset(CustomPresetConfig preset)
+        static void MigratePreset(CustomPresetConfig preset)
         {
-            foreach (var hook in preset.ListOfBaits)
-            {
-                MigrateHookConfig(hook);
-            }
-
-            foreach (var hook in preset.ListOfMooch)
-            {
-                MigrateHookConfig(hook);
-            }
-
-            foreach (var fish in preset.ListOfFish)
-            {
-                MigrateFishConfig(fish);
-            }
+            preset.ListOfBaits.ForEach(MigrateHookConfig);
+            preset.ListOfMooch.ForEach(MigrateHookConfig);
+            preset.ListOfFish.ForEach(MigrateFishConfig);
 
             MigrateAutoCordial(preset.AutoCastsCfg.CastCordial);
             MigrateAutoIdenticalCast(preset.AutoCastsCfg.CastIdenticalCast);
@@ -190,7 +176,7 @@ public class Configuration : IPluginConfiguration
     /// </summary>
     private void MigrateExtraToTriggers()
     {
-        void MigratePreset(CustomPresetConfig preset)
+        static void MigratePreset(CustomPresetConfig preset)
         {
             var extra = preset.ExtraCfg;
             if (extra == null)
@@ -629,11 +615,11 @@ public class Configuration : IPluginConfiguration
 
         var set = fish.IgnoreConditionSet ??= new ConditionSet();
         var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-                var cond = new Condition
-                {
-                    TypeId = Registry.GetId<IntuitionActiveCD>(),
-                    Params = []
-                };
+        var cond = new Condition
+        {
+            TypeId = Registry.GetId<IntuitionActiveCD>(),
+            Params = []
+        };
         group.Conditions.Add(cond);
         set.Groups.Add(group);
     }

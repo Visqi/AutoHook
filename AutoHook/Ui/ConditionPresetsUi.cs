@@ -1,11 +1,11 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
-using static AutoHook.Conditions.ConditionRegistry;
-using static AutoHook.Conditions.IConditionDefinition;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using static AutoHook.Conditions.ConditionRegistry;
+using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Ui;
 

@@ -33,10 +33,6 @@ public class BaseBiteConfig(HookType type)
     public bool OnlyWhenActiveMultihook;
     public bool OnlyWhenNotActiveMultihook;
 
-    /// <summary>
-    /// Optional condition set backing the legacy flags/timers.
-    /// When non-empty, it is evaluated in addition to the old booleans.
-    /// </summary>
     public ConditionSet? ConditionSet { get; set; }
 
     public HookType HooksetType = type;
@@ -59,9 +55,6 @@ public class BaseBiteConfig(HookType type)
     public double StellarHookTypeMin;
     public double StellarHookTypeMax;
 
-    private static bool HasActiveConditionSet(ConditionSet? set)
-        => set is { Groups.Count: > 0 } && set.Groups.Any(g => g.Conditions.Count > 0);
-
     public void DrawOptions(string biteName, bool enableSwap = false)
     {
         EnableHooksetSwap = enableSwap;
@@ -70,14 +63,10 @@ public class BaseBiteConfig(HookType type)
         DrawUtil.DrawCheckboxTree(biteName, ref HooksetEnabled,
             () =>
             {
-                // Advanced condition editor (ConditionSet-based, with presets)
                 ConditionSet = Ui.ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, Ui.ConditionScope.Hook);
 
                 if (EnableHooksetSwap)
                     DrawUtil.DrawTreeNodeEx(UIStrings.HookType, DrawBite, UIStrings.HookWillBeUsedIfPatienceIsNotUp);
-
-                if (!HasActiveConditionSet(ConditionSet))
-                    DrawUtil.DrawTreeNodeEx(UIStrings.HookingTimer, DrawTimers, UIStrings.HookingTimerHelpText);
             });
     }
 
@@ -146,91 +135,6 @@ public class BaseBiteConfig(HookType type)
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.SetZeroToIgnore);
             SetupTimer(ref minTime, ref maxTime);
         }
-    }
-
-    private void DrawSurfaceSwap()
-    {
-        using var indent = ImRaii.PushIndent();
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenActiveSurfaceSlap, ref OnlyWhenActiveSlap))
-        {
-            OnlyWhenNotActiveSlap = false;
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenNOTActiveSurfaceSlap, ref OnlyWhenNotActiveSlap))
-        {
-            OnlyWhenActiveSlap = false;
-            Service.Save();
-        }
-    }
-
-    private void DrawIdenticalCast()
-    {
-        using var indent = ImRaii.PushIndent();
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenActiveIdentical, ref OnlyWhenActiveIdentical))
-        {
-            OnlyWhenNotActiveIdentical = false;
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenNOTActiveIdentical, ref OnlyWhenNotActiveIdentical))
-        {
-            OnlyWhenActiveIdentical = false;
-            Service.Save();
-        }
-    }
-
-    private void DrawPrizeCatch()
-    {
-        using var indent = ImRaii.PushIndent();
-
-        if (DrawUtil.Checkbox(UIStrings.Prize_Catch_Required, ref PrizeCatchReq))
-        {
-            PrizeCatchNotReq = false;
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.PrizeCatchNotActive, ref PrizeCatchNotReq))
-        {
-            PrizeCatchReq = false;
-            Service.Save();
-        }
-    }
-
-    private void DrawMultihook()
-    {
-        using var indent = ImRaii.PushIndent();
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenActiveMultihook, ref OnlyWhenActiveMultihook))
-        {
-            OnlyWhenNotActiveMultihook = false;
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenNOTActiveMultihook, ref OnlyWhenNotActiveMultihook))
-        {
-            OnlyWhenActiveMultihook = false;
-            Service.Save();
-        }
-    }
-
-    private void DrawTimers()
-    {
-        using var indent = ImRaii.PushIndent();
-        using (var _ = ImRaii.PushId(@"HookingTimer"))
-        {
-            ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.SetZeroToIgnore);
-            DrawUtil.Checkbox(UIStrings.EnableHookingTimer, ref HookTimerEnabled);
-            SetupTimer(ref MinHookTimer, ref MaxHookTimer);
-        }
-
-        DrawUtil.SpacingSeparator();
-
-        using var id = ImRaii.PushId(@"MoochTimer");
-        DrawUtil.Checkbox(UIStrings.EnableChumTimer, ref ChumTimerEnabled);
-        SetupTimer(ref ChumMinHookTimer, ref ChumMaxHookTimer);
     }
 
     private void SetupTimer(ref double minTimeDelay, ref double maxTimeDelay)

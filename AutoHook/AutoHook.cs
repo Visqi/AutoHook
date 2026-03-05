@@ -1,6 +1,7 @@
 using AutoHook.Conditions;
 using AutoHook.IPC;
 using AutoHook.Spearfishing;
+using clib;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui.Dtr;
 using Dalamud.Game.Text;
@@ -57,6 +58,7 @@ public class AutoHook : IDalamudPlugin
     public AutoHook(IDalamudPluginInterface pluginInterface, IDtrBar dtrBar)
     {
         ECommonsMain.Init(pluginInterface, this, Module.DalamudReflector, Module.ObjectFunctions);
+        CLibMain.Init(pluginInterface, this);
         Service.Initialize(pluginInterface);
         PunishLibMain.Init(pluginInterface, "AutoHook",
             new AboutPlugin() { Developer = "InitialDet", Sponsor = "https://ko-fi.com/initialdet" });
