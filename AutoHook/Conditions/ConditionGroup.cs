@@ -8,7 +8,7 @@ namespace AutoHook.Conditions;
 public class ConditionGroup
 {
     [JsonProperty("m")]
-    public ConditionCombineMode CombineMode { get; set; } = ConditionCombineMode.Any;
+    public ConditionCombineMode CombineMode { get; set; } = ConditionCombineMode.All;
 
     /// <summary>Only store conditions that are actually added</summary>
     [JsonProperty("c")]

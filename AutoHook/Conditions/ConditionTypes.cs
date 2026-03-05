@@ -222,7 +222,7 @@ public static class ConditionTypes
             Category = "Fishing",
             Evaluate = (w, p) =>
             {
-                var ids = GetMissionTypeIds(p);
+                var ids = GetIds(p);
                 if (ids.Count == 0) return false;
                 var of = w.OceanFishing;
                 var result = ids.Contains(of.Mission1Type) || ids.Contains(of.Mission2Type) || ids.Contains(of.Mission3Type);
@@ -250,6 +250,39 @@ public static class ConditionTypes
                     _ => of.Mission1Progress,
                 };
                 var result = CompareInt(progress, val, op);
+                return GetBool(p, "inv", false) ? !result : result;
+            },
+        });
+
+        // ---- Ocean fishing route ----
+        // Params: "ids" = list of route row IDs (matches CurrentRoute), "inv" = optional
+        registry.Register(new ConditionTypeDef
+        {
+            Id = ConditionId.OceanRoute,
+            Name = "Ocean route",
+            Category = "Fishing",
+            Evaluate = (w, p) =>
+            {
+                var ids = GetIds(p);
+                if (ids.Count == 0) return false;
+                var route = w.OceanFishing.CurrentRoute;
+                var result = ids.Contains(route);
+                return GetBool(p, "inv", false) ? !result : result;
+            },
+        });
+
+        // ---- Ocean fishing zone ----
+        // Params: "zone" = 0/1/2 (CurrentZone index), "inv" = optional
+        registry.Register(new ConditionTypeDef
+        {
+            Id = ConditionId.OceanZone,
+            Name = "Ocean zone",
+            Category = "Fishing",
+            Evaluate = (w, p) =>
+            {
+                var wanted = GetInt(p, "zone", 0);
+                var zone = (int)w.OceanFishing.CurrentZone;
+                var result = zone == wanted;
                 return GetBool(p, "inv", false) ? !result : result;
             },
         });
@@ -309,7 +342,7 @@ public static class ConditionTypes
         return null;
     }
 
-    private static List<uint> GetMissionTypeIds(IReadOnlyDictionary<string, object> p)
+    private static List<uint> GetIds(IReadOnlyDictionary<string, object> p)
     {
         if (!p.TryGetValue("ids", out var o)) return [];
         if (o is List<object> list)

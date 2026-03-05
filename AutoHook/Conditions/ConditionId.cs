@@ -17,4 +17,6 @@ public static class ConditionId
     public const string OceanMissionProgress = "OceanMissionProgress";
     public const string SwimbaitCount = "SwimbaitCount";
     public const string OceanLastFishPoints = "OceanLastFishPoints";
+    public const string OceanRoute = "OceanRoute";
+    public const string OceanZone = "OceanZone";
 }

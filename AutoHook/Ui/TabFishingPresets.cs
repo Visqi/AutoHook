@@ -695,35 +695,33 @@ public class TabFishingPresets : BaseTab
         ImGui.OpenPopup(UIStrings.CreateNewFolder);
 
         ImGui.SetNextWindowSize(new Vector2(300, 120));
-        using (var modal = ImRaii.PopupModal(UIStrings.CreateNewFolder, ref promptingForFolderName, ImGuiWindowFlags.NoResize))
+        using var modal = ImRaii.PopupModal(UIStrings.CreateNewFolder, ref promptingForFolderName, ImGuiWindowFlags.NoResize);
+        if (modal.Success)
         {
-            if (modal.Success)
+            ImGui.Text(UIStrings.FolderNameHint);
+            ImGui.Separator();
+
+            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
+            ImGui.InputText("##newFolderName", ref newFolderName, 100);
+
+            ImGui.Spacing();
+
+            if (ImGui.Button(UIStrings.Create, new Vector2(120, 0)))
             {
-                ImGui.Text(UIStrings.FolderNameHint);
-                ImGui.Separator();
-
-                ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                ImGui.InputText("##newFolderName", ref newFolderName, 100);
-
-                ImGui.Spacing();
-
-                if (ImGui.Button(UIStrings.Create, new Vector2(120, 0)))
+                if (!string.IsNullOrWhiteSpace(newFolderName))
                 {
-                    if (!string.IsNullOrWhiteSpace(newFolderName))
-                    {
-                        _basePreset.AddNewFolder(newFolderName);
-                        newFolderName = string.Empty;
-                        promptingForFolderName = false;
-                    }
-                }
-
-                ImGui.SameLine();
-
-                if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0)))
-                {
+                    _basePreset.AddNewFolder(newFolderName);
                     newFolderName = string.Empty;
                     promptingForFolderName = false;
                 }
+            }
+
+            ImGui.SameLine();
+
+            if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0)))
+            {
+                newFolderName = string.Empty;
+                promptingForFolderName = false;
             }
         }
     }
@@ -734,46 +732,44 @@ public class TabFishingPresets : BaseTab
 
         ImGui.SetNextWindowSize(new Vector2(300, 120));
         var isOpen = true;
-        using (var modal = ImRaii.PopupModal(UIStrings.RenameFolder, ref isOpen, ImGuiWindowFlags.NoResize))
+        using var modal = ImRaii.PopupModal(UIStrings.RenameFolder, ref isOpen, ImGuiWindowFlags.NoResize);
+        if (modal.Success)
         {
-            if (modal.Success)
+            ImGui.Text(UIStrings.EnterNewFolderName);
+            ImGui.Separator();
+
+            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
+            ImGui.InputText("##renameFolderName", ref renameFolderName, 100);
+
+            ImGui.Spacing();
+
+            if (ImGui.Button(UIStrings.Rename, new Vector2(120, 0)))
             {
-                ImGui.Text(UIStrings.EnterNewFolderName);
-                ImGui.Separator();
-
-                ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                ImGui.InputText("##renameFolderName", ref renameFolderName, 100);
-
-                ImGui.Spacing();
-
-                if (ImGui.Button(UIStrings.Rename, new Vector2(120, 0)))
+                if (!string.IsNullOrWhiteSpace(renameFolderName) && renameFolderId.HasValue)
                 {
-                    if (!string.IsNullOrWhiteSpace(renameFolderName) && renameFolderId.HasValue)
+                    var folder = _basePreset.Folders.FirstOrDefault(f => f.UniqueId == renameFolderId.Value);
+                    if (folder != null)
                     {
-                        var folder = _basePreset.Folders.FirstOrDefault(f => f.UniqueId == renameFolderId.Value);
-                        if (folder != null)
-                        {
-                            folder.FolderName = renameFolderName;
-                            Service.Save();
-                        }
-                        renameFolderName = string.Empty;
-                        renameFolderId = null;
+                        folder.FolderName = renameFolderName;
+                        Service.Save();
                     }
-                }
-
-                ImGui.SameLine();
-
-                if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0)))
-                {
                     renameFolderName = string.Empty;
                     renameFolderId = null;
                 }
+            }
 
-                if (!isOpen)
-                {
-                    renameFolderName = string.Empty;
-                    renameFolderId = null;
-                }
+            ImGui.SameLine();
+
+            if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0)))
+            {
+                renameFolderName = string.Empty;
+                renameFolderId = null;
+            }
+
+            if (!isOpen)
+            {
+                renameFolderName = string.Empty;
+                renameFolderId = null;
             }
         }
     }

@@ -386,15 +386,6 @@ public static class ConditionUi
         }
     }
 
-    private static readonly HashSet<string> HookScopeIds =
-    [
-        ConditionId.StatusActive, ConditionId.StatusStacks, ConditionId.BiteTimer, ConditionId.ChumTimer,
-        ConditionId.IntuitionActive, ConditionId.IntuitionTime, ConditionId.SpectralActive,
-        ConditionId.Gp, ConditionId.MultihookAvailable, ConditionId.Weather,
-        ConditionId.OceanMissionType, ConditionId.OceanMissionProgress, ConditionId.SwimbaitCount,
-        ConditionId.OceanLastFishPoints,
-    ];
-
     private static readonly HashSet<string> AutoCordialScopeIds =
     [
         ConditionId.StatusActive, ConditionId.Gp,
@@ -405,7 +396,7 @@ public static class ConditionUi
         ConditionId.StatusActive, ConditionId.IntuitionActive, ConditionId.IntuitionTime,
         ConditionId.SpectralActive, ConditionId.Weather,
         ConditionId.OceanMissionType, ConditionId.OceanMissionProgress,
-        ConditionId.OceanLastFishPoints,
+        ConditionId.OceanLastFishPoints, ConditionId.OceanRoute, ConditionId.OceanZone,
     ];
 
     private static IEnumerable<ConditionTypeDef> GetScopedTypes(ConditionScope scope)
@@ -413,7 +404,6 @@ public static class ConditionUi
         var all = Conditions.Conditions.Registry.All;
         var allowed = scope switch
         {
-            ConditionScope.Hook => HookScopeIds,
             ConditionScope.AutoCordial => AutoCordialScopeIds,
             ConditionScope.FishIgnore => FishIgnoreScopeIds,
             _ => null,
@@ -435,6 +425,8 @@ public static class ConditionUi
         [ConditionId.OceanMissionType] = DrawMissionTypeParams,
         [ConditionId.OceanMissionProgress] = DrawMissionProgressParams,
         [ConditionId.OceanLastFishPoints] = DrawOceanLastFishPointsParams,
+        [ConditionId.OceanRoute] = DrawOceanRouteParams,
+        [ConditionId.OceanZone] = DrawOceanZoneParams,
     };
 
     private static void DrawParams(Condition cond)
@@ -576,16 +568,14 @@ public static class ConditionUi
         var op = cond.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
         var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
         ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
-        using (var combo = ImRaii.Combo("##gp_op", label))
+        using var combo = ImRaii.Combo("##gp_op", label);
+        if (combo.Success)
         {
-            if (combo.Success)
+            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
             {
-                foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
-                {
-                    var sel = choice == op;
-                    if (ImGui.Selectable(choice, sel))
-                        cond.Params["op"] = choice;
-                }
+                var sel = choice == op;
+                if (ImGui.Selectable(choice, sel))
+                    cond.Params["op"] = choice;
             }
         }
     }
@@ -603,16 +593,14 @@ public static class ConditionUi
         var op = cond.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
         var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
         ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
-        using (var combo = ImRaii.Combo("##swimbait_op", label))
+        using var combo = ImRaii.Combo("##swimbait_op", label);
+        if (combo.Success)
         {
-            if (combo.Success)
+            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
             {
-                foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
-                {
-                    var sel = choice == op;
-                    if (ImGui.Selectable(choice, sel))
-                        cond.Params["op"] = choice;
-                }
+                var sel = choice == op;
+                if (ImGui.Selectable(choice, sel))
+                    cond.Params["op"] = choice;
             }
         }
     }
@@ -622,25 +610,85 @@ public static class ConditionUi
         var val = GetInt(cond.Params, "val", 300);
         ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
         if (ImGui.InputInt("Points", ref val))
-        {
             cond.Params["val"] = (long)Math.Max(0, val);
-        }
 
         ImGui.SameLine();
         var op = cond.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
         var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
         ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
-        using (var combo = ImRaii.Combo("##ocean_points_op", label))
+        using var combo = ImRaii.Combo("##ocean_points_op", label);
+        if (combo.Success)
         {
-            if (combo.Success)
+            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
             {
-                foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
+                var sel = choice == op;
+                if (ImGui.Selectable(choice, sel))
+                    cond.Params["op"] = choice;
+            }
+        }
+    }
+
+    private static void DrawOceanRouteParams(Condition cond)
+    {
+        var ids = GetIds(cond.Params);
+        var currentId = ids.Count > 0 ? ids[0] : 0;
+
+        ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);
+        var sheet = Svc.Data.GetExcelSheet<Lumina.Excel.Sheets.IKDRoute>();
+        if (sheet == null)
+        {
+            DrawIdsParams(cond, "Route IDs");
+            return;
+        }
+
+        var unique = new Dictionary<string, uint>();
+        foreach (var row in sheet)
+        {
+            if (row.RowId == 0) continue;
+            var name = row.Name.ToString();
+            if (string.IsNullOrEmpty(name)) continue;
+            if (!unique.ContainsKey(name))
+                unique[name] = row.RowId;
+        }
+
+        var label = currentId != 0 && sheet.TryGetRow(currentId, out var currentRow) ? $"{currentRow.RowId}: {currentRow.Name}" : "Select route";
+        using var combo = ImRaii.Combo("Route", label);
+        if (combo.Success)
+        {
+            foreach (var kv in unique.OrderBy(k => k.Key))
+            {
+                var id = kv.Value;
+                var name = kv.Key;
+                var sel = id == currentId;
+                if (ImGui.Selectable($"{id}: {name}", sel))
                 {
-                    var sel = choice == op;
-                    if (ImGui.Selectable(choice, sel))
-                        cond.Params["op"] = choice;
+                    currentId = id;
+                    cond.Params["ids"] = new List<object> { (long)id };
                 }
             }
+        }
+    }
+
+    private static void DrawOceanZoneParams(Condition cond)
+    {
+        var zone = GetInt(cond.Params, "zone", 0);
+        zone = Math.Clamp(zone, 0, 2);
+
+        ImGui.SetNextItemWidth(60 * ImGuiHelpers.GlobalScale);
+        var label = zone switch
+        {
+            0 => "1",
+            1 => "2",
+            2 => "3",
+            _ => $"{zone}",
+        };
+
+        using var combo = ImRaii.Combo("Zone", label);
+        if (combo)
+        {
+            if (ImGui.Selectable("Zone 1", zone == 0)) { zone = 0; cond.Params["zone"] = (long)0; }
+            if (ImGui.Selectable("Zone 2", zone == 1)) { zone = 1; cond.Params["zone"] = (long)1; }
+            if (ImGui.Selectable("Zone 3", zone == 2)) { zone = 2; cond.Params["zone"] = (long)2; }
         }
     }
 
@@ -1033,20 +1081,18 @@ public static class ConditionUi
         else
             label = "Any weather";
 
-        using (var combo = ImRaii.Combo("Weather", label))
+        using var combo = ImRaii.Combo("Weather", label);
+        if (combo.Success)
         {
-            if (combo.Success)
+            foreach (var kv in unique.OrderBy(k => k.Key))
             {
-                foreach (var kv in unique.OrderBy(k => k.Key))
+                var id = kv.Value;
+                var name = kv.Key;
+                var sel = id == currentId;
+                if (ImGui.Selectable(name, sel))
                 {
-                    var id = kv.Value;
-                    var name = kv.Key;
-                    var sel = id == currentId;
-                    if (ImGui.Selectable(name, sel))
-                    {
-                        currentId = id;
-                        cond.Params["ids"] = new List<object> { (long)id };
-                    }
+                    currentId = id;
+                    cond.Params["ids"] = new List<object> { (long)id };
                 }
             }
         }
@@ -1074,21 +1120,19 @@ public static class ConditionUi
         }
 
         var label = LabelForRow(currentId);
-        using (var combo = ImRaii.Combo("Mission type", label))
+        using var combo = ImRaii.Combo("Mission type", label);
+        if (combo.Success)
         {
-            if (combo.Success)
+            foreach (var row in sheet)
             {
-                foreach (var row in sheet)
+                var name = MultiString.ParseSeString(row.Unknown0);
+                if (string.IsNullOrEmpty(name)) continue;
+                var id = row.RowId;
+                var sel = id == currentId;
+                if (ImGui.Selectable($"{id}: {name}", sel))
                 {
-                    var name = MultiString.ParseSeString(row.Unknown0);
-                    if (string.IsNullOrEmpty(name)) continue;
-                    var id = row.RowId;
-                    var sel = id == currentId;
-                    if (ImGui.Selectable($"{id}: {name}", sel))
-                    {
-                        currentId = id;
-                        cond.Params["ids"] = new List<object> { (long)id };
-                    }
+                    currentId = id;
+                    cond.Params["ids"] = new List<object> { (long)id };
                 }
             }
         }

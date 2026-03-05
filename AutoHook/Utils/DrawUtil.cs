@@ -553,17 +553,15 @@ public static class DrawUtil
         if (helpText != string.Empty)
             ImGui.TooltipOnHover(helpText);
 
-        using (var popup = ImRaii.Popup(popupName, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Tooltip))
+        using var popup = ImRaii.Popup(popupName, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Tooltip);
+        if (popup.Success)
         {
-            if (popup.Success)
-            {
-                var windowPos = ImGui.GetWindowPos();
-                var windowSize = ImGui.GetWindowSize();
-                ImGui.GetForegroundDrawList()
-                    .AddRect(windowPos, windowPos + windowSize, ImGui.GetColorU32(ImGuiCol.Separator));
+            var windowPos = ImGui.GetWindowPos();
+            var windowSize = ImGui.GetWindowSize();
+            ImGui.GetForegroundDrawList()
+                .AddRect(windowPos, windowPos + windowSize, ImGui.GetColorU32(ImGuiCol.Separator));
 
-                action();
-            }
+            action();
         }
     }
 
@@ -578,17 +576,15 @@ public static class DrawUtil
         if (helpText != string.Empty)
             ImGui.TooltipOnHover(helpText);
 
-        using (var popup = ImRaii.Popup(popupName, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Tooltip))
+        using var popup = ImRaii.Popup(popupName, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Tooltip);
+        if (popup.Success)
         {
-            if (popup.Success)
-            {
-                var windowPos = ImGui.GetWindowPos();
-                var windowSize = ImGui.GetWindowSize();
-                ImGui.GetForegroundDrawList()
-                    .AddRect(windowPos, windowPos + windowSize, ImGui.GetColorU32(ImGuiCol.Separator));
+            var windowPos = ImGui.GetWindowPos();
+            var windowSize = ImGui.GetWindowSize();
+            ImGui.GetForegroundDrawList()
+                .AddRect(windowPos, windowPos + windowSize, ImGui.GetColorU32(ImGuiCol.Separator));
 
-                action();
-            }
+            action();
         }
     }
 
