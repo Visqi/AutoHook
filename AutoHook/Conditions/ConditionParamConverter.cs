@@ -3,12 +3,6 @@ using Newtonsoft.Json.Linq;
 
 namespace AutoHook.Conditions;
 
-/// <summary>
-/// Minimal serialization for condition parameters:
-/// - Skips nulls
-/// - Skips default/empty values (false, 0, empty lists)
-/// This keeps ConditionSet JSON small and stable.
-/// </summary>
 public class ConditionParamConverter : JsonConverter<Dictionary<string, object>>
 {
     public override void WriteJson(JsonWriter writer, Dictionary<string, object>? value, JsonSerializer serializer)
@@ -83,7 +77,7 @@ public class ConditionParamConverter : JsonConverter<Dictionary<string, object>>
         JTokenType.Integer => (long)token,
         JTokenType.Float => (double)token,
         JTokenType.Boolean => (bool)token,
-        JTokenType.String => (string)token,
+        JTokenType.String => (string?)token ?? string.Empty,
         _ => token.ToString()
     };
 }

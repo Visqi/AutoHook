@@ -179,40 +179,32 @@ public static class DrawUtil
 
     private static string _filterText = "";
 
-    public static void DrawComboSelector<T>(
-        List<T> itemList,
-        Func<T, string> getItemName,
-        string selectedItem,
-        Action<T> onSelect)
+    public static void DrawComboSelector<T>(List<T> itemList, Func<T, string> getItemName, string selectedItem, Action<T> onSelect)
     {
         ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);
 
-        using (var combo = ImRaii.Combo("###search", selectedItem ?? "Error"))
+        using (var combo = ImRaii.Combo("###search", selectedItem))
         {
             if (combo.Success)
             {
                 ImGui.SetNextItemWidth(190 * ImGuiHelpers.GlobalScale);
-
                 ImGui.InputTextWithHint("", UIStrings.Search_Hint, ref _filterText, 100);
-
                 ImGui.Separator();
 
-                using (var child = ImRaii.Child($"###ComboSelector", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false))
+                using var child = ImRaii.Child($"###ComboSelector", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false);
+                foreach (var (item, index) in itemList.WithIndex())
                 {
-                    foreach (var (item, index) in itemList.WithIndex())
-                    {
-                        var itemName = getItemName(item) ?? $"Error, Try renaming";
+                    var itemName = getItemName(item) ?? $"Error, Try renaming";
 
-                        if (_filterText.Length != 0 && !itemName.ToLower().Contains(_filterText.ToLower()))
-                            continue;
-                        using var _ = ImRaii.PushId($"{itemName}###{index}");
-                        if (ImGui.Selectable(itemName, false))
-                        {
-                            ImGui.CloseCurrentPopup();
-                            onSelect(item);
-                            _filterText = "";
-                            Service.Save();
-                        }
+                    if (_filterText.Length != 0 && !itemName.Contains(_filterText, StringComparison.CurrentCultureIgnoreCase))
+                        continue;
+                    using var _ = ImRaii.PushId($"{itemName}###{index}");
+                    if (ImGui.Selectable(itemName, false))
+                    {
+                        ImGui.CloseCurrentPopup();
+                        onSelect(item);
+                        _filterText = "";
+                        Service.Save();
                     }
                 }
             }
@@ -232,40 +224,36 @@ public static class DrawUtil
             if (combo.Success)
             {
                 ImGui.SetNextItemWidth(210 * ImGuiHelpers.GlobalScale);
-
                 ImGui.InputTextWithHint("", UIStrings.Search_Hint, ref _filterText, 100);
-
                 ImGui.Separator();
 
-                using (var child = ImRaii.Child("###ComboPreset", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false))
+                using var child = ImRaii.Child("###ComboPreset", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false);
+                if (ImGui.Selectable(UIStrings.Disabled, presetList.SelectedPreset == null))
                 {
-                    if (ImGui.Selectable(UIStrings.Disabled, presetList.SelectedPreset == null))
+                    Service.Save();
+                    presetList.SelectedPreset = null;
+                    ImGui.CloseCurrentPopup();
+                }
+
+                foreach (var item in presetList.PresetList)
+                {
+                    using var id = ImRaii.PushId(item.UniqueId.ToString());
+                    var itemName = item.PresetName ?? $"Error, Try renaming";
+
+                    if (_filterText.Length != 0 && !itemName.ToLower().Contains(_filterText.ToLower()))
+                        continue;
+
+                    var color = selectedPreset?.PresetName == itemName
+                        ? ImGuiColors.DalamudYellow
+                        : ImGuiColors.DalamudWhite;
+
+                    using var a = ImRaii.PushColor(ImGuiCol.Text, color);
+                    if (ImGui.Selectable(itemName, false))
                     {
+                        presetList.SelectedGuid = item.UniqueId.ToString();
+                        _filterText = "";
                         Service.Save();
-                        presetList.SelectedPreset = null;
                         ImGui.CloseCurrentPopup();
-                    }
-
-                    foreach (var item in presetList.PresetList)
-                    {
-                        using var id = ImRaii.PushId(item.UniqueId.ToString());
-                        var itemName = item.PresetName ?? $"Error, Try renaming";
-
-                        if (_filterText.Length != 0 && !itemName.ToLower().Contains(_filterText.ToLower()))
-                            continue;
-
-                        var color = selectedPreset?.PresetName == itemName
-                            ? ImGuiColors.DalamudYellow
-                            : ImGuiColors.DalamudWhite;
-
-                        using var a = ImRaii.PushColor(ImGuiCol.Text, color);
-                        if (ImGui.Selectable(itemName, false))
-                        {
-                            presetList.SelectedGuid = item.UniqueId.ToString();
-                            _filterText = "";
-                            Service.Save();
-                            ImGui.CloseCurrentPopup();
-                        }
                     }
                 }
             }
@@ -289,8 +277,7 @@ public static class DrawUtil
 
         ImGui.Text(UIStrings.EnterToConfirm);
         var name = selectedPreset.PresetName ?? "Rename";
-        if (ImGui.InputText(UIStrings.PresetName, ref name, 64,
-                ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+        if (ImGui.InputText(UIStrings.PresetName, ref name, 64, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         {
             selectedPreset.RenamePreset(name);
             Service.Save();

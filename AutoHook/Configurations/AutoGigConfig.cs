@@ -1,6 +1,6 @@
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Configurations;
 
@@ -12,15 +12,12 @@ public class AutoGigConfig : BasePresetConfig
 
     public int HitboxSize = 25;
 
-    public AutoGigConfig(string presetName)
-    {
-        PresetName = presetName;
-    }
+    public AutoGigConfig(string presetName) => PresetName = presetName;
 
     public List<BaseGig> GetGigCurrentNode(int node)
     {
-        Service.PrintDebug($"[AutoGig] GetGigCurrentNode - node: {node}, Total Gigs: {Gigs?.Count ?? 0}");
-        
+        Service.PrintDebug($"[AutoGig] GetGigCurrentNode - node: {node}, Total Gigs: {Gigs.Count}");
+
         var result = Gigs.Where(f =>
         {
             var hasFish = f.Fish != null;
@@ -28,7 +25,7 @@ public class AutoGigConfig : BasePresetConfig
             Service.PrintDebug($"[AutoGig] GetGigCurrentNode - Fish: {f.Fish?.Name ?? "null"}, Enabled: {f.Enabled}, HasFish: {hasFish}, HasNode: {hasNode}");
             return hasFish && hasNode;
         }).ToList();
-        
+
         Service.PrintDebug($"[AutoGig] GetGigCurrentNode - Returning {result.Count} fish(es)");
         return result;
     }
@@ -47,7 +44,7 @@ public class AutoGigConfig : BasePresetConfig
 
     public override void DrawOptions()
     {
-        if (Gigs == null || Gigs.Count == 0)
+        if (Gigs.Count == 0)
             return;
 
         foreach (var gig in Gigs)
