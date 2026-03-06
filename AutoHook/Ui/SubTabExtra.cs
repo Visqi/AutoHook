@@ -1,4 +1,5 @@
 using AutoHook.Conditions;
+using AutoHook.Conditions.Definitions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -101,8 +102,10 @@ public class SubTabExtra
         ImGui.TextV(ImGuiColors.DalamudYellow, UIStrings.SwapStopRules);
 
         ImGui.SameLine();
+        var newlyAddedIndex = -1;
         if (ImGui.SmallIconButton(FontAwesomeIcon.Plus))
         {
+            newlyAddedIndex = config.Triggers.Count;
             config.Triggers.Add(new ExtraTrigger
             {
                 ConditionSet = new ConditionSet(),
@@ -117,72 +120,95 @@ public class SubTabExtra
         for (var i = 0; i < config.Triggers.Count; i++)
         {
             var trig = config.Triggers[i];
-            using var id = ImRaii.PushId($"trigger_{i}");
+            trig.EnsureUiId();
+            using var id = ImRaii.PushId(trig.UiId);
 
             var headerLabel = GetTriggerHeaderLabel(i, trig);
+            var enabled = trig.Enabled;
+            var forceOpen = i == newlyAddedIndex;
+            var removed = false;
 
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash))
+            if (DrawUtil.DrawCheckboxHeader(headerLabel, ref enabled, ImGuiTreeNodeFlags.DefaultOpen, () =>
+                {
+                    // Slim editor with only Extra-relevant condition types (Intuition, Spectral, Angler's stacks, Swimbait).
+                    trig.ConditionSet = ConditionUi.DrawConditionSetSlim(
+                        "When",
+                        trig.ConditionSet,
+                        ConditionScope.Hook,
+                        showAdvanced: true,
+                        allowedTypeIds: [nameof(IntuitionActiveCD), nameof(SpectralActiveCD), nameof(StatusStacksCD), nameof(SwimbaitCountCD)],
+                        drawHeaderExtras: () =>
+                        {
+                            ImGui.SameLine(0, 3);
+                            if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash))
+                            {
+                                config.Triggers.RemoveAt(i);
+                                Service.Save();
+                                removed = true;
+                            }
+                            ImGui.TooltipOnHover(UIStrings.Delete);
+                        });
+
+                    if (removed)
+                        return;
+
+                    ImGui.Separator();
+                    ImGui.Indent(20 * ImGuiHelpers.GlobalScale);
+
+                    var stopEnabled = trig.StopAction != ExtraStopAction.None;
+                    DrawUtil.DrawCheckboxTree(UIStrings.StopQuitFishing, ref stopEnabled,
+                        () =>
+                        {
+                            if (ImGui.RadioButton(UIStrings.Stop_Casting, trig.StopAction == ExtraStopAction.StopOnly))
+                            {
+                                trig.StopAction = ExtraStopAction.StopOnly;
+                                Service.Save();
+                            }
+
+                            ImGui.SameLine();
+                            ImGuiComponents.HelpMarker(UIStrings.Auto_Cast_Stopped);
+
+                            if (ImGui.RadioButton(UIStrings.Quit_Fishing, trig.StopAction == ExtraStopAction.QuitFishing))
+                            {
+                                trig.StopAction = ExtraStopAction.QuitFishing;
+                                Service.Save();
+                            }
+                        });
+
+                    if (!stopEnabled && trig.StopAction != ExtraStopAction.None)
+                    {
+                        trig.StopAction = ExtraStopAction.None;
+                        Service.Save();
+                    }
+                    else if (stopEnabled && trig.StopAction == ExtraStopAction.None)
+                    {
+                        trig.StopAction = ExtraStopAction.StopOnly;
+                        Service.Save();
+                    }
+
+                    var swapPreset = trig.SwapPreset;
+                    var presetName = trig.PresetToSwap;
+                    DrawPresetSwap(ref swapPreset, ref presetName);
+                    trig.SwapPreset = swapPreset;
+                    trig.PresetToSwap = presetName;
+
+                    var swapBait = trig.SwapBait;
+                    var bait = trig.BaitToSwap;
+                    DrawBaitSwap(ref swapBait, ref bait);
+                    trig.SwapBait = swapBait;
+                    trig.BaitToSwap = bait;
+
+                    ImGui.Unindent(20 * ImGuiHelpers.GlobalScale);
+                }, helpText: string.Empty, forceOpen: forceOpen))
             {
-                config.Triggers.RemoveAt(i);
+                trig.Enabled = enabled;
                 Service.Save();
+            }
+
+            if (removed)
+            {
                 i--;
                 continue;
-            }
-            ImGui.TooltipOnHover(UIStrings.Delete);
-
-            ImGui.SameLine();
-
-            if (ImGui.CollapsingHeader(headerLabel, ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                trig.ConditionSet = ConditionUi.DrawConditionSet("Conditions", trig.ConditionSet, ConditionScope.Hook, showPresets: false);
-
-                ImGui.Separator();
-                ImGui.Indent(20 * ImGuiHelpers.GlobalScale);
-
-                var stopEnabled = trig.StopAction != ExtraStopAction.None;
-                DrawUtil.DrawCheckboxTree(UIStrings.StopQuitFishing, ref stopEnabled,
-                    () =>
-                    {
-                        if (ImGui.RadioButton(UIStrings.Stop_Casting, trig.StopAction == ExtraStopAction.StopOnly))
-                        {
-                            trig.StopAction = ExtraStopAction.StopOnly;
-                            Service.Save();
-                        }
-
-                        ImGui.SameLine();
-                        ImGuiComponents.HelpMarker(UIStrings.Auto_Cast_Stopped);
-
-                        if (ImGui.RadioButton(UIStrings.Quit_Fishing, trig.StopAction == ExtraStopAction.QuitFishing))
-                        {
-                            trig.StopAction = ExtraStopAction.QuitFishing;
-                            Service.Save();
-                        }
-                    });
-
-                if (!stopEnabled && trig.StopAction != ExtraStopAction.None)
-                {
-                    trig.StopAction = ExtraStopAction.None;
-                    Service.Save();
-                }
-                else if (stopEnabled && trig.StopAction == ExtraStopAction.None)
-                {
-                    trig.StopAction = ExtraStopAction.StopOnly;
-                    Service.Save();
-                }
-
-                var swapPreset = trig.SwapPreset;
-                var presetName = trig.PresetToSwap;
-                DrawPresetSwap(ref swapPreset, ref presetName);
-                trig.SwapPreset = swapPreset;
-                trig.PresetToSwap = presetName;
-
-                var swapBait = trig.SwapBait;
-                var bait = trig.BaitToSwap;
-                DrawBaitSwap(ref swapBait, ref bait);
-                trig.SwapBait = swapBait;
-                trig.BaitToSwap = bait;
-
-                ImGui.Unindent(20 * ImGuiHelpers.GlobalScale);
             }
         }
     }
@@ -191,8 +217,8 @@ public class SubTabExtra
     {
         var summary = SummarizeTrigger(trig);
         return string.IsNullOrEmpty(summary)
-            ? $"Trigger {index + 1}"
-            : $"Trigger {index + 1} – {summary}";
+            ? $"Rule {index + 1}"
+            : $"Rule {index + 1} – {summary}";
     }
 
     private static string SummarizeTrigger(ExtraTrigger trig)

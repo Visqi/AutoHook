@@ -25,6 +25,11 @@ public class AutoFishEyes : BaseActionCast
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
         DrawUtil.Checkbox(UIStrings.IgnoreMooch, ref IgnoreMooch, UIStrings.IgnoreMoochFishEyes);
-        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
+        ConditionSet = ConditionUi.DrawConditionSetSlim(
+            UIStrings.Conditions,
+            ConditionSet,
+            ConditionScope.AutoCast,
+            showAdvanced: true,
+            showSubPrefix: true);
     };
 }

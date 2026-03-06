@@ -1,3 +1,4 @@
+using System.Threading;
 using AutoHook.Conditions;
 using Newtonsoft.Json;
 
@@ -12,6 +13,13 @@ public enum ExtraStopAction
 
 public class ExtraTrigger
 {
+    [JsonIgnore]
+    private static int _nextUiId = 1;
+
+    public bool Enabled { get; set; } = true;
+
+    public int UiId { get; set; }
+
     public ConditionSet? ConditionSet { get; set; }
 
     public bool SwapPreset { get; set; }
@@ -21,6 +29,12 @@ public class ExtraTrigger
     public BaitFishClass BaitToSwap { get; set; } = new();
 
     public ExtraStopAction StopAction { get; set; } = ExtraStopAction.None;
+
+    public void EnsureUiId()
+    {
+        if (UiId <= 0)
+            UiId = Interlocked.Increment(ref _nextUiId);
+    }
 }
 
 public class ExtraConfig : BaseOption

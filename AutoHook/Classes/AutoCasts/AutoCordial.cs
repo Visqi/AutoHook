@@ -95,7 +95,12 @@ public class AutoCordial : BaseActionCast
             if (DrawUtil.Checkbox(UIStrings.CordialOutsideTimeWindow, ref IgnoreTimeWindow, UIStrings.CordialOutsideTimeWindowHelpText))
                 Service.Save();
 
-            OvercapConditionSet = Ui.ConditionUi.DrawConditionSet("Overcap conditions", OvercapConditionSet, Ui.ConditionScope.AutoCordial);
+            OvercapConditionSet = Ui.ConditionUi.DrawConditionSetSlim(
+                "Overcap conditions",
+                OvercapConditionSet,
+                Ui.ConditionScope.AutoCordial,
+                showAdvanced: true,
+                showSubPrefix: true);
         }
     };
 

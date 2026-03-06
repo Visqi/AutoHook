@@ -26,6 +26,13 @@ public class AutoIdenticalCast : BaseActionCast
 
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
+        ConditionSet = ConditionUi.DrawConditionSetSlim(
+            UIStrings.Conditions,
+            ConditionSet,
+            ConditionScope.AutoCast,
+            showAdvanced: true,
+            showSubPrefix: true);
+
         var stack = CaughtAmountLimit;
 
         if (DrawUtil.Checkbox(UIStrings.Only_use_when_the_fish_is_caught, ref OnlyUseAfterXAmount))
@@ -42,7 +49,6 @@ public class AutoIdenticalCast : BaseActionCast
 
         if (DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref DontCancelMooch, UIStrings.IdenticalCast_HelpText, true))
             Service.Save();
-        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
     };
 
     public override int Priority { get; set; } = 8;

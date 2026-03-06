@@ -30,9 +30,14 @@ public class AutoCastLine : BaseActionCast
 
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
+        ConditionSet = ConditionUi.DrawConditionSetSlim(
+            UIStrings.Conditions,
+            ConditionSet,
+            ConditionScope.AutoCast,
+            showAdvanced: true,
+            showSubPrefix: true);
+
         DrawUtil.Checkbox(UIStrings.IgnoreMooch, ref IgnoreMooch,
             UIStrings.IgnoreMoochHelpText);
-
-        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
     };
 }

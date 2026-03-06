@@ -444,7 +444,7 @@ public static class DrawUtil
 
     }
 
-    public static void DrawCheckboxTree(string treeName, ref bool enable, Action action, string helpText = "")
+    public static void DrawCheckboxTree(string treeName, ref bool enable, Action action, string helpText = "", bool forceOpen = false)
     {
         using var id = ImRaii.PushId(treeName);
         if (ImGui.Checkbox($"###checkbox{treeName}", ref enable))
@@ -472,6 +472,8 @@ public static class DrawUtil
         else
         {
             var x = ImGui.GetCursorPosX();
+            if (forceOpen)
+                ImGui.SetNextItemOpen(true, ImGuiCond.Always);
             if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding))
             {
                 ImGui.SetCursorPosX(x);
@@ -492,6 +494,35 @@ public static class DrawUtil
                 ImGui.TreePop();
             }
         }
+    }
+
+    /// <summary>
+    /// Draws a checkbox and an inline collapsing header sharing a single label.
+    /// The checkbox controls the 'enable' flag; the header expands/collapses the body.
+    /// Returns true if 'enable' changed.
+    /// </summary>
+    public static bool DrawCheckboxHeader(string headerLabel, ref bool enable, ImGuiTreeNodeFlags flags, Action body, string helpText = "", bool forceOpen = false)
+    {
+        using var id = ImRaii.PushId(headerLabel);
+
+        var changed = ImGui.Checkbox($"###checkbox{headerLabel}", ref enable);
+        if (!string.IsNullOrEmpty(helpText))
+            ImGui.TooltipOnHover(helpText);
+
+        ImGui.SameLine(0, 6);
+        var x = ImGui.GetCursorPosX();
+        if (forceOpen)
+            ImGui.SetNextItemOpen(true, ImGuiCond.Always);
+        if (ImGui.CollapsingHeader(headerLabel, flags))
+        {
+            ImGui.SetCursorPosX(x);
+            using (ImRaii.Group())
+            {
+                body();
+            }
+        }
+
+        return changed;
     }
 
     public static void DrawTreeNodeEx(string treeName, Action action, string helpText = "")

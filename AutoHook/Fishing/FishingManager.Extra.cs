@@ -5,19 +5,17 @@ namespace AutoHook.Fishing;
 public partial class FishingManager
 {
     public ExtraConfig GetExtraCfg()
-    {
-        return Presets.SelectedPreset?.ExtraCfg.Enabled ?? false
+        => Presets.SelectedPreset?.ExtraCfg.Enabled ?? false
             ? Presets.SelectedPreset.ExtraCfg
             : Presets.DefaultPreset.ExtraCfg;
-    }
 
     private void CheckExtraActions(ExtraConfig extraCfg)
     {
-        // Only trigger-based behavior runs at runtime. Legacy Extra fields are migration-only.
         if (extraCfg.Triggers.Count > 0)
             RunExtraTriggers(extraCfg);
     }
 
+    // TODO: remove
     private void CheckSpectral(ExtraConfig extraCfg)
     {
         if (Ws.SpectralCurrentStatus == SpectralCurrentStatus.NotActive)
@@ -219,8 +217,7 @@ public partial class FishingManager
     {
         for (var i = 0; i < extraCfg.Triggers.Count; i++)
         {
-            var trig = extraCfg.Triggers[i];
-            if (trig.ConditionSet == null)
+            if (extraCfg.Triggers[i] is not { Enabled: true, ConditionSet: not null } trig)
                 continue;
 
             var current = trig.ConditionSet.Evaluate(Ws, ConditionRegistry.Registry);

@@ -35,14 +35,20 @@ public class ConditionSet
     [JsonIgnore]
     public bool ExprVisible { get; set; }
 
+    /// <summary>UI-only: slim editor "Advanced" section expanded (DrawCheckboxTree style).</summary>
+    [JsonIgnore]
+    public bool SlimAdvancedExpanded { get; set; }
+
     public bool Evaluate(WorldState world, ConditionRegistry registry)
     {
         if (Groups.Count == 0) return true;
 
-        // Evaluate each group once
+        // Evaluate each group once (disabled groups: true for AND, false for OR so they don't affect result)
         var values = new bool[Groups.Count];
         for (var i = 0; i < Groups.Count; i++)
-            values[i] = Groups[i].Evaluate(world, registry);
+            values[i] = !Groups[i].Enabled
+                ? (CombineMode == ConditionCombineMode.All)
+                : Groups[i].Evaluate(world, registry);
 
         // If an expression is provided, try to use it first
         if (!string.IsNullOrWhiteSpace(Expression))

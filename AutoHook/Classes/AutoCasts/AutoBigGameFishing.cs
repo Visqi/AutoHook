@@ -36,7 +36,12 @@ public class AutoBigGameFishing : BaseActionCast
             Service.Save();
         }
 
-        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
+        ConditionSet = ConditionUi.DrawConditionSetSlim(
+            UIStrings.Conditions,
+            ConditionSet,
+            ConditionScope.AutoCast,
+            showAdvanced: true,
+            showSubPrefix: true);
     };
 
     public override int Priority { get; set; } = 18;

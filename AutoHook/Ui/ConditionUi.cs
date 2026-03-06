@@ -1,5 +1,6 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
+using AutoHook.Utils;
 using static AutoHook.Conditions.ConditionRegistry;
 using static AutoHook.Conditions.IConditionDefinition;
 using Dalamud.Bindings.ImGui;
@@ -84,6 +85,151 @@ public static class ConditionUi
         return set;
     }
 
+    public static ConditionSet? DrawConditionSetSlim(string label, ConditionSet? set, ConditionScope scope, bool showAdvanced = true, IReadOnlyList<string>? allowedTypeIds = null, bool showSubPrefix = false, Action? drawHeaderExtras = null)
+    {
+        set ??= new ConditionSet();
+        if (set.Groups.Count == 0)
+            set.Groups.Add(new ConditionGroup());
+
+        // Either slim view or advanced view, never both. Toggle via SlimAdvancedExpanded.
+        if (set.SlimAdvancedExpanded)
+        {
+            DrawSlimAdvancedEditor(set, scope, drawHeaderExtras);
+            return set;
+        }
+
+        var group = set.Groups[0];
+        var types = allowedTypeIds != null && allowedTypeIds.Count > 0
+            ? GetScopedTypes(scope).Where(d => allowedTypeIds.Contains(d.Id)).ToList()
+            : GetScopedTypes(scope).ToList();
+        var defaultTypeId = types.FirstOrDefault()?.Id ?? Registry.GetId<StatusActiveCD>();
+
+        // Header: (optional) sub marker + label + add + small advanced icon + optional extras.
+        if (!label.IsNullOrEmpty())
+        {
+            if (showSubPrefix)
+            {
+                ImGui.TextUnformatted(" └");
+                ImGui.SameLine();
+            }
+
+            ImGui.TextUnformatted(label);
+            ImGui.SameLine();
+        }
+
+        var newlyAddedIndex = -1;
+        if (ImGuiComponents.IconButton(FontAwesomeIcon.Plus))
+        {
+            newlyAddedIndex = group.Conditions.Count;
+            group.Conditions.Add(new Condition { TypeId = defaultTypeId, Params = [] });
+            Service.Save();
+        }
+        ImGui.TooltipOnHover("Add condition");
+
+        ImGui.SameLine(0, 3);
+        if (showAdvanced && ImGuiComponents.IconButton(FontAwesomeIcon.Code))
+        {
+            set.SlimAdvancedExpanded = true;
+            Service.Save();
+        }
+        ImGui.TooltipOnHover("Advanced (groups, expression)");
+
+        if (drawHeaderExtras != null)
+        {
+            ImGui.SameLine(0, 3);
+            drawHeaderExtras();
+        }
+
+        var toRemove = new List<int>();
+        for (var ci = 0; ci < group.Conditions.Count; ci++)
+        {
+            var cond = group.Conditions[ci];
+            cond.EnsureUiId();
+            using var _ = ImRaii.PushId($"slim_cond{cond.UiId}");
+            var rowLabel = types.FirstOrDefault(d => d.Id == cond.TypeId)?.Name ?? cond.TypeId;
+            var enabled = cond.Enabled;
+
+            var forceOpen = ci == newlyAddedIndex;
+
+            DrawUtil.DrawCheckboxTree(rowLabel, ref enabled, () =>
+            {
+                DrawConditionContent(cond, scope, types);
+                ImGui.SameLine();
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash))
+                    toRemove.Add(ci);
+                ImGui.TooltipOnHover("Delete condition");
+            }, forceOpen: forceOpen);
+            if (enabled != cond.Enabled)
+            {
+                cond.Enabled = enabled;
+                Service.Save();
+            }
+        }
+        foreach (var idx in toRemove.OrderByDescending(x => x))
+        {
+            group.Conditions.RemoveAt(idx);
+        }
+        if (toRemove.Count > 0)
+            Service.Save();
+
+        return set;
+    }
+
+    private static void DrawSlimAdvancedEditor(ConditionSet set, ConditionScope scope, Action? drawHeaderExtras)
+    {
+        // Back icon inline with advanced editor controls (set header).
+        if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowLeft))
+        {
+            set.SlimAdvancedExpanded = false;
+            Service.Save();
+        }
+        ImGui.TooltipOnHover("Back to simple view");
+        ImGui.SameLine();
+        DrawSetHeader(set);
+        if (drawHeaderExtras != null)
+        {
+            ImGui.SameLine(0, 3);
+            drawHeaderExtras();
+        }
+        ImGui.Spacing();
+        var toRemoveGroup = new List<int>();
+        for (var gi = 0; gi < set.Groups.Count; gi++)
+        {
+            var g = set.Groups[gi];
+            var groupLetter = (char)('A' + gi);
+            using var _ = ImRaii.PushId($"slim_adv_grp{gi}");
+            var gEnabled = g.Enabled;
+            DrawUtil.DrawCheckboxTree($"Group {groupLetter}", ref gEnabled, () =>
+            {
+                var deleteGroup = DrawGroupHeader(set, g, gi, scope);
+                if (deleteGroup)
+                    toRemoveGroup.Add(gi);
+                ImGui.Spacing();
+                DrawConditionsWithTypes(g, scope, GetScopedTypes(scope).ToList());
+            });
+            if (gEnabled != g.Enabled)
+            {
+                g.Enabled = gEnabled;
+                Service.Save();
+            }
+            ImGui.DragDropSource(gi, "COND_GROUP"u8, $"Moving group {groupLetter}");
+            ImGui.DragDropTarget(gi, "COND_GROUP"u8, set.Groups.Count, (sourceIndex, insertIndex) =>
+            {
+                if (sourceIndex == insertIndex || sourceIndex < 0 || sourceIndex >= set.Groups.Count) return;
+                var grp = set.Groups[sourceIndex];
+                set.Groups.RemoveAt(sourceIndex);
+                insertIndex = Math.Clamp(insertIndex, 0, set.Groups.Count);
+                set.Groups.Insert(insertIndex, grp);
+            });
+        }
+        foreach (var idx in toRemoveGroup.OrderByDescending(x => x))
+        {
+            set.Groups.RemoveAt(idx);
+        }
+        if (toRemoveGroup.Count > 0)
+            Service.Save();
+    }
+
     private static void DrawSetHeader(ConditionSet set)
     {
         var mode = set.CombineMode;
@@ -100,9 +246,7 @@ public static class ConditionUi
 
         ImGui.SameLine();
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Code))
-        {
             set.ExprVisible = !set.ExprVisible;
-        }
         ImGui.TooltipOnHover(set.ExprVisible ? "Hide editor" : "Show editor");
 
         ImGui.SameLine();
@@ -151,40 +295,42 @@ public static class ConditionUi
     }
 
     private static void DrawConditions(ConditionGroup group, ConditionScope scope)
+        => DrawConditionsWithTypes(group, scope, GetScopedTypes(scope).ToList());
+
+    private static void DrawConditionContent(Condition cond, ConditionScope scope, List<ConditionTypeDef> defs)
     {
-        var defs = GetScopedTypes(scope).ToList();
-
-        for (var ci = 0; ci < group.Conditions.Count; ci++)
+        DrawInverseToggle(cond);
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(180 * ImGuiHelpers.GlobalScale);
+        var currentDef = defs.FirstOrDefault(d => d.Id == cond.TypeId) ?? defs.FirstOrDefault();
+        var currentLabel = currentDef?.Name ?? cond.TypeId;
+        using (var combo = ImRaii.Combo("##type", currentLabel))
         {
-            var cond = group.Conditions[ci];
-            using var _ = ImRaii.PushId($"cond{ci}");
-
-            DrawInverseToggle(cond);
-            ImGui.SameLine();
-
-            ImGui.SetNextItemWidth(180 * ImGuiHelpers.GlobalScale);
-
-            var currentDef = defs.FirstOrDefault(d => d.Id == cond.TypeId) ?? defs.FirstOrDefault();
-            var currentLabel = currentDef?.Name ?? cond.TypeId;
-            using (var combo = ImRaii.Combo("##type", currentLabel))
+            if (combo)
             {
-                if (combo)
+                foreach (var def in defs)
                 {
-                    foreach (var def in defs)
+                    var sel = def.Id == cond.TypeId;
+                    if (ImGui.Selectable(def.Name, sel))
                     {
-                        var sel = def.Id == cond.TypeId;
-                        if (ImGui.Selectable(def.Name, sel))
-                        {
-                            cond.TypeId = def.Id;
-                            cond.Params.Clear();
-                        }
+                        cond.TypeId = def.Id;
+                        cond.Params.Clear();
                     }
                 }
             }
+        }
+        ImGui.SameLine();
+        ConditionParamUi.DrawParams(cond);
+    }
 
-            ImGui.SameLine();
-            ConditionParamUi.DrawParams(cond);
-
+    private static void DrawConditionsWithTypes(ConditionGroup group, ConditionScope scope, List<ConditionTypeDef> defs)
+    {
+        for (var ci = 0; ci < group.Conditions.Count; ci++)
+        {
+            var cond = group.Conditions[ci];
+            cond.EnsureUiId();
+            using var _ = ImRaii.PushId($"cond{cond.UiId}");
+            DrawConditionContent(cond, scope, defs);
             ImGui.SameLine();
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash))
             {
@@ -240,7 +386,8 @@ public static class ConditionUi
             var cg = new ConditionGroup
             {
                 CombineMode = g.CombineMode,
-                Conditions = []
+                Conditions = [],
+                Enabled = g.Enabled
             };
 
             foreach (var c in g.Conditions)
@@ -248,7 +395,8 @@ public static class ConditionUi
                 var nc = new Condition
                 {
                     TypeId = c.TypeId,
-                    Params = CloneParams(c.Params)
+                    Params = CloneParams(c.Params),
+                    Enabled = c.Enabled
                 };
                 cg.Conditions.Add(nc);
             }
@@ -279,7 +427,8 @@ public static class ConditionUi
             var cg = new ConditionGroup
             {
                 CombineMode = g.CombineMode,
-                Conditions = []
+                Conditions = [],
+                Enabled = g.Enabled
             };
 
             foreach (var c in g.Conditions)
@@ -287,7 +436,8 @@ public static class ConditionUi
                 var nc = new Condition
                 {
                     TypeId = c.TypeId,
-                    Params = CloneParams(c.Params)
+                    Params = CloneParams(c.Params),
+                    Enabled = c.Enabled
                 };
                 cg.Conditions.Add(nc);
             }

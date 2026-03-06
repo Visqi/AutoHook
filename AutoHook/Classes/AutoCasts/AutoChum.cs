@@ -17,7 +17,12 @@ public class AutoChum : BaseActionCast
 
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
-        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
+        ConditionSet = ConditionUi.DrawConditionSetSlim(
+            UIStrings.Conditions,
+            ConditionSet,
+            ConditionScope.AutoCast,
+            showAdvanced: true,
+            showSubPrefix: true);
     };
 
     public override int Priority { get; set; } = 1;

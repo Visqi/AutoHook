@@ -27,6 +27,11 @@ public class AutoMultiHook : BaseActionCast
 
     protected override DrawOptionsDelegate DrawOptions => () =>
     {
-        ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showPresets: true);
+        ConditionSet = ConditionUi.DrawConditionSetSlim(
+            UIStrings.Conditions,
+            ConditionSet,
+            ConditionScope.AutoCast,
+            showAdvanced: true,
+            showSubPrefix: true);
     };
 }

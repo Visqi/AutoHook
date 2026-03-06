@@ -1,9 +1,9 @@
-using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
+using System.Numerics;
 
 namespace AutoHook.Ui;
 
@@ -67,50 +67,43 @@ public class SubTabBaitMooch
             var count = FishingManager.FishingHelper.GetFishCount(hook.UniqueId);
             var hookCounter = count > 0 ? @$"({UIStrings.Hooked_Counter} {count})" : "";
 
-            if (DrawUtil.Checkbox($"###checkbox{idx}", ref hook.Enabled, UIStrings.EnabledConfigArrowhelpMarker,
-                    true))
-                Service.Save();
-
-            ImGui.SameLine(0, 6);
-            var x = ImGui.GetCursorPosX();
-            if (ImGui.CollapsingHeader(@$"{baitName} {hookCounter}###{idx}"))
-            {
-                ImGui.SetCursorPosX(x);
-                using (ImRaii.Group())
+            if (DrawUtil.DrawCheckboxHeader(@$"{baitName} {hookCounter}###{idx}", ref hook.Enabled, ImGuiTreeNodeFlags.FramePadding, () =>
                 {
                     if (!_preset.IsGlobal)
-                {
-                    ImGui.Spacing();
-                    DrawInputSearchBar(hook, isMooch);
-                    ImGui.SameLine();
-                    DrawDeleteButton(hook);
-                    ImGui.Spacing();
-                }
-
-                //rewrite TabBarsBaitMooch using ImRaii
-                using (var tabBarsBaitMooch = ImRaii.TabBar(@"TabBarsBaitMooch", ImGuiTabBarFlags.NoTooltip))
-                {
-                    if (tabBarsBaitMooch)
                     {
-                        using (var tabDefault = ImRaii.TabItem($"{UIStrings.DefaultSubTab}###Default"))
-                        {
-                            if (tabDefault)
-                                hook.NormalHook.DrawOptions();
-                        }
-
-                        using var tabIntuition = ImRaii.TabItem($"{UIStrings.Intuition}###Intuition");
-                        if (tabIntuition)
-                            hook.IntuitionHook.DrawOptions();
+                        ImGui.Spacing();
+                        DrawInputSearchBar(hook, isMooch);
+                        ImGui.SameLine();
+                        DrawDeleteButton(hook);
+                        ImGui.Spacing();
                     }
-                }
 
-                if (isMooch)
-                {
-                    ImGui.Spacing();
-                    if (_preset.IsGlobal || hook.BaitFish.Id == GameRes.AllMoochesId || GameRes.MoochableFish.Any(f => f.Id == hook.BaitFish.Id))
-                        DrawSwimbaitUsage(hook);
-                }
-                }
+                    //rewrite TabBarsBaitMooch using ImRaii
+                    using (var tabBarsBaitMooch = ImRaii.TabBar(@"TabBarsBaitMooch", ImGuiTabBarFlags.NoTooltip))
+                    {
+                        if (tabBarsBaitMooch)
+                        {
+                            using (var tabDefault = ImRaii.TabItem($"{UIStrings.DefaultSubTab}###Default"))
+                            {
+                                if (tabDefault)
+                                    hook.NormalHook.DrawOptions();
+                            }
+
+                            using var tabIntuition = ImRaii.TabItem($"{UIStrings.Intuition}###Intuition");
+                            if (tabIntuition)
+                                hook.IntuitionHook.DrawOptions();
+                        }
+                    }
+
+                    if (isMooch)
+                    {
+                        ImGui.Spacing();
+                        if (_preset.IsGlobal || hook.BaitFish.Id == GameRes.AllMoochesId || GameRes.MoochableFish.Any(f => f.Id == hook.BaitFish.Id))
+                            DrawSwimbaitUsage(hook);
+                    }
+                }, UIStrings.EnabledConfigArrowhelpMarker))
+            {
+                Service.Save();
             }
 
             DrawUtil.SpacingSeparator();
