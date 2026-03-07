@@ -1,7 +1,7 @@
 using AutoHook.Conditions;
 using Dalamud.Game;
-using Dalamud.Plugin;
 using Dalamud.Interface.Windowing;
+using Dalamud.Plugin;
 using ECommons.Automation.NeoTaskManager;
 
 namespace AutoHook;

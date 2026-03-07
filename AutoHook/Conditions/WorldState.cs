@@ -71,6 +71,10 @@ public sealed class WorldState
     public bool HasItem(uint itemId) => GetItemCount(itemId) > 0;
     public bool HaveCordialInInventory(uint id) => HasItem(id);
 
+    // Per-fish catch counters keyed by fish ID for the current session.
+    private readonly Dictionary<int, int> _fishCaughtCounts = [];
+    public int GetFishCaughtCount(int fishId) => _fishCaughtCounts.TryGetValue(fishId, out var c) ? c : 0;
+
     private readonly List<uint> _swimbaitIds = [];
     public IReadOnlyList<uint> SwimbaitIds => _swimbaitIds;
     public int GetSwimbaitCount() => _swimbaitIds.Count(id => id != 0);
@@ -287,5 +291,22 @@ public sealed class WorldState
             ws.CurrentWeatherId = WeatherId;
             ws.TerritoryId = TerritoryId;
         }
+    }
+
+    /// <summary>Increment per-fish caught counter for the current session.</summary>
+    public sealed record OpAddFishCaught(int FishId, byte Amount) : Operation
+    {
+        protected override void Exec(WorldState ws)
+        {
+            if (FishId <= 0 || Amount <= 0)
+                return;
+            ws._fishCaughtCounts[FishId] = ws._fishCaughtCounts.GetValueOrDefault(FishId) + Amount;
+        }
+    }
+
+    /// <summary>Reset all per-fish caught counters (typically on fishing stop).</summary>
+    public sealed record OpResetFishCaught() : Operation
+    {
+        protected override void Exec(WorldState ws) => ws._fishCaughtCounts.Clear();
     }
 }

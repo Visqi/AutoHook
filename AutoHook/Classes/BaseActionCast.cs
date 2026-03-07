@@ -1,12 +1,12 @@
 using AutoHook.Conditions;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using Dalamud.Bindings.ImGui;
-using System.ComponentModel;
-using System.Numerics;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.Throttlers;
+using FFXIVClientStructs.FFXIV.Client.Game;
+using System.ComponentModel;
+using System.Numerics;
 
 namespace AutoHook.Classes;
 

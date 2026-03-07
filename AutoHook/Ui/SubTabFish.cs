@@ -1,3 +1,5 @@
+using AutoHook.Conditions;
+using AutoHook.Conditions.Definitions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
@@ -129,7 +131,11 @@ public class SubTabFish
             GameRes.Fishes,
             (BaitFishClass fish) => $"[#{fish.Id}] {fish.Name}",
             fishConfig.Fish.Name,
-            (BaitFishClass fish) => fishConfig.Fish = fish);
+            (BaitFishClass fish) =>
+            {
+                fishConfig.Fish = fish;
+                SyncFishCountConditions(fishConfig);
+            });
     }
 
     private static void DrawSurfaceSlapIdenticalCast(FishConfig fishConfig)
@@ -277,6 +283,7 @@ public class SubTabFish
                     if (fishConfig.StopAfterCaughtLimit < 1)
                         fishConfig.StopAfterCaughtLimit = 1;
 
+                    SyncFishCountConditions(fishConfig);
                     Service.Save();
                 }
 
@@ -300,5 +307,65 @@ public class SubTabFish
 
                 DrawUtil.Checkbox(UIStrings.Reset_the_counter, ref fishConfig.StopAfterResetCount);
             });
+    }
+
+    /// <summary>
+    /// Keep fish-level count-based ConditionSets (stop-after, swap-after) in sync with the
+    /// numeric limits on <see cref="FishConfig"/> using <see cref="FishCaughtCountCD"/>.
+    /// </summary>
+    private static void SyncFishCountConditions(FishConfig fishConfig)
+    {
+        var fishId = fishConfig.Fish.Id;
+        if (fishId <= 0)
+        {
+            fishConfig.StopConditionSet = null;
+            fishConfig.SwapBaitConditionSet = null;
+            fishConfig.SwapPresetConditionSet = null;
+            return;
+        }
+
+        var typeId = ConditionRegistry.Registry.GetId<FishCaughtCountCD>();
+
+        ConditionSet? SyncSet(ConditionSet? current, int limit)
+        {
+            if (limit < 1)
+                return null;
+
+            var set = current ?? new ConditionSet { CombineMode = ConditionCombineMode.All };
+
+            ConditionGroup group;
+            if (set.Groups.Count > 0)
+                group = set.Groups[0];
+            else
+            {
+                group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
+                set.Groups.Add(group);
+            }
+
+            var cond = group.Conditions.FirstOrDefault(c => c.TypeId == typeId);
+            var args = new FishCaughtCountCD.FishCaughtParams(fishId, limit, ">=", false);
+            if (cond == null)
+            {
+                cond = new Condition
+                {
+                    TypeId = typeId,
+                    Params = args.ToParams(),
+                };
+                group.Conditions.Add(cond);
+            }
+            else
+                cond.Params = args.ToParams();
+
+            return set;
+        }
+
+        if (fishConfig.StopAfterCaught)
+            fishConfig.StopConditionSet = SyncSet(fishConfig.StopConditionSet, fishConfig.StopAfterCaughtLimit);
+
+        if (fishConfig.SwapBait)
+            fishConfig.SwapBaitConditionSet = SyncSet(fishConfig.SwapBaitConditionSet, fishConfig.SwapBaitCount);
+
+        if (fishConfig.SwapPresets)
+            fishConfig.SwapPresetConditionSet = SyncSet(fishConfig.SwapPresetConditionSet, fishConfig.SwapPresetCount);
     }
 }

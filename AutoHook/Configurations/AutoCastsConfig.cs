@@ -1,3 +1,5 @@
+using AutoHook.Conditions;
+using AutoHook.Conditions.Definitions;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using System.ComponentModel;
 
@@ -13,6 +15,12 @@ public class AutoCastsConfig
     public TimeOnly EndTime = new(0);
 
     public bool OnlyCastDuringSpecificTime = false;
+
+    /// <summary>
+    /// Optional global auto-cast time window expressed as a ConditionSet.
+    /// Typically a single <see cref="TimeWindowCD"/> condition.
+    /// </summary>
+    public ConditionSet? TimeWindowConditionSet { get; set; }
 
     public bool RecastAnimationCancel;
     public bool TurnCollectOff;
@@ -65,7 +73,7 @@ public class AutoCastsConfig
 
         foreach (var action in order.Where(action => action.IsAvailableToCast(ignoreCurrentMooch)))
         {
-            if (OnlyCastDuringSpecificTime && action.RequiresTimeWindow() && !InsideCastWindow())
+            if (action.RequiresTimeWindow() && !IsWithinTimeWindow())
                 continue;
 
             Service.PrintDebug($"[AutoCast] Returning {action.Name}");
@@ -73,6 +81,21 @@ public class AutoCastsConfig
         }
 
         return cast;
+    }
+
+    /// <summary>
+    /// Returns true if the current time is within the configured time window, using
+    /// a ConditionSet when available and falling back to the legacy check otherwise.
+    /// </summary>
+    private bool IsWithinTimeWindow()
+    {
+        if (!OnlyCastDuringSpecificTime)
+            return true;
+
+        if (TimeWindowConditionSet is { Groups.Count: > 0 } set)
+            return set.Evaluate(Service.WorldState, ConditionRegistry.Registry);
+
+        return InsideCastWindow();
     }
 
     private unsafe bool InsideCastWindow()
@@ -88,7 +111,7 @@ public class AutoCastsConfig
         if (action == null || !EnableAll)
             return false;
 
-        if (OnlyCastDuringSpecificTime && action.RequiresTimeWindow() && !InsideCastWindow())
+        if (action.RequiresTimeWindow() && !IsWithinTimeWindow())
             return false;
 
         if (!action.Enabled || !action.IsAvailableToCast(ignoreCurrentMooch))
@@ -102,6 +125,49 @@ public class AutoCastsConfig
             PlayerRes.CastActionDelayed(action.Id, action.ActionType, action.GetName());
 
         return true;
+    }
+
+    /// <summary>
+    /// Keep <see cref="TimeWindowConditionSet"/> in sync with <see cref="StartTime"/>,
+    /// <see cref="EndTime"/> and <see cref="OnlyCastDuringSpecificTime"/>.
+    /// </summary>
+    public void SyncTimeWindowCondition()
+    {
+        if (!OnlyCastDuringSpecificTime)
+            return;
+
+        var set = TimeWindowConditionSet ??= new ConditionSet
+        {
+            CombineMode = ConditionCombineMode.All,
+        };
+
+        ConditionGroup group;
+        if (set.Groups.Count > 0)
+        {
+            group = set.Groups[0];
+        }
+        else
+        {
+            group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
+            set.Groups.Add(group);
+        }
+
+        var typeId = ConditionRegistry.Registry.GetId<TimeWindowCD>();
+        var cond = group.Conditions.FirstOrDefault(c => c.TypeId == typeId);
+        if (cond == null)
+        {
+            cond = new Condition
+            {
+                TypeId = typeId,
+                Params = new TimeWindowCD.TimeWindowParams(StartTime, EndTime, false).ToParams(),
+            };
+            group.Conditions.Add(cond);
+        }
+        else
+        {
+            var args = new TimeWindowCD.TimeWindowParams(StartTime, EndTime, false);
+            cond.Params = args.ToParams();
+        }
     }
 
     private void TryChumAnimationCancel()

@@ -1,11 +1,11 @@
-using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.ImGuiMethods;
-using Dalamud.Bindings.ImGui;
 using Newtonsoft.Json;
+using System.Numerics;
 
 namespace AutoHook.Ui;
 

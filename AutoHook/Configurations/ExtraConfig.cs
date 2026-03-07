@@ -1,6 +1,6 @@
-using System.Threading;
 using AutoHook.Conditions;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace AutoHook.Configurations;
 

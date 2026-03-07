@@ -193,7 +193,10 @@ public class SubTabBaitMooch
                 ImGui.Spacing();
 
                 if (DrawUtil.Checkbox(UIStrings.OnlyUseWhenNoMoochAvailable, ref hookConfig.OnlyUseWhenNoMoochAvailable, UIStrings.OnlyUseWhenNoMoochAvailableHelpText))
+                {
+                    hookConfig.SyncSwimbaitMoochCondition();
                     Service.Save();
+                }
             }
 
             ImGui.TreePop();

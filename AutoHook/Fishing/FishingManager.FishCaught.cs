@@ -89,7 +89,13 @@ public partial class FishingManager
         if (lastCatchCfg.SwapPresets && !FishingHelper.SwappedPreset(guid) &&
             !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped))
         {
-            if (caughtCount >= lastCatchCfg.SwapPresetCount && lastCatchCfg.PresetToSwap != Presets.SelectedPreset?.PresetName)
+            var readyForPresetSwap = false;
+            if (lastCatchCfg.SwapPresetConditionSet is { Groups.Count: > 0 } presetSet)
+                readyForPresetSwap = presetSet.Evaluate(Ws, ConditionRegistry.Registry);
+            else
+                readyForPresetSwap = caughtCount >= lastCatchCfg.SwapPresetCount;
+
+            if (readyForPresetSwap && lastCatchCfg.PresetToSwap != Presets.SelectedPreset?.PresetName)
             {
                 var preset = Presets.CustomPresets.FirstOrDefault(preset => preset.PresetName == lastCatchCfg.PresetToSwap);
 
@@ -110,7 +116,13 @@ public partial class FishingManager
 
         if (lastCatchCfg.SwapBait && !FishingHelper.SwappedBait(guid) && !Ws.FishingStep.HasFlag(FishingSteps.BaitSwapped))
         {
-            if (caughtCount >= lastCatchCfg.SwapBaitCount &&
+            var readyForBaitSwap = false;
+            if (lastCatchCfg.SwapBaitConditionSet is { Groups.Count: > 0 } baitSet)
+                readyForBaitSwap = baitSet.Evaluate(Ws, ConditionRegistry.Registry);
+            else
+                readyForBaitSwap = caughtCount >= lastCatchCfg.SwapBaitCount;
+
+            if (readyForBaitSwap &&
                 lastCatchCfg.BaitToSwap.Id != Ws.CurrentBaitId)
             {
                 var result = Service.BaitManager.ChangeBait(lastCatchCfg.BaitToSwap);

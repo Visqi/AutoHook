@@ -1,5 +1,5 @@
-using System.ComponentModel;
 using AutoHook.Conditions;
+using System.ComponentModel;
 
 namespace AutoHook.Configurations;
 
@@ -11,6 +11,15 @@ public class FishConfig : BaseOption
     [Obsolete("Legacy config")] public bool IgnoreOnIntuition = false;
 
     public ConditionSet? IgnoreConditionSet { get; set; }
+
+    /// <summary>Stop after caught condition set</summary>
+    public ConditionSet? StopConditionSet { get; set; }
+
+    /// <summary>Swap bait after n caught condition set</summary>
+    public ConditionSet? SwapBaitConditionSet { get; set; }
+
+    /// <summary>Swap preset after n caught condition set</summary>
+    public ConditionSet? SwapPresetConditionSet { get; set; }
 
     public BaitFishClass Fish = new();
 
@@ -42,7 +51,7 @@ public class FishConfig : BaseOption
     public FishConfig(BaitFishClass fish)
     {
         Fish = fish;
-        // ok this is not the best way, but im tired, and it works for now so be nice to me
+        // TODO: ok this is not the best way, but im tired, and it works for now so be nice to me
         Mooch.Name = UIStrings.Always_Mooch;
     }
 
@@ -51,8 +60,5 @@ public class FishConfig : BaseOption
         Fish = new BaitFishClass(fishId);
     }
 
-    public override void DrawOptions()
-    {
-
-    }
+    public override void DrawOptions() { }
 }

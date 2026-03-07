@@ -1,13 +1,13 @@
-using System.Diagnostics;
 using AutoHook.Spearfishing;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.ImGuiMethods;
 using ECommons.Throttlers;
-using Dalamud.Bindings.ImGui;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace AutoHook.Ui;
 

@@ -17,6 +17,8 @@ public class HookConfig : BaseOption
     public int SwimbaitCountThreshold = 1;
     public bool OnlyUseWhenNoMoochAvailable = true;
 
+    public ConditionSet? SwimbaitConditionSet { get; set; }
+
     //todo enable more hook settings based on the current status
     //List<BaseHookset> CustomHooksets = new();
 
@@ -130,6 +132,57 @@ public class HookConfig : BaseOption
             }*/
 
         return Service.WorldState.IntuitionStatus == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook ? IntuitionHook : NormalHook;
+    }
+
+    /// <summary>
+    /// Keep <see cref="SwimbaitConditionSet"/> in sync with <see cref="OnlyUseWhenNoMoochAvailable"/>.
+    /// This creates or updates a single <see cref="MoochAvailableCD"/> condition (inverted) when needed.
+    /// </summary>
+    public void SyncSwimbaitMoochCondition()
+    {
+        if (!UseSwimbait)
+            return;
+
+        var typeId = ConditionRegistry.Registry.GetId<MoochAvailableCD>();
+
+        // Ensure we have a set/group when enabling the flag.
+        var set = SwimbaitConditionSet ??= new ConditionSet
+        {
+            CombineMode = ConditionCombineMode.All,
+        };
+
+        ConditionGroup group;
+        if (set.Groups.Count > 0)
+        {
+            group = set.Groups[0];
+        }
+        else
+        {
+            group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
+            set.Groups.Add(group);
+        }
+
+        if (!OnlyUseWhenNoMoochAvailable)
+        {
+            // Clear out any MoochAvailable conditions but leave other conditions intact.
+            group.Conditions.RemoveAll(c => c.TypeId == typeId);
+            return;
+        }
+
+        var cond = group.Conditions.FirstOrDefault(c => c.TypeId == typeId);
+        if (cond == null)
+        {
+            cond = new Condition
+            {
+                TypeId = typeId,
+                Params = new MoochAvailableCD.MoochAvailableParams(true).ToParams(),
+            };
+            group.Conditions.Add(cond);
+        }
+        else
+        {
+            cond.Params = new MoochAvailableCD.MoochAvailableParams(true).ToParams();
+        }
     }
 
     public HookType? GetHook(BiteType bite, double timePassed)

@@ -1,5 +1,5 @@
-using System.ComponentModel;
 using AutoHook.Ui;
+using System.ComponentModel;
 
 namespace AutoHook.Classes.AutoCasts;
 

@@ -1,6 +1,6 @@
-using System.Runtime.InteropServices;
 using AutoHook.Spearfishing.Enums;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using System.Runtime.InteropServices;
 
 namespace AutoHook.Spearfishing.Struct;
 

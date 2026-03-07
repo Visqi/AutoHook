@@ -1,3 +1,4 @@
+using AutoHook.Conditions;
 using ECommons.Throttlers;
 
 namespace AutoHook.Fishing;
@@ -127,7 +128,13 @@ public partial class FishingManager
             if (swimbaitCountForFish < swimbaitMoochConfig.SwimbaitCountThreshold)
                 continue;
 
-            if (swimbaitMoochConfig.OnlyUseWhenNoMoochAvailable)
+            // If a swimbait-specific ConditionSet is present, prefer it as the gate.
+            if (swimbaitMoochConfig.SwimbaitConditionSet is { Groups.Count: > 0 } set)
+            {
+                if (!set.Evaluate(Ws, ConditionRegistry.Registry))
+                    continue;
+            }
+            else if (swimbaitMoochConfig.OnlyUseWhenNoMoochAvailable)
             {
                 if (!blockMooch)
                 {

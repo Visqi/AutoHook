@@ -114,6 +114,7 @@ public class SubTabAutoCast
             if (startTimeGui && TimeOnly.TryParse(startTime, out var newStartTime))
             {
                 acCfg.StartTime = newStartTime;
+                acCfg.SyncTimeWindowCondition();
                 Service.Save();
             }
 
@@ -124,6 +125,7 @@ public class SubTabAutoCast
             if (endTimeGui && TimeOnly.TryParse(endTime, out var newEndTime))
             {
                 acCfg.EndTime = newEndTime;
+                acCfg.SyncTimeWindowCondition();
                 Service.Save();
             }
         }, UIStrings.SpecificTimeWindowHelpText);

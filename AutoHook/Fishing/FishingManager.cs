@@ -376,6 +376,7 @@ public partial class FishingManager : IDisposable
     {
         var lastCatch = GameRes.Fishes.FirstOrDefault(fish => fish.Id == fishId) ?? new BaitFishClass(@"-", -1);
         Ws.Execute(new WorldState.OpLastCatch(lastCatch.Id, (byte)amount));
+        Ws.Execute(new WorldState.OpAddFishCaught(lastCatch.Id, (byte)amount));
         var lastFishCatchCfg = GetLastCatchConfig();
 
         Service.LastCatch = lastCatch;
@@ -406,16 +407,27 @@ public partial class FishingManager : IDisposable
 
         if (lastFishCatchCfg?.StopAfterCaught ?? false)
         {
-            var guid = lastFishCatchCfg.UniqueId;
-            var total = FishingHelper.GetFishCount(guid);
+            var shouldStop = false;
 
-            if (total >= lastFishCatchCfg.StopAfterCaughtLimit)
+            if (lastFishCatchCfg.StopConditionSet is { Groups.Count: > 0 } stopSet)
+            {
+                // Prefer ConditionSet-based evaluation when configured.
+                shouldStop = stopSet.Evaluate(Ws, ConditionRegistry.Registry);
+            }
+            else
+            {
+                var guid = lastFishCatchCfg.UniqueId;
+                var total = FishingHelper.GetFishCount(guid);
+                shouldStop = total >= lastFishCatchCfg.StopAfterCaughtLimit;
+            }
+
+            if (shouldStop)
             {
                 Service.PrintChat(string.Format(UIStrings.Caught_Limited_Reached_Chat_Message,
                     @$"{lastFishCatchCfg.Fish.Name}: {lastFishCatchCfg.StopAfterCaughtLimit}"));
 
                 Ws.Execute(new WorldState.OpOrFishingStep(lastFishCatchCfg.StopFishingStep));
-                if (lastFishCatchCfg.StopAfterResetCount) FishingHelper.ToBeRemoved.Add(guid);
+                if (lastFishCatchCfg.StopAfterResetCount) FishingHelper.ToBeRemoved.Add(lastFishCatchCfg.UniqueId);
             }
         }
 
@@ -440,6 +452,7 @@ public partial class FishingManager : IDisposable
     private void OnFishingStop()
     {
         Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.None));
+        Ws.Execute(new WorldState.OpResetFishCaught());
 
         if (_fishingTimer.IsRunning)
             _fishingTimer.Reset();

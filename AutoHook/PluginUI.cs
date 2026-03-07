@@ -1,17 +1,17 @@
 using AutoHook.Ui;
-using Dalamud.Interface.Colors;
-using Dalamud.Interface.Windowing;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
+using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility.Raii;
+using Dalamud.Interface.Windowing;
+using Dalamud.Utility;
+using ECommons.ImGuiMethods;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using PunishLib.ImGuiMethods;
 using System.ComponentModel;
 using System.Numerics;
 using System.Reflection;
-using Dalamud.Interface;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
-using ECommons.ImGuiMethods;
-using FFXIVClientStructs.FFXIV.Client.Game.Event;
-using Dalamud.Utility;
 
 namespace AutoHook;
 

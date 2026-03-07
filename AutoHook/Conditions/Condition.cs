@@ -1,5 +1,5 @@
-using System.Threading;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace AutoHook.Conditions;
 

@@ -1,5 +1,5 @@
-﻿using System.ComponentModel;
-using AutoHook.Spearfishing.Enums;
+﻿using AutoHook.Spearfishing.Enums;
+using System.ComponentModel;
 
 namespace AutoHook.Classes;
 

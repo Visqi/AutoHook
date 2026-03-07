@@ -1,9 +1,9 @@
-using System.Diagnostics;
-using System.Globalization;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
-using Dalamud.Bindings.ImGui;
+using System.Diagnostics;
+using System.Globalization;
 
 namespace AutoHook.Ui;
 
