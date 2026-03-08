@@ -142,8 +142,8 @@ public partial class FishingManager : IDisposable
 
     public string GetPresetName()
     {
-        var isMooching = Ws.IsMooching || Ws.SessionIsMooching || Ws.CurrentSwimbaitId is { };
-        var currentBaitId = Ws.CurrentSwimbaitId is { } sb ? (int)sb : WorldStateUpdater.ComputeCurrentBaitMoochId(Ws.CurrentBaitId, Ws.CurrentSwimbaitId, Ws.SessionIsMooching, new BiteContext { LastCaughtFishId = Ws.LastCaughtFishId });
+        var isMooching = Ws.IsMooching;
+        var currentBaitId = Ws.CurrentSwimbaitId is { } sb ? (int)sb : WorldStateUpdater.ComputeCurrentBaitMoochId(Ws.CurrentBaitId, Ws.CurrentSwimbaitId, Ws.IsMooching, new BiteContext { LastCaughtFishId = Ws.LastCaughtFishId });
 
         HookConfig? customHook = null;
         if (Presets.SelectedPreset != null)
@@ -164,8 +164,8 @@ public partial class FishingManager : IDisposable
 
     public HookConfig GetHookCfg()
     {
-        var isMooching = Ws.IsMooching || Ws.SessionIsMooching || Ws.CurrentSwimbaitId is { };
-        var currentBaitId = Ws.CurrentSwimbaitId is { } sb ? (int)sb : WorldStateUpdater.ComputeCurrentBaitMoochId(Ws.CurrentBaitId, Ws.CurrentSwimbaitId, Ws.SessionIsMooching, new BiteContext { LastCaughtFishId = Ws.LastCaughtFishId });
+        var isMooching = Ws.IsMooching;
+        var currentBaitId = Ws.CurrentSwimbaitId is { } sb ? (int)sb : WorldStateUpdater.ComputeCurrentBaitMoochId(Ws.CurrentBaitId, Ws.CurrentSwimbaitId, Ws.IsMooching, new BiteContext { LastCaughtFishId = Ws.LastCaughtFishId });
 
         HookConfig? custom = null;
         if (Presets.SelectedPreset != null)
@@ -288,14 +288,13 @@ public partial class FishingManager : IDisposable
             Ws.PreviousFishingState != FishingState.PoleReady && Ws.PreviousFishingState != FishingState.None)
             return;
 
-        Ws.Execute(new WorldState.OpSetSessionIsMooching(mooching));
         Ws.Execute(new WorldState.OpSetLureSuccess(false));
 
         var baitname = MultiString.GetItemName(WorldStateUpdater.ComputeCurrentBaitMoochId(Ws.CurrentBaitId, Ws.CurrentSwimbaitId, mooching, new BiteContext { LastCaughtFishId = Ws.LastCaughtFishId }));
         if (!mooching)
-            Service.PrintDebug(@$"Started fishing with {(Ws.IsMooching ? @"Swimbait/Mooch" : @"normal bait")}: {baitname}");
+            Service.PrintDebug(@$"Started fishing with normal bait: {baitname}");
         else
-            Service.PrintDebug(@$"Started mooching with {baitname}");
+            Service.PrintDebug(@$"Started mooching/swimbait with {baitname}");
 
         Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.BeganFishing));
         lastCatchCfg = null;

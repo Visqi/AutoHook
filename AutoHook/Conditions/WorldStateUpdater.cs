@@ -185,7 +185,8 @@ public sealed class WorldStateUpdater : IDisposable
                 state = handler->State;
                 if (handler->CurrentSelectedSwimBait is >= 0 and < 3)
                     swimbaitId = handler->SwimBaitItemIds[handler->CurrentSelectedSwimBait];
-                isMooching = GameRes.MoochableFish.Any(f => f.Id == (int)baitId);
+                var flags = handler->CurrentCastBaitFlags;
+                isMooching = (flags & (FishingBaitFlags.Mooch | FishingBaitFlags.Swimbait)) != 0;
             }
 
             baitMoochId = ComputeCurrentBaitMoochId(baitId, swimbaitId, isMooching, biteContext);

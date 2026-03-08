@@ -97,9 +97,6 @@ public sealed class WorldState
     /// <summary>Set when a lure (Ambitious/Modest) successfully applied. Cleared on new cast.</summary>
     public bool LureSuccess { get; private set; }
 
-    /// <summary>True when this session began with Mooch (set in OnBeganFishing).</summary>
-    public bool SessionIsMooching { get; private set; }
-
     public bool HasStatus(uint statusId) => _statuses.ContainsKey(statusId);
     public float GetStatusTime(uint statusId) => _statuses.TryGetValue(statusId, out var t) ? t.Time : 0f;
     public int GetStatusStacks(uint statusId) => _statuses.TryGetValue(statusId, out var s) ? s.Stacks : 0;
@@ -262,11 +259,6 @@ public sealed class WorldState
     public sealed record OpSetLureSuccess(bool Value) : Operation
     {
         protected override void Exec(WorldState ws) => ws.LureSuccess = Value;
-    }
-
-    public sealed record OpSetSessionIsMooching(bool Value) : Operation
-    {
-        protected override void Exec(WorldState ws) => ws.SessionIsMooching = Value;
     }
 
     public sealed record OpSetPreviousFishingState(FishingState Value) : Operation

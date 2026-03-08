@@ -59,8 +59,7 @@ public class TabDebug : BaseTab
                 ImGui.Text($"CurrentSwimbaitId: {ws.CurrentSwimbaitId}");
                 ImGui.Text($"CurrentBaitMoochId: {ws.CurrentBaitMoochId}");
                 ImGui.Text($"CurrentBaitSwimBait: {ws.CurrentBaitSwimBait}");
-                ImGui.Text($"IsMooching: {ws.IsMooching}");
-                ImGui.Text($"SessionIsMooching: {ws.SessionIsMooching}");
+                ImGui.Text($"IsMooching (Mooch/Swimbait from flags): {ws.IsMooching}");
             }
 
             // Bite / context
