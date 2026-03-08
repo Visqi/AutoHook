@@ -1,4 +1,6 @@
 using AutoHook.Conditions;
+using AutoHook.Conditions.Definitions;
+using Newtonsoft.Json;
 using System.ComponentModel;
 
 namespace AutoHook.Configurations;
@@ -9,22 +11,15 @@ public class FishConfig : BaseOption
     public bool Enabled = true;
 
     [Obsolete("Legacy config")] public bool IgnoreOnIntuition = false;
+    [JsonProperty(nameof(StopAfterCaughtLimit))] internal int LegacyStopAfterCaughtLimit = 1;
+    [JsonProperty("SwapBaitCount")] internal int LegacySwapBaitCount = 1;
+    [JsonProperty("SwapPresetCount")] internal int LegacySwapPresetCount = 1;
 
     public ConditionSet? IgnoreConditionSet { get; set; }
-
-    /// <summary>Stop after caught condition set</summary>
-    public ConditionSet? StopConditionSet { get; set; }
-
-    /// <summary>Swap bait after n caught condition set</summary>
-    public ConditionSet? SwapBaitConditionSet { get; set; }
-
-    /// <summary>Swap preset after n caught condition set</summary>
-    public ConditionSet? SwapPresetConditionSet { get; set; }
 
     public BaitFishClass Fish = new();
 
     public bool StopAfterCaught = false;
-    public int StopAfterCaughtLimit = 1;
     public bool StopAfterResetCount = false;
 
     public AutoIdenticalCast IdenticalCast = new();
@@ -35,12 +30,10 @@ public class FishConfig : BaseOption
 
     public bool SwapBait = false;
     public BaitFishClass BaitToSwap = new();
-    public int SwapBaitCount = 1;
     public bool SwapBaitResetCount = false;
 
     public bool SwapPresets = false;
     public string PresetToSwap = "-";
-    public int SwapPresetCount = 1;
 
     public bool NeverMooch = false;
 
@@ -59,6 +52,18 @@ public class FishConfig : BaseOption
     {
         Fish = new BaitFishClass(fishId);
     }
+
+    [JsonProperty("StopConditionSet")]
+    [JsonConverter(typeof(SingleConditionConverter))]
+    public SingleCondition<FishCaughtCountCD, (bool Enabled, int Limit)> StopAfterCaughtLimit { get => field ??= new SingleCondition<FishCaughtCountCD, (bool Enabled, int Limit)>(() => Fish.Id); set; }
+
+    [JsonProperty("SwapBaitConditionSet")]
+    [JsonConverter(typeof(SingleConditionConverter))]
+    public SingleCondition<FishCaughtCountCD, (bool Enabled, int Limit)> SwapBaitLimit { get => field ??= new SingleCondition<FishCaughtCountCD, (bool Enabled, int Limit)>(() => Fish.Id); set; }
+
+    [JsonProperty("SwapPresetConditionSet")]
+    [JsonConverter(typeof(SingleConditionConverter))]
+    public SingleCondition<FishCaughtCountCD, (bool Enabled, int Limit)> SwapPresetLimit { get => field ??= new SingleCondition<FishCaughtCountCD, (bool Enabled, int Limit)>(() => Fish.Id); set; }
 
     public override void DrawOptions() { }
 }

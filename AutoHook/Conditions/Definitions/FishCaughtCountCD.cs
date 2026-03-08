@@ -5,7 +5,7 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class FishCaughtCountCD : IConditionDefinition
+public sealed class FishCaughtCountCD : IConditionDefinition, ISimpleConditionValue<(bool Enabled, int Limit)>
 {
     public string Id => nameof(FishCaughtCountCD);
     public string Name => "Fish caught count";
@@ -89,6 +89,16 @@ public sealed class FishCaughtCountCD : IConditionDefinition
         var op = GetOp(p, "op", ">=");
         var invert = GetBool(p, "inv", false);
         return new FishCaughtParams(fishId, value, op, invert);
+    }
+
+    (bool Enabled, int Limit) ISimpleConditionValue<(bool Enabled, int Limit)>.FromParams(IReadOnlyDictionary<string, object> p)
+        => (true, Math.Max(1, GetInt(p, "val", 1)));
+
+    IReadOnlyDictionary<string, object>? ISimpleConditionValue<(bool Enabled, int Limit)>.ToParams((bool Enabled, int Limit) value, object? context)
+    {
+        if (!value.Enabled) return null;
+        var fishId = context is int id ? id : 0;
+        return new FishCaughtParams(fishId, value.Limit, ">=", false).ToParams();
     }
 }
 

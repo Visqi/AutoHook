@@ -4,7 +4,7 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class TimeWindowCD : IConditionDefinition
+public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(bool Enabled, TimeOnly Start, TimeOnly End)>
 {
     public string Id => nameof(TimeWindowCD);
     public string Name => "Time window";
@@ -90,18 +90,29 @@ public sealed class TimeWindowCD : IConditionDefinition
 
     private static TimeWindowParams GetParams(IReadOnlyDictionary<string, object> p)
     {
-        var startMinutes = IConditionDefinition.GetInt(p, "start", 0);
-        var endMinutes = IConditionDefinition.GetInt(p, "end", 0);
+        var (start, end) = GetTimeWindowFromParams(p);
         var invert = IConditionDefinition.GetBool(p, "inv", false);
-
-        // Clamp into valid ranges; fall back to midnight on invalid values.
-        startMinutes = Math.Clamp(startMinutes, 0, 24 * 60 - 1);
-        endMinutes = Math.Clamp(endMinutes, 0, 24 * 60 - 1);
-
-        var start = new TimeOnly(startMinutes / 60, startMinutes % 60);
-        var end = new TimeOnly(endMinutes / 60, endMinutes % 60);
-
         return new TimeWindowParams(start, end, invert);
     }
+
+    public static (TimeOnly Start, TimeOnly End) GetTimeWindowFromParams(IReadOnlyDictionary<string, object> p)
+    {
+        var startMinutes = IConditionDefinition.GetInt(p, "start", 0);
+        var endMinutes = IConditionDefinition.GetInt(p, "end", 0);
+        startMinutes = Math.Clamp(startMinutes, 0, 24 * 60 - 1);
+        endMinutes = Math.Clamp(endMinutes, 0, 24 * 60 - 1);
+        var start = new TimeOnly(startMinutes / 60, startMinutes % 60);
+        var end = new TimeOnly(endMinutes / 60, endMinutes % 60);
+        return (start, end);
+    }
+
+    (bool Enabled, TimeOnly Start, TimeOnly End) ISimpleConditionValue<(bool Enabled, TimeOnly Start, TimeOnly End)>.FromParams(IReadOnlyDictionary<string, object> p)
+    {
+        var (start, end) = GetTimeWindowFromParams(p);
+        return (true, start, end);
+    }
+
+    IReadOnlyDictionary<string, object>? ISimpleConditionValue<(bool Enabled, TimeOnly Start, TimeOnly End)>.ToParams((bool Enabled, TimeOnly Start, TimeOnly End) value, object? context)
+        => value.Enabled ? new TimeWindowParams(value.Start, value.End, false).ToParams() : null;
 }
 

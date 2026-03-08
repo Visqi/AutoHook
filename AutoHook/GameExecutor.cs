@@ -9,17 +9,11 @@ namespace AutoHook;
 /// Single place for executing fishing actions: cast, use item, change bait/swimbait.
 /// Reads BlockCasting and action availability from <see cref="WorldState"/>.
 /// </summary>
-public sealed class GameExecutor
+public sealed class GameExecutor(WorldState ws)
 {
-    private readonly WorldState _ws;
     private bool _blockActionNoDelay;
 
-    public GameExecutor(WorldState ws)
-    {
-        _ws = ws;
-    }
-
-    public bool IsCastAvailable() => _ws.IsCastAvailable();
+    public bool IsCastAvailable() => ws.IsCastAvailable();
 
     public unsafe bool CastAction(uint id)
         => ActionManager.Instance()->UseAction(ActionType.Action, id);
@@ -29,12 +23,12 @@ public sealed class GameExecutor
 
     public void CastActionDelayed(uint actionId, ActionType actionType = ActionType.Action, string actionName = "")
     {
-        if (_ws.BlockCasting) return;
+        if (ws.BlockCasting) return;
 
         if (actionType is ActionType.Action or ActionType.EventAction)
         {
-            if (!_ws.ActionAvailable(actionId, actionType)) return;
-            _ws.Execute(new WorldState.OpSetBlockCasting(true));
+            if (!ws.ActionAvailable(actionId, actionType)) return;
+            ws.Execute(new WorldState.OpSetBlockCasting(true));
             Service.PrintDebug($"[Executor] Casting Action: {actionName}, Id: {actionId}");
             try { CastAction(actionId); }
             catch (Exception e) { Service.PrintDebug($"[Executor] Error casting: {actionName}, Id: {actionId}, {e}"); }
@@ -42,7 +36,7 @@ public sealed class GameExecutor
         }
         else if (actionType == ActionType.Item)
         {
-            _ws.Execute(new WorldState.OpSetBlockCasting(true));
+            ws.Execute(new WorldState.OpSetBlockCasting(true));
             Service.PrintDebug($"[Executor] Using Item: {actionName}, Id: {actionId}");
             try { UseItems(actionId); }
             catch (Exception e) { Service.PrintDebug($"[Executor] Error using item: {actionName}, Id: {actionId}, {e}"); }
@@ -54,7 +48,7 @@ public sealed class GameExecutor
     {
         if (_blockActionNoDelay) return;
         _blockActionNoDelay = true;
-        if (actionType == ActionType.Action && _ws.ActionAvailable(actionId, actionType))
+        if (actionType == ActionType.Action && ws.ActionAvailable(actionId, actionType))
         {
             var casted = CastAction(actionId);
             if (casted) Service.PrintDebug($"[Executor] Casting Action: {actionName}, Id: {actionId}");
@@ -79,7 +73,7 @@ public sealed class GameExecutor
             Svc.Log.Error($"[Executor] Error getting delay: {e}");
         }
         await Task.Delay(delay + ConditionalDelay(actionId));
-        _ws.Execute(new WorldState.OpSetBlockCasting(false));
+        ws.Execute(new WorldState.OpSetBlockCasting(false));
     }
 
     private static int ConditionalDelay(uint id) => id switch
@@ -97,9 +91,9 @@ public sealed class GameExecutor
 
     public ChangeBaitReturn ChangeBait(uint baitId)
     {
-        if (baitId == _ws.CurrentBaitId) return ChangeBaitReturn.AlreadyEquipped;
+        if (baitId == ws.CurrentBaitId) return ChangeBaitReturn.AlreadyEquipped;
         if (baitId == 0 || GameRes.Baits.All(b => b.Id != baitId)) return ChangeBaitReturn.InvalidBait;
-        if (_ws.GetItemCount(baitId) <= 0) return ChangeBaitReturn.NotInInventory;
+        if (ws.GetItemCount(baitId) <= 0) return ChangeBaitReturn.NotInInventory;
         return GameMain.ExecuteCommand(701, 4, (int)baitId, 0, 0) ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
     }
 
@@ -111,7 +105,7 @@ public sealed class GameExecutor
 
     public ChangeBaitReturn ChangeBait(BaitFishClass bait)
     {
-        if (bait.Id == _ws.CurrentBaitId)
+        if (bait.Id == ws.CurrentBaitId)
         {
             Service.PrintChat($"Bait \"{bait.Name}\" is already equipped.");
             return ChangeBaitReturn.AlreadyEquipped;
@@ -121,7 +115,7 @@ public sealed class GameExecutor
             Service.PrintChat($"Bait \"{bait.Name}\" is not a valid bait.");
             return ChangeBaitReturn.InvalidBait;
         }
-        if (_ws.GetItemCount((uint)bait.Id) <= 0)
+        if (ws.GetItemCount((uint)bait.Id) <= 0)
         {
             Service.PrintChat($"Bait \"{bait.Name}\" is not in your inventory.");
             return ChangeBaitReturn.NotInInventory;

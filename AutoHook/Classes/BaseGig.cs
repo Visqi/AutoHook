@@ -13,21 +13,20 @@ public class BaseGig(int itemId) : BaseOption
     {
         get
         {
-            if (_fish == null && _itemId != 0)
+            if (field == null && _itemId != 0)
             {
                 Service.PrintDebug($"[AutoGig] BaseGig.Fish - Lazy initializing for itemId: {_itemId}, ImportedFishes count: {GameRes.ImportedFishes.Count}");
-                _fish = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == _itemId);
-                Service.PrintDebug($"[AutoGig] BaseGig.Fish - Found: {(_fish != null ? _fish.Name : "null")}");
+                field = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == _itemId);
+                Service.PrintDebug($"[AutoGig] BaseGig.Fish - Found: {(field != null ? field.Name : "null")}");
             }
-            return _fish;
+            return field;
         }
         set
         {
             Service.PrintDebug($"[AutoGig] BaseGig.Fish - Setting to: {(value != null ? value.Name : "null")}");
-            _fish = value;
+            field = value;
         }
-    }
-    private ImportedFish? _fish = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == itemId);
+    } = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == itemId);
 
     public bool UseNaturesBounty;
 

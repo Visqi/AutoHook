@@ -159,10 +159,13 @@ public class Configuration : IPluginConfiguration
         {
             preset.ListOfBaits.ForEach(MigrateHookConfig);
             preset.ListOfMooch.ForEach(MigrateHookConfig);
+            preset.ListOfMooch.ForEach(MigrateHookConfigSwimbaitMooch);
             preset.ListOfFish.ForEach(MigrateFishConfig);
+            preset.ListOfFish.ForEach(MigrateFishConfigStopSwap);
 
             MigrateAutoCordial(preset.AutoCastsCfg.CastCordial);
             MigrateAutoIdenticalCast(preset.AutoCastsCfg.CastIdenticalCast);
+            MigrateAutoCastsTimeWindow(preset.AutoCastsCfg);
         }
 
         MigratePreset(HookPresets.DefaultPreset);
@@ -751,6 +754,70 @@ public class Configuration : IPluginConfiguration
 
         if (group.Conditions.Count > 0)
             set.Groups.Add(group);
+    }
+
+    /// <summary>v6 migration: legacy time-window → TimeWindowConditionSet (single source of truth).</summary>
+    private static void MigrateAutoCastsTimeWindow(AutoCastsConfig acCfg)
+    {
+        if (acCfg == null) return;
+        if (acCfg.TimeWindow.BackingSet is { Groups.Count: > 0 }) return;
+        if (!acCfg.OnlyCastDuringSpecificTime) return;
+
+        var set = acCfg.TimeWindow.BackingSet ??= new ConditionSet { CombineMode = ConditionCombineMode.All };
+        var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
+        group.Conditions.Add(new Condition
+        {
+            TypeId = Registry.GetId<TimeWindowCD>(),
+            Params = new TimeWindowCD.TimeWindowParams(acCfg.StartTime, acCfg.EndTime, false).ToParams(),
+        });
+        set.Groups.Add(group);
+    }
+
+    /// <summary>v6 migration: legacy OnlyUseWhenNoMoochAvailable → SwimbaitConditionSet.</summary>
+    private static void MigrateHookConfigSwimbaitMooch(HookConfig hook)
+    {
+        if (hook == null || !hook.UseSwimbait) return;
+        if (hook.OnlyUseWhenNoMoochAvailable.BackingSet is { Groups.Count: > 0 }) return;
+        if (!hook.LegacyOnlyUseWhenNoMoochAvailable) return;
+
+        var set = hook.OnlyUseWhenNoMoochAvailable.BackingSet ??= new ConditionSet { CombineMode = ConditionCombineMode.All };
+        var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
+        group.Conditions.Add(new Condition
+        {
+            TypeId = Registry.GetId<MoochAvailableCD>(),
+            Params = new MoochAvailableCD.MoochAvailableParams(true).ToParams(),
+        });
+        set.Groups.Add(group);
+    }
+
+    /// <summary>v6 migration: legacy stop/swap counts → ConditionSets (single source of truth).</summary>
+    private static void MigrateFishConfigStopSwap(FishConfig fish)
+    {
+        if (fish == null || fish.Fish.Id <= 0) return;
+        var fishId = fish.Fish.Id;
+        var typeId = Registry.GetId<FishCaughtCountCD>();
+
+        ConditionSet? EnsureCountConditionSet(ConditionSet? current, int limit)
+        {
+            if (limit < 1) return current;
+            if (current is { Groups.Count: > 0 }) return current;
+            var set = current ?? new ConditionSet { CombineMode = ConditionCombineMode.All };
+            var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
+            group.Conditions.Add(new Condition
+            {
+                TypeId = typeId,
+                Params = new FishCaughtCountCD.FishCaughtParams(fishId, limit, ">=", false).ToParams(),
+            });
+            set.Groups.Add(group);
+            return set;
+        }
+
+        if (fish.StopAfterCaught)
+            fish.StopAfterCaughtLimit.BackingSet = EnsureCountConditionSet(fish.StopAfterCaughtLimit.BackingSet, fish.LegacyStopAfterCaughtLimit);
+        if (fish.SwapBait)
+            fish.SwapBaitLimit.BackingSet = EnsureCountConditionSet(fish.SwapBaitLimit.BackingSet, fish.LegacySwapBaitCount);
+        if (fish.SwapPresets)
+            fish.SwapPresetLimit.BackingSet = EnsureCountConditionSet(fish.SwapPresetLimit.BackingSet, fish.LegacySwapPresetCount);
     }
 
     public void Initiate()

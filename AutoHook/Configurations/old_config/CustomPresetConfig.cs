@@ -3,18 +3,12 @@
 public class BaitPresetConfig
 {
     /* old config, dont use*/
-    private string presetName = UIStrings.New_Preset;
-
-    private List<BaitConfig> _listOfBaits = [];
-
-    public string PresetName { get => presetName; set => presetName = value; }
-    public List<BaitConfig> ListOfBaits { get => _listOfBaits; set => _listOfBaits = value; }
+    public string PresetName { get; set; } = UIStrings.New_Preset;
+    public List<BaitConfig> ListOfBaits { get; set; } = [];
 
     public BaitPresetConfig(string presetName)
     {
-        if (ListOfBaits == null)
-            ListOfBaits = [];
-
+        ListOfBaits ??= [];
         PresetName = presetName;
     }
 
@@ -43,12 +37,12 @@ public class BaitPresetConfig
     public override bool Equals(object? obj)
     {
         return obj is BaitPresetConfig settings &&
-               presetName == settings.presetName;
+               PresetName == settings.PresetName;
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(presetName + @"a");
+        return HashCode.Combine(PresetName + @"a");
     }
 
     public void RenamePreset(string name)

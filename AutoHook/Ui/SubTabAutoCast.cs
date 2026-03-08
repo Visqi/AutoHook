@@ -99,36 +99,40 @@ public class SubTabAutoCast
             ImGui.TreePop();
         }
 
-        DrawUtil.Checkbox(UIStrings.TurnCollectOffWithoutAnimCancel, ref acCfg.TurnCollectOffWithoutAnimCancel,
-            UIStrings.TurnCollectOffWithoutAnimCancelHelp);
-
-        DrawUtil.DrawCheckboxTree(UIStrings.AutoCastOnlyAtSpecificTimes, ref acCfg.OnlyCastDuringSpecificTime, () =>
+        if (DrawUtil.Checkbox(UIStrings.TurnCollectOffWithoutAnimCancel, ref acCfg.TurnCollectOffWithoutAnimCancel, UIStrings.TurnCollectOffWithoutAnimCancelHelp))
         {
-            var startTime = acCfg.StartTime.ToString(@"HH:mm");
-            var endTime = acCfg.EndTime.ToString(@"HH:mm");
-
-            ImGui.PushItemWidth(40 * ImGuiHelpers.GlobalScale);
-            var startTimeGui = ImGui.InputText(@$"{UIStrings.AutoCastStartTime}", ref startTime, 5,
-                ImGuiInputTextFlags.EnterReturnsTrue);
-            ImGui.PopItemWidth();
-            if (startTimeGui && TimeOnly.TryParse(startTime, out var newStartTime))
+            var (enabled, start, end) = acCfg.TimeWindow.Value;
+            var enabledLocal = enabled;
+            var startTime = start.ToString(@"HH:mm");
+            var endTime = end.ToString(@"HH:mm");
+            DrawUtil.DrawCheckboxTree(UIStrings.AutoCastOnlyAtSpecificTimes, ref enabledLocal, () =>
             {
-                acCfg.StartTime = newStartTime;
-                acCfg.SyncTimeWindowCondition();
+                ImGui.PushItemWidth(40 * ImGuiHelpers.GlobalScale);
+                var startTimeGui = ImGui.InputText(@$"{UIStrings.AutoCastStartTime}", ref startTime, 5,
+                    ImGuiInputTextFlags.EnterReturnsTrue);
+                ImGui.PopItemWidth();
+                if (startTimeGui && TimeOnly.TryParse(startTime, out var newStartTime))
+                {
+                    acCfg.TimeWindow.Value = (true, newStartTime, end);
+                    Service.Save();
+                }
+
+                ImGui.PushItemWidth(40 * ImGuiHelpers.GlobalScale);
+                var endTimeGui = ImGui.InputText(@$"{UIStrings.AutoCastEndTime}", ref endTime, 5,
+                    ImGuiInputTextFlags.EnterReturnsTrue);
+                ImGui.PopItemWidth();
+                if (endTimeGui && TimeOnly.TryParse(endTime, out var newEndTime))
+                {
+                    acCfg.TimeWindow.Value = (true, start, newEndTime);
+                    Service.Save();
+                }
+            }, UIStrings.SpecificTimeWindowHelpText);
+            if (enabledLocal != enabled)
+            {
+                acCfg.TimeWindow.Value = (enabledLocal, start, end);
                 Service.Save();
             }
-
-            ImGui.PushItemWidth(40 * ImGuiHelpers.GlobalScale);
-            var endTimeGui = ImGui.InputText(@$"{UIStrings.AutoCastEndTime}", ref endTime, 5,
-                ImGuiInputTextFlags.EnterReturnsTrue);
-            ImGui.PopItemWidth();
-            if (endTimeGui && TimeOnly.TryParse(endTime, out var newEndTime))
-            {
-                acCfg.EndTime = newEndTime;
-                acCfg.SyncTimeWindowCondition();
-                Service.Save();
-            }
-        }, UIStrings.SpecificTimeWindowHelpText);
+        }
 
         ImGui.TextColored(ImGuiColors.DalamudOrange, UIStrings.Auto_Cast_Sort_Notice);
 

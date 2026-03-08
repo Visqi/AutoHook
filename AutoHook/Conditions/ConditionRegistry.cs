@@ -15,14 +15,18 @@ public class ConditionRegistry
 
     private readonly Dictionary<string, ConditionTypeDef> _byId = [];
     private readonly Dictionary<Type, string> _idByType = [];
+    private readonly Dictionary<Type, ConditionTypeDef> _byType = [];
 
     public void Register(ConditionTypeDef def)
     {
         if (string.IsNullOrEmpty(def.Id)) return;
         _byId[def.Id] = def;
+        if (def.Definition != null)
+            _byType[def.Definition.GetType()] = def;
     }
 
     public ConditionTypeDef? Get(string typeId) => _byId.TryGetValue(typeId, out var d) ? d : null;
+    public T? GetDefinition<T>() where T : class => _byType.TryGetValue(typeof(T), out var d) ? d.Definition as T : null;
 
     public IReadOnlyCollection<ConditionTypeDef> All => _byId.Values;
 
@@ -46,6 +50,7 @@ public class ConditionTypeDef
     public ConditionScopeFlags AllowedScopes { get; init; } = ConditionScopeFlags.All;
     public Action<Condition>? DrawParams { get; init; }
     public Func<WorldState, IReadOnlyDictionary<string, object>, bool> Evaluate { get; init; } = (_, _) => false;
+    public IConditionDefinition? Definition { get; init; }
 }
 
 [Flags]

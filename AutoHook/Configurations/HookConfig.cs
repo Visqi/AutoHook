@@ -1,5 +1,6 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
+using Newtonsoft.Json;
 using System.ComponentModel;
 
 namespace AutoHook.Configurations;
@@ -15,9 +16,13 @@ public class HookConfig : BaseOption
 
     public bool UseSwimbait = false;
     public int SwimbaitCountThreshold = 1;
-    public bool OnlyUseWhenNoMoochAvailable = true;
+    [Obsolete("Legacy config")]
+    [JsonProperty(nameof(OnlyUseWhenNoMoochAvailable))]
+    public bool LegacyOnlyUseWhenNoMoochAvailable = true;
 
-    public ConditionSet? SwimbaitConditionSet { get; set; }
+    [JsonProperty("SwimbaitConditionSet")]
+    [JsonConverter(typeof(SingleConditionConverter))]
+    public SingleCondition<MoochAvailableCD, bool> OnlyUseWhenNoMoochAvailable { get; set; } = new SingleCondition<MoochAvailableCD, bool>();
 
     //todo enable more hook settings based on the current status
     //List<BaseHookset> CustomHooksets = new();
@@ -36,7 +41,7 @@ public class HookConfig : BaseOption
 
     public void SetBiteAndHookType(BiteType bite, HookType hookType, bool isIntuition = false)
     {
-        BaseHookset hookset = isIntuition ? IntuitionHook : NormalHook;
+        var hookset = isIntuition ? IntuitionHook : NormalHook;
         var hookDictionary = new Dictionary<BiteType, (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph)>
         {
             { BiteType.Weak, (hookset.TripleWeak, hookset.DoubleWeak, hookset.PatienceWeak) },
@@ -56,7 +61,7 @@ public class HookConfig : BaseOption
 
     public void SetHooksetTimer(BiteType bite, double min, double max, bool isIntuition = false)
     {
-        BaseHookset hookset = isIntuition ? IntuitionHook : NormalHook;
+        var hookset = isIntuition ? IntuitionHook : NormalHook;
         var hookDictionary = new Dictionary<BiteType, (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph)>
         {
             { BiteType.Weak, (hookset.TripleWeak, hookset.DoubleWeak, hookset.PatienceWeak) },
@@ -132,57 +137,6 @@ public class HookConfig : BaseOption
             }*/
 
         return Service.WorldState.IntuitionStatus == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook ? IntuitionHook : NormalHook;
-    }
-
-    /// <summary>
-    /// Keep <see cref="SwimbaitConditionSet"/> in sync with <see cref="OnlyUseWhenNoMoochAvailable"/>.
-    /// This creates or updates a single <see cref="MoochAvailableCD"/> condition (inverted) when needed.
-    /// </summary>
-    public void SyncSwimbaitMoochCondition()
-    {
-        if (!UseSwimbait)
-            return;
-
-        var typeId = ConditionRegistry.Registry.GetId<MoochAvailableCD>();
-
-        // Ensure we have a set/group when enabling the flag.
-        var set = SwimbaitConditionSet ??= new ConditionSet
-        {
-            CombineMode = ConditionCombineMode.All,
-        };
-
-        ConditionGroup group;
-        if (set.Groups.Count > 0)
-        {
-            group = set.Groups[0];
-        }
-        else
-        {
-            group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-            set.Groups.Add(group);
-        }
-
-        if (!OnlyUseWhenNoMoochAvailable)
-        {
-            // Clear out any MoochAvailable conditions but leave other conditions intact.
-            group.Conditions.RemoveAll(c => c.TypeId == typeId);
-            return;
-        }
-
-        var cond = group.Conditions.FirstOrDefault(c => c.TypeId == typeId);
-        if (cond == null)
-        {
-            cond = new Condition
-            {
-                TypeId = typeId,
-                Params = new MoochAvailableCD.MoochAvailableParams(true).ToParams(),
-            };
-            group.Conditions.Add(cond);
-        }
-        else
-        {
-            cond.Params = new MoochAvailableCD.MoochAvailableParams(true).ToParams();
-        }
     }
 
     public HookType? GetHook(BiteType bite, double timePassed)

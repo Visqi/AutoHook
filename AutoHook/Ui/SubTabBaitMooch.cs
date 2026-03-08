@@ -192,9 +192,10 @@ public class SubTabBaitMooch
 
                 ImGui.Spacing();
 
-                if (DrawUtil.Checkbox(UIStrings.OnlyUseWhenNoMoochAvailable, ref hookConfig.OnlyUseWhenNoMoochAvailable, UIStrings.OnlyUseWhenNoMoochAvailableHelpText))
+                var onlyWhenNoMooch = hookConfig.OnlyUseWhenNoMoochAvailable.Value;
+                if (DrawUtil.Checkbox(UIStrings.OnlyUseWhenNoMoochAvailable, ref onlyWhenNoMooch, UIStrings.OnlyUseWhenNoMoochAvailableHelpText))
                 {
-                    hookConfig.SyncSwimbaitMoochCondition();
+                    hookConfig.OnlyUseWhenNoMoochAvailable.Value = onlyWhenNoMooch;
                     Service.Save();
                 }
             }

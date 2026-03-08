@@ -454,8 +454,7 @@ public class PresetCreator
         fishConfig.SparefulHand.FishIdToCheck = (uint)_selectedTargetFish.ItemId;
         fishConfig.SparefulHand.SwimbaitCountLimit = 3;
 
-        fishConfig.StopAfterCaught = true;
-        fishConfig.StopAfterCaughtLimit = 4;
+        fishConfig.StopAfterCaughtLimit.Value = (true, 4);
 
         newPreset.AddItem(fishConfig);
     }

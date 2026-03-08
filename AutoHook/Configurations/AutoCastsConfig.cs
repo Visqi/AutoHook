@@ -1,6 +1,7 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using Newtonsoft.Json;
 using System.ComponentModel;
 
 namespace AutoHook.Configurations;
@@ -11,16 +12,12 @@ public class AutoCastsConfig
 
     [DefaultValue(true)] public bool DontCancelMooch = true;
 
+    [Obsolete("Legacy; migrated into TimeWindowConditionSet. Only read for migration.")]
     public TimeOnly StartTime = new(0);
+    [Obsolete("Legacy; migrated into TimeWindowConditionSet. Only read for migration.")]
     public TimeOnly EndTime = new(0);
-
+    [Obsolete("Legacy; migrated into TimeWindowConditionSet. Only read for migration.")]
     public bool OnlyCastDuringSpecificTime = false;
-
-    /// <summary>
-    /// Optional global auto-cast time window expressed as a ConditionSet.
-    /// Typically a single <see cref="TimeWindowCD"/> condition.
-    /// </summary>
-    public ConditionSet? TimeWindowConditionSet { get; set; }
 
     public bool RecastAnimationCancel;
     public bool TurnCollectOff;
@@ -83,28 +80,16 @@ public class AutoCastsConfig
         return cast;
     }
 
-    /// <summary>
-    /// Returns true if the current time is within the configured time window, using
-    /// a ConditionSet when available and falling back to the legacy check otherwise.
-    /// </summary>
     private bool IsWithinTimeWindow()
     {
-        if (!OnlyCastDuringSpecificTime)
+        if (TimeWindow.BackingSet is not { Groups.Count: > 0 } set)
             return true;
-
-        if (TimeWindowConditionSet is { Groups.Count: > 0 } set)
-            return set.Evaluate(Service.WorldState, ConditionRegistry.Registry);
-
-        return InsideCastWindow();
+        return set.Evaluate(Service.WorldState, ConditionRegistry.Registry);
     }
 
-    private unsafe bool InsideCastWindow()
-    {
-        var clientTime = Framework.Instance()->ClientTime.EorzeaTime;
-        var eorzeaTime = TimeOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(clientTime).DateTime);
-
-        return eorzeaTime.IsBetween(StartTime, EndTime);
-    }
+    [JsonProperty("TimeWindowConditionSet")]
+    [JsonConverter(typeof(SingleConditionConverter))]
+    public SingleCondition<TimeWindowCD, (bool Enabled, TimeOnly Start, TimeOnly End)> TimeWindow { get; set; } = new SingleCondition<TimeWindowCD, (bool Enabled, TimeOnly Start, TimeOnly End)>();
 
     public bool TryCastAction(BaseActionCast? action, bool noDelay = false, bool ignoreCurrentMooch = false)
     {
@@ -125,49 +110,6 @@ public class AutoCastsConfig
             PlayerRes.CastActionDelayed(action.Id, action.ActionType, action.GetName());
 
         return true;
-    }
-
-    /// <summary>
-    /// Keep <see cref="TimeWindowConditionSet"/> in sync with <see cref="StartTime"/>,
-    /// <see cref="EndTime"/> and <see cref="OnlyCastDuringSpecificTime"/>.
-    /// </summary>
-    public void SyncTimeWindowCondition()
-    {
-        if (!OnlyCastDuringSpecificTime)
-            return;
-
-        var set = TimeWindowConditionSet ??= new ConditionSet
-        {
-            CombineMode = ConditionCombineMode.All,
-        };
-
-        ConditionGroup group;
-        if (set.Groups.Count > 0)
-        {
-            group = set.Groups[0];
-        }
-        else
-        {
-            group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-            set.Groups.Add(group);
-        }
-
-        var typeId = ConditionRegistry.Registry.GetId<TimeWindowCD>();
-        var cond = group.Conditions.FirstOrDefault(c => c.TypeId == typeId);
-        if (cond == null)
-        {
-            cond = new Condition
-            {
-                TypeId = typeId,
-                Params = new TimeWindowCD.TimeWindowParams(StartTime, EndTime, false).ToParams(),
-            };
-            group.Conditions.Add(cond);
-        }
-        else
-        {
-            var args = new TimeWindowCD.TimeWindowParams(StartTime, EndTime, false);
-            cond.Params = args.ToParams();
-        }
     }
 
     private void TryChumAnimationCancel()

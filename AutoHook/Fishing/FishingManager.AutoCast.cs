@@ -128,23 +128,10 @@ public partial class FishingManager
             if (swimbaitCountForFish < swimbaitMoochConfig.SwimbaitCountThreshold)
                 continue;
 
-            // If a swimbait-specific ConditionSet is present, prefer it as the gate.
-            if (swimbaitMoochConfig.SwimbaitConditionSet is { Groups.Count: > 0 } set)
+            if (swimbaitMoochConfig.OnlyUseWhenNoMoochAvailable.BackingSet is { Groups.Count: > 0 } set)
             {
                 if (!set.Evaluate(Ws, ConditionRegistry.Registry))
                     continue;
-            }
-            else if (swimbaitMoochConfig.OnlyUseWhenNoMoochAvailable)
-            {
-                if (!blockMooch)
-                {
-                    var canMooch = lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast();
-                    if (canMooch)
-                        continue;
-
-                    if (acCfg.CastMooch.IsAvailableToCast())
-                        continue;
-                }
             }
 
             if (Service.BaitManager.ChangeSwimbait((uint)slotIndex) == BaitManager.ChangeBaitReturn.Success)

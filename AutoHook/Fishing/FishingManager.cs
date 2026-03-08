@@ -367,8 +367,7 @@ public partial class FishingManager : IDisposable
         }
 
         Service.TaskManager.EnqueueDelay(delay);
-        Service.TaskManager.Enqueue(() =>
-            PlayerRes.CastActionDelayed((uint)hook, ActionType.Action, @$"{hook}"));
+        Service.TaskManager.Enqueue(() => PlayerRes.CastActionDelayed((uint)hook, ActionType.Action, @$"{hook}"));
         Service.Status = @$"Using {hook} hook. (Bite: {bite})";
     }
 
@@ -403,28 +402,15 @@ public partial class FishingManager : IDisposable
         var lastFishCatchCfg = GetLastCatchConfig();
         var currentHook = GetHookCfg();
         var hookset = currentHook.GetHookset();
-        var extra = GetExtraCfg();
 
-        if (lastFishCatchCfg?.StopAfterCaught ?? false)
+        if (lastFishCatchCfg?.StopAfterCaughtLimit.BackingSet is { Groups.Count: > 0 } stopSet)
         {
-            var shouldStop = false;
-
-            if (lastFishCatchCfg.StopConditionSet is { Groups.Count: > 0 } stopSet)
-            {
-                // Prefer ConditionSet-based evaluation when configured.
-                shouldStop = stopSet.Evaluate(Ws, ConditionRegistry.Registry);
-            }
-            else
-            {
-                var guid = lastFishCatchCfg.UniqueId;
-                var total = FishingHelper.GetFishCount(guid);
-                shouldStop = total >= lastFishCatchCfg.StopAfterCaughtLimit;
-            }
-
+            var shouldStop = stopSet.Evaluate(Ws, ConditionRegistry.Registry);
             if (shouldStop)
             {
+                var (_, limit) = lastFishCatchCfg.StopAfterCaughtLimit.Value;
                 Service.PrintChat(string.Format(UIStrings.Caught_Limited_Reached_Chat_Message,
-                    @$"{lastFishCatchCfg.Fish.Name}: {lastFishCatchCfg.StopAfterCaughtLimit}"));
+                    @$"{lastFishCatchCfg.Fish.Name}: {limit}"));
 
                 Ws.Execute(new WorldState.OpOrFishingStep(lastFishCatchCfg.StopFishingStep));
                 if (lastFishCatchCfg.StopAfterResetCount) FishingHelper.ToBeRemoved.Add(lastFishCatchCfg.UniqueId);

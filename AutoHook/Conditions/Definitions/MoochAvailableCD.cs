@@ -3,7 +3,7 @@ using Dalamud.Interface.Utility;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class MoochAvailableCD : IConditionDefinition
+public sealed class MoochAvailableCD : IConditionDefinition, ISimpleConditionValue<bool>
 {
     public string Id => nameof(MoochAvailableCD);
     public string Name => "Mooch available";
@@ -39,5 +39,11 @@ public sealed class MoochAvailableCD : IConditionDefinition
             condition.Params = args.ToParams();
         }
     }
+
+    bool ISimpleConditionValue<bool>.FromParams(IReadOnlyDictionary<string, object> p)
+        => IConditionDefinition.GetBool(p, "inv", false);
+
+    IReadOnlyDictionary<string, object>? ISimpleConditionValue<bool>.ToParams(bool value, object? context)
+        => value ? new MoochAvailableParams(true).ToParams() : null;
 }
 

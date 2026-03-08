@@ -1,14 +1,8 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
-using System.Reflection;
 
 namespace AutoHook.Conditions;
 
-/// <summary>
-/// Pluggable definition for a single condition type.
-/// Implement this once per condition to define its ID, metadata,
-/// evaluation logic, and UI drawing in a single place.
-/// </summary>
 public interface IConditionDefinition
 {
     string Id { get; }
@@ -153,6 +147,7 @@ public static class ConditionDefinitionExtensions
             AllowedScopes = def.AllowedScopes,
             Evaluate = def.Evaluate,
             DrawParams = def.DrawParams,
+            Definition = def,
         };
 }
 
