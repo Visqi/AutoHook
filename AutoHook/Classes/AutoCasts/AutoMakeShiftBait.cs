@@ -7,9 +7,9 @@ public class AutoMakeShiftBait : BaseActionCast
 {
     public int MakeshiftBaitStacks = 5;
 
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool _onlyUseWithIntuition;
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenMoochNotUp;
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseOnlyWhenMoochIIOnCD;
+    [Obsolete("Legacy config")] public bool _onlyUseWithIntuition;
+    [Obsolete("Legacy config")] public bool OnlyWhenMoochNotUp;
+    [Obsolete("Legacy config")] public bool UseOnlyWhenMoochIIOnCD;
 
     public override bool RequiresTimeWindow() => true;
 

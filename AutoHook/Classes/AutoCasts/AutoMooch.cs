@@ -7,7 +7,7 @@ public class AutoMooch : BaseActionCast
 {
     public AutoMooch2 Mooch2 = new();
 
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyMoochIntuition = false;
+    [Obsolete("Legacy config")] public bool OnlyMoochIntuition = false;
 
     public override bool RequiresTimeWindow() => true;
 

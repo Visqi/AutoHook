@@ -6,8 +6,8 @@ public class AutoBigGameFishing : BaseActionCast
 {
     public int AnglersStacks = 2;
 
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool WithIdenticalC = false;
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool WithSlap = false;
+    [Obsolete("Legacy config")] public bool WithIdenticalC = false;
+    [Obsolete("Legacy config")] public bool WithSlap = false;
 
     public AutoBigGameFishing() : base(UIStrings.BigGameFishing, IDs.Actions.BigGameFishing) { }
 

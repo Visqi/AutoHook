@@ -1,6 +1,7 @@
 using Dalamud.Bindings.ImGui;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using AutoHook.Ui;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -13,12 +14,11 @@ public class AutoLures : BaseActionCast
 
     public AutoLures() : base(UIStrings.UseLures, IDs.Actions.AmbitiousLure) { }
 
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenActiveSlap;
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenNotActiveSlap;
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenActiveIdentical;
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenNotActiveIdentical;
-
-    public bool OnlyCastLarge;
+    [Obsolete("Legacy config")] public bool OnlyWhenActiveSlap;
+    [Obsolete("Legacy config")] public bool OnlyWhenNotActiveSlap;
+    [Obsolete("Legacy config")] public bool OnlyWhenActiveIdentical;
+    [Obsolete("Legacy config")] public bool OnlyWhenNotActiveIdentical;
+    [Obsolete("Legacy config")] public bool OnlyCastLarge;
 
     public override string GetName()
         => Name = UIStrings.UseLures;
@@ -31,9 +31,6 @@ public class AutoLures : BaseActionCast
             return false;
 
         if (Service.WorldState.FishingState is not (FishingState.AmbitiousLure or FishingState.LineInWater))
-            return false;
-
-        if (OnlyCastLarge && !Service.WorldState.HasAnyStatus([IDs.Status.AnglersFortune, IDs.Status.PrizeCatch]))
             return false;
 
         return EvaluateConditionSet();
@@ -93,10 +90,13 @@ public class AutoLures : BaseActionCast
         }
 
         DrawUtil.Checkbox(UIStrings.CancelAttempt, ref CancelAttempt);
-        DrawUtil.Checkbox(UIStrings.OnlyCastLarge, ref OnlyCastLarge);
 
-        DrawUtil.DrawTreeNodeEx(UIStrings.Surface_Slap_Options, DrawSurfaceSwap);
-        DrawUtil.DrawTreeNodeEx(UIStrings.Identical_Cast_Options, DrawIdenticalCast);
+        ConditionSet = ConditionUi.DrawConditionSetSlim(
+            UIStrings.Conditions,
+            ConditionSet,
+            ConditionScope.AutoCast,
+            showAdvanced: true,
+            showSubPrefix: true);
     };
 
     public void TryCasting(bool lureSuccess)
@@ -115,44 +115,6 @@ public class AutoLures : BaseActionCast
 
         PlayerRes.CastActionDelayed(Id);
         EzThrottler.Throttle("CastingLure", 2500);
-    }
-
-    private void DrawSurfaceSwap()
-    {
-        ImGui.Indent();
-
-        if (DrawUtil.Checkbox(UIStrings.LureSSActive, ref OnlyWhenActiveSlap))
-        {
-            OnlyWhenNotActiveSlap = false;
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.LureSSNotActive, ref OnlyWhenNotActiveSlap))
-        {
-            OnlyWhenActiveSlap = false;
-            Service.Save();
-        }
-
-        ImGui.Unindent();
-    }
-
-    private void DrawIdenticalCast()
-    {
-        ImGui.Indent();
-
-        if (DrawUtil.Checkbox(UIStrings.LureICActive, ref OnlyWhenActiveIdentical))
-        {
-            OnlyWhenNotActiveIdentical = false;
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.LureICNotActive, ref OnlyWhenNotActiveIdentical))
-        {
-            OnlyWhenActiveIdentical = false;
-            Service.Save();
-        }
-
-        ImGui.Unindent();
     }
 
     public override int Priority { get; set; } = 0;

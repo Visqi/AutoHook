@@ -5,9 +5,9 @@ namespace AutoHook.Classes.AutoCasts;
 
 public class AutoPrizeCatch : BaseActionCast
 {
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseWhenMoochIIOnCD = false;
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseOnlyWithIdenticalCast = false;
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseOnlyWithActiveSlap = false;
+    [Obsolete("Legacy config")] public bool UseWhenMoochIIOnCD = false;
+    [Obsolete("Legacy config")] public bool UseOnlyWithIdenticalCast = false;
+    [Obsolete("Legacy config")] public bool UseOnlyWithActiveSlap = false;
 
     public override bool DoesCancelMooch() => true;
 

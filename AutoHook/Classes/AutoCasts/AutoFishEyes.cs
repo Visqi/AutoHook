@@ -8,7 +8,7 @@ public class AutoFishEyes : BaseActionCast
     public override int Priority { get; set; } = 6;
     public override bool IsExcludedPriority { get; set; } = false;
 
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenMakeShiftUp;
+    [Obsolete("Legacy config")] public bool OnlyWhenMakeShiftUp;
 
     public bool IgnoreMooch;
 

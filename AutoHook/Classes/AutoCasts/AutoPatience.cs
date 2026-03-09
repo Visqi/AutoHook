@@ -8,7 +8,7 @@ public class AutoPatience : BaseActionCast
 {
     public int RefreshEarlyTime = 0;
 
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseOnlyWhenMoochIIOnCD;
+    [Obsolete("Legacy config")] public bool UseOnlyWhenMoochIIOnCD;
 
     public override bool RequiresTimeWindow() => true;
 

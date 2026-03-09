@@ -6,8 +6,8 @@ namespace AutoHook.Classes.AutoCasts;
 
 public class AutoIdenticalCast : BaseActionCast
 {
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyUseUnderPatience;
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyWhenCordialAvailable;
+    [Obsolete("Legacy config")] public bool OnlyUseUnderPatience;
+    [Obsolete("Legacy config")] public bool OnlyWhenCordialAvailable;
 
     public bool OnlyUseAfterXAmount;
     public int CaughtAmountLimit = 1;

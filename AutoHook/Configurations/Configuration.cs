@@ -608,6 +608,33 @@ public class Configuration : IPluginConfiguration
 
         if (group.Conditions.Count > 0)
             set.Groups.Add(group);
+
+        // "Only use when Patience/Prize Catch is active" → OR of Patience or Prize Catch.
+        if (lures.OnlyCastLarge)
+        {
+            var largeGroup = new ConditionGroup { CombineMode = ConditionCombineMode.Any };
+            var statusActiveId = Registry.GetId<StatusActiveCD>();
+
+            largeGroup.Conditions.Add(new Condition
+            {
+                TypeId = statusActiveId,
+                Params = new Dictionary<string, object>
+                {
+                    ["ids"] = new List<object> { (long)IDs.Status.AnglersFortune }
+                }
+            });
+
+            largeGroup.Conditions.Add(new Condition
+            {
+                TypeId = statusActiveId,
+                Params = new Dictionary<string, object>
+                {
+                    ["ids"] = new List<object> { (long)IDs.Status.PrizeCatch }
+                }
+            });
+
+            set.Groups.Add(largeGroup);
+        }
     }
 
     private static void MigrateFishConfig(FishConfig fish)

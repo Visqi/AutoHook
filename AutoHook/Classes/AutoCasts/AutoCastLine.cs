@@ -5,8 +5,8 @@ namespace AutoHook.Classes.AutoCasts;
 
 public class AutoCastLine : BaseActionCast
 {
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyCastWithFishEyes = false;
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyCastLarge = false;
+    [Obsolete("Legacy config")] public bool OnlyCastWithFishEyes = false;
+    [Obsolete("Legacy config")] public bool OnlyCastLarge = false;
 
     [DefaultValue(true)] public bool IgnoreMooch = true;
 

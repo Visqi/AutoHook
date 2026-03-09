@@ -4,8 +4,8 @@ namespace AutoHook.Classes.AutoCasts;
 
 public class AutoChum : BaseActionCast
 {
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool _onlyUseWithIntuition;
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public int _useWhenIntuitionExceeds = 0;
+    [Obsolete("Legacy config")] public bool _onlyUseWithIntuition;
+    [Obsolete("Legacy config")] public int _useWhenIntuitionExceeds = 0;
 
     public override bool DoesCancelMooch() => true;
 

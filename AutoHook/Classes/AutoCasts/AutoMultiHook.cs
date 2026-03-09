@@ -5,7 +5,7 @@ namespace AutoHook.Classes.AutoCasts;
 
 public class AutoMultiHook : BaseActionCast
 {
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool OnlyUseWhenIdenticalCastActive;
+    [Obsolete("Legacy config")] public bool OnlyUseWhenIdenticalCastActive;
 
     public AutoMultiHook() : base(UIStrings.Multihook, IDs.Actions.MultiHook) { }
 

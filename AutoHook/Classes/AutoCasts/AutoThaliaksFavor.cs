@@ -5,7 +5,7 @@ namespace AutoHook.Classes.AutoCasts;
 
 public class AutoThaliaksFavor : BaseActionCast
 {
-    [Obsolete("Legacy config. Replaced by ConditionSet.")] public bool UseWhenCordialCD;
+    [Obsolete("Legacy config")] public bool UseWhenCordialCD;
 
     public int ThaliaksFavorStacks = 3;
     public int ThaliaksFavorRecover = 150;
