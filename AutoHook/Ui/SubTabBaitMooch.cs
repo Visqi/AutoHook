@@ -86,20 +86,29 @@ public class SubTabBaitMooch
                             using (var tabDefault = ImRaii.TabItem($"{UIStrings.DefaultSubTab}###Default"))
                             {
                                 if (tabDefault)
+                                {
                                     hook.NormalHook.DrawOptions();
+
+                                    if (isMooch && (_preset.IsGlobal || hook.BaitFish.Id == GameRes.AllMoochesId || GameRes.MoochableFish.Any(f => f.Id == hook.BaitFish.Id)))
+                                    {
+                                        ImGui.Spacing();
+                                        DrawSwimbaitUsage(hook.SwimbaitNormal, _preset.IsGlobal, false);
+                                    }
+                                }
                             }
 
                             using var tabIntuition = ImRaii.TabItem($"{UIStrings.Intuition}###Intuition");
                             if (tabIntuition)
+                            {
                                 hook.IntuitionHook.DrawOptions();
-                        }
-                    }
 
-                    if (isMooch)
-                    {
-                        ImGui.Spacing();
-                        if (_preset.IsGlobal || hook.BaitFish.Id == GameRes.AllMoochesId || GameRes.MoochableFish.Any(f => f.Id == hook.BaitFish.Id))
-                            DrawSwimbaitUsage(hook);
+                                if (isMooch && (_preset.IsGlobal || hook.BaitFish.Id == GameRes.AllMoochesId || GameRes.MoochableFish.Any(f => f.Id == hook.BaitFish.Id)))
+                                {
+                                    ImGui.Spacing();
+                                    DrawSwimbaitUsage(hook.SwimbaitIntuition, _preset.IsGlobal, true);
+                                }
+                            }
+                        }
                     }
                 }, UIStrings.EnabledConfigArrowhelpMarker))
             {
@@ -156,21 +165,27 @@ public class SubTabBaitMooch
             ImGui.SetTooltip(UIStrings.HoldShiftToDelete);
     }
 
-    private static void DrawSwimbaitUsage(HookConfig hookConfig)
+    private static void DrawSwimbaitUsage(SwimbaitConfig config, bool isGlobal, bool isIntuition)
     {
-        using var _ = ImRaii.PushId("DrawSwimbaitUsage");
+        using var _ = ImRaii.PushId(isIntuition ? "DrawSwimbaitUsageIntuition" : "DrawSwimbaitUsageNormal");
 
-        var isGlobal = _preset.IsGlobal;
+        var headerLabel = isIntuition
+            ? $"{UIStrings.UseSwimbait} ({UIStrings.Intuition})"
+            : UIStrings.UseSwimbait;
 
-        if (ImGui.TreeNodeEx(UIStrings.UseSwimbait, ImGuiTreeNodeFlags.FramePadding))
+        if (ImGui.TreeNodeEx(headerLabel, ImGuiTreeNodeFlags.FramePadding))
         {
             var enableText = isGlobal ? UIStrings.EnableUsingSwimbaitGlobal : UIStrings.EnableUsingSwimbait;
             var helpText = isGlobal ? UIStrings.UseSwimbaitHelpTextGlobal : UIStrings.UseSwimbaitHelpText;
 
-            if (DrawUtil.Checkbox(enableText, ref hookConfig.UseSwimbait, helpText))
+            var useSwimbait = config.UseSwimbait;
+            if (DrawUtil.Checkbox(enableText, ref useSwimbait, helpText))
+            {
+                config.UseSwimbait = useSwimbait;
                 Service.Save();
+            }
 
-            if (hookConfig.UseSwimbait)
+            if (config.UseSwimbait)
             {
                 ImGui.Spacing();
 
@@ -180,11 +195,11 @@ public class SubTabBaitMooch
                 DrawUtil.DrawWordWrappedString(countText);
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
-                var threshold = hookConfig.SwimbaitCountThreshold;
+                var threshold = config.CountThreshold;
                 if (ImGui.InputInt("###SwimbaitThreshold", ref threshold, 1, 1))
                 {
                     threshold = Math.Clamp(threshold, 1, 3);
-                    hookConfig.SwimbaitCountThreshold = threshold;
+                    config.CountThreshold = threshold;
                     Service.Save();
                 }
 
@@ -192,12 +207,13 @@ public class SubTabBaitMooch
 
                 ImGui.Spacing();
 
-                var onlyWhenNoMooch = hookConfig.OnlyUseWhenNoMoochAvailable.Value;
-                if (DrawUtil.Checkbox(UIStrings.OnlyUseWhenNoMoochAvailable, ref onlyWhenNoMooch, UIStrings.OnlyUseWhenNoMoochAvailableHelpText))
-                {
-                    hookConfig.OnlyUseWhenNoMoochAvailable.Value = onlyWhenNoMooch;
-                    Service.Save();
-                }
+                config.ConditionSet =
+                    ConditionUi.DrawConditionSetSlim(
+                        UIStrings.Conditions,
+                        config.ConditionSet,
+                        ConditionScope.Hook,
+                        showAdvanced: true,
+                        showSubPrefix: true);
             }
 
             ImGui.TreePop();

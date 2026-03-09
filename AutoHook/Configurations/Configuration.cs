@@ -800,21 +800,48 @@ public class Configuration : IPluginConfiguration
         set.Groups.Add(group);
     }
 
-    /// <summary>v6 migration: legacy OnlyUseWhenNoMoochAvailable → SwimbaitConditionSet.</summary>
+    /// <summary>v6 migration: legacy swimbait fields → per-window SwimbaitConfig.</summary>
     private static void MigrateHookConfigSwimbaitMooch(HookConfig hook)
     {
-        if (hook == null || !hook.UseSwimbait) return;
-        if (hook.OnlyUseWhenNoMoochAvailable.BackingSet is { Groups.Count: > 0 }) return;
-        if (!hook.LegacyOnlyUseWhenNoMoochAvailable) return;
+        if (hook == null) return;
 
-        var set = hook.OnlyUseWhenNoMoochAvailable.BackingSet ??= new ConditionSet { CombineMode = ConditionCombineMode.All };
-        var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-        group.Conditions.Add(new Condition
+        // 1) Legacy UseSwimbait → enable both windows if neither has been explicitly configured.
+        if (hook.UseSwimbait && !hook.SwimbaitNormal.UseSwimbait && !hook.SwimbaitIntuition.UseSwimbait)
         {
-            TypeId = Registry.GetId<MoochAvailableCD>(),
-            Params = new MoochAvailableCD.MoochAvailableParams(true).ToParams(),
-        });
-        set.Groups.Add(group);
+            hook.SwimbaitNormal.UseSwimbait = true;
+            hook.SwimbaitIntuition.UseSwimbait = true;
+        }
+
+        if (!hook.SwimbaitNormal.UseSwimbait && !hook.SwimbaitIntuition.UseSwimbait)
+            return;
+
+        // 2) Migrate legacy count threshold into both configs if they are still at default.
+        if (hook.SwimbaitCountThreshold > 1)
+        {
+            if (hook.SwimbaitNormal.CountThreshold == 1)
+                hook.SwimbaitNormal.CountThreshold = hook.SwimbaitCountThreshold;
+            if (hook.SwimbaitIntuition.CountThreshold == 1)
+                hook.SwimbaitIntuition.CountThreshold = hook.SwimbaitCountThreshold;
+        }
+
+        // 3) Migrate legacy "OnlyUseWhenNoMoochAvailable" into a MoochAvailableCD condition.
+        // This is only done when new configs don't already have a condition set.
+        if (hook.LegacyOnlyUseWhenNoMoochAvailable)
+        {
+            var legacySet = new ConditionSet { CombineMode = ConditionCombineMode.All };
+            var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
+            group.Conditions.Add(new Condition
+            {
+                TypeId = Registry.GetId<MoochAvailableCD>(),
+                Params = new MoochAvailableCD.MoochAvailableParams(true).ToParams(),
+            });
+            legacySet.Groups.Add(group);
+
+            if (hook.SwimbaitNormal.ConditionSet is not { Groups.Count: > 0 })
+                hook.SwimbaitNormal.ConditionSet = legacySet;
+            if (hook.SwimbaitIntuition.ConditionSet is not { Groups.Count: > 0 })
+                hook.SwimbaitIntuition.ConditionSet = legacySet;
+        }
     }
 
     /// <summary>v6 migration: legacy stop/swap counts → ConditionSets (single source of truth).</summary>

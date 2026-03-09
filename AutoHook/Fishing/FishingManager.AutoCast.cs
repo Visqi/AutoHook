@@ -96,6 +96,7 @@ public partial class FishingManager
             return false;
 
         var swimbaitIds = Ws.SwimbaitIds;
+        var isIntuition = Ws.IntuitionStatus == IntuitionStatus.Active;
         foreach (var (fishId, slotIndex) in swimbaitIds.ToArray().WithIndex())
         {
             if (fishId == 0)
@@ -105,33 +106,47 @@ public partial class FishingManager
             if (Presets.SelectedPreset != null)
             {
                 swimbaitMoochConfig = Presets.SelectedPreset.GetCfgById((int)fishId, true);
-                Service.PrintDebug($"[Swimbait] Found config in selected preset: {swimbaitMoochConfig != null}, Enabled: {swimbaitMoochConfig?.Enabled}, UseSwimbait: {swimbaitMoochConfig?.UseSwimbait}");
+                Service.PrintDebug($"[Swimbait] Found config in selected preset: {swimbaitMoochConfig != null}, Enabled: {swimbaitMoochConfig?.Enabled}");
             }
 
-            // If no config found in selected preset, or swimbait not enabled, check global preset config
-            if (swimbaitMoochConfig == null || !swimbaitMoochConfig.Enabled || !swimbaitMoochConfig.UseSwimbait)
+            // Resolve per-window swimbait config (normal vs Intuition).
+            SwimbaitConfig? activeSwimbaitCfg = null;
+
+            if (swimbaitMoochConfig != null && swimbaitMoochConfig.Enabled)
+            {
+                activeSwimbaitCfg = isIntuition ? swimbaitMoochConfig.SwimbaitIntuition : swimbaitMoochConfig.SwimbaitNormal;
+            }
+
+            // If no config found in selected preset, or swimbait not enabled for this window, check global preset config.
+            if (activeSwimbaitCfg == null || !activeSwimbaitCfg.UseSwimbait)
             {
                 var globalAllMooches = Presets.DefaultPreset.ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == GameRes.AllMoochesId);
-                if (globalAllMooches != null && globalAllMooches.Enabled && globalAllMooches.UseSwimbait)
+                if (globalAllMooches != null && globalAllMooches.Enabled)
                 {
-                    swimbaitMoochConfig = globalAllMooches;
-                    Service.PrintDebug("[Swimbait] Using global 'All Mooches' config");
+                    var globalCfg = isIntuition ? globalAllMooches.SwimbaitIntuition : globalAllMooches.SwimbaitNormal;
+                    if (globalCfg.UseSwimbait)
+                    {
+                        swimbaitMoochConfig = globalAllMooches;
+                        activeSwimbaitCfg = globalCfg;
+                        Service.PrintDebug("[Swimbait] Using global 'All Mooches' config");
+                    }
                 }
-                else
+
+                if (activeSwimbaitCfg == null || !activeSwimbaitCfg.UseSwimbait)
                 {
-                    Service.PrintDebug($"[Swimbait] No valid config found for fish {fishId}, trying next slot");
+                    Service.PrintDebug($"[Swimbait] No valid config found for fish {fishId} in this window, trying next slot");
                     continue;
                 }
             }
 
             var swimbaitCountForFish = Ws.GetSwimbaitCountForFish(fishId);
-            if (swimbaitCountForFish < swimbaitMoochConfig.SwimbaitCountThreshold)
+            if (swimbaitCountForFish < activeSwimbaitCfg.CountThreshold)
                 continue;
 
-            if (swimbaitMoochConfig.OnlyUseWhenNoMoochAvailable.BackingSet is { Groups.Count: > 0 } set)
+            if (activeSwimbaitCfg.ConditionSet is { Groups.Count: > 0 } condSet &&
+                !condSet.Evaluate(Ws, ConditionRegistry.Registry))
             {
-                if (!set.Evaluate(Ws, ConditionRegistry.Registry))
-                    continue;
+                continue;
             }
 
             if (Service.BaitManager.ChangeSwimbait((uint)slotIndex) == BaitManager.ChangeBaitReturn.Success)

@@ -1,6 +1,3 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
-
 namespace AutoHook.Conditions.Definitions;
 
 public sealed class MoochAvailableCD : IConditionDefinition, ISimpleConditionValue<bool>
@@ -29,16 +26,7 @@ public sealed class MoochAvailableCD : IConditionDefinition, ISimpleConditionVal
         return invert ? !available : available;
     }
 
-    public void DrawParams(Condition condition)
-    {
-        var invert = IConditionDefinition.GetBool(condition.Params, "inv", false);
-        ImGui.SetNextItemWidth(180 * ImGuiHelpers.GlobalScale);
-        if (ImGui.Checkbox(UIStrings.OnlyWhenMoochNotAvailable, ref invert))
-        {
-            var args = new MoochAvailableParams(invert);
-            condition.Params = args.ToParams();
-        }
-    }
+    public void DrawParams(Condition condition) { }
 
     bool ISimpleConditionValue<bool>.FromParams(IReadOnlyDictionary<string, object> p)
         => IConditionDefinition.GetBool(p, "inv", false);
