@@ -1,5 +1,4 @@
 using AutoHook.Conditions;
-using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -17,22 +16,11 @@ public partial class FishingManager : IDisposable {
 
     private static WorldState Ws => Service.WorldState;
 
-    private delegate bool UseActionDelegate(IntPtr manager, ActionType actionType, uint actionId, ulong targetId,
-        uint a4, uint a5,
-        uint a6, IntPtr a7);
-
-    private Hook<UseActionDelegate>? _useActionHook;
-
-    public delegate void UpdateCatchDelegate(IntPtr module, uint fishId, bool large, ushort size, byte amount,
-        byte level, byte unk7, byte unk8, byte unk9, byte unk10,
-        byte unk11, byte unk12);
-
-    public Hook<UpdateCatchDelegate>? UpdateCatch = null!;
-
     public FishingManager() {
         try {
-            Service.TaskManager.EnqueueDelay(200);
-            Service.TaskManager.Enqueue(CreateDalamudHooks);
+            Svc.Framework.Update += OnFrameworkUpdate;
+            Svc.Chat.CheckMessageHandled += OnMessageDelegate;
+            Ws.Modified += OnWorldStateModified;
         }
         catch (Exception e) {
             Svc.Log.Error(@$"{e.Message}");
@@ -40,33 +28,38 @@ public partial class FishingManager : IDisposable {
     }
 
     public void Dispose() {
-        Disable();
-        _useActionHook?.Dispose();
-        UpdateCatch?.Dispose();
-    }
-
-    public unsafe void CreateDalamudHooks() {
-        UpdateCatch = Svc.Hook.HookFromSignature<UpdateCatchDelegate>(
-            SignaturePatterns.UpdateCatch,
-            UpdateCatchDetour);
-        var hookPtr = (IntPtr)ActionManager.MemberFunctionPointers.UseAction;
-        _useActionHook = Svc.Hook.HookFromAddress<UseActionDelegate>(hookPtr, OnUseAction);
-
-        Enable();
-    }
-
-    private void Enable() {
-        Svc.Framework.Update += OnFrameworkUpdate;
-        Svc.Chat.CheckMessageHandled += OnMessageDelegate;
-        UpdateCatch?.Enable();
-        _useActionHook?.Enable();
-    }
-
-    private void Disable() {
         Svc.Framework.Update -= OnFrameworkUpdate;
         Svc.Chat.CheckMessageHandled -= OnMessageDelegate;
-        _useActionHook?.Disable();
-        UpdateCatch?.Disable();
+        Ws.Modified -= OnWorldStateModified;
+    }
+
+    private void OnWorldStateModified(WorldState.Operation op) {
+        if (!Service.Configuration.PluginEnabled)
+            return;
+
+        switch (op) {
+            case WorldState.OpPlayerUsedAction(var actionType, var actionId):
+                if (actionType == ActionType.Action && Ws.ActionAvailable(actionId)) {
+                    switch (actionId) {
+                        case IDs.Actions.Rest:
+                            if (Ws.HasStatus(IDs.Status.CollectorsGlove))
+                                AnimationCancel();
+                            Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.Reeling));
+                            break;
+                        case IDs.Actions.Cast:
+                            OnBeganFishing(false);
+                            break;
+                        case IDs.Actions.Mooch:
+                        case IDs.Actions.Mooch2:
+                            OnBeganFishing(true);
+                            break;
+                    }
+                }
+                break;
+            case WorldState.OpLastCatch:
+                OnCatch();
+                break;
+        }
     }
 
     public void StartFishing() {
@@ -336,17 +329,18 @@ public partial class FishingManager : IDisposable {
         Service.Status = @$"Using {hook} hook. (Bite: {bite})";
     }
 
-    private void OnCatch(uint fishId, uint amount) {
+    private void OnCatch() {
+        if (Ws.LastCaughtFishId is not { } fishId || fishId <= 0 || Ws.LastCatchAmount == 0)
+            return;
+
+        var amount = Ws.LastCatchAmount;
         var lastCatch = GameRes.Fishes.FirstOrDefault(fish => fish.Id == fishId) ?? new BaitFishClass(@"-", -1);
-        Ws.Execute(new WorldState.OpLastCatch(lastCatch.Id, (byte)amount));
-        Ws.Execute(new WorldState.OpAddFishCaught(lastCatch.Id, (byte)amount));
+        Ws.Execute(new WorldState.OpAddFishCaught(lastCatch.Id, amount));
         var lastFishCatchCfg = GetLastCatchConfig();
 
         Service.LastCatch = lastCatch;
 
         Service.PrintDebug(@$"[HookManager] Caught {lastCatch.Name} (id {lastCatch.Id})");
-
-        Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.FishCaught));
 
         if (lastFishCatchCfg != null) {
             for (var i = 0; i < amount; i++) {
@@ -405,44 +399,5 @@ public partial class FishingManager : IDisposable {
 
         PlayerRes.CastActionNoDelay(IDs.Actions.Quit);
         PlayerRes.DelayNextCast(0);
-    }
-
-    private bool OnUseAction(IntPtr manager, ActionType actionType, uint actionId, ulong targetId, uint a4,
-        uint a5, uint a6, IntPtr a7) {
-        try {
-            if (actionType == ActionType.Action && Service.Configuration.PluginEnabled &&
-                Ws.ActionAvailable(actionId)) {
-                switch (actionId) {
-                    case IDs.Actions.Rest:
-                        if (Ws.HasStatus(IDs.Status.CollectorsGlove)) AnimationCancel();
-                        Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.Reeling));
-                        break;
-                    case IDs.Actions.Cast:
-                        OnBeganFishing(false);
-                        break;
-                    case IDs.Actions.Mooch:
-                    case IDs.Actions.Mooch2:
-                        OnBeganFishing(true);
-                        break;
-                }
-            }
-        }
-        catch (Exception e) {
-            Service.PrintDebug(@$"[HookManager] Error: {e.Message}");
-        }
-
-        return _useActionHook!.Original(manager, actionType, actionId, targetId, a4, a5, a6, a7);
-    }
-
-    private void UpdateCatchDetour(IntPtr module, uint fishId, bool large, ushort size, byte amount, byte level,
-        byte unk7,
-        byte unk8, byte unk9, byte unk10, byte unk11, byte unk12) {
-        UpdateCatch!.Original(module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12);
-
-        // Check against collectibles.
-        if (fishId > 500000)
-            fishId -= 500000;
-
-        OnCatch(fishId, amount);
     }
 }

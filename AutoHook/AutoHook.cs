@@ -196,8 +196,9 @@ public class AutoHook : IDalamudPlugin {
         _pluginUi.Dispose();
         _autoGig.Dispose();
         HookManager.Dispose();
+        _wsSync.Dispose();
         Service.Save();
-        Svc.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
+        Svc.PluginInterface.UiBuilder.Draw -= () => { _wsSync.Update(); Service.WindowSystem.Draw(); };
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;
 

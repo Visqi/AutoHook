@@ -14,13 +14,12 @@ public class Service {
 
     public const string GlobalPresetName = "Global Preset";
 
-    /// <summary>Single WorldState instance, set from AutoHook and used by all systems.</summary>
     public static WorldState WorldState { get; set; } = null!;
 
     public static BaitManager BaitManager { get; set; } = null!;
     public static Configuration Configuration { get; set; } = null!;
     public static WindowSystem WindowSystem { get; } = new(PluginName);
-    public static SeTugType TugType { get; set; } = null!;
+    public static SeTugType TugType { get; set; } = null!; // TODO replace with FishingEventHandler.PlayAnimation hook
     public static ClientLanguage Language { get; set; }
 
     public static string _status = @"";

@@ -20,6 +20,7 @@ public readonly struct BiteContext {
 public sealed class WorldStateUpdater : IDisposable {
     private readonly Hook<ActionManager.Delegates.UseAction>? _useActionHook;
 
+    // TODO replace with cs once it's live
     public delegate void UpdateCatchDelegate(IntPtr module, uint fishId, bool large, ushort size, byte amount,
         byte level, byte unk7, byte unk8, byte unk9, byte unk10, byte unk11, byte unk12);
     private readonly Hook<UpdateCatchDelegate>? _updateCatchHook;
