@@ -287,7 +287,7 @@ public class TabFishingPresets : BaseTab
                 ImGui.EndDragDropSource();
             }
 
-            // Handle folder reparenting by dropping one folder onto another
+            // Handle folder reparenting / reordering by dropping one folder onto another
             if (ImGui.BeginDragDropTarget())
             {
                 if (ImGuiDragDrop.AcceptDragDropPayload("FOLDER_ORDER", out int sourceFolderIndex))
@@ -298,19 +298,38 @@ public class TabFishingPresets : BaseTab
                         {
                             var movingFolder = _basePreset.Folders[sourceFolderIndex];
 
-                            // Special-case: if dropping a parent onto its direct child, swap places
-                            if (folder.ParentFolderId == movingFolder.UniqueId)
+                            // If both folders share the same parent, treat drop as a reorder within that level
+                            if (movingFolder.ParentFolderId == folder.ParentFolderId)
                             {
-                                var oldParent = movingFolder.ParentFolderId;
-                                movingFolder.ParentFolderId = folder.UniqueId;
-                                folder.ParentFolderId = oldParent;
+                                _basePreset.Folders.RemoveAt(sourceFolderIndex);
+                                var targetIndex = _basePreset.Folders.IndexOf(folder);
+                                if (targetIndex < 0)
+                                {
+                                    // Fallback: append if target somehow not found
+                                    _basePreset.Folders.Add(movingFolder);
+                                }
+                                else
+                                {
+                                    _basePreset.Folders.Insert(targetIndex, movingFolder);
+                                }
                                 Service.Save();
                             }
-                            // Otherwise, prevent creating cycles (cannot parent a folder under its own descendant)
-                            else if (!IsFolderDescendantOf(movingFolder, folder))
+                            else
                             {
-                                movingFolder.ParentFolderId = folder.UniqueId;
-                                Service.Save();
+                                // Special-case: if dropping a parent onto its direct child, swap places
+                                if (folder.ParentFolderId == movingFolder.UniqueId)
+                                {
+                                    var oldParent = movingFolder.ParentFolderId;
+                                    movingFolder.ParentFolderId = folder.UniqueId;
+                                    folder.ParentFolderId = oldParent;
+                                    Service.Save();
+                                }
+                                // Otherwise, prevent creating cycles (cannot parent a folder under its own descendant)
+                                else if (!IsFolderDescendantOf(movingFolder, folder))
+                                {
+                                    movingFolder.ParentFolderId = folder.UniqueId;
+                                    Service.Save();
+                                }
                             }
                         }
                     }
