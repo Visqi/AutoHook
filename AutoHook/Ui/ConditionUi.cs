@@ -90,7 +90,7 @@ public static class ConditionUi {
         var group = set.Groups[0];
         var types = allowedTypeIds != null && allowedTypeIds.Count > 0
             ? GetScopedTypes(scope).Where(d => allowedTypeIds.Contains(d.Id)).ToList()
-            : GetScopedTypes(scope).ToList();
+            : [.. GetScopedTypes(scope)];
         var defaultTypeId = types.FirstOrDefault()?.Id ?? Registry.GetId<StatusActiveCD>();
 
         // Header: (optional) sub marker + label + add + small advanced icon + optional extras.
@@ -180,7 +180,7 @@ public static class ConditionUi {
                 if (deleteGroup)
                     toRemoveGroup.Add(gi);
                 ImGui.Spacing();
-                DrawConditionsWithTypes(g, scope, GetScopedTypes(scope).ToList());
+                DrawConditionsWithTypes(g, scope, [.. GetScopedTypes(scope)]);
             });
             if (gEnabled != g.Enabled) {
                 g.Enabled = gEnabled;
@@ -264,7 +264,7 @@ public static class ConditionUi {
     }
 
     private static void DrawConditions(ConditionGroup group, ConditionScope scope)
-        => DrawConditionsWithTypes(group, scope, GetScopedTypes(scope).ToList());
+        => DrawConditionsWithTypes(group, scope, [.. GetScopedTypes(scope)]);
 
     private static void DrawConditionContent(Condition cond, ConditionScope scope, List<ConditionTypeDef> defs) {
         DrawInverseToggle(cond);
@@ -303,7 +303,7 @@ public static class ConditionUi {
     }
 
     private static IEnumerable<ConditionTypeDef> GetScopedTypes(ConditionScope scope) {
-        var all = ConditionRegistry.Registry.All;
+        var all = Registry.All;
         var flag = scope switch {
             ConditionScope.Hook => ConditionScopeFlags.Hook,
             ConditionScope.AutoCordial => ConditionScopeFlags.AutoCordial,
@@ -357,7 +357,7 @@ public static class ConditionUi {
         return clone;
     }
 
-    private static Dictionary<string, object> CloneParams(IReadOnlyDictionary<string, object> src) {
+    private static Dictionary<string, object> CloneParams(Dictionary<string, object> src) {
         var dict = new Dictionary<string, object>(src.Count);
         foreach (var (key, value) in src) {
             dict[key] = value is List<object> list ? new List<object>(list) : value;
