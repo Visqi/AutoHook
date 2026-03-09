@@ -32,8 +32,7 @@ public partial class FishingManager
     private const XivChatType FishingMessage = (XivChatType)2243;
     private const XivChatType SystemAlert = (XivChatType)2115; //idk what to call this
 
-    private void OnMessageDelegate(XivChatType type, int timeStamp, ref SeString sender, ref SeString messageSe,
-        ref bool isHandled)
+    private void OnMessageDelegate(XivChatType type, int timeStamp, ref SeString sender, ref SeString messageSe, ref bool isHandled)
     {
         try
         {
