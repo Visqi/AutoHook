@@ -57,14 +57,42 @@ public class Configuration : IPluginConfiguration {
 
     [Obsolete("Legacy config")] public List<BaitPresetConfig> BaitPresetList = [];
 
+    private void WriteVersionBackup(int fromVersion) {
+        try {
+            var dir = Svc.PluginInterface.GetPluginConfigDirectory();
+            var fileName = $"autohook_v{fromVersion}_backup.json";
+            var path = Path.Combine(dir, fileName);
+
+            if (File.Exists(path)) {
+                var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                path = Path.Combine(dir, $"autohook_v{fromVersion}_backup_{stamp}.json");
+            }
+
+            var json = JsonConvert.SerializeObject(
+                this,
+                new JsonSerializerSettings {
+                    Formatting = Formatting.Indented,
+                    DefaultValueHandling = DefaultValueHandling.Include
+                });
+
+            File.WriteAllText(path, json, Encoding.UTF8);
+            Service.PrintDebug(@$"[Configuration] Wrote backup to {path}");
+        }
+        catch (Exception e) {
+            Svc.Log.Warning(@$"[Configuration] Failed to write v{fromVersion} backup: {e.Message}");
+        }
+    }
+
     public void Save() => Svc.PluginInterface.SavePluginConfig(this);
 
     public void UpdateVersion() {
         if (Version == 1) {
+            WriteVersionBackup(1);
             Version = 2;
         }
 
         if (Version == 2) {
+            WriteVersionBackup(2);
             try {
                 foreach (var preset in BaitPresetList) {
                     var newPreset = ConvertOldPreset(preset);
@@ -82,6 +110,7 @@ public class Configuration : IPluginConfiguration {
         if (Version == 3) {
             Service.PrintDebug(@$"[Configuration] Updating to v4");
 
+            WriteVersionBackup(3);
             Save();
             Version = 4;
         }
@@ -89,6 +118,7 @@ public class Configuration : IPluginConfiguration {
         if (Version == 4) {
             Service.PrintDebug(@$"[Configuration] Updating to v5");
 
+            WriteVersionBackup(4);
             foreach (var gig in AutoGigConfig.Presets) {
                 Service.PrintDebug($"Renaming {gig.PresetName} to {gig.Name}");
                 gig.PresetName = gig.Name;
@@ -103,6 +133,7 @@ public class Configuration : IPluginConfiguration {
         if (Version == 5) {
             Service.PrintDebug(@$"[Configuration] Updating to v6");
 
+            WriteVersionBackup(5);
             try {
                 MigrateConditionsToConditionSets();
                 MigrateExtraToTriggers();
