@@ -250,13 +250,15 @@ public static class ConditionUi {
             });
         }
 
-        ImGui.SameLine();
-        if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
-            if (ImGui.GetIO().KeyShift)
-                return true;
-            group.Conditions.Clear();
+        if (set.Groups.Count > 1 || group.Conditions.Count > 0) {
+            ImGui.SameLine();
+            if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
+                if (ImGui.GetIO().KeyShift)
+                    return true;
+                group.Conditions.Clear();
+            }
+            ImGui.TooltipOnHover("Click: clear conditions in this group\nShift+Click: delete group");
         }
-        ImGui.TooltipOnHover("Click: clear conditions in this group\nShift+Click: delete group");
 
         return false;
     }
