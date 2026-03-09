@@ -7,6 +7,7 @@ using Dalamud.Interface.Windowing;
 using ECommons.Automation;
 using ECommons.Automation.NeoTaskManager;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using System.Numerics;
 
 namespace AutoHook.Spearfishing;
@@ -135,6 +136,11 @@ internal class AutoGig : Window, IDisposable
 
         if (_gigCfg is { AutoGigEnabled: true, })
         {
+            var selectedPreset = _gigCfg.SelectedPreset;
+
+            if (selectedPreset is { KeepCollectorsGloveOn: true } && !Service.WorldState.HasStatus(IDs.Status.CollectorsGlove))
+                PlayerRes.CastActionDelayed(IDs.Actions.Collect, ActionType.EventAction, UIStrings.Collect);
+
             if (!Service.WorldState.HasStatus(IDs.Status.NaturesBounty) && _gigCfg.NatureBountyBeforeFish)
                 PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
 

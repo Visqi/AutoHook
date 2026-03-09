@@ -1,4 +1,4 @@
-﻿using AutoHook.Spearfishing;
+using AutoHook.Spearfishing;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
@@ -88,6 +88,9 @@ internal class TabAutoGig : BaseTab
                 selectedPreset.HitboxSize = Math.Max(0, Math.Min(selectedPreset.HitboxSize, 300));
                 Service.Save();
             }
+
+            if (DrawUtil.Checkbox(UIStrings.Collect, ref selectedPreset.KeepCollectorsGloveOn, UIStrings.CollectHelpText))
+                Service.Save();
 
             DrawUtil.SpacingSeparator();
 

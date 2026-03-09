@@ -1,6 +1,7 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
+using System.ComponentModel;
 
 namespace AutoHook.Configurations;
 
@@ -11,6 +12,8 @@ public class AutoGigConfig : BasePresetConfig
     public List<BaseGig> Gigs { get; set; } = [];
 
     public int HitboxSize = 25;
+
+    public bool KeepCollectorsGloveOn = false;
 
     public AutoGigConfig(string presetName) => PresetName = presetName;
 
