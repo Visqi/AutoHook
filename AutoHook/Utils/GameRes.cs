@@ -5,8 +5,7 @@ using System.Text.Json;
 
 namespace AutoHook.Utils;
 
-public static class GameRes
-{
+public static class GameRes {
     public const uint FishingTackleRow = 30;
     public const int AllBaitsId = -99;
     public const int AllMoochesId = -98;
@@ -19,8 +18,7 @@ public static class GameRes
 
     public static List<BiteTimers> BiteTimers { get; private set; } = [];
 
-    public static void Initialize()
-    {
+    public static void Initialize() {
         Baits = [.. FindRows<Item>(i => i.ItemSearchCategory.RowId == FishingTackleRow).ToList()
             .Concat([.. FindRows<WKSItemInfo>(i => i.WKSItemSubCategory.RowId == 5).Select(i => i.Item.Value)])
             .Select(b => new BaitFishClass(b))];
@@ -30,13 +28,11 @@ public static class GameRes
 
         MoochableFish = FindRows<FishingBaitParameter>(x => x.Item.Value.ItemUICategory.RowId != 33).Select(f => new BaitFishClass(f.Item.RowId)).ToList() ?? [];
 
-        try
-        {
+        try {
             var fishList = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName!,
                 $"Data\\FishData\\fish_list.json");
 
-            if (File.Exists(fishList))
-            {
+            if (File.Exists(fishList)) {
                 var json = File.ReadAllText(fishList);
 
                 ImportedFishes = JsonSerializer.Deserialize<List<ImportedFish>>(json)!;
@@ -45,15 +41,13 @@ public static class GameRes
             var biteTimers = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName!,
                 $"Data\\FishData\\bitetimers.json");
 
-            if (File.Exists(biteTimers))
-            {
+            if (File.Exists(biteTimers)) {
                 var json = File.ReadAllText(biteTimers);
 
                 BiteTimers = JsonSerializer.Deserialize<List<BiteTimers>>(json)!;
             }
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             ImGui.SetClipboardText(e.Message);
             Svc.Log.Error($"{e.Message}");
         }

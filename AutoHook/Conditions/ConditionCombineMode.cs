@@ -1,7 +1,6 @@
 namespace AutoHook.Conditions;
 
-public enum ConditionCombineMode
-{
+public enum ConditionCombineMode {
     All,
     Any,
 }

@@ -2,8 +2,7 @@ using AutoHook.Ui;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoChum : BaseActionCast
-{
+public class AutoChum : BaseActionCast {
     [Obsolete("Legacy config")] public bool _onlyUseWithIntuition;
     [Obsolete("Legacy config")] public int _useWhenIntuitionExceeds = 0;
 
@@ -15,8 +14,7 @@ public class AutoChum : BaseActionCast
 
     public override bool CastCondition() => EvaluateConditionSet();
 
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
+    protected override DrawOptionsDelegate DrawOptions => () => {
         ConditionSet = ConditionUi.DrawConditionSetSlim(
             UIStrings.Conditions,
             ConditionSet,

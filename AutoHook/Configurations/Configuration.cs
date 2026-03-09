@@ -12,8 +12,7 @@ using static AutoHook.Conditions.ConditionRegistry;
 namespace AutoHook.Configurations;
 
 [Serializable]
-public class Configuration : IPluginConfiguration
-{
+public class Configuration : IPluginConfiguration {
     public int Version { get; set; } = 6;
     public string CurrentLanguage { get; set; } = @"en";
 
@@ -60,19 +59,14 @@ public class Configuration : IPluginConfiguration
 
     public void Save() => Svc.PluginInterface.SavePluginConfig(this);
 
-    public void UpdateVersion()
-    {
-        if (Version == 1)
-        {
+    public void UpdateVersion() {
+        if (Version == 1) {
             Version = 2;
         }
 
-        if (Version == 2)
-        {
-            try
-            {
-                foreach (var preset in BaitPresetList)
-                {
+        if (Version == 2) {
+            try {
+                foreach (var preset in BaitPresetList) {
                     var newPreset = ConvertOldPreset(preset);
                     if (newPreset != null)
                         HookPresets.CustomPresets.Add(newPreset);
@@ -80,26 +74,22 @@ public class Configuration : IPluginConfiguration
 
                 Version = 3;
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Service.PrintDebug(@$"[Configuration] {e.Message}");
             }
         }
 
-        if (Version == 3)
-        {
+        if (Version == 3) {
             Service.PrintDebug(@$"[Configuration] Updating to v4");
 
             Save();
             Version = 4;
         }
 
-        if (Version == 4)
-        {
+        if (Version == 4) {
             Service.PrintDebug(@$"[Configuration] Updating to v5");
 
-            foreach (var gig in AutoGigConfig.Presets)
-            {
+            foreach (var gig in AutoGigConfig.Presets) {
                 Service.PrintDebug($"Renaming {gig.PresetName} to {gig.Name}");
                 gig.PresetName = gig.Name;
             }
@@ -110,17 +100,14 @@ public class Configuration : IPluginConfiguration
             Version = 5;
         }
 
-        if (Version == 5)
-        {
+        if (Version == 5) {
             Service.PrintDebug(@$"[Configuration] Updating to v6");
 
-            try
-            {
+            try {
                 MigrateConditionsToConditionSets();
                 MigrateExtraToTriggers();
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Service.PrintDebug(@$"[Configuration] v6 migration failed: {e.Message}");
             }
 
@@ -129,20 +116,17 @@ public class Configuration : IPluginConfiguration
         }
     }
 
-    private static void SetFieldNewClass(HookConfig newOne, BaitConfig old)
-    {
+    private static void SetFieldNewClass(HookConfig newOne, BaitConfig old) {
         var oldType = old.GetType();
         var newType = newOne.GetType();
 
         var oldFields = oldType.GetFields();
         var newFields = newType.GetFields();
 
-        foreach (var sourceField in oldFields)
-        {
+        foreach (var sourceField in oldFields) {
             var targetField =
                 newFields.FirstOrDefault(f => f.Name == sourceField.Name && f.FieldType == sourceField.FieldType);
-            if (targetField != null)
-            {
+            if (targetField != null) {
                 var value = sourceField.GetValue(old);
                 targetField.SetValue(newOne, value);
             }
@@ -153,10 +137,8 @@ public class Configuration : IPluginConfiguration
     /// v6 migration: populate ConditionSet-backed fields from legacy flags/timers.
     /// This keeps old fields for backward compat while enabling the new condition engine.
     /// </summary>
-    private void MigrateConditionsToConditionSets()
-    {
-        static void MigratePreset(CustomPresetConfig preset)
-        {
+    private void MigrateConditionsToConditionSets() {
+        static void MigratePreset(CustomPresetConfig preset) {
             preset.ListOfBaits.ForEach(MigrateHookConfig);
             preset.ListOfMooch.ForEach(MigrateHookConfig);
             preset.ListOfMooch.ForEach(MigrateHookConfigSwimbaitMooch);
@@ -177,19 +159,15 @@ public class Configuration : IPluginConfiguration
     /// v6 migration: convert legacy ExtraConfig flags (intuition, spectral, angler's art, swimbait)
     /// into generic trigger-based ExtraConfig.Triggers using ConditionSets.
     /// </summary>
-    private void MigrateExtraToTriggers()
-    {
-        static void MigratePreset(CustomPresetConfig preset)
-        {
+    private void MigrateExtraToTriggers() {
+        static void MigratePreset(CustomPresetConfig preset) {
             var extra = preset.ExtraCfg;
             if (extra == null)
                 return;
 
             // Intuition gained
-            if ((extra.SwapPresetIntuitionGain || extra.SwapBaitIntuitionGain) && extra.Triggers.Count < 16)
-            {
-                var set = new ConditionSet
-                {
+            if ((extra.SwapPresetIntuitionGain || extra.SwapBaitIntuitionGain) && extra.Triggers.Count < 16) {
+                var set = new ConditionSet {
                     CombineMode = ConditionCombineMode.All,
                     Groups =
                     [
@@ -208,8 +186,7 @@ public class Configuration : IPluginConfiguration
                     ]
                 };
 
-                extra.Triggers.Add(new ExtraTrigger
-                {
+                extra.Triggers.Add(new ExtraTrigger {
                     ConditionSet = set,
                     SwapPreset = extra.SwapPresetIntuitionGain,
                     PresetToSwap = extra.PresetToSwapIntuitionGain,
@@ -220,10 +197,8 @@ public class Configuration : IPluginConfiguration
             }
 
             // Intuition lost
-            if ((extra.SwapPresetIntuitionLost || extra.SwapBaitIntuitionLost || extra.QuitOnIntuitionLost || extra.StopOnIntuitionLost) && extra.Triggers.Count < 16)
-            {
-                var set = new ConditionSet
-                {
+            if ((extra.SwapPresetIntuitionLost || extra.SwapBaitIntuitionLost || extra.QuitOnIntuitionLost || extra.StopOnIntuitionLost) && extra.Triggers.Count < 16) {
+                var set = new ConditionSet {
                     CombineMode = ConditionCombineMode.All,
                     Groups =
                     [
@@ -251,8 +226,7 @@ public class Configuration : IPluginConfiguration
                 // OnLose Intuition = (NOT IntuitionActive)
                 set.Groups[0].Conditions[0].Params["inv"] = true;
 
-                extra.Triggers.Add(new ExtraTrigger
-                {
+                extra.Triggers.Add(new ExtraTrigger {
                     ConditionSet = set,
                     SwapPreset = extra.SwapPresetIntuitionLost,
                     PresetToSwap = extra.PresetToSwapIntuitionLost,
@@ -263,10 +237,8 @@ public class Configuration : IPluginConfiguration
             }
 
             // Spectral gained
-            if ((extra.SwapPresetSpectralCurrentGain || extra.SwapBaitSpectralCurrentGain) && extra.Triggers.Count < 16)
-            {
-                var set = new ConditionSet
-                {
+            if ((extra.SwapPresetSpectralCurrentGain || extra.SwapBaitSpectralCurrentGain) && extra.Triggers.Count < 16) {
+                var set = new ConditionSet {
                     CombineMode = ConditionCombineMode.All,
                     Groups =
                     [
@@ -285,8 +257,7 @@ public class Configuration : IPluginConfiguration
                     ]
                 };
 
-                extra.Triggers.Add(new ExtraTrigger
-                {
+                extra.Triggers.Add(new ExtraTrigger {
                     ConditionSet = set,
                     SwapPreset = extra.SwapPresetSpectralCurrentGain,
                     PresetToSwap = extra.PresetToSwapSpectralCurrentGain,
@@ -297,10 +268,8 @@ public class Configuration : IPluginConfiguration
             }
 
             // Spectral lost
-            if ((extra.SwapPresetSpectralCurrentLost || extra.SwapBaitSpectralCurrentLost) && extra.Triggers.Count < 16)
-            {
-                var set = new ConditionSet
-                {
+            if ((extra.SwapPresetSpectralCurrentLost || extra.SwapBaitSpectralCurrentLost) && extra.Triggers.Count < 16) {
+                var set = new ConditionSet {
                     CombineMode = ConditionCombineMode.All,
                     Groups =
                     [
@@ -322,8 +291,7 @@ public class Configuration : IPluginConfiguration
                 // OnLose Spectral = (NOT SpectralActive)
                 set.Groups[0].Conditions[0].Params["inv"] = true;
 
-                extra.Triggers.Add(new ExtraTrigger
-                {
+                extra.Triggers.Add(new ExtraTrigger {
                     ConditionSet = set,
                     SwapPreset = extra.SwapPresetSpectralCurrentLost,
                     PresetToSwap = extra.PresetToSwapSpectralCurrentLost,
@@ -334,10 +302,8 @@ public class Configuration : IPluginConfiguration
             }
 
             // Angler's Art stacks reached
-            if ((extra.SwapPresetAnglersArt || extra.SwapBaitAnglersArt || extra.StopAfterAnglersArt) && extra.AnglerStackQtd > 0 && extra.Triggers.Count < 16)
-            {
-                var set = new ConditionSet
-                {
+            if ((extra.SwapPresetAnglersArt || extra.SwapBaitAnglersArt || extra.StopAfterAnglersArt) && extra.AnglerStackQtd > 0 && extra.Triggers.Count < 16) {
+                var set = new ConditionSet {
                     CombineMode = ConditionCombineMode.All,
                     Groups =
                     [
@@ -361,15 +327,13 @@ public class Configuration : IPluginConfiguration
                 };
 
                 var stop = ExtraStopAction.None;
-                if (extra.StopAfterAnglersArt)
-                {
+                if (extra.StopAfterAnglersArt) {
                     stop = extra.AnglerStopFishingStep == FishingSteps.Quitting
                         ? ExtraStopAction.QuitFishing
                         : ExtraStopAction.StopOnly;
                 }
 
-                extra.Triggers.Add(new ExtraTrigger
-                {
+                extra.Triggers.Add(new ExtraTrigger {
                     ConditionSet = set,
                     SwapPreset = extra.SwapPresetAnglersArt,
                     PresetToSwap = extra.PresetToSwapAnglersArt,
@@ -380,10 +344,8 @@ public class Configuration : IPluginConfiguration
             }
 
             // Swimbait fills
-            if (extra.SwimbaitFillsAction != SwimbaitAction.None && extra.Triggers.Count < 16)
-            {
-                var set = new ConditionSet
-                {
+            if (extra.SwimbaitFillsAction != SwimbaitAction.None && extra.Triggers.Count < 16) {
+                var set = new ConditionSet {
                     CombineMode = ConditionCombineMode.All,
                     Groups =
                     [
@@ -410,8 +372,7 @@ public class Configuration : IPluginConfiguration
                     ? ExtraStopAction.StopOnly
                     : ExtraStopAction.None;
 
-                extra.Triggers.Add(new ExtraTrigger
-                {
+                extra.Triggers.Add(new ExtraTrigger {
                     ConditionSet = set,
                     SwapPreset = extra.SwimbaitFillsAction == SwimbaitAction.SwapPreset,
                     PresetToSwap = extra.PresetToSwapSwimbaitFills,
@@ -421,10 +382,8 @@ public class Configuration : IPluginConfiguration
             }
 
             // Swimbait runs out
-            if (extra.SwimbaitRunsOutAction != SwimbaitAction.None && extra.Triggers.Count < 16)
-            {
-                var set = new ConditionSet
-                {
+            if (extra.SwimbaitRunsOutAction != SwimbaitAction.None && extra.Triggers.Count < 16) {
+                var set = new ConditionSet {
                     CombineMode = ConditionCombineMode.All,
                     Groups =
                     [
@@ -451,8 +410,7 @@ public class Configuration : IPluginConfiguration
                     ? ExtraStopAction.StopOnly
                     : ExtraStopAction.None;
 
-                extra.Triggers.Add(new ExtraTrigger
-                {
+                extra.Triggers.Add(new ExtraTrigger {
                     ConditionSet = set,
                     SwapPreset = extra.SwimbaitRunsOutAction == SwimbaitAction.SwapPreset,
                     PresetToSwap = extra.PresetToSwapSwimbaitRunsOut,
@@ -467,19 +425,16 @@ public class Configuration : IPluginConfiguration
             MigratePreset(preset);
     }
 
-    private static void MigrateHookConfig(HookConfig hook)
-    {
+    private static void MigrateHookConfig(HookConfig hook) {
         if (hook == null) return;
         MigrateHookset(hook.NormalHook);
         MigrateHookset(hook.IntuitionHook);
     }
 
-    private static void MigrateHookset(BaseHookset hookset)
-    {
+    private static void MigrateHookset(BaseHookset hookset) {
         if (hookset == null) return;
 
-        void MigrateBite(BaseBiteConfig b)
-        {
+        void MigrateBite(BaseBiteConfig b) {
             if (b == null) return;
             // Do not overwrite existing ConditionSets
             if (b.ConditionSet is { Groups.Count: > 0 }) return;
@@ -487,13 +442,10 @@ public class Configuration : IPluginConfiguration
             var set = b.ConditionSet ??= new ConditionSet();
             var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
 
-            void AddStatus(uint statusId, bool inverse)
-            {
-                var cond = new Condition
-                {
+            void AddStatus(uint statusId, bool inverse) {
+                var cond = new Condition {
                     TypeId = Registry.GetId<StatusActiveCD>(),
-                    Params = new Dictionary<string, object>
-                    {
+                    Params = new Dictionary<string, object> {
                         ["ids"] = new List<object> { (long)statusId }
                     }
                 };
@@ -502,15 +454,12 @@ public class Configuration : IPluginConfiguration
                 group.Conditions.Add(cond);
             }
 
-            void AddRange(string typeId, double min, double max)
-            {
+            void AddRange(string typeId, double min, double max) {
                 if (min <= 0 && max <= 0)
                     return;
-                var cond = new Condition
-                {
+                var cond = new Condition {
                     TypeId = typeId,
-                    Params = new Dictionary<string, object>
-                    {
+                    Params = new Dictionary<string, object> {
                         // "r": [min, max]; max 0 => no upper bound
                         ["r"] = new List<object> { min, max }
                     }
@@ -537,10 +486,8 @@ public class Configuration : IPluginConfiguration
                 AddStatus(IDs.Status.PrizeCatch, inverse: true);
 
             // Multihook: only map the positive case; negative case remains on legacy flag.
-            if (b.OnlyWhenActiveMultihook)
-            {
-                var cond = new Condition
-                {
+            if (b.OnlyWhenActiveMultihook) {
+                var cond = new Condition {
                     TypeId = Registry.GetId<MultihookAvailableCD>(),
                     Params = []
                 };
@@ -571,21 +518,17 @@ public class Configuration : IPluginConfiguration
         MigrateLures(hookset.CastLures);
     }
 
-    private static void MigrateLures(AutoLures lures)
-    {
+    private static void MigrateLures(AutoLures lures) {
         if (lures == null) return;
         if (lures.ConditionSet is { Groups.Count: > 0 }) return;
 
         var set = lures.ConditionSet ??= new ConditionSet();
         var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
 
-        void AddStatus(uint statusId, bool inverse)
-        {
-            var cond = new Condition
-            {
+        void AddStatus(uint statusId, bool inverse) {
+            var cond = new Condition {
                 TypeId = Registry.GetId<StatusActiveCD>(),
-                Params = new Dictionary<string, object>
-                {
+                Params = new Dictionary<string, object> {
                     ["ids"] = new List<object> { (long)statusId }
                 }
             };
@@ -610,25 +553,20 @@ public class Configuration : IPluginConfiguration
             set.Groups.Add(group);
 
         // "Only use when Patience/Prize Catch is active" → OR of Patience or Prize Catch.
-        if (lures.OnlyCastLarge)
-        {
+        if (lures.OnlyCastLarge) {
             var largeGroup = new ConditionGroup { CombineMode = ConditionCombineMode.Any };
             var statusActiveId = Registry.GetId<StatusActiveCD>();
 
-            largeGroup.Conditions.Add(new Condition
-            {
+            largeGroup.Conditions.Add(new Condition {
                 TypeId = statusActiveId,
-                Params = new Dictionary<string, object>
-                {
+                Params = new Dictionary<string, object> {
                     ["ids"] = new List<object> { (long)IDs.Status.AnglersFortune }
                 }
             });
 
-            largeGroup.Conditions.Add(new Condition
-            {
+            largeGroup.Conditions.Add(new Condition {
                 TypeId = statusActiveId,
-                Params = new Dictionary<string, object>
-                {
+                Params = new Dictionary<string, object> {
                     ["ids"] = new List<object> { (long)IDs.Status.PrizeCatch }
                 }
             });
@@ -637,16 +575,14 @@ public class Configuration : IPluginConfiguration
         }
     }
 
-    private static void MigrateFishConfig(FishConfig fish)
-    {
+    private static void MigrateFishConfig(FishConfig fish) {
         if (fish == null) return;
         if (fish.IgnoreConditionSet is { Groups.Count: > 0 }) return;
         if (!fish.IgnoreOnIntuition) return;
 
         var set = fish.IgnoreConditionSet ??= new ConditionSet();
         var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-        var cond = new Condition
-        {
+        var cond = new Condition {
             TypeId = Registry.GetId<IntuitionActiveCD>(),
             Params = []
         };
@@ -654,19 +590,16 @@ public class Configuration : IPluginConfiguration
         set.Groups.Add(group);
     }
 
-    private static void MigrateAutoCordial(AutoCordial cordial)
-    {
+    private static void MigrateAutoCordial(AutoCordial cordial) {
         if (cordial == null) return;
         if (cordial.OvercapConditionSet is { Groups.Count: > 0 }) return;
         if (!cordial.AllowOvercapIC) return;
 
         var set = cordial.OvercapConditionSet ??= new ConditionSet();
         var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-        var cond = new Condition
-        {
+        var cond = new Condition {
             TypeId = Registry.GetId<StatusActiveCD>(),
-            Params = new Dictionary<string, object>
-            {
+            Params = new Dictionary<string, object> {
                 ["ids"] = new List<object> { (long)IDs.Status.IdenticalCast }
             }
         };
@@ -677,8 +610,7 @@ public class Configuration : IPluginConfiguration
     /// <summary>
     /// v6 migration: convert legacy AutoIdenticalCast flags (Patience / Cordial) into ConditionSet-based rules.
     /// </summary>
-    private static void MigrateAutoIdenticalCast(AutoIdenticalCast ic)
-    {
+    private static void MigrateAutoIdenticalCast(AutoIdenticalCast ic) {
         if (ic == null) return;
         // If user already configured a ConditionSet, don't touch it.
         if (ic.ConditionSet is { Groups.Count: > 0 }) return;
@@ -692,24 +624,19 @@ public class Configuration : IPluginConfiguration
         // or just the one that is set.
         var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
 
-        if (ic.OnlyUseUnderPatience)
-        {
-            group.Conditions.Add(new Condition
-            {
+        if (ic.OnlyUseUnderPatience) {
+            group.Conditions.Add(new Condition {
                 TypeId = Registry.GetId<StatusActiveCD>(),
-                Params = new Dictionary<string, object>
-                {
+                Params = new Dictionary<string, object> {
                     ["ids"] = new List<object> { (long)IDs.Status.AnglersFortune }
                 }
             });
         }
 
-        if (ic.OnlyWhenCordialAvailable)
-        {
+        if (ic.OnlyWhenCordialAvailable) {
             // OR of any cordial item being available.
             // Achieve this by a subgroup with CombineMode.Any over multiple ActionAvailable conditions.
-            var cordialGroup = new ConditionGroup
-            {
+            var cordialGroup = new ConditionGroup {
                 CombineMode = ConditionCombineMode.Any,
                 Conditions =
                 [
@@ -765,8 +692,7 @@ public class Configuration : IPluginConfiguration
             // appending it as another group, and using Expression to AND A && C if needed.
             // For simplicity, if we already have a Patience condition, we just AND it with
             // "(B || C || D ...)" by using the Expression over the two groups.
-            if (group.Conditions.Count == 0)
-            {
+            if (group.Conditions.Count == 0) {
                 // Only cordial flag set: just use cordialGroup as the sole group.
                 set.Groups.Add(cordialGroup);
                 return;
@@ -784,16 +710,14 @@ public class Configuration : IPluginConfiguration
     }
 
     /// <summary>v6 migration: legacy time-window → TimeWindowConditionSet (single source of truth).</summary>
-    private static void MigrateAutoCastsTimeWindow(AutoCastsConfig acCfg)
-    {
+    private static void MigrateAutoCastsTimeWindow(AutoCastsConfig acCfg) {
         if (acCfg == null) return;
         if (acCfg.TimeWindow.BackingSet is { Groups.Count: > 0 }) return;
         if (!acCfg.OnlyCastDuringSpecificTime) return;
 
         var set = acCfg.TimeWindow.BackingSet ??= new ConditionSet { CombineMode = ConditionCombineMode.All };
         var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-        group.Conditions.Add(new Condition
-        {
+        group.Conditions.Add(new Condition {
             TypeId = Registry.GetId<TimeWindowCD>(),
             Params = new TimeWindowCD.TimeWindowParams(acCfg.StartTime, acCfg.EndTime, false).ToParams(),
         });
@@ -801,13 +725,11 @@ public class Configuration : IPluginConfiguration
     }
 
     /// <summary>v6 migration: legacy swimbait fields → per-window SwimbaitConfig.</summary>
-    private static void MigrateHookConfigSwimbaitMooch(HookConfig hook)
-    {
+    private static void MigrateHookConfigSwimbaitMooch(HookConfig hook) {
         if (hook == null) return;
 
         // 1) Legacy UseSwimbait → enable both windows if neither has been explicitly configured.
-        if (hook.UseSwimbait && !hook.SwimbaitNormal.UseSwimbait && !hook.SwimbaitIntuition.UseSwimbait)
-        {
+        if (hook.UseSwimbait && !hook.SwimbaitNormal.UseSwimbait && !hook.SwimbaitIntuition.UseSwimbait) {
             hook.SwimbaitNormal.UseSwimbait = true;
             hook.SwimbaitIntuition.UseSwimbait = true;
         }
@@ -816,8 +738,7 @@ public class Configuration : IPluginConfiguration
             return;
 
         // 2) Migrate legacy count threshold into both configs if they are still at default.
-        if (hook.SwimbaitCountThreshold > 1)
-        {
+        if (hook.SwimbaitCountThreshold > 1) {
             if (hook.SwimbaitNormal.CountThreshold == 1)
                 hook.SwimbaitNormal.CountThreshold = hook.SwimbaitCountThreshold;
             if (hook.SwimbaitIntuition.CountThreshold == 1)
@@ -826,12 +747,10 @@ public class Configuration : IPluginConfiguration
 
         // 3) Migrate legacy "OnlyUseWhenNoMoochAvailable" into a MoochAvailableCD condition.
         // This is only done when new configs don't already have a condition set.
-        if (hook.OnlyUseWhenNoMoochAvailable)
-        {
+        if (hook.OnlyUseWhenNoMoochAvailable) {
             var legacySet = new ConditionSet { CombineMode = ConditionCombineMode.All };
             var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-            group.Conditions.Add(new Condition
-            {
+            group.Conditions.Add(new Condition {
                 TypeId = Registry.GetId<MoochAvailableCD>(),
                 Params = new MoochAvailableCD.MoochAvailableParams(true).ToParams(),
             });
@@ -845,20 +764,17 @@ public class Configuration : IPluginConfiguration
     }
 
     /// <summary>v6 migration: legacy stop/swap counts → ConditionSets (single source of truth).</summary>
-    private static void MigrateFishConfigStopSwap(FishConfig fish)
-    {
+    private static void MigrateFishConfigStopSwap(FishConfig fish) {
         if (fish == null || fish.Fish.Id <= 0) return;
         var fishId = fish.Fish.Id;
         var typeId = Registry.GetId<FishCaughtCountCD>();
 
-        ConditionSet? EnsureCountConditionSet(ConditionSet? current, int limit)
-        {
+        ConditionSet? EnsureCountConditionSet(ConditionSet? current, int limit) {
             if (limit < 1) return current;
             if (current is { Groups.Count: > 0 }) return current;
             var set = current ?? new ConditionSet { CombineMode = ConditionCombineMode.All };
             var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-            group.Conditions.Add(new Condition
-            {
+            group.Conditions.Add(new Condition {
                 TypeId = typeId,
                 Params = new FishCaughtCountCD.FishCaughtParams(fishId, limit, ">=", false).ToParams(),
             });
@@ -874,8 +790,7 @@ public class Configuration : IPluginConfiguration
             fish.SwapPresetLimit.BackingSet = EnsureCountConditionSet(fish.SwapPresetLimit.BackingSet, fish.LegacySwapPresetCount);
     }
 
-    public void Initiate()
-    {
+    public void Initiate() {
         if (HookPresets.DefaultPreset.ListOfBaits.Count != 0)
             return;
 
@@ -886,12 +801,9 @@ public class Configuration : IPluginConfiguration
         HookPresets.DefaultPreset.ListOfMooch.Add(new HookConfig(mooch));
     }
 
-    public static Configuration Load()
-    {
-        try
-        {
-            if (Svc.PluginInterface.GetPluginConfig() is Configuration config)
-            {
+    public static Configuration Load() {
+        try {
+            if (Svc.PluginInterface.GetPluginConfig() is Configuration config) {
                 config.Initiate();
                 config.UpdateVersion();
                 config.Save();
@@ -903,15 +815,13 @@ public class Configuration : IPluginConfiguration
             config.Save();
             return config;
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Svc.Log.Error(@$"[Configuration] {e.Message}");
             throw;
         }
     }
 
-    public static void ResetConfig()
-    {
+    public static void ResetConfig() {
     }
 
     // Got the export/import function from the UnknownX7's ReAction repo
@@ -921,8 +831,7 @@ public class Configuration : IPluginConfiguration
             new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore }));
     }*/
 
-    public static string ExportPreset(BasePresetConfig preset)
-    {
+    public static string ExportPreset(BasePresetConfig preset) {
         var exported = CompressString(JsonConvert.SerializeObject(
             preset,
             new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore }));
@@ -936,21 +845,17 @@ public class Configuration : IPluginConfiguration
         return "Something went wrong while exporting the preset";
     }
 
-    public class FolderExport(string name)
-    {
+    public class FolderExport(string name) {
         public string FolderName { get; set; } = name;
         public List<CustomPresetConfig> Presets { get; set; } = [];
     }
 
-    public static string ExportFolder(PresetFolder folder, List<CustomPresetConfig> presets)
-    {
+    public static string ExportFolder(PresetFolder folder, List<CustomPresetConfig> presets) {
         var folderExport = new FolderExport(folder.FolderName);
 
-        foreach (var presetId in folder.PresetIds)
-        {
+        foreach (var presetId in folder.PresetIds) {
             var preset = presets.FirstOrDefault(p => p.UniqueId == presetId);
-            if (preset != null)
-            {
+            if (preset != null) {
                 folderExport.Presets.Add(preset);
             }
         }
@@ -961,13 +866,11 @@ public class Configuration : IPluginConfiguration
         return ExportPrefixFolder + exported;
     }
 
-    public static (PresetFolder Folder, List<CustomPresetConfig> Presets)? ImportFolder(string import)
-    {
+    public static (PresetFolder Folder, List<CustomPresetConfig> Presets)? ImportFolder(string import) {
         if (!import.StartsWith(ExportPrefixFolder))
             return null;
 
-        try
-        {
+        try {
             var folderData = JsonConvert.DeserializeObject<FolderExport>(DecompressString(import),
                 new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace });
 
@@ -977,40 +880,34 @@ public class Configuration : IPluginConfiguration
             var folder = new PresetFolder(folderData.FolderName);
 
             // Generate new GUIDs for all presets to avoid conflicts
-            foreach (var preset in folderData.Presets)
-            {
+            foreach (var preset in folderData.Presets) {
                 preset.UniqueId = Guid.NewGuid();
                 folder.AddPreset(preset.UniqueId);
             }
 
             return (folder, folderData.Presets);
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Svc.Log.Error($"Failed to import folder: {e.Message}");
             return null;
         }
     }
 
-    public static BasePresetConfig? ImportPreset(string import)
-    {
-        if (import.StartsWith(ExportPrefixV2))
-        {
+    public static BasePresetConfig? ImportPreset(string import) {
+        if (import.StartsWith(ExportPrefixV2)) {
             var old = JsonConvert.DeserializeObject<BaitPresetConfig>(DecompressString(import),
                 new JsonSerializerSettings() { ObjectCreationHandling = ObjectCreationHandling.Replace });
             return ConvertOldPreset(old);
         }
 
-        if (import.StartsWith(ExportPrefixV3))
-        {
+        if (import.StartsWith(ExportPrefixV3)) {
             var old = JsonConvert.DeserializeObject<OldPresetConfig>(DecompressString(import),
                 new JsonSerializerSettings() { ObjectCreationHandling = ObjectCreationHandling.Replace });
 
             return ConvertOldPresetV3(old);
         }
 
-        if (import.StartsWith(ExportPrefixSf))
-        {
+        if (import.StartsWith(ExportPrefixSf)) {
             var autogig = JsonConvert.DeserializeObject<AutoGigConfig>(DecompressString(import),
                 new JsonSerializerSettings() { ObjectCreationHandling = ObjectCreationHandling.Replace });
 
@@ -1040,8 +937,7 @@ public class Configuration : IPluginConfiguration
         ExportPrefixFolder
     ];
 
-    public static string CompressString(string s)
-    {
+    public static string CompressString(string s) {
         var bytes = Encoding.UTF8.GetBytes(s);
         using var ms = new MemoryStream();
         using (var gs = new GZipStream(ms, CompressionMode.Compress))
@@ -1050,8 +946,7 @@ public class Configuration : IPluginConfiguration
         return Convert.ToBase64String(ms.ToArray());
     }
 
-    public static string DecompressString(string s)
-    {
+    public static string DecompressString(string s) {
         if (!ExportPrefixes.Any(s.StartsWith))
             throw new ApplicationException(UIStrings.DecompressString_Invalid_Import);
 
@@ -1062,8 +957,7 @@ public class Configuration : IPluginConfiguration
         var uncompressedSize = BitConverter.ToInt32(lengthBuffer, 0);
 
         var buffer = new byte[uncompressedSize];
-        using (var ms = new MemoryStream(data))
-        {
+        using (var ms = new MemoryStream(data)) {
             using var gzip = new GZipStream(ms, CompressionMode.Decompress);
             gzip.ReadExactly(buffer, 0, uncompressedSize);
         }
@@ -1071,10 +965,8 @@ public class Configuration : IPluginConfiguration
         return Encoding.UTF8.GetString(buffer);
     }
 
-    public static string DecompressBase64(string base64)
-    {
-        try
-        {
+    public static string DecompressBase64(string base64) {
+        try {
             var bytes = Convert.FromBase64String(base64);
             using var compressedStream = new MemoryStream(bytes);
             using var zipStream = new GZipStream(compressedStream, CompressionMode.Decompress);
@@ -1083,61 +975,52 @@ public class Configuration : IPluginConfiguration
             bytes = resultStream.ToArray();
             return Encoding.UTF8.GetString(bytes, 1, bytes.Length - 1);
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Svc.Log.Error(@$"Failed to DecompressBase64: {e.Message}");
             return "";
         }
     }
 
-    private static CustomPresetConfig? ConvertOldPreset(BaitPresetConfig? preset)
-    {
+    private static CustomPresetConfig? ConvertOldPreset(BaitPresetConfig? preset) {
         if (preset == null)
             return null;
 
         var filteredBaits = new List<HookConfig>();
         var filteredMooch = new List<HookConfig>();
-        foreach (var old in preset.ListOfBaits)
-        {
+        foreach (var old in preset.ListOfBaits) {
             var matchingBait = GameRes.Baits.FirstOrDefault(b => b.Name == old.BaitName);
             var matchingFish = GameRes.Fishes.FirstOrDefault(f => f.Name == old.BaitName);
 
-            if (matchingBait != null)
-            {
+            if (matchingBait != null) {
                 var newOne = new HookConfig(matchingBait);
                 SetFieldNewClass(newOne, old);
                 filteredBaits.Add(newOne);
             }
-            else if (matchingFish != null)
-            {
+            else if (matchingFish != null) {
                 var newOne = new HookConfig(matchingFish);
                 SetFieldNewClass(newOne, old);
                 filteredMooch.Add(newOne);
             }
         }
 
-        CustomPresetConfig newPreset = new(@$"[Old Version] {preset.PresetName}")
-        {
+        CustomPresetConfig newPreset = new(@$"[Old Version] {preset.PresetName}") {
             ListOfBaits = filteredBaits,
             ListOfMooch = filteredMooch
         };
         return newPreset;
     }
 
-    private static CustomPresetConfig? ConvertOldPresetV3(OldPresetConfig? old)
-    {
+    private static CustomPresetConfig? ConvertOldPresetV3(OldPresetConfig? old) {
         if (old == null)
             return null;
 
         var newPreset = new CustomPresetConfig(old.PresetName);
 
         Service.PrintDebug($"Converting v3 to v4: {old.PresetName}");
-        foreach (var bait in old.ListOfBaits)
-        {
+        foreach (var bait in old.ListOfBaits) {
             bait.ConvertV3ToV4();
 
-            var newBait = new HookConfig(bait.BaitFish)
-            {
+            var newBait = new HookConfig(bait.BaitFish) {
                 Enabled = bait.Enabled,
                 NormalHook = bait.NormalHook,
                 IntuitionHook = bait.IntuitionHook
@@ -1147,11 +1030,9 @@ public class Configuration : IPluginConfiguration
             newPreset.AddItem(newBait);
         }
 
-        foreach (var mooch in old.ListOfMooch)
-        {
+        foreach (var mooch in old.ListOfMooch) {
             mooch.ConvertV3ToV4();
-            var newMooch = new HookConfig(mooch.BaitFish)
-            {
+            var newMooch = new HookConfig(mooch.BaitFish) {
                 Enabled = mooch.Enabled,
                 NormalHook = mooch.NormalHook,
                 IntuitionHook = mooch.IntuitionHook

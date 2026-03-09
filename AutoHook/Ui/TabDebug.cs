@@ -5,44 +5,36 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Ui;
 
-public class TabDebug : BaseTab
-{
+public class TabDebug : BaseTab {
     public override OpenWindow Type => OpenWindow.Debug;
 
     public override string TabName => "Debug";
     public override bool Enabled => true;
 
-    public override void DrawHeader()
-    {
+    public override void DrawHeader() {
         DrawUtil.TextV("WorldState viewer and wiki presets.");
     }
 
-    public override void Draw()
-    {
-        try
-        {
+    public override void Draw() {
+        try {
             DrawWorldState();
             DrawWikiPresets();
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Svc.Log.Error(e.Message);
         }
     }
 
-    private static void DrawWorldState()
-    {
+    private static void DrawWorldState() {
         var ws = Service.WorldState;
         if (ws == null) return;
 
         if (!ImGui.CollapsingHeader("WorldState", ImGuiTreeNodeFlags.DefaultOpen))
             return;
 
-        using (ImRaii.PushIndent())
-        {
+        using (ImRaii.PushIndent()) {
             // Core
-            if (ImGui.CollapsingHeader("Core", ImGuiTreeNodeFlags.DefaultOpen))
-            {
+            if (ImGui.CollapsingHeader("Core", ImGuiTreeNodeFlags.DefaultOpen)) {
                 ImGui.Text($"CurrentGp / MaxGp: {ws.CurrentGp} / {ws.MaxGp}");
                 ImGui.Text($"BlockCasting: {ws.BlockCasting}");
                 ImGui.Text($"CurrentWeatherId: {ws.CurrentWeatherId}");
@@ -50,8 +42,7 @@ public class TabDebug : BaseTab
             }
 
             // Fishing state
-            if (ImGui.CollapsingHeader("Fishing state", ImGuiTreeNodeFlags.DefaultOpen))
-            {
+            if (ImGui.CollapsingHeader("Fishing state", ImGuiTreeNodeFlags.DefaultOpen)) {
                 ImGui.Text($"FishingState: {ws.FishingState}");
                 ImGui.Text($"PreviousFishingState: {ws.PreviousFishingState}");
                 ImGui.Text($"FishingStep: {ws.FishingStep} (0x{(uint)ws.FishingStep:X})");
@@ -63,23 +54,20 @@ public class TabDebug : BaseTab
             }
 
             // Bite / context
-            if (ImGui.CollapsingHeader("Bite / context"))
-            {
+            if (ImGui.CollapsingHeader("Bite / context")) {
                 ImGui.Text($"BiteTimeSeconds: {ws.BiteTimeSeconds:F2}");
                 ImGui.Text($"ChumActive: {ws.ChumActive}");
             }
 
             // Intuition
-            if (ImGui.CollapsingHeader("Intuition"))
-            {
+            if (ImGui.CollapsingHeader("Intuition")) {
                 ImGui.Text($"IntuitionStatus: {ws.IntuitionStatus}");
                 ImGui.Text($"IntuitionTimeRemaining: {ws.IntuitionTimeRemaining:F1}s");
                 ImGui.Text($"SpectralCurrentStatus: {ws.SpectralCurrentStatus}");
             }
 
             // Ocean fishing
-            if (ImGui.CollapsingHeader("Ocean fishing"))
-            {
+            if (ImGui.CollapsingHeader("Ocean fishing")) {
                 var of = ws.OceanFishing;
                 ImGui.Text($"SpectralCurrentActive: {of.SpectralCurrentActive}");
                 ImGui.Text($"CurrentRoute: {of.CurrentRoute}");
@@ -91,8 +79,7 @@ public class TabDebug : BaseTab
             }
 
             // Last catch
-            if (ImGui.CollapsingHeader("Last catch"))
-            {
+            if (ImGui.CollapsingHeader("Last catch")) {
                 ImGui.Text($"LastCaughtFishId: {ws.LastCaughtFishId}");
                 ImGui.Text($"LastCatchAmount: {ws.LastCatchAmount}");
                 if (Service.LastCatch != null)
@@ -100,18 +87,15 @@ public class TabDebug : BaseTab
             }
 
             // Actions
-            if (ImGui.CollapsingHeader("Actions"))
-            {
+            if (ImGui.CollapsingHeader("Actions")) {
                 ImGui.Text($"LastUsedActionId: {ws.LastUsedActionId}");
                 ImGui.Text($"LastUsedActionType: {ws.LastUsedActionType}");
                 ImGui.Text($"LureSuccess: {ws.LureSuccess}");
             }
 
             // Statuses
-            if (ImGui.CollapsingHeader("Statuses"))
-            {
-                foreach (var (id, (time, stacks)) in ws.Statuses)
-                {
+            if (ImGui.CollapsingHeader("Statuses")) {
+                foreach (var (id, (time, stacks)) in ws.Statuses) {
                     var name = StatusName(id);
                     ImGui.Text($"{id}: {name} — time={time:F1}s stacks={stacks}");
                 }
@@ -120,8 +104,7 @@ public class TabDebug : BaseTab
             }
 
             // Swimbait
-            if (ImGui.CollapsingHeader("Swimbait"))
-            {
+            if (ImGui.CollapsingHeader("Swimbait")) {
                 ImGui.Text($"SwimbaitIds: [{string.Join(", ", ws.SwimbaitIds)}]");
                 ImGui.Text($"GetSwimbaitCount(): {ws.GetSwimbaitCount()}");
                 ImGui.Text($"IsSwimbaitFull: {ws.IsSwimbaitFull()}");
@@ -129,16 +112,13 @@ public class TabDebug : BaseTab
             }
 
             // Pot
-            if (ImGui.CollapsingHeader("Pot"))
-            {
+            if (ImGui.CollapsingHeader("Pot")) {
                 ImGui.Text($"IsPotOffCooldown: {ws.IsPotOffCooldown}");
             }
 
             // Item counts (known IDs)
-            if (ImGui.CollapsingHeader("Item counts (known)"))
-            {
-                foreach (var (id, label) in KnownItemIds)
-                {
+            if (ImGui.CollapsingHeader("Item counts (known)")) {
+                foreach (var (id, label) in KnownItemIds) {
                     var c = ws.GetItemCount(id);
                     if (c > 0)
                         ImGui.Text($"{label} ({id}): {c}");
@@ -146,13 +126,11 @@ public class TabDebug : BaseTab
             }
 
             // Action availability (key actions)
-            if (ImGui.CollapsingHeader("Action availability (key)"))
-            {
+            if (ImGui.CollapsingHeader("Action availability (key)")) {
                 ImGui.Text($"IsCastAvailable: {ws.IsCastAvailable()}");
                 ImGui.Text($"IsMoochAvailable: {ws.IsMoochAvailable()}");
                 ImGui.Text($"HasMultihookAvailable: {ws.HasMultihookAvailable()}");
-                foreach (var (id, type, label) in KnownActionIds)
-                {
+                foreach (var (id, type, label) in KnownActionIds) {
                     if (ws.ActionAvailable(id, type))
                         ImGui.Text($"{label}: available");
                 }
@@ -160,10 +138,8 @@ public class TabDebug : BaseTab
         }
     }
 
-    private static string StatusName(uint id)
-    {
-        return id switch
-        {
+    private static string StatusName(uint id) {
+        return id switch {
             IDs.Status.FoodBuff => "FoodBuff",
             IDs.Status.FishersIntuition => "FishersIntuition",
             IDs.Status.SurfaceSlap => "SurfaceSlap",
@@ -206,20 +182,16 @@ public class TabDebug : BaseTab
         (IDs.Item.HQWateredCordial, "HQWateredCordial"),
     ];
 
-    private static void DrawWikiPresets()
-    {
+    private static void DrawWikiPresets() {
         if (!ImGui.CollapsingHeader("Get Wiki presets", ImGuiTreeNodeFlags.DefaultOpen))
             return;
 
-        using (ImRaii.Group())
-        {
-            if (ImGui.Button($"Get Wiki info (cd: {EzThrottler.GetRemainingTime("WikiUpdate")})"))
-            {
+        using (ImRaii.Group()) {
+            if (ImGui.Button($"Get Wiki info (cd: {EzThrottler.GetRemainingTime("WikiUpdate")})")) {
                 _ = WikiPresets.ListWikiPages();
             }
 
-            foreach (var preset in WikiPresets.Presets)
-            {
+            foreach (var preset in WikiPresets.Presets) {
                 ImGui.TextWrapped($"Preset: {preset.Key}, Qtd: {preset.Value.Count}");
                 foreach (var item in preset.Value)
                     ImGui.TextWrapped($"-> {item.Presets.FirstOrDefault()?.PresetName ?? "No preset name"}");
@@ -228,7 +200,6 @@ public class TabDebug : BaseTab
         }
     }
 
-    public override void Dispose()
-    {
+    public override void Dispose() {
     }
 }

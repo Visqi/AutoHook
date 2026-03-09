@@ -5,8 +5,7 @@ namespace AutoHook.Conditions;
 /// <summary>
 /// A group of conditions combined with AND or OR. (X or Y) in "(X or Y) AND (A or B)".
 /// </summary>
-public class ConditionGroup
-{
+public class ConditionGroup {
     [JsonProperty("m")]
     public ConditionCombineMode CombineMode { get; set; } = ConditionCombineMode.All;
 
@@ -17,8 +16,7 @@ public class ConditionGroup
     [JsonProperty("a")]
     public bool Enabled { get; set; } = true;
 
-    public bool Evaluate(WorldState world, ConditionRegistry registry)
-    {
+    public bool Evaluate(WorldState world, ConditionRegistry registry) {
         if (!Enabled) return true;
         var active = Conditions.Where(c => c.Enabled).ToList();
         if (active.Count == 0) return true;

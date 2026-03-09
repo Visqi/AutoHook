@@ -4,15 +4,13 @@ using System.Threading;
 
 namespace AutoHook.Configurations;
 
-public enum ExtraStopAction
-{
+public enum ExtraStopAction {
     None,
     StopOnly,
     QuitFishing,
 }
 
-public class ExtraTrigger
-{
+public class ExtraTrigger {
     [JsonIgnore]
     private static int _nextUiId = 1;
 
@@ -30,15 +28,13 @@ public class ExtraTrigger
 
     public ExtraStopAction StopAction { get; set; } = ExtraStopAction.None;
 
-    public void EnsureUiId()
-    {
+    public void EnsureUiId() {
         if (UiId <= 0)
             UiId = Interlocked.Increment(ref _nextUiId);
     }
 }
 
-public class ExtraConfig : BaseOption
-{
+public class ExtraConfig : BaseOption {
     public bool Enabled = false;
 
     public bool ResetCounterPresetSwap = false;

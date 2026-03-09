@@ -8,8 +8,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.WKS;
 
 namespace AutoHook.Conditions;
 
-public readonly struct BiteContext
-{
+public readonly struct BiteContext {
     public double BiteTimeSeconds { get; init; }
     public bool ChumActive { get; init; }
     public IntuitionStatus IntuitionStatus { get; init; }
@@ -18,24 +17,21 @@ public readonly struct BiteContext
     public int? LastCaughtFishId { get; init; }
 }
 
-public sealed class WorldStateUpdater : IDisposable
-{
+public sealed class WorldStateUpdater : IDisposable {
     private readonly Hook<ActionManager.Delegates.UseAction>? _useActionHook;
 
     public delegate void UpdateCatchDelegate(IntPtr module, uint fishId, bool large, ushort size, byte amount,
         byte level, byte unk7, byte unk8, byte unk9, byte unk10, byte unk11, byte unk12);
     private readonly Hook<UpdateCatchDelegate>? _updateCatchHook;
 
-    public unsafe WorldStateUpdater()
-    {
+    public unsafe WorldStateUpdater() {
         _updateCatchHook = Svc.Hook.HookFromSignature<UpdateCatchDelegate>(SignaturePatterns.UpdateCatch, UpdateCatchDetour);
         _useActionHook = Svc.Hook.HookFromAddress<ActionManager.Delegates.UseAction>((nint)ActionManager.MemberFunctionPointers.UseAction, UseActionDetour);
         _updateCatchHook?.Enable();
         _useActionHook?.Enable();
     }
 
-    public void Dispose()
-    {
+    public void Dispose() {
         _useActionHook?.Dispose();
         _updateCatchHook?.Dispose();
     }
@@ -43,8 +39,7 @@ public sealed class WorldStateUpdater : IDisposable
     /// <summary>
     /// Push current game state into WorldState. Call every frame
     /// </summary>
-    public void Update()
-    {
+    public void Update() {
         var ws = Service.WorldState;
         ws.Execute(CollectGp());
         ws.Execute(CollectStatuses());
@@ -64,10 +59,8 @@ public sealed class WorldStateUpdater : IDisposable
         ws.Execute(new WorldState.OpLastCatch(biteContext.LastCaughtFishId));
     }
 
-    private static BiteContext CollectBiteContext(WorldState ws)
-    {
-        return new BiteContext
-        {
+    private static BiteContext CollectBiteContext(WorldState ws) {
+        return new BiteContext {
             BiteTimeSeconds = ws.BiteTimeSeconds,
             ChumActive = ws.HasStatus(IDs.Status.Chum),
             IntuitionStatus = ws.HasStatus(IDs.Status.FishersIntuition) ? IntuitionStatus.Active : IntuitionStatus.NotActive,
@@ -77,10 +70,8 @@ public sealed class WorldStateUpdater : IDisposable
         };
     }
 
-    private static unsafe WorldState.OpOceanFishing CollectOceanFishing()
-    {
-        try
-        {
+    private static unsafe WorldState.OpOceanFishing CollectOceanFishing() {
+        try {
             var ptr = EventFramework.Instance()->GetInstanceContentOceanFishing();
             if (ptr == null)
                 return new WorldState.OpOceanFishing(null);
@@ -93,8 +84,7 @@ public sealed class WorldStateUpdater : IDisposable
             foreach (var f in ptr->ThirdZoneFishData)
                 fishData.Add(f);
 
-            var state = new OceanFishingState
-            {
+            var state = new OceanFishingState {
                 SpectralCurrentActive = ptr->SpectralCurrentActive,
                 CurrentRoute = ptr->CurrentRoute,
                 CurrentZone = ptr->CurrentZone,
@@ -108,36 +98,30 @@ public sealed class WorldStateUpdater : IDisposable
             };
             return new WorldState.OpOceanFishing(state);
         }
-        catch
-        {
+        catch {
             return new WorldState.OpOceanFishing(null);
         }
     }
 
-    private unsafe bool UseActionDetour(ActionManager* thisPtr, ActionType actionType, uint actionId, ulong targetId, uint extraParam, ActionManager.UseActionMode mode, uint comboRouteId, bool* outOptAreaTargeted)
-    {
-        try
-        {
+    private unsafe bool UseActionDetour(ActionManager* thisPtr, ActionType actionType, uint actionId, ulong targetId, uint extraParam, ActionManager.UseActionMode mode, uint comboRouteId, bool* outOptAreaTargeted) {
+        try {
             if (actionType == ActionType.Action && Service.Configuration.PluginEnabled && Service.WorldState.ActionAvailable(actionId))
                 Service.WorldState.Execute(new WorldState.OpPlayerUsedAction(actionType, actionId));
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Service.PrintDebug($"[WorldStateUpdater] UseAction: {e.Message}");
         }
         return _useActionHook!.Original(thisPtr, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
     }
 
     private void UpdateCatchDetour(IntPtr module, uint fishId, bool large, ushort size, byte amount, byte level,
-        byte unk7, byte unk8, byte unk9, byte unk10, byte unk11, byte unk12)
-    {
+        byte unk7, byte unk8, byte unk9, byte unk10, byte unk11, byte unk12) {
         _updateCatchHook!.Original(module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12);
         Service.WorldState.Execute(new WorldState.OpLastCatch((int?)ItemUtil.GetBaseId(fishId).ItemId, amount));
         Service.WorldState.Execute(new WorldState.OpSetFishingStep(FishingSteps.FishCaught));
     }
 
-    public static int ComputeCurrentBaitMoochId(uint currentId, uint? swimbaitId, bool isMooching, BiteContext biteContext)
-    {
+    public static int ComputeCurrentBaitMoochId(uint currentId, uint? swimbaitId, bool isMooching, BiteContext biteContext) {
         if (swimbaitId.HasValue && swimbaitId.Value != 0)
             return (int)swimbaitId.Value;
         if (GameRes.Fishes.Any(f => f.Id == currentId))
@@ -151,8 +135,7 @@ public sealed class WorldStateUpdater : IDisposable
     private static WorldState.OpGp CollectGp()
         => new(Svc.Objects.LocalPlayer?.CurrentGp ?? 0, Svc.Objects.LocalPlayer?.MaxGp ?? 0);
 
-    private static WorldState.OpStatuses CollectStatuses()
-    {
+    private static WorldState.OpStatuses CollectStatuses() {
         var dict = new Dictionary<uint, (float Time, int Stacks)>();
         if (Svc.Objects.LocalPlayer is { StatusList: var statuses })
             foreach (var buff in statuses)
@@ -160,18 +143,15 @@ public sealed class WorldStateUpdater : IDisposable
         return new WorldState.OpStatuses(dict);
     }
 
-    private static unsafe WorldState.OpFishingState CollectFishingState(BiteContext biteContext)
-    {
+    private static unsafe WorldState.OpFishingState CollectFishingState(BiteContext biteContext) {
         var state = FishingState.None;
         uint baitId = 0;
         uint? swimbaitId = null;
         var isMooching = false;
         var baitMoochId = 0;
 
-        try
-        {
-            if (Player.Territory is { Value.TerritoryIntendedUse.RowId: 60 })
-            {
+        try {
+            if (Player.Territory is { Value.TerritoryIntendedUse.RowId: 60 }) {
                 if (WKSManager.Instance() is not null and var cosmic)
                     baitId = cosmic->FishingBait;
             }
@@ -180,8 +160,7 @@ public sealed class WorldStateUpdater : IDisposable
 
             var ef = EventFramework.Instance();
             var handler = ef != null ? ef->EventHandlerModule.FishingEventHandler : null;
-            if (handler != null)
-            {
+            if (handler != null) {
                 state = handler->State;
                 if (handler->CurrentSelectedSwimBait is >= 0 and < 3)
                     swimbaitId = handler->SwimBaitItemIds[handler->CurrentSelectedSwimBait];
@@ -196,13 +175,10 @@ public sealed class WorldStateUpdater : IDisposable
         return new WorldState.OpFishingState(state, baitId, swimbaitId, isMooching, baitMoochId);
     }
 
-    private static WorldState.OpActionAvailability CollectActionAvailability()
-    {
+    private static WorldState.OpActionAvailability CollectActionAvailability() {
         var available = new List<(uint Id, ActionType Type)>();
-        bool Add(uint id, ActionType actionType = ActionType.Action)
-        {
-            if (ActionTypeAvailable(id, actionType))
-            {
+        bool Add(uint id, ActionType actionType = ActionType.Action) {
+            if (ActionTypeAvailable(id, actionType)) {
                 available.Add((id, actionType));
                 return true;
             }
@@ -240,8 +216,7 @@ public sealed class WorldStateUpdater : IDisposable
         return new WorldState.OpActionAvailability(available);
     }
 
-    private static unsafe bool ActionTypeAvailable(uint id, ActionType actionType)
-    {
+    private static unsafe bool ActionTypeAvailable(uint id, ActionType actionType) {
         if (ActionManager.Instance()->GetActionStatus(actionType, id) != 0)
             return false;
         var group = ActionManager.Instance()->GetRecastGroup((int)actionType, id);
@@ -250,20 +225,15 @@ public sealed class WorldStateUpdater : IDisposable
         return detail->Total - detail->Elapsed <= 0;
     }
 
-    private static unsafe WorldState.OpItemCounts CollectItemCounts()
-    {
+    private static unsafe WorldState.OpItemCounts CollectItemCounts() {
         var dict = new Dictionary<uint, int>();
-        try
-        {
+        try {
             var inv = InventoryManager.Instance();
-            if (inv != null)
-            {
-                for (var i = 0; i < 4; i++)
-                {
+            if (inv != null) {
+                for (var i = 0; i < 4; i++) {
                     var container = inv->GetInventoryContainer((InventoryType)i);
                     if (container == null) continue;
-                    for (var k = 0; k < container->Size; k++)
-                    {
+                    for (var k = 0; k < container->Size; k++) {
                         var slot = container->GetInventorySlot(k);
                         if (slot == null || slot->ItemId == 0) continue;
                         var id = slot->ItemId;
@@ -276,11 +246,9 @@ public sealed class WorldStateUpdater : IDisposable
         return new WorldState.OpItemCounts(dict);
     }
 
-    private static unsafe WorldState.OpSwimbaitIds CollectSwimbaitIds()
-    {
+    private static unsafe WorldState.OpSwimbaitIds CollectSwimbaitIds() {
         var list = new List<uint>();
-        try
-        {
+        try {
             if (EventFramework.Instance() is not null and var ef && ef->EventHandlerModule.FishingEventHandler is not null and var handler)
                 list.Add(handler->SwimBaitItemIds.ToArray());
         }
@@ -288,11 +256,9 @@ public sealed class WorldStateUpdater : IDisposable
         return new WorldState.OpSwimbaitIds(list);
     }
 
-    private static unsafe WorldState.OpPotCooldown CollectPotCooldown()
-    {
+    private static unsafe WorldState.OpPotCooldown CollectPotCooldown() {
         var off = false;
-        try
-        {
+        try {
             var recast = ActionManager.Instance()->GetRecastGroupDetail(68);
             off = recast->Total - recast->Elapsed <= 0;
         }

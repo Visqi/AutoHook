@@ -3,12 +3,9 @@ using Newtonsoft.Json.Linq;
 
 namespace AutoHook.Conditions;
 
-public class ConditionParamConverter : JsonConverter<Dictionary<string, object>>
-{
-    public override void WriteJson(JsonWriter writer, Dictionary<string, object>? value, JsonSerializer serializer)
-    {
-        if (value == null || value.Count == 0)
-        {
+public class ConditionParamConverter : JsonConverter<Dictionary<string, object>> {
+    public override void WriteJson(JsonWriter writer, Dictionary<string, object>? value, JsonSerializer serializer) {
+        if (value == null || value.Count == 0) {
             writer.WriteStartObject();
             writer.WriteEndObject();
             return;
@@ -16,13 +13,11 @@ public class ConditionParamConverter : JsonConverter<Dictionary<string, object>>
 
         // Filter out default / empty values
         var filtered = new Dictionary<string, object>();
-        foreach (var (key, rawVal) in value)
-        {
+        foreach (var (key, rawVal) in value) {
             if (rawVal == null)
                 continue;
 
-            switch (rawVal)
-            {
+            switch (rawVal) {
                 case bool b when !b:
                     continue;
                 case int i when i == 0:
@@ -41,8 +36,7 @@ public class ConditionParamConverter : JsonConverter<Dictionary<string, object>>
         }
 
         // If everything was default, still emit an empty object
-        if (filtered.Count == 0)
-        {
+        if (filtered.Count == 0) {
             writer.WriteStartObject();
             writer.WriteEndObject();
             return;
@@ -51,17 +45,14 @@ public class ConditionParamConverter : JsonConverter<Dictionary<string, object>>
         serializer.Serialize(writer, filtered);
     }
 
-    public override Dictionary<string, object> ReadJson(JsonReader reader, Type objectType, Dictionary<string, object>? existingValue, bool hasExistingValue, JsonSerializer serializer)
-    {
+    public override Dictionary<string, object> ReadJson(JsonReader reader, Type objectType, Dictionary<string, object>? existingValue, bool hasExistingValue, JsonSerializer serializer) {
         if (reader.TokenType == JsonToken.Null)
             return [];
 
         var token = JToken.Load(reader);
-        if (token.Type == JTokenType.Object)
-        {
+        if (token.Type == JTokenType.Object) {
             var dict = new Dictionary<string, object>();
-            foreach (var prop in token.Children<JProperty>())
-            {
+            foreach (var prop in token.Children<JProperty>()) {
                 dict[prop.Name] = ConvertToken(prop.Value);
             }
 
@@ -71,8 +62,7 @@ public class ConditionParamConverter : JsonConverter<Dictionary<string, object>>
         return [];
     }
 
-    private static object ConvertToken(JToken token) => token.Type switch
-    {
+    private static object ConvertToken(JToken token) => token.Type switch {
         JTokenType.Array => token.Children().Select(ConvertToken).ToList(),
         JTokenType.Integer => (long)token,
         JTokenType.Float => (double)token,

@@ -5,8 +5,7 @@ using AutoHook.Ui;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoLures : BaseActionCast
-{
+public class AutoLures : BaseActionCast {
     public int LureStacks = 3;
     public bool CancelAttempt;
 
@@ -25,8 +24,7 @@ public class AutoLures : BaseActionCast
 
     private uint StatusId => Id == IDs.Actions.AmbitiousLure ? IDs.Status.AmbitiousLure : IDs.Status.ModestLure;
 
-    public override bool CastCondition()
-    {
+    public override bool CastCondition() {
         if (Service.WorldState.GetStatusStacks(StatusId) >= LureStacks)
             return false;
 
@@ -36,21 +34,18 @@ public class AutoLures : BaseActionCast
         return EvaluateConditionSet();
     }
 
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
+    protected override DrawOptionsDelegate DrawOptions => () => {
         DrawUtil.TextV(UIStrings.LureType);
         ImGui.SameLine();
 
-        if (ImGui.RadioButton(UIStrings.AmbitiousLure, Id == IDs.Actions.AmbitiousLure))
-        {
+        if (ImGui.RadioButton(UIStrings.AmbitiousLure, Id == IDs.Actions.AmbitiousLure)) {
             Id = IDs.Actions.AmbitiousLure;
             Service.Save();
         }
 
         ImGui.SameLine();
 
-        if (ImGui.RadioButton(UIStrings.ModestLure, Id == IDs.Actions.ModestLure))
-        {
+        if (ImGui.RadioButton(UIStrings.ModestLure, Id == IDs.Actions.ModestLure)) {
             Id = IDs.Actions.ModestLure;
             Service.Save();
         }
@@ -59,15 +54,13 @@ public class AutoLures : BaseActionCast
 
         DrawUtil.TextV(UIStrings.AutoLures_Target_Fish);
         ImGui.SameLine();
-        if (ImGui.RadioButton(UIStrings.AnyTarget, LureTarget == LureTarget.Any))
-        {
+        if (ImGui.RadioButton(UIStrings.AnyTarget, LureTarget == LureTarget.Any)) {
             LureTarget = LureTarget.Any;
             Service.Save();
         }
 
         ImGui.SameLine();
-        if (ImGui.RadioButton(UIStrings.OnlySpecial, LureTarget == LureTarget.Special))
-        {
+        if (ImGui.RadioButton(UIStrings.OnlySpecial, LureTarget == LureTarget.Special)) {
             LureTarget = LureTarget.Special;
             Service.Save();
         }
@@ -76,14 +69,12 @@ public class AutoLures : BaseActionCast
         DrawUtil.Info($"{UIStrings.SpecialFishExemple} {GameRes.LureFishes.FirstOrDefault()?.Name}");
 
         ImGui.SameLine();
-        if (ImGui.RadioButton(UIStrings.NotSpecial, LureTarget == LureTarget.NotSpecial))
-        {
+        if (ImGui.RadioButton(UIStrings.NotSpecial, LureTarget == LureTarget.NotSpecial)) {
             LureTarget = LureTarget.NotSpecial;
             Service.Save();
         }
 
-        if (DrawUtil.EditNumberField(UIStrings.MaxAttempts, ref stack, "", 1))
-        {
+        if (DrawUtil.EditNumberField(UIStrings.MaxAttempts, ref stack, "", 1)) {
             // value has to be between 3 and 10
             LureStacks = Math.Clamp(stack, 1, 3);
             Service.Save();
@@ -99,13 +90,11 @@ public class AutoLures : BaseActionCast
             showSubPrefix: true);
     };
 
-    public void TryCasting(bool lureSuccess)
-    {
+    public void TryCasting(bool lureSuccess) {
         if (!EzThrottler.Check("CastingLure"))
             return;
 
-        if (Service.WorldState.GetStatusStacks(StatusId) >= LureStacks && CancelAttempt && !lureSuccess)
-        {
+        if (Service.WorldState.GetStatusStacks(StatusId) >= LureStacks && CancelAttempt && !lureSuccess) {
             PlayerRes.CastActionDelayed(IDs.Actions.Rest);
             return;
         }

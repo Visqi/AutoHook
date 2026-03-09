@@ -1,7 +1,6 @@
 namespace AutoHook.Utils;
 
-public static class SignaturePatterns
-{
+public static class SignaturePatterns {
     // Used to hook ExecuteCommand (bait/swimbait changes, etc.)
     public const string ExecuteCommand = "E8 ?? ?? ?? ?? 41 C6 04 24";
 

@@ -2,8 +2,7 @@
 
 namespace AutoHook;
 
-public static class PluginChangelog
-{
+public static class PluginChangelog {
     public static readonly List<Version> Versions =
     [
         new Version("5.0.0.5")
@@ -600,8 +599,7 @@ public static class PluginChangelog
         }
     ];
 
-    public class Version(string versionNumber)
-    {
+    public class Version(string versionNumber) {
         public string VersionNumber { get; set; } = versionNumber;
         public List<string> Main { get; set; } = [];
         public List<string> Minor { get; set; } = [];

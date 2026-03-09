@@ -1,12 +1,10 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using System.ComponentModel;
 
 namespace AutoHook.Configurations;
 
-public class AutoGigConfig : BasePresetConfig
-{
+public class AutoGigConfig : BasePresetConfig {
     public string Name { get; set; } = "Old Preset";
 
     public List<BaseGig> Gigs { get; set; } = [];
@@ -17,12 +15,10 @@ public class AutoGigConfig : BasePresetConfig
 
     public AutoGigConfig(string presetName) => PresetName = presetName;
 
-    public List<BaseGig> GetGigCurrentNode(int node)
-    {
+    public List<BaseGig> GetGigCurrentNode(int node) {
         Service.PrintDebug($"[AutoGig] GetGigCurrentNode - node: {node}, Total Gigs: {Gigs.Count}");
 
-        var result = Gigs.Where(f =>
-        {
+        var result = Gigs.Where(f => {
             var hasFish = f.Fish != null;
             var hasNode = f.Fish?.Nodes.Contains(node) ?? false;
             Service.PrintDebug($"[AutoGig] GetGigCurrentNode - Fish: {f.Fish?.Name ?? "null"}, Enabled: {f.Enabled}, HasFish: {hasFish}, HasNode: {hasNode}");
@@ -33,33 +29,27 @@ public class AutoGigConfig : BasePresetConfig
         return result;
     }
 
-    public override void AddItem(BaseOption item)
-    {
+    public override void AddItem(BaseOption item) {
         Gigs.Add((BaseGig)item);
         Service.Save();
     }
 
-    public override void RemoveItem(Guid value)
-    {
+    public override void RemoveItem(Guid value) {
         Gigs.RemoveAll(x => x.UniqueId == value);
         Service.Save();
     }
 
-    public override void DrawOptions()
-    {
+    public override void DrawOptions() {
         if (Gigs.Count == 0)
             return;
 
-        foreach (var gig in Gigs)
-        {
+        foreach (var gig in Gigs) {
             using var gigId = ImRaii.PushId(gig.UniqueId.ToString());
-            using (ImRaii.PushFont(UiBuilder.IconFont))
-            {
+            using (ImRaii.PushFont(UiBuilder.IconFont)) {
                 var icon = FontAwesomeIcon.Trash.ToIconString();
                 var buttonSize = ImGui.CalcTextSize(icon) + ImGui.GetStyle().FramePadding * 2;
                 if (ImGui.Button(@$"{icon}", buttonSize) &&
-                    ImGui.GetIO().KeyShift)
-                {
+                    ImGui.GetIO().KeyShift) {
                     RemoveItem(gig.UniqueId);
                     Service.Save();
                     return;
@@ -76,11 +66,9 @@ public class AutoGigConfig : BasePresetConfig
             ImGui.SameLine(0, 3);
 
             var x = ImGui.GetCursorPosX();
-            if (ImGui.TreeNodeEx($"{gig.Fish?.Name ?? UIStrings.None}", ImGuiTreeNodeFlags.FramePadding))
-            {
+            if (ImGui.TreeNodeEx($"{gig.Fish?.Name ?? UIStrings.None}", ImGuiTreeNodeFlags.FramePadding)) {
                 ImGui.SetCursorPosX(x);
-                using (ImRaii.Group())
-                {
+                using (ImRaii.Group()) {
                     gig.DrawOptions();
                 }
                 ImGui.TreePop();

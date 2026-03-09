@@ -4,8 +4,7 @@ using System.Runtime.InteropServices;
 namespace AutoHook.Utils;
 
 // I got this from the XIVDeck plugin, ty KazWolfe
-internal static class InputUtil
-{
+internal static class InputUtil {
     private const uint WM_KEYUP = 0x101;
     private const uint WM_KEYDOWN = 0x100;
 
@@ -18,11 +17,9 @@ internal static class InputUtil
     [DllImport("user32.dll")]
     private static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
-    public static bool TryFindGameWindow(out IntPtr hwnd)
-    {
+    public static bool TryFindGameWindow(out IntPtr hwnd) {
         hwnd = IntPtr.Zero;
-        while (true)
-        {
+        while (true) {
             hwnd = FindWindowEx(IntPtr.Zero, hwnd, "FFXIVGAME", null);
             if (hwnd == IntPtr.Zero) break;
             GetWindowThreadProcessId(hwnd, out var pid);
@@ -31,8 +28,7 @@ internal static class InputUtil
         return hwnd != IntPtr.Zero;
     }
 
-    public static void SendKeycode(IntPtr hwnd, int keycode)
-    {
+    public static void SendKeycode(IntPtr hwnd, int keycode) {
         SendMessage(hwnd, WM_KEYDOWN, (IntPtr)keycode, (IntPtr)0);
         SendMessage(hwnd, WM_KEYUP, (IntPtr)keycode, (IntPtr)0);
     }

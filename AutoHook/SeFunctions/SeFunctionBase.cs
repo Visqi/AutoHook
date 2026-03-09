@@ -5,31 +5,26 @@ using System.Runtime.InteropServices;
 
 namespace AutoHook.SeFunctions;
 
-public class SeFunctionBase<T> where T : Delegate
-{
+public class SeFunctionBase<T> where T : Delegate {
     public IntPtr Address;
     protected T? FuncDelegate;
 
-    public SeFunctionBase(SigScanner sigScanner, int offset)
-    {
+    public SeFunctionBase(SigScanner sigScanner, int offset) {
         Address = sigScanner.Module.BaseAddress + offset;
     }
 
-    public SeFunctionBase(ISigScanner sigScanner, string signature, int offset = 0)
-    {
+    public SeFunctionBase(ISigScanner sigScanner, string signature, int offset = 0) {
         Address = sigScanner.ScanText(signature);
         if (Address != IntPtr.Zero)
             Address += offset;
         var baseOffset = (ulong)Address.ToInt64() - (ulong)sigScanner.Module.BaseAddress.ToInt64();
     }
 
-    public T? Delegate()
-    {
+    public T? Delegate() {
         if (FuncDelegate != null)
             return FuncDelegate;
 
-        if (Address != IntPtr.Zero)
-        {
+        if (Address != IntPtr.Zero) {
             FuncDelegate = Marshal.GetDelegateForFunctionPointer<T>(Address);
             return FuncDelegate;
         }
@@ -38,27 +33,22 @@ public class SeFunctionBase<T> where T : Delegate
         return null;
     }
 
-    public dynamic? Invoke(params dynamic[] parameters)
-    {
+    public dynamic? Invoke(params dynamic[] parameters) {
         if (FuncDelegate != null)
             return FuncDelegate.DynamicInvoke(parameters);
 
-        if (Address != IntPtr.Zero)
-        {
+        if (Address != IntPtr.Zero) {
             FuncDelegate = Marshal.GetDelegateForFunctionPointer<T>(Address);
             return FuncDelegate!.DynamicInvoke(parameters);
         }
-        else
-        {
+        else {
             Service.PrintDebug($"[SeFunctionBase] Trying to call {GetType().Name}, but no pointer available.");
             return null;
         }
     }
 
-    public Hook<T>? CreateHook(T detour)
-    {
-        if (Address != IntPtr.Zero)
-        {
+    public Hook<T>? CreateHook(T detour) {
+        if (Address != IntPtr.Zero) {
             var hook = Svc.Hook.HookFromAddress(Address, detour);
             hook.Enable();
             return hook;

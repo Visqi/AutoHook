@@ -3,8 +3,7 @@ using System.ComponentModel;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoCastLine : BaseActionCast
-{
+public class AutoCastLine : BaseActionCast {
     [Obsolete("Legacy config")] public bool OnlyCastWithFishEyes = false;
     [Obsolete("Legacy config")] public bool OnlyCastLarge = false;
 
@@ -14,8 +13,7 @@ public class AutoCastLine : BaseActionCast
 
     public override bool RequiresTimeWindow() => true;
 
-    public AutoCastLine() : base(UIStrings.AutoCastLine_Auto_Cast_Line, IDs.Actions.Cast)
-    {
+    public AutoCastLine() : base(UIStrings.AutoCastLine_Auto_Cast_Line, IDs.Actions.Cast) {
         Enabled = true;
         Priority = 1;
     }
@@ -28,8 +26,7 @@ public class AutoCastLine : BaseActionCast
 
     public override string GetName() => Name = UIStrings.AutoCastLine_Auto_Cast_Line;
 
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
+    protected override DrawOptionsDelegate DrawOptions => () => {
         ConditionSet = ConditionUi.DrawConditionSetSlim(
             UIStrings.Conditions,
             ConditionSet,

@@ -1,7 +1,6 @@
 namespace AutoHook.Spearfishing.Enums;
 
-public enum SpearfishSpeed : ushort
-{
+public enum SpearfishSpeed : ushort {
     All = 0,
     SuperSlow = 100,
     ExtremelySlow = 150,
@@ -17,11 +16,9 @@ public enum SpearfishSpeed : ushort
     Unknown = 65535,
 }
 
-public static class SpearFishSpeedExtensions
-{
+public static class SpearFishSpeedExtensions {
     public static string ToName(this SpearfishSpeed speed)
-        => speed switch
-        {
+        => speed switch {
             SpearfishSpeed.All => "All",
             SpearfishSpeed.SuperSlow => "Super Slow",
             SpearfishSpeed.ExtremelySlow => "Extremely Slow",

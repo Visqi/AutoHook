@@ -13,8 +13,7 @@ using System.Globalization;
 
 namespace AutoHook;
 
-public class AutoHook : IDalamudPlugin
-{
+public class AutoHook : IDalamudPlugin {
     public string Name => UIStrings.AutoHook;
 
     internal static AutoHook Plugin = null!;
@@ -55,8 +54,7 @@ public class AutoHook : IDalamudPlugin
 
     public AutoHookIPC AutoHookIpc;
 
-    public AutoHook(IDalamudPluginInterface pluginInterface, IDtrBar dtrBar)
-    {
+    public AutoHook(IDalamudPluginInterface pluginInterface, IDtrBar dtrBar) {
         ECommonsMain.Init(pluginInterface, this, Module.DalamudReflector, Module.ObjectFunctions);
         CLibMain.Init(pluginInterface, this);
         Service.Initialize(pluginInterface);
@@ -80,10 +78,8 @@ public class AutoHook : IDalamudPlugin
         _pluginUi = new PluginUi();
         _autoGig = new AutoGig();
 
-        foreach (var (command, help) in CommandHelp)
-        {
-            Svc.Commands.AddHandler(command, new CommandInfo(OnCommand)
-            {
+        foreach (var (command, help) in CommandHelp) {
+            Svc.Commands.AddHandler(command, new CommandInfo(OnCommand) {
                 HelpMessage = help
             });
         }
@@ -93,10 +89,8 @@ public class AutoHook : IDalamudPlugin
 
         _ = new EzDtr(() =>
             $"{((SeIconChar)0xE05E).ToIconString()} {(Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled)}",
-            evt =>
-            {
-                if (evt.ClickType is MouseClickType.Left)
-                {
+            evt => {
+                if (evt.ClickType is MouseClickType.Left) {
                     Service.Configuration.PluginEnabled ^= true;
                     Service.Configuration.Save();
                 }
@@ -107,8 +101,7 @@ public class AutoHook : IDalamudPlugin
         );
 
         _ = new EzDtr(() => $"{SeIconChar.Collectible.ToIconString()} {Service.Configuration.HookPresets.SelectedPreset?.PresetName ?? $"{UIStrings.GlobalPreset}"}",
-            evt =>
-            {
+            evt => {
                 if (Service.Configuration.HookPresets.SelectedPreset == null) return;
                 var presets = Service.Configuration.HookPresets.CustomPresets;
                 var index = presets.IndexOf(Service.Configuration.HookPresets.SelectedPreset);
@@ -125,10 +118,8 @@ public class AutoHook : IDalamudPlugin
 #endif
     }
 
-    private void OnCommand(string command, string args)
-    {
-        switch (command.Trim())
-        {
+    private void OnCommand(string command, string args) {
+        switch (command.Trim()) {
             case CmdAhCfg:
             case CmdAh:
                 OnOpenConfigUi();
@@ -165,17 +156,14 @@ public class AutoHook : IDalamudPlugin
         }
     }
 
-    private static void SwapBait(string args)
-    {
+    private static void SwapBait(string args) {
         var bait = GameRes.Baits.FirstOrDefault(f => f.Name.ToLower() == args.ToLower() || f.Id.ToString() == args);
         Service.BaitManager.ChangeBait((uint)bait?.Id!);
     }
 
-    private static void SetPreset(string presetName)
-    {
+    private static void SetPreset(string presetName) {
         var preset = Service.Configuration.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == presetName);
-        if (preset == null)
-        {
+        if (preset == null) {
             Svc.Chat.Print(UIStrings.Preset_not_found);
             return;
         }
@@ -186,13 +174,10 @@ public class AutoHook : IDalamudPlugin
         Service.Save();
     }
 
-    private static void SetGigPreset(string presetName)
-    {
-        try
-        {
+    private static void SetGigPreset(string presetName) {
+        try {
             var preset = Service.Configuration.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == presetName);
-            if (preset == null)
-            {
+            if (preset == null) {
                 Svc.Chat.Print(@$"{UIStrings.Preset_not_found} - {presetName}");
                 return;
             }
@@ -202,14 +187,12 @@ public class AutoHook : IDalamudPlugin
             Svc.Chat.Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
             Service.Save();
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Svc.Log.Error(e.Message);
         }
     }
 
-    public void Dispose()
-    {
+    public void Dispose() {
         _pluginUi.Dispose();
         _autoGig.Dispose();
         HookManager.Dispose();

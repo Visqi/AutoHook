@@ -2,8 +2,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoCollect : BaseActionCast
-{
+public class AutoCollect : BaseActionCast {
     public override int Priority { get; set; } = 2;
     public override bool IsExcludedPriority { get; set; } = true;
 

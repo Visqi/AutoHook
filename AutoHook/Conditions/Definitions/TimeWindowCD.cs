@@ -4,26 +4,22 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(bool Enabled, TimeOnly Start, TimeOnly End)>
-{
+public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(bool Enabled, TimeOnly Start, TimeOnly End)> {
     public string Id => nameof(TimeWindowCD);
     public string Name => "Time window";
     public string Category => "Time";
     public string Description => "Checks current Eorzea time between start and end.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.AutoCast;
 
-    public readonly record struct TimeWindowParams(TimeOnly Start, TimeOnly End, bool Invert)
-    {
-        public Dictionary<string, object> ToParams()
-        {
+    public readonly record struct TimeWindowParams(TimeOnly Start, TimeOnly End, bool Invert) {
+        public Dictionary<string, object> ToParams() {
             var dict = new Dictionary<string, object>();
 
             // Store minutes-since-midnight for start/end
             var startMinutes = Start.Hour * 60 + Start.Minute;
             var endMinutes = End.Hour * 60 + End.Minute;
 
-            if (startMinutes != 0 || endMinutes != 0)
-            {
+            if (startMinutes != 0 || endMinutes != 0) {
                 dict["start"] = (long)startMinutes;
                 dict["end"] = (long)endMinutes;
             }
@@ -35,8 +31,7 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
         }
     }
 
-    public unsafe bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters)
-    {
+    public unsafe bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var args = GetParams(parameters);
 
         // If no window configured, treat as always-true (unless inverted).
@@ -57,18 +52,15 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
         return args.Invert ? !result : result;
     }
 
-    public void DrawParams(Condition condition)
-    {
+    public void DrawParams(Condition condition) {
         var args = GetParams(condition.Params);
         var start = args.Start;
         var end = args.End;
 
         var startText = start.ToString("HH:mm");
         ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputText("Start (HH:mm)", ref startText, 5))
-        {
-            if (TimeOnly.TryParse(startText, out var parsed))
-            {
+        if (ImGui.InputText("Start (HH:mm)", ref startText, 5)) {
+            if (TimeOnly.TryParse(startText, out var parsed)) {
                 args = args with { Start = parsed };
                 condition.Params = args.ToParams();
             }
@@ -78,25 +70,21 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
 
         var endText = end.ToString("HH:mm");
         ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputText("End (HH:mm)", ref endText, 5))
-        {
-            if (TimeOnly.TryParse(endText, out var parsed))
-            {
+        if (ImGui.InputText("End (HH:mm)", ref endText, 5)) {
+            if (TimeOnly.TryParse(endText, out var parsed)) {
                 args = args with { End = parsed };
                 condition.Params = args.ToParams();
             }
         }
     }
 
-    private static TimeWindowParams GetParams(IReadOnlyDictionary<string, object> p)
-    {
+    private static TimeWindowParams GetParams(IReadOnlyDictionary<string, object> p) {
         var (start, end) = GetTimeWindowFromParams(p);
         var invert = IConditionDefinition.GetBool(p, "inv", false);
         return new TimeWindowParams(start, end, invert);
     }
 
-    public static (TimeOnly Start, TimeOnly End) GetTimeWindowFromParams(IReadOnlyDictionary<string, object> p)
-    {
+    public static (TimeOnly Start, TimeOnly End) GetTimeWindowFromParams(IReadOnlyDictionary<string, object> p) {
         var startMinutes = IConditionDefinition.GetInt(p, "start", 0);
         var endMinutes = IConditionDefinition.GetInt(p, "end", 0);
         startMinutes = Math.Clamp(startMinutes, 0, 24 * 60 - 1);
@@ -106,8 +94,7 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
         return (start, end);
     }
 
-    (bool Enabled, TimeOnly Start, TimeOnly End) ISimpleConditionValue<(bool Enabled, TimeOnly Start, TimeOnly End)>.FromParams(IReadOnlyDictionary<string, object> p)
-    {
+    (bool Enabled, TimeOnly Start, TimeOnly End) ISimpleConditionValue<(bool Enabled, TimeOnly Start, TimeOnly End)>.FromParams(IReadOnlyDictionary<string, object> p) {
         var (start, end) = GetTimeWindowFromParams(p);
         return (true, start, end);
     }

@@ -2,8 +2,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoSparefulHand : BaseActionCast
-{
+public class AutoSparefulHand : BaseActionCast {
     public int SwimbaitCountLimit { get; set; } = 3;
 
     public AutoSparefulHand() : base(UIStrings.SparefulHand, IDs.Actions.SparefulHand, ActionType.Action) => HelpText = UIStrings.SparefulHand_HelpText;
@@ -13,11 +12,9 @@ public class AutoSparefulHand : BaseActionCast
 
     public uint? FishIdToCheck { get; set; }
 
-    public override bool CastCondition()
-    {
+    public override bool CastCondition() {
         // Check swimbait count for this specific fish if limit is set
-        if (SwimbaitCountLimit > 0 && FishIdToCheck.HasValue)
-        {
+        if (SwimbaitCountLimit > 0 && FishIdToCheck.HasValue) {
             var currentSwimbaitCount = Service.WorldState.GetSwimbaitCountForFish(FishIdToCheck.Value);
             if (currentSwimbaitCount >= SwimbaitCountLimit)
                 return false;

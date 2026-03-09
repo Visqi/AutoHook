@@ -3,16 +3,14 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoThaliaksFavor : BaseActionCast
-{
+public class AutoThaliaksFavor : BaseActionCast {
     [Obsolete("Legacy config")] public bool UseWhenCordialCD;
 
     public int ThaliaksFavorStacks = 3;
     public int ThaliaksFavorRecover = 150;
 
 
-    public AutoThaliaksFavor(bool isSpearfishing = false) : base(UIStrings.Thaliaks_Favor, IDs.Actions.ThaliaksFavor, ActionType.Action)
-    {
+    public AutoThaliaksFavor(bool isSpearfishing = false) : base(UIStrings.Thaliaks_Favor, IDs.Actions.ThaliaksFavor, ActionType.Action) {
         HelpText = UIStrings.TabAutoCasts_DrawThaliaksFavor_HelpText;
         IsSpearFishing = isSpearfishing;
     }
@@ -20,8 +18,7 @@ public class AutoThaliaksFavor : BaseActionCast
     public override string GetName()
         => Name = UIStrings.Thaliaks_Favor;
 
-    public override bool CastCondition()
-    {
+    public override bool CastCondition() {
         if (!EvaluateConditionSet())
             return false;
 
@@ -33,11 +30,9 @@ public class AutoThaliaksFavor : BaseActionCast
         return hasStacks && notOvercaped && allowedToUseThaliaks; // dont use if its going to overcap gp
     }
 
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
+    protected override DrawOptionsDelegate DrawOptions => () => {
         var stack = ThaliaksFavorStacks;
-        if (DrawUtil.EditNumberField(UIStrings.TabAutoCasts_DrawExtraOptionsThaliaksFavor_, ref stack))
-        {
+        if (DrawUtil.EditNumberField(UIStrings.TabAutoCasts_DrawExtraOptionsThaliaksFavor_, ref stack)) {
             // value has to be between 3 and 10
             ThaliaksFavorStacks = Math.Max(3, Math.Min(stack, 10));
             Service.Save();

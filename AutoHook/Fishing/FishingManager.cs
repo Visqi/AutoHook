@@ -8,8 +8,7 @@ using System.Diagnostics;
 
 namespace AutoHook.Fishing;
 
-public partial class FishingManager : IDisposable
-{
+public partial class FishingManager : IDisposable {
     // todo: refactor this entire class
     private static readonly FishingPresets Presets = Service.Configuration.HookPresets;
 
@@ -30,28 +29,23 @@ public partial class FishingManager : IDisposable
 
     public Hook<UpdateCatchDelegate>? UpdateCatch = null!;
 
-    public FishingManager()
-    {
-        try
-        {
+    public FishingManager() {
+        try {
             Service.TaskManager.EnqueueDelay(200);
             Service.TaskManager.Enqueue(CreateDalamudHooks);
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Svc.Log.Error(@$"{e.Message}");
         }
     }
 
-    public void Dispose()
-    {
+    public void Dispose() {
         Disable();
         _useActionHook?.Dispose();
         UpdateCatch?.Dispose();
     }
 
-    public unsafe void CreateDalamudHooks()
-    {
+    public unsafe void CreateDalamudHooks() {
         UpdateCatch = Svc.Hook.HookFromSignature<UpdateCatchDelegate>(
             SignaturePatterns.UpdateCatch,
             UpdateCatchDetour);
@@ -61,37 +55,31 @@ public partial class FishingManager : IDisposable
         Enable();
     }
 
-    private void Enable()
-    {
+    private void Enable() {
         Svc.Framework.Update += OnFrameworkUpdate;
         Svc.Chat.CheckMessageHandled += OnMessageDelegate;
         UpdateCatch?.Enable();
         _useActionHook?.Enable();
     }
 
-    private void Disable()
-    {
+    private void Disable() {
         Svc.Framework.Update -= OnFrameworkUpdate;
         Svc.Chat.CheckMessageHandled -= OnMessageDelegate;
         _useActionHook?.Disable();
         UpdateCatch?.Disable();
     }
 
-    public void StartFishing()
-    {
-        if (!Ws.IsCastAvailable())
-        {
+    public void StartFishing() {
+        if (!Ws.IsCastAvailable()) {
             Service.PrintChat(@"[AutoHook] You can't cast right now.");
             return;
         }
 
         var extraCfg = GetExtraCfg();
-        if (extraCfg is { ForceBaitSwap: true, Enabled: true })
-        {
+        if (extraCfg is { ForceBaitSwap: true, Enabled: true }) {
             var result = Service.BaitManager.ChangeBait((uint)extraCfg.ForcedBaitId);
 
-            if (result == BaitManager.ChangeBaitReturn.Success)
-            {
+            if (result == BaitManager.ChangeBaitReturn.Success) {
                 Service.PrintChat(
                     @$"[AutoHook] Starting with bait: {MultiString.GetItemName(extraCfg.ForcedBaitId)}");
                 Service.Save();
@@ -104,14 +92,12 @@ public partial class FishingManager : IDisposable
     }
 
     // The current config is updates two times: When we began fishing (to get the config based on the mooch/bait) and when we hooked the fish (in case the user updated their configs).
-    private void UpdateStatusAndTimer()
-    {
+    private void UpdateStatusAndTimer() {
         ResetAfkTimer();
 
         var selected = GetHookCfg();
         var hookset = selected.GetHookset();
-        if (selected.Enabled)
-        {
+        if (selected.Enabled) {
             _timeout = Ws.HasStatus(IDs.Status.Chum)
                 ? hookset.ChumTimeoutMax
                 : hookset.TimeoutMax;
@@ -119,12 +105,10 @@ public partial class FishingManager : IDisposable
         else
             _timeout = 0;
 
-        if (Service.Configuration.ShowStatus)
-        {
+        if (Service.Configuration.ShowStatus) {
             var buffStatus = "";
 
-            if (hookset.RequiredStatus != 0)
-            {
+            if (hookset.RequiredStatus != 0) {
                 buffStatus = MultiString.GetStatusName(hookset.RequiredStatus);
                 buffStatus = @$"({buffStatus})";
             }
@@ -140,8 +124,7 @@ public partial class FishingManager : IDisposable
         }
     }
 
-    public string GetPresetName()
-    {
+    public string GetPresetName() {
         var isMooching = Ws.IsMooching;
         var currentBaitId = Ws.CurrentSwimbaitId is { } sb ? (int)sb : WorldStateUpdater.ComputeCurrentBaitMoochId(Ws.CurrentBaitId, Ws.CurrentSwimbaitId, Ws.IsMooching, new BiteContext { LastCaughtFishId = Ws.LastCaughtFishId });
 
@@ -162,8 +145,7 @@ public partial class FishingManager : IDisposable
         return presetName;
     }
 
-    public HookConfig GetHookCfg()
-    {
+    public HookConfig GetHookCfg() {
         var isMooching = Ws.IsMooching;
         var currentBaitId = Ws.CurrentSwimbaitId is { } sb ? (int)sb : WorldStateUpdater.ComputeCurrentBaitMoochId(Ws.CurrentBaitId, Ws.CurrentSwimbaitId, Ws.IsMooching, new BiteContext { LastCaughtFishId = Ws.LastCaughtFishId });
 
@@ -180,28 +162,22 @@ public partial class FishingManager : IDisposable
         return currentHook;
     }
 
-    private void OnFrameworkUpdate(IFramework _)
-    {
+    private void OnFrameworkUpdate(IFramework _) {
         if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null || !Service.BaitManager.IsValid) return;
 
         var currentState = Service.WorldState.FishingState;
-        if (currentState == FishingState.None)
-        {
-            if (Service.Configuration.AutoStartFishing && EzThrottler.Throttle("AutoStartFishing", 1000))
-            {
+        if (currentState == FishingState.None) {
+            if (Service.Configuration.AutoStartFishing && EzThrottler.Throttle("AutoStartFishing", 1000)) {
                 var autoCastCfg = GetAutoCastCfg();
-                if (autoCastCfg.EnableAll && autoCastCfg.CastLine.IsAvailableToCast() && Ws.IsCastAvailable())
-                {
+                if (autoCastCfg.EnableAll && autoCastCfg.CastLine.IsAvailableToCast() && Ws.IsCastAvailable()) {
                     StartFishing();
                 }
             }
             return;
         }
 
-        if (currentState != FishingState.Quitting && Ws.FishingStep.HasFlag(FishingSteps.Quitting))
-        {
-            if (Ws.IsCastAvailable())
-            {
+        if (currentState != FishingState.Quitting && Ws.FishingStep.HasFlag(FishingSteps.Quitting)) {
+            if (Ws.IsCastAvailable()) {
                 PlayerRes.CastActionDelayed(IDs.Actions.Quit, ActionType.Action, @"Quit");
                 currentState = FishingState.Quitting;
             }
@@ -210,8 +186,7 @@ public partial class FishingManager : IDisposable
         if (!Ws.FishingStep.HasFlag(FishingSteps.Quitting) && currentState == FishingState.PoleReady)
             CheckPluginActions();
 
-        if (currentState is FishingState.AmbitiousLure or FishingState.LineInWater)
-        {
+        if (currentState is FishingState.AmbitiousLure or FishingState.LineInWater) {
             CheckWhileFishingActions();
             CheckTimeout();
         }
@@ -221,8 +196,7 @@ public partial class FishingManager : IDisposable
 
         Ws.Execute(new WorldState.OpSetPreviousFishingState(currentState));
 
-        switch (currentState)
-        {
+        switch (currentState) {
             case FishingState.PullingPoleIn:
                 if (Ws.FishingStep.HasFlag(FishingSteps.BeganFishing))
                     Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.None));
@@ -241,8 +215,7 @@ public partial class FishingManager : IDisposable
         }
     }
 
-    private void InitFinishing()
-    {
+    private void InitFinishing() {
         if (!_fishingTimer.IsRunning)
             _fishingTimer.Start();
 
@@ -251,8 +224,7 @@ public partial class FishingManager : IDisposable
 
     FishConfig? lastCatchCfg = null;
 
-    private void CheckPluginActions()
-    {
+    private void CheckPluginActions() {
         if (!EzThrottler.Throttle(@"CheckPluginActions", 500))
             return;
 
@@ -270,8 +242,7 @@ public partial class FishingManager : IDisposable
         CheckExtraActions(extraCfg);
 
         var casted = false;
-        if (Ws.FishingStep.HasFlag(FishingSteps.FishCaught) && !Ws.FishingStep.HasFlag(FishingSteps.Quitting))
-        {
+        if (Ws.FishingStep.HasFlag(FishingSteps.FishCaught) && !Ws.FishingStep.HasFlag(FishingSteps.Quitting)) {
             casted = UseFishCaughtActions(lastCatchCfg);
             CheckFishCaughtSwap(lastCatchCfg);
         }
@@ -282,8 +253,7 @@ public partial class FishingManager : IDisposable
             UseAutoCasts();
     }
 
-    private void OnBeganFishing(bool mooching)
-    {
+    private void OnBeganFishing(bool mooching) {
         if (Ws.FishingStep.HasFlag(FishingSteps.BeganFishing) &&
             Ws.PreviousFishingState != FishingState.PoleReady && Ws.PreviousFishingState != FishingState.None)
             return;
@@ -305,8 +275,7 @@ public partial class FishingManager : IDisposable
         UpdateStatusAndTimer();
     }
 
-    private void CheckTimeout()
-    {
+    private void CheckTimeout() {
         if (!_fishingTimer.IsRunning)
             _fishingTimer.Start();
 
@@ -323,8 +292,7 @@ public partial class FishingManager : IDisposable
         Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.TimeOut));
     }
 
-    private void OnBite()
-    {
+    private void OnBite() {
         UpdateStatusAndTimer();
         var currentHook = GetHookCfg();
         _fishingTimer.Stop();
@@ -336,8 +304,7 @@ public partial class FishingManager : IDisposable
         HookFish(Service.TugType?.Bite ?? BiteType.Unknown, currentHook);
     }
 
-    private void HookFish(BiteType bite, HookConfig currentHook)
-    {
+    private void HookFish(BiteType bite, HookConfig currentHook) {
         var delay = new Random().Next(Service.Configuration.DelayBetweenHookMin,
             Service.Configuration.DelayBetweenHookMax);
 
@@ -353,8 +320,7 @@ public partial class FishingManager : IDisposable
 
         var hook = currentHook.GetHook(bite, timePassed);
 
-        if (hook is null or HookType.None)
-        {
+        if (hook is null or HookType.None) {
             delay = new Random().Next(Service.Configuration.DelayBeforeCancelMin,
                 Service.Configuration.DelayBeforeCancelMax);
 
@@ -370,8 +336,7 @@ public partial class FishingManager : IDisposable
         Service.Status = @$"Using {hook} hook. (Bite: {bite})";
     }
 
-    private void OnCatch(uint fishId, uint amount)
-    {
+    private void OnCatch(uint fishId, uint amount) {
         var lastCatch = GameRes.Fishes.FirstOrDefault(fish => fish.Id == fishId) ?? new BaitFishClass(@"-", -1);
         Ws.Execute(new WorldState.OpLastCatch(lastCatch.Id, (byte)amount));
         Ws.Execute(new WorldState.OpAddFishCaught(lastCatch.Id, (byte)amount));
@@ -383,10 +348,8 @@ public partial class FishingManager : IDisposable
 
         Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.FishCaught));
 
-        if (lastFishCatchCfg != null)
-        {
-            for (var i = 0; i < amount; i++)
-            {
+        if (lastFishCatchCfg != null) {
+            for (var i = 0; i < amount; i++) {
                 FishingHelper.AddFishCount(lastFishCatchCfg.UniqueId);
             }
         }
@@ -396,17 +359,14 @@ public partial class FishingManager : IDisposable
             FishingHelper.AddFishCount(hook.UniqueId);
     }
 
-    private void CheckStopCondition()
-    {
+    private void CheckStopCondition() {
         var lastFishCatchCfg = GetLastCatchConfig();
         var currentHook = GetHookCfg();
         var hookset = currentHook.GetHookset();
 
-        if (lastFishCatchCfg?.StopAfterCaughtLimit.BackingSet is { Groups.Count: > 0 } stopSet)
-        {
+        if (lastFishCatchCfg?.StopAfterCaughtLimit.BackingSet is { Groups.Count: > 0 } stopSet) {
             var shouldStop = stopSet.Evaluate(Ws, ConditionRegistry.Registry);
-            if (shouldStop)
-            {
+            if (shouldStop) {
                 var (_, limit) = lastFishCatchCfg.StopAfterCaughtLimit.Value;
                 Service.PrintChat(string.Format(UIStrings.Caught_Limited_Reached_Chat_Message,
                     @$"{lastFishCatchCfg.Fish.Name}: {limit}"));
@@ -416,13 +376,11 @@ public partial class FishingManager : IDisposable
             }
         }
 
-        if (currentHook.Enabled && hookset.StopAfterCaught)
-        {
+        if (currentHook.Enabled && hookset.StopAfterCaught) {
             var guid = currentHook.UniqueId;
             var total = FishingHelper.GetFishCount(guid);
 
-            if (total >= hookset.StopAfterCaughtLimit)
-            {
+            if (total >= hookset.StopAfterCaughtLimit) {
                 Service.PrintChat(string.Format(UIStrings.Hooking_Limited_Reached_Chat_Message,
                     @$"{currentHook.BaitFish.Name}: {hookset.StopAfterCaughtLimit}"));
 
@@ -434,8 +392,7 @@ public partial class FishingManager : IDisposable
         // Extra stop conditions run only via Triggers; legacy fields are migration-only.
     }
 
-    private void OnFishingStop()
-    {
+    private void OnFishingStop() {
         Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.None));
         Ws.Execute(new WorldState.OpResetFishCaught());
 
@@ -451,15 +408,11 @@ public partial class FishingManager : IDisposable
     }
 
     private bool OnUseAction(IntPtr manager, ActionType actionType, uint actionId, ulong targetId, uint a4,
-        uint a5, uint a6, IntPtr a7)
-    {
-        try
-        {
+        uint a5, uint a6, IntPtr a7) {
+        try {
             if (actionType == ActionType.Action && Service.Configuration.PluginEnabled &&
-                Ws.ActionAvailable(actionId))
-            {
-                switch (actionId)
-                {
+                Ws.ActionAvailable(actionId)) {
+                switch (actionId) {
                     case IDs.Actions.Rest:
                         if (Ws.HasStatus(IDs.Status.CollectorsGlove)) AnimationCancel();
                         Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.Reeling));
@@ -474,8 +427,7 @@ public partial class FishingManager : IDisposable
                 }
             }
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Service.PrintDebug(@$"[HookManager] Error: {e.Message}");
         }
 
@@ -484,8 +436,7 @@ public partial class FishingManager : IDisposable
 
     private void UpdateCatchDetour(IntPtr module, uint fishId, bool large, ushort size, byte amount, byte level,
         byte unk7,
-        byte unk8, byte unk9, byte unk10, byte unk11, byte unk12)
-    {
+        byte unk8, byte unk9, byte unk10, byte unk11, byte unk12) {
         UpdateCatch!.Original(module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12);
 
         // Check against collectibles.

@@ -8,8 +8,7 @@ using System.ComponentModel;
 
 namespace AutoHook.Classes;
 
-public class BaseBiteConfig(HookType type)
-{
+public class BaseBiteConfig(HookType type) {
     [DefaultValue(true)]
     public bool HooksetEnabled = true;
 
@@ -55,14 +54,12 @@ public class BaseBiteConfig(HookType type)
     public double StellarHookTypeMin;
     public double StellarHookTypeMax;
 
-    public void DrawOptions(string biteName, bool enableSwap = false)
-    {
+    public void DrawOptions(string biteName, bool enableSwap = false) {
         EnableHooksetSwap = enableSwap;
         using var id = ImRaii.PushId(@$"{biteName}");
 
         DrawUtil.DrawCheckboxTree(biteName, ref HooksetEnabled,
-            () =>
-            {
+            () => {
                 ConditionSet = Ui.ConditionUi.DrawConditionSetSlim(
                     UIStrings.Conditions,
                     ConditionSet,
@@ -75,40 +72,33 @@ public class BaseBiteConfig(HookType type)
             });
     }
 
-    private void DrawBite()
-    {
+    private void DrawBite() {
         using var indent = ImRaii.PushIndent();
 
         DrawUtil.Checkbox(UIStrings.UseMutlipleHooksByTimer, ref UseMultipleHookTypesByTimer);
 
-        if (!UseMultipleHookTypesByTimer)
-        {
-            if (ImGui.RadioButton(UIStrings.Normal_Hook, HooksetType == HookType.Normal))
-            {
+        if (!UseMultipleHookTypesByTimer) {
+            if (ImGui.RadioButton(UIStrings.Normal_Hook, HooksetType == HookType.Normal)) {
                 HooksetType = HookType.Normal;
                 Service.Save();
             }
 
-            if (ImGui.RadioButton(UIStrings.PrecisionHookset, HooksetType == HookType.Precision))
-            {
+            if (ImGui.RadioButton(UIStrings.PrecisionHookset, HooksetType == HookType.Precision)) {
                 HooksetType = HookType.Precision;
                 Service.Save();
             }
 
-            if (ImGui.RadioButton(UIStrings.PowerfulHookset, HooksetType == HookType.Powerful))
-            {
+            if (ImGui.RadioButton(UIStrings.PowerfulHookset, HooksetType == HookType.Powerful)) {
                 HooksetType = HookType.Powerful;
                 Service.Save();
             }
 
-            if (ImGui.RadioButton(UIStrings.StellarHookset, HooksetType == HookType.Stellar))
-            {
+            if (ImGui.RadioButton(UIStrings.StellarHookset, HooksetType == HookType.Stellar)) {
                 HooksetType = HookType.Stellar;
                 Service.Save();
             }
         }
-        else
-        {
+        else {
             DrawTimedHookTypeOption(UIStrings.Normal_Hook, HookType.Normal,
                 ref UseNormalHookTypeByTimer, ref NormalHookTypeMin, ref NormalHookTypeMax);
 
@@ -123,33 +113,27 @@ public class BaseBiteConfig(HookType type)
         }
     }
 
-    private void DrawTimedHookTypeOption(string label, HookType hookType, ref bool enabled, ref double minTime, ref double maxTime)
-    {
+    private void DrawTimedHookTypeOption(string label, HookType hookType, ref bool enabled, ref double minTime, ref double maxTime) {
         using var id = ImRaii.PushId(label);
         using var indent = ImRaii.PushIndent();
 
-        if (DrawUtil.Checkbox(label, ref enabled))
-        {
+        if (DrawUtil.Checkbox(label, ref enabled)) {
             if (enabled && HooksetType == HookType.None)
                 HooksetType = hookType;
         }
 
-        if (enabled)
-        {
+        if (enabled) {
             using var innerIndent = ImRaii.PushIndent();
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.SetZeroToIgnore);
             SetupTimer(ref minTime, ref maxTime);
         }
     }
 
-    private void SetupTimer(ref double minTimeDelay, ref double maxTimeDelay)
-    {
+    private void SetupTimer(ref double minTimeDelay, ref double maxTimeDelay) {
 
         ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputDouble(UIStrings.MinWait, ref minTimeDelay, .1, 1, @"%.1f%"))
-        {
-            switch (minTimeDelay)
-            {
+        if (ImGui.InputDouble(UIStrings.MinWait, ref minTimeDelay, .1, 1, @"%.1f%")) {
+            switch (minTimeDelay) {
                 case <= 0:
                     minTimeDelay = 0;
                     break;
@@ -165,10 +149,8 @@ public class BaseBiteConfig(HookType type)
         ImGuiComponents.HelpMarker($"{UIStrings.HelpMarkerMinWaitTimer}\n\n{UIStrings.DoesntHaveAffectUnderChum}");
 
         ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputDouble(UIStrings.MaxWait, ref maxTimeDelay, .1, 1, @"%.1f%"))
-        {
-            switch (maxTimeDelay)
-            {
+        if (ImGui.InputDouble(UIStrings.MaxWait, ref maxTimeDelay, .1, 1, @"%.1f%")) {
+            switch (maxTimeDelay) {
                 case 0.1:
                     maxTimeDelay = 2;
                     break;

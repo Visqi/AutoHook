@@ -2,8 +2,7 @@ using System.Reflection;
 
 namespace AutoHook.Conditions;
 
-public class ConditionRegistry
-{
+public class ConditionRegistry {
     public static ConditionRegistry Registry { get; } = new();
 
     static ConditionRegistry() => Assembly.GetExecutingAssembly().GetTypes().Where(t => !t.IsAbstract && typeof(IConditionDefinition).IsAssignableFrom(t))
@@ -17,8 +16,7 @@ public class ConditionRegistry
     private readonly Dictionary<Type, string> _idByType = [];
     private readonly Dictionary<Type, ConditionTypeDef> _byType = [];
 
-    public void Register(ConditionTypeDef def)
-    {
+    public void Register(ConditionTypeDef def) {
         if (string.IsNullOrEmpty(def.Id)) return;
         _byId[def.Id] = def;
         if (def.Definition != null)
@@ -30,8 +28,7 @@ public class ConditionRegistry
 
     public IReadOnlyCollection<ConditionTypeDef> All => _byId.Values;
 
-    public string GetId(Type type)
-    {
+    public string GetId(Type type) {
         if (_idByType.TryGetValue(type, out var id)) return id;
         if (Activator.CreateInstance(type) is not IConditionDefinition def) return string.Empty;
         _idByType[type] = def.Id;
@@ -41,8 +38,7 @@ public class ConditionRegistry
     public string GetId<T>() where T : IConditionDefinition => GetId(typeof(T));
 }
 
-public class ConditionTypeDef
-{
+public class ConditionTypeDef {
     public string Id { get; init; } = "";
     public string Name { get; init; } = "";
     public string Category { get; init; } = "";
@@ -54,8 +50,7 @@ public class ConditionTypeDef
 }
 
 [Flags]
-public enum ConditionScopeFlags
-{
+public enum ConditionScopeFlags {
     None = 0,
     Hook = 1 << 0,
     AutoCordial = 1 << 1,

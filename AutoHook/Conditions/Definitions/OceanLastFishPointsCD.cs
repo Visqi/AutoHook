@@ -5,16 +5,14 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class OceanLastFishPointsCD : IConditionDefinition
-{
+public sealed class OceanLastFishPointsCD : IConditionDefinition {
     public string Id => nameof(OceanLastFishPointsCD);
     public string Name => "Last ocean fish points";
     public string Category => "Fishing";
     public string Description => "Compares the points value of the last caught ocean fish in the current zone against a value.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters)
-    {
+    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var points = GetLastOceanFishPointsValue(world);
         if (points == null) return GetBool(parameters, "inv", false);
         var val = GetInt(parameters, "val", 0);
@@ -23,8 +21,7 @@ public sealed class OceanLastFishPointsCD : IConditionDefinition
         return GetBool(parameters, "inv", false) ? !result : result;
     }
 
-    public void DrawParams(Condition condition)
-    {
+    public void DrawParams(Condition condition) {
         var val = GetInt(condition.Params, "val", 300);
         ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
         if (ImGui.InputInt("Points", ref val))
@@ -37,22 +34,19 @@ public sealed class OceanLastFishPointsCD : IConditionDefinition
         using var combo = ImRaii.Combo("##ocean_points_op", label);
         if (!combo) return;
 
-        foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
-        {
+        foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
             var sel = choice == op;
             if (ImGui.Selectable(choice, sel))
                 condition.Params["op"] = choice;
         }
     }
 
-    private static int? GetLastOceanFishPointsValue(WorldState w)
-    {
+    private static int? GetLastOceanFishPointsValue(WorldState w) {
         var of = w.OceanFishing;
         if (of.FishData == null || of.FishData.Count < 60) return null;
         var zone = (int)Math.Clamp(of.CurrentZone, 0, 2);
         var start = zone * 20;
-        for (var i = start + 19; i >= start; i--)
-        {
+        for (var i = start + 19; i >= start; i--) {
             var f = of.FishData[i];
             if (f.ItemId == 0) continue;
             var count = f.NqAmount + f.HqAmount;

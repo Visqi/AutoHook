@@ -2,18 +2,15 @@ using AutoHook.Conditions;
 
 namespace AutoHook.Fishing;
 
-public partial class FishingManager
-{
-    private FishConfig? GetLastCatchConfig()
-    {
+public partial class FishingManager {
+    private FishConfig? GetLastCatchConfig() {
         if (Ws.LastCaughtFishId == null)
             return null;
 
         return Presets.SelectedPreset?.GetFishById(Ws.LastCaughtFishId.Value) ?? Presets.DefaultPreset.GetFishById(Ws.LastCaughtFishId.Value);
     }
 
-    private bool UseFishCaughtActions(FishConfig? lastFishCatchCfg)
-    {
+    private bool UseFishCaughtActions(FishConfig? lastFishCatchCfg) {
         BaseActionCast? cast = null;
 
         if (lastFishCatchCfg == null || !lastFishCatchCfg.Enabled || Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped))
@@ -33,8 +30,7 @@ public partial class FishingManager
             cast = lastFishCatchCfg.IdenticalCast;
 
         // global IC
-        if (cast == null)
-        {
+        if (cast == null) {
             var autoCastCfg = GetAutoCastCfg();
             if (autoCastCfg.CastIdenticalCast.IsAvailableToCast(caughtCount))
                 cast = autoCastCfg.CastIdenticalCast;
@@ -48,8 +44,7 @@ public partial class FishingManager
 
         var multiHook = lastFishCatchCfg.Multihook;
 
-        if (cast == null && multiHook.Enabled && multiHook.CastCondition())
-        {
+        if (cast == null && multiHook.Enabled && multiHook.CastCondition()) {
             Service.TaskManager.Enqueue(() =>
                 PlayerRes.CastActionDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));
             Service.TaskManager.Enqueue(() =>
@@ -57,10 +52,8 @@ public partial class FishingManager
             return true;
         }
 
-        if (cast != null)
-        {
-            if (multiHook.Enabled && multiHook.CastCondition())
-            {
+        if (cast != null) {
+            if (multiHook.Enabled && multiHook.CastCondition()) {
                 Service.TaskManager.Enqueue(() =>
                     PlayerRes.CastActionDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));
                 Service.TaskManager.Enqueue(() =>
@@ -75,8 +68,7 @@ public partial class FishingManager
         return false;
     }
 
-    private void CheckFishCaughtSwap(FishConfig? lastCatchCfg)
-    {
+    private void CheckFishCaughtSwap(FishConfig? lastCatchCfg) {
         if (lastCatchCfg == null || !lastCatchCfg.Enabled)
             return;
 
@@ -86,11 +78,9 @@ public partial class FishingManager
             FishingHelper.RemovePresetSwap(guid);
 
         if (lastCatchCfg.SwapPresetLimit.BackingSet is { Groups.Count: > 0 } presetSet &&
-            !FishingHelper.SwappedPreset(guid) && !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped))
-        {
+            !FishingHelper.SwappedPreset(guid) && !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
             var readyForPresetSwap = presetSet.Evaluate(Ws, ConditionRegistry.Registry);
-            if (readyForPresetSwap && lastCatchCfg.PresetToSwap != Presets.SelectedPreset?.PresetName)
-            {
+            if (readyForPresetSwap && lastCatchCfg.PresetToSwap != Presets.SelectedPreset?.PresetName) {
                 var preset = Presets.CustomPresets.FirstOrDefault(preset => preset.PresetName == lastCatchCfg.PresetToSwap);
 
                 FishingHelper.AddPresetSwap(guid);
@@ -98,8 +88,7 @@ public partial class FishingManager
 
                 if (preset == null)
                     Service.PrintChat(@$"Preset {lastCatchCfg.PresetToSwap} not found.");
-                else
-                {
+                else {
                     Service.Save();
                     Presets.SelectedPreset = preset;
                     Service.PrintChat(@$"[Fish Caught] Swapping current preset to {lastCatchCfg.PresetToSwap}");
@@ -109,18 +98,15 @@ public partial class FishingManager
         }
 
         if (lastCatchCfg.SwapBaitLimit.BackingSet is { Groups.Count: > 0 } baitSet &&
-            !FishingHelper.SwappedBait(guid) && !Ws.FishingStep.HasFlag(FishingSteps.BaitSwapped))
-        {
+            !FishingHelper.SwappedBait(guid) && !Ws.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
             var readyForBaitSwap = baitSet.Evaluate(Ws, ConditionRegistry.Registry);
             if (readyForBaitSwap &&
-                lastCatchCfg.BaitToSwap.Id != Ws.CurrentBaitId)
-            {
+                lastCatchCfg.BaitToSwap.Id != Ws.CurrentBaitId) {
                 var result = Service.BaitManager.ChangeBait(lastCatchCfg.BaitToSwap);
 
                 FishingHelper.AddBaitSwap(guid);
                 Ws.Execute(new WorldState.OpOrFishingStep(FishingSteps.BaitSwapped));
-                if (result == BaitManager.ChangeBaitReturn.Success)
-                {
+                if (result == BaitManager.ChangeBaitReturn.Success) {
                     Service.PrintChat(@$"[Fish Caught] Swapping bait to {lastCatchCfg.BaitToSwap.Name}");
                     Service.Save();
                 }

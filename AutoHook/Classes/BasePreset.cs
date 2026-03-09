@@ -2,22 +2,17 @@
 
 namespace AutoHook.Classes;
 
-public abstract class BasePreset
-{
+public abstract class BasePreset {
     public string SelectedGuid { get; set; } = "";
 
     [JsonIgnore]
-    public virtual BasePresetConfig? SelectedPreset
-    {
-        get
-        {
+    public virtual BasePresetConfig? SelectedPreset {
+        get {
             return PresetList.FirstOrDefault(p => p.UniqueId.ToString() == SelectedGuid);
         }
-        set
-        {
+        set {
             Service.Status = string.Empty;
-            if (value != null)
-            {
+            if (value != null) {
                 OnSelectedPreset(value, SelectedPreset);
                 SelectedGuid = value.UniqueId.ToString();
             }
@@ -34,8 +29,7 @@ public abstract class BasePreset
 
     public abstract void RemovePreset(Guid value);
 
-    public virtual void RenamePreset(Guid value, string newName)
-    {
+    public virtual void RenamePreset(Guid value, string newName) {
         var preset = PresetList.Find(p => p.UniqueId == value);
         if (preset == null)
             return;
@@ -44,15 +38,13 @@ public abstract class BasePreset
         Service.Save();
     }
 
-    public virtual void OnSelectedPreset(BasePresetConfig newPreset, BasePresetConfig? oldPreset)
-    {
+    public virtual void OnSelectedPreset(BasePresetConfig newPreset, BasePresetConfig? oldPreset) {
         Service.Save();
     }
 
     public abstract void SwapIndex(int itemIndex, int targetIndex);
 
-    public virtual BasePresetConfig? GetPreset(Guid value)
-    {
+    public virtual BasePresetConfig? GetPreset(Guid value) {
         return PresetList.Find(p => p.UniqueId == value);
     }
 

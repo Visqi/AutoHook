@@ -3,15 +3,13 @@ using ECommons.Throttlers;
 
 namespace AutoHook.Fishing;
 
-public partial class FishingManager
-{
+public partial class FishingManager {
     public AutoCastsConfig GetAutoCastCfg()
         => Presets.SelectedPreset?.AutoCastsCfg.EnableAll ?? false
             ? Presets.SelectedPreset.AutoCastsCfg
             : Presets.DefaultPreset.AutoCastsCfg;
 
-    private void CheckWhileFishingActions()
-    {
+    private void CheckWhileFishingActions() {
         if (!EzThrottler.Throttle("CheckWhileFishingActions", 500))
             return;
 
@@ -26,31 +24,27 @@ public partial class FishingManager
         Service.TaskManager.Enqueue(() => hookCfg.GetHookset().CastLures.TryCasting(Ws.LureSuccess));
     }
 
-    private void CastCollect()
-    {
+    private void CastCollect() {
         var cfg = GetAutoCastCfg();
 
         if (Ws.HasStatus(IDs.Status.CollectorsGlove) && cfg.RecastAnimationCancel && cfg.TurnCollectOff && !cfg.CastCollect.Enabled)
             PlayerRes.CastAction(IDs.Actions.Collect);
         else if (Ws.HasStatus(IDs.Status.CollectorsGlove) && cfg.TurnCollectOffWithoutAnimCancel && !cfg.CastCollect.Enabled)
             PlayerRes.CastAction(IDs.Actions.Collect);
-        else
-        {
+        else {
             cfg.TryCastAction(cfg.CastCollect);
             return;
         }
     }
 
-    private void UseAutoCasts()
-    {
+    private void UseAutoCasts() {
         if (Ws.FishingStep.HasFlag(FishingSteps.None) || Ws.FishingStep.HasFlag(FishingSteps.BeganFishing) || Ws.FishingStep.HasFlag(FishingSteps.Quitting))
             return;
 
         if (!Ws.IsCastAvailable() || Service.TaskManager.IsBusy)
             return;
 
-        Service.TaskManager.Enqueue(() =>
-        {
+        Service.TaskManager.Enqueue(() => {
             var lastFishCatchCfg = GetLastCatchConfig();
 
             var acCfg = GetAutoCastCfg();
@@ -65,18 +59,15 @@ public partial class FishingManager
         }, "AutoCasting");
     }
 
-    private void CastLineMoochOrRelease(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg)
-    {
+    private void CastLineMoochOrRelease(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg) {
         var blockMooch = lastFishCatchCfg is { Enabled: true, NeverMooch: true };
 
         if (TryUseSwimbait(acCfg, lastFishCatchCfg, blockMooch))
             if (acCfg.TryCastAction(acCfg.CastLine, true))
                 return;
 
-        if (!blockMooch)
-        {
-            if (lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast())
-            {
+        if (!blockMooch) {
+            if (lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast()) {
                 PlayerRes.CastActionNoDelay(lastFishCatchCfg.Mooch.Id, lastFishCatchCfg.Mooch.ActionType,
                     UIStrings.Mooch);
                 return;
@@ -90,21 +81,18 @@ public partial class FishingManager
             return;
     }
 
-    private bool TryUseSwimbait(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg, bool blockMooch)
-    {
+    private bool TryUseSwimbait(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg, bool blockMooch) {
         if (Ws.GetSwimbaitCount() is 0)
             return false;
 
         var swimbaitIds = Ws.SwimbaitIds;
         var isIntuition = Ws.IntuitionStatus == IntuitionStatus.Active;
-        foreach (var (fishId, slotIndex) in swimbaitIds.ToArray().WithIndex())
-        {
+        foreach (var (fishId, slotIndex) in swimbaitIds.ToArray().WithIndex()) {
             if (fishId == 0)
                 continue;
 
             HookConfig? swimbaitMoochConfig = null;
-            if (Presets.SelectedPreset != null)
-            {
+            if (Presets.SelectedPreset != null) {
                 swimbaitMoochConfig = Presets.SelectedPreset.GetCfgById((int)fishId, true);
                 Service.PrintDebug($"[Swimbait] Found config in selected preset: {swimbaitMoochConfig != null}, Enabled: {swimbaitMoochConfig?.Enabled}");
             }
@@ -112,28 +100,23 @@ public partial class FishingManager
             // Resolve per-window swimbait config (normal vs Intuition).
             SwimbaitConfig? activeSwimbaitCfg = null;
 
-            if (swimbaitMoochConfig != null && swimbaitMoochConfig.Enabled)
-            {
+            if (swimbaitMoochConfig != null && swimbaitMoochConfig.Enabled) {
                 activeSwimbaitCfg = isIntuition ? swimbaitMoochConfig.SwimbaitIntuition : swimbaitMoochConfig.SwimbaitNormal;
             }
 
             // If no config found in selected preset, or swimbait not enabled for this window, check global preset config.
-            if (activeSwimbaitCfg == null || !activeSwimbaitCfg.UseSwimbait)
-            {
+            if (activeSwimbaitCfg == null || !activeSwimbaitCfg.UseSwimbait) {
                 var globalAllMooches = Presets.DefaultPreset.ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == GameRes.AllMoochesId);
-                if (globalAllMooches != null && globalAllMooches.Enabled)
-                {
+                if (globalAllMooches != null && globalAllMooches.Enabled) {
                     var globalCfg = isIntuition ? globalAllMooches.SwimbaitIntuition : globalAllMooches.SwimbaitNormal;
-                    if (globalCfg.UseSwimbait)
-                    {
+                    if (globalCfg.UseSwimbait) {
                         swimbaitMoochConfig = globalAllMooches;
                         activeSwimbaitCfg = globalCfg;
                         Service.PrintDebug("[Swimbait] Using global 'All Mooches' config");
                     }
                 }
 
-                if (activeSwimbaitCfg == null || !activeSwimbaitCfg.UseSwimbait)
-                {
+                if (activeSwimbaitCfg == null || !activeSwimbaitCfg.UseSwimbait) {
                     Service.PrintDebug($"[Swimbait] No valid config found for fish {fishId} in this window, trying next slot");
                     continue;
                 }
@@ -144,13 +127,11 @@ public partial class FishingManager
                 continue;
 
             if (activeSwimbaitCfg.ConditionSet is { Groups.Count: > 0 } condSet &&
-                !condSet.Evaluate(Ws, ConditionRegistry.Registry))
-            {
+                !condSet.Evaluate(Ws, ConditionRegistry.Registry)) {
                 continue;
             }
 
-            if (Service.BaitManager.ChangeSwimbait((uint)slotIndex) == BaitManager.ChangeBaitReturn.Success)
-            {
+            if (Service.BaitManager.ChangeSwimbait((uint)slotIndex) == BaitManager.ChangeBaitReturn.Success) {
                 Service.PrintDebug($"[Swimbait] Using swimbait slot {slotIndex} (fish ID: {fishId})");
                 Service.Status = $"Using swimbait: {MultiString.GetItemName((int)fishId)}";
                 return true;

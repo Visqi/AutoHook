@@ -5,8 +5,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 namespace AutoHook.Conditions;
 
 /// <summary>Ocean fishing instance state from <see cref="InstanceContentOceanFishing"/>.</summary>
-public sealed class OceanFishingState
-{
+public sealed class OceanFishingState {
     public static readonly OceanFishingState Empty = new();
 
     public bool SpectralCurrentActive { get; init; }
@@ -20,8 +19,7 @@ public sealed class OceanFishingState
     public ushort Mission3Progress { get; init; }
     public IReadOnlyList<InstanceContentOceanFishing.FishDataStruct> FishData { get; init; } = [];
 
-    public OceanFishingState WithSpectralCurrentActive(bool value) => new()
-    {
+    public OceanFishingState WithSpectralCurrentActive(bool value) => new() {
         SpectralCurrentActive = value,
         CurrentRoute = CurrentRoute,
         CurrentZone = CurrentZone,
@@ -35,8 +33,7 @@ public sealed class OceanFishingState
     };
 }
 
-public sealed class WorldState
-{
+public sealed class WorldState {
     public uint CurrentGp { get; private set; }
     public uint MaxGp { get; private set; }
 
@@ -101,8 +98,7 @@ public sealed class WorldState
     public float GetStatusTime(uint statusId) => _statuses.TryGetValue(statusId, out var t) ? t.Time : 0f;
     public int GetStatusStacks(uint statusId) => _statuses.TryGetValue(statusId, out var s) ? s.Stacks : 0;
 
-    public bool HasAnyStatus(uint[] statusIds)
-    {
+    public bool HasAnyStatus(uint[] statusIds) {
         foreach (var id in statusIds)
             if (HasStatus(id)) return true;
         return false;
@@ -124,10 +120,8 @@ public sealed class WorldState
 
     public event Action<Operation>? Modified;
 
-    public abstract record Operation
-    {
-        internal void Execute(WorldState ws)
-        {
+    public abstract record Operation {
+        internal void Execute(WorldState ws) {
             Exec(ws);
             ws.Modified?.Invoke(this);
         }
@@ -135,34 +129,27 @@ public sealed class WorldState
         protected abstract void Exec(WorldState ws);
     }
 
-    public void Execute(Operation op)
-    {
+    public void Execute(Operation op) {
         op.Execute(this);
     }
 
-    public sealed record OpGp(uint Current, uint Max) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpGp(uint Current, uint Max) : Operation {
+        protected override void Exec(WorldState ws) {
             ws.CurrentGp = Current;
             ws.MaxGp = Max;
         }
     }
 
-    public sealed record OpStatuses(IReadOnlyDictionary<uint, (float Time, int Stacks)> Statuses) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpStatuses(IReadOnlyDictionary<uint, (float Time, int Stacks)> Statuses) : Operation {
+        protected override void Exec(WorldState ws) {
             ws._statuses.Clear();
             foreach (var kv in Statuses)
                 ws._statuses[kv.Key] = kv.Value;
         }
     }
 
-    public sealed record OpFishingState(FishingState State, uint BaitId, uint? SwimbaitId, bool IsMooching, int BaitMoochId = 0) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpFishingState(FishingState State, uint BaitId, uint? SwimbaitId, bool IsMooching, int BaitMoochId = 0) : Operation {
+        protected override void Exec(WorldState ws) {
             ws.FishingState = State;
             ws.CurrentBaitId = BaitId;
             ws.CurrentSwimbaitId = SwimbaitId;
@@ -171,125 +158,99 @@ public sealed class WorldState
         }
     }
 
-    public sealed record OpSetBlockCasting(bool Block) : Operation
-    {
+    public sealed record OpSetBlockCasting(bool Block) : Operation {
         protected override void Exec(WorldState ws) => ws.BlockCasting = Block;
     }
 
-    public sealed record OpItemCounts(IReadOnlyDictionary<uint, int> Counts) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpItemCounts(IReadOnlyDictionary<uint, int> Counts) : Operation {
+        protected override void Exec(WorldState ws) {
             ws._itemCounts.Clear();
             foreach (var kv in Counts)
                 ws._itemCounts[kv.Key] = kv.Value;
         }
     }
 
-    public sealed record OpSwimbaitIds(IReadOnlyList<uint> Ids) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpSwimbaitIds(IReadOnlyList<uint> Ids) : Operation {
+        protected override void Exec(WorldState ws) {
             ws._swimbaitIds.Clear();
             ws._swimbaitIds.AddRange(Ids);
         }
     }
 
-    public sealed record OpPotCooldown(bool OffCooldown) : Operation
-    {
+    public sealed record OpPotCooldown(bool OffCooldown) : Operation {
         protected override void Exec(WorldState ws) => ws.IsPotOffCooldown = OffCooldown;
     }
 
-    public sealed record OpBiteContext(double BiteTimeSeconds, bool ChumActive) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpBiteContext(double BiteTimeSeconds, bool ChumActive) : Operation {
+        protected override void Exec(WorldState ws) {
             ws.BiteTimeSeconds = BiteTimeSeconds;
             ws.ChumActive = ChumActive;
         }
     }
 
-    public sealed record OpIntuition(IntuitionStatus Status, float TimeRemaining) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpIntuition(IntuitionStatus Status, float TimeRemaining) : Operation {
+        protected override void Exec(WorldState ws) {
             ws.IntuitionStatus = Status;
             ws.IntuitionTimeRemaining = TimeRemaining;
         }
     }
 
-    public sealed record OpOceanFishing(OceanFishingState? State) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpOceanFishing(OceanFishingState? State) : Operation {
+        protected override void Exec(WorldState ws) {
             var s = State ?? OceanFishingState.Empty;
             ws.OceanFishing = s;
             ws.SpectralCurrentStatus = s.SpectralCurrentActive ? SpectralCurrentStatus.Active : SpectralCurrentStatus.NotActive;
         }
     }
 
-    public sealed record OpLastCatch(int? FishId, byte Amount = 1) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpLastCatch(int? FishId, byte Amount = 1) : Operation {
+        protected override void Exec(WorldState ws) {
             ws.LastCaughtFishId = FishId;
             ws.LastCatchAmount = Amount;
         }
     }
 
-    public sealed record OpSetFishingStep(FishingSteps Step) : Operation
-    {
+    public sealed record OpSetFishingStep(FishingSteps Step) : Operation {
         protected override void Exec(WorldState ws) => ws.FishingStep = Step;
     }
 
-    public sealed record OpOrFishingStep(FishingSteps Flag) : Operation
-    {
+    public sealed record OpOrFishingStep(FishingSteps Flag) : Operation {
         protected override void Exec(WorldState ws) => ws.FishingStep |= Flag;
     }
 
-    public sealed record OpPlayerUsedAction(ActionType ActionType, uint ActionId) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpPlayerUsedAction(ActionType ActionType, uint ActionId) : Operation {
+        protected override void Exec(WorldState ws) {
             ws.LastUsedActionType = ActionType;
             ws.LastUsedActionId = ActionId;
         }
     }
 
-    public sealed record OpSetLureSuccess(bool Value) : Operation
-    {
+    public sealed record OpSetLureSuccess(bool Value) : Operation {
         protected override void Exec(WorldState ws) => ws.LureSuccess = Value;
     }
 
-    public sealed record OpSetPreviousFishingState(FishingState Value) : Operation
-    {
+    public sealed record OpSetPreviousFishingState(FishingState Value) : Operation {
         protected override void Exec(WorldState ws) => ws.PreviousFishingState = Value;
     }
 
-    public sealed record OpActionAvailability(IReadOnlyCollection<(uint Id, ActionType Type)> Available) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpActionAvailability(IReadOnlyCollection<(uint Id, ActionType Type)> Available) : Operation {
+        protected override void Exec(WorldState ws) {
             ws._actionAvailable.Clear();
             foreach (var (id, type) in Available)
                 ws._actionAvailable[(id, type)] = true;
         }
     }
 
-    public sealed record OpZone(byte WeatherId, uint TerritoryId) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpZone(byte WeatherId, uint TerritoryId) : Operation {
+        protected override void Exec(WorldState ws) {
             ws.CurrentWeatherId = WeatherId;
             ws.TerritoryId = TerritoryId;
         }
     }
 
     /// <summary>Increment per-fish caught counter for the current session.</summary>
-    public sealed record OpAddFishCaught(int FishId, byte Amount) : Operation
-    {
-        protected override void Exec(WorldState ws)
-        {
+    public sealed record OpAddFishCaught(int FishId, byte Amount) : Operation {
+        protected override void Exec(WorldState ws) {
             if (FishId <= 0 || Amount <= 0)
                 return;
             ws._fishCaughtCounts[FishId] = ws._fishCaughtCounts.GetValueOrDefault(FishId) + Amount;
@@ -297,8 +258,7 @@ public sealed class WorldState
     }
 
     /// <summary>Reset all per-fish caught counters (typically on fishing stop).</summary>
-    public sealed record OpResetFishCaught() : Operation
-    {
+    public sealed record OpResetFishCaught() : Operation {
         protected override void Exec(WorldState ws) => ws._fishCaughtCounts.Clear();
     }
 }

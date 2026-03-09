@@ -3,24 +3,21 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoPrizeCatch : BaseActionCast
-{
+public class AutoPrizeCatch : BaseActionCast {
     [Obsolete("Legacy config")] public bool UseWhenMoochIIOnCD = false;
     [Obsolete("Legacy config")] public bool UseOnlyWithIdenticalCast = false;
     [Obsolete("Legacy config")] public bool UseOnlyWithActiveSlap = false;
 
     public override bool DoesCancelMooch() => true;
 
-    public AutoPrizeCatch() : base(UIStrings.Prize_Catch, IDs.Actions.PrizeCatch, ActionType.Action)
-    {
+    public AutoPrizeCatch() : base(UIStrings.Prize_Catch, IDs.Actions.PrizeCatch, ActionType.Action) {
         HelpText = UIStrings.Use_Prize_Catch_HelpText;
     }
 
     public override string GetName()
         => Name = UIStrings.Prize_Catch;
 
-    public override bool CastCondition()
-    {
+    public override bool CastCondition() {
         if (!EvaluateConditionSet())
             return false;
 
@@ -39,8 +36,7 @@ public class AutoPrizeCatch : BaseActionCast
         return Service.WorldState.ActionAvailable(IDs.Actions.PrizeCatch);
     }
 
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
+    protected override DrawOptionsDelegate DrawOptions => () => {
         ConditionSet = ConditionUi.DrawConditionSetSlim(
             UIStrings.Conditions,
             ConditionSet,

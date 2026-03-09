@@ -2,8 +2,7 @@
 
 namespace AutoHook.Classes;
 
-public class ImportedFish
-{
+public class ImportedFish {
     public int ItemId { get; set; }
     public HookType HookType { get; set; }
     public BiteType BiteType { get; set; }
@@ -23,14 +22,12 @@ public class ImportedFish
 
     public bool IsLureFish => GameRes.LureFishes.Any(f => f.Id == ItemId);
 
-    public class FishPredator
-    {
+    public class FishPredator {
         public int itemId { get; set; }
         public int qtd { get; set; }
     }
 
-    public class FishInterval
-    {
+    public class FishInterval {
         public int OnTime { get; set; }
         public int OffTime { get; set; }
         public int ShiftTime { get; set; }

@@ -3,16 +3,14 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoMultiHook : BaseActionCast
-{
+public class AutoMultiHook : BaseActionCast {
     [Obsolete("Legacy config")] public bool OnlyUseWhenIdenticalCastActive;
 
     public AutoMultiHook() : base(UIStrings.Multihook, IDs.Actions.MultiHook) { }
 
     public override int Priority { get; set; } = 0;
     public override bool IsExcludedPriority { get; set; } = true;
-    public override unsafe bool CastCondition()
-    {
+    public override unsafe bool CastCondition() {
         if (!EvaluateConditionSet())
             return false;
 
@@ -25,8 +23,7 @@ public class AutoMultiHook : BaseActionCast
 
     public override string GetName() => Name = UIStrings.Multihook;
 
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
+    protected override DrawOptionsDelegate DrawOptions => () => {
         ConditionSet = ConditionUi.DrawConditionSetSlim(
             UIStrings.Conditions,
             ConditionSet,

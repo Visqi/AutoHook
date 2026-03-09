@@ -5,30 +5,26 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class OceanZoneCD : IConditionDefinition
-{
+public sealed class OceanZoneCD : IConditionDefinition {
     public string Id => nameof(OceanZoneCD);
     public string Name => "Ocean zone";
     public string Category => "Fishing";
     public string Description => "Matches the current ocean fishing zone index (1–3).";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters)
-    {
+    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var wanted = GetInt(parameters, "zone", 0);
         var zone = (int)world.OceanFishing.CurrentZone;
         var result = zone == wanted;
         return GetBool(parameters, "inv", false) ? !result : result;
     }
 
-    public void DrawParams(Condition condition)
-    {
+    public void DrawParams(Condition condition) {
         var zone = GetInt(condition.Params, "zone", 0);
         zone = Math.Clamp(zone, 0, 2);
 
         ImGui.SetNextItemWidth(60 * ImGuiHelpers.GlobalScale);
-        var label = zone switch
-        {
+        var label = zone switch {
             0 => "1",
             1 => "2",
             2 => "3",

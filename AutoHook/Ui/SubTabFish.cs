@@ -1,5 +1,3 @@
-using AutoHook.Conditions;
-using AutoHook.Conditions.Definitions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
@@ -9,20 +7,17 @@ using System.Numerics;
 
 namespace AutoHook.Ui;
 
-public class SubTabFish
-{
+public class SubTabFish {
     private static CustomPresetConfig _preset = null!;
 
-    public static void DrawFishTab(CustomPresetConfig presetCfg)
-    {
+    public static void DrawFishTab(CustomPresetConfig presetCfg) {
         _preset = presetCfg;
         var listOfFish = presetCfg.ListOfFish;
 
         DrawDescription(listOfFish);
 
         using var item = ImRaii.Child("###FishItems", new Vector2(0, 0), true);
-        for (var idx = 0; idx < listOfFish.Count; idx++)
-        {
+        for (var idx = 0; idx < listOfFish.Count; idx++) {
             var fish = listOfFish[idx];
             using var id = ImRaii.PushId($"fishTab###{idx}");
 
@@ -34,11 +29,9 @@ public class SubTabFish
 
             ImGui.SameLine(0, 6);
             var x = ImGui.GetCursorPosX();
-            if (ImGui.CollapsingHeader($"{fish.Fish.Name} {fishCount}###a{idx}"))
-            {
+            if (ImGui.CollapsingHeader($"{fish.Fish.Name} {fishCount}###a{idx}")) {
                 ImGui.SetCursorPosX(x);
-                using (ImRaii.Group())
-                {
+                using (ImRaii.Group()) {
                     ImGui.Spacing();
                     DrawFishSearchBar(fish);
                     DrawDeleteButton(fish);
@@ -79,12 +72,9 @@ public class SubTabFish
         }
     }
 
-    private static void DrawDescription(List<FishConfig> list)
-    {
-        if (ImGui.Button(UIStrings.Add))
-        {
-            if (list.All(x => x.Fish.Id != -1))
-            {
+    private static void DrawDescription(List<FishConfig> list) {
+        if (ImGui.Button(UIStrings.Add)) {
+            if (list.All(x => x.Fish.Id != -1)) {
                 list.Add(new FishConfig(new BaitFishClass()));
             }
 
@@ -97,8 +87,7 @@ public class SubTabFish
 
         ImGui.SameLine();
 
-        if (ImGui.Button($"{UIStrings.AddLastCatch} {Service.LastCatch.Name ?? "-"}"))
-        {
+        if (ImGui.Button($"{UIStrings.AddLastCatch} {Service.LastCatch.Name ?? "-"}")) {
             if (Service.LastCatch.Id is 0 or -1)
                 return;
             if (list.Any(x => x.Fish.Id == Service.LastCatch.Id))
@@ -109,13 +98,10 @@ public class SubTabFish
         }
     }
 
-    private static void DrawDeleteButton(FishConfig fishConfig)
-    {
+    private static void DrawDeleteButton(FishConfig fishConfig) {
         ImGui.SameLine();
-        using (ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash) && ImGui.GetIO().KeyShift)
-            {
+        using (ImRaii.PushFont(UiBuilder.IconFont)) {
+            if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash) && ImGui.GetIO().KeyShift) {
                 _preset.RemoveItem(fishConfig.UniqueId);
                 Service.Save();
             }
@@ -124,15 +110,13 @@ public class SubTabFish
         ImGui.TooltipOnHover(UIStrings.HoldShiftToDelete);
     }
 
-    private static void DrawFishSearchBar(FishConfig fishConfig)
-    {
+    private static void DrawFishSearchBar(FishConfig fishConfig) {
         using var _ = ImRaii.PushId("DrawFishSearchBar");
         DrawUtil.DrawComboSelector(
             GameRes.Fishes,
-            (BaitFishClass fish) => $"[#{fish.Id}] {fish.Name}",
+            fish => $"[#{fish.Id}] {fish.Name}",
             fishConfig.Fish.Name,
-            (BaitFishClass fish) =>
-            {
+            fish => {
                 fishConfig.Fish = fish;
                 var stopLimit = fishConfig.StopAfterCaughtLimit.Value;
                 fishConfig.StopAfterCaughtLimit.Value = stopLimit;
@@ -143,12 +127,10 @@ public class SubTabFish
             });
     }
 
-    private static void DrawSurfaceSlapIdenticalCast(FishConfig fishConfig)
-    {
+    private static void DrawSurfaceSlapIdenticalCast(FishConfig fishConfig) {
         using var _ = ImRaii.PushId($"{UIStrings.SurfaceSlapIdenticalCast}");
 
-        if (ImGui.TreeNodeEx(UIStrings.SurfaceSlapIdenticalCast, ImGuiTreeNodeFlags.FramePadding))
-        {
+        if (ImGui.TreeNodeEx(UIStrings.SurfaceSlapIdenticalCast, ImGuiTreeNodeFlags.FramePadding)) {
             fishConfig.SurfaceSlap.DrawConfigWithLabel(UIStrings.UseSurfaceSlap);
 
             fishConfig.IdenticalCast.DrawConfigWithLabel(UIStrings.UseIdenticalCast);
@@ -157,23 +139,19 @@ public class SubTabFish
         }
     }
 
-    private static void DrawMultihook(FishConfig fishConfig)
-    {
+    private static void DrawMultihook(FishConfig fishConfig) {
         using var _ = ImRaii.PushId("DrawMultihook");
         using var tree = ImRaii.TreeNode(UIStrings.Multihook_Settings, ImGuiTreeNodeFlags.FramePadding);
         if (!tree) return;
         DrawUtil.DrawCheckboxTree(UIStrings.Use_Multihook, ref fishConfig.Multihook.Enabled, () => fishConfig.Multihook.DrawConfig());
     }
 
-    private static void DrawMooch(FishConfig fishConfig)
-    {
+    private static void DrawMooch(FishConfig fishConfig) {
         using var _ = ImRaii.PushId(@"DrawMooch");
-        if (ImGui.TreeNodeEx(UIStrings.Mooch_Setting, ImGuiTreeNodeFlags.FramePadding))
-        {
+        if (ImGui.TreeNodeEx(UIStrings.Mooch_Setting, ImGuiTreeNodeFlags.FramePadding)) {
             fishConfig.Mooch.DrawConfig();
 
-            if (DrawUtil.Checkbox(UIStrings.Never_Mooch, ref fishConfig.NeverMooch, UIStrings.NeverMoochHelpText))
-            {
+            if (DrawUtil.Checkbox(UIStrings.Never_Mooch, ref fishConfig.NeverMooch, UIStrings.NeverMoochHelpText)) {
                 fishConfig.Mooch.Enabled = false;
                 Service.Save();
             }
@@ -182,8 +160,7 @@ public class SubTabFish
         }
     }
 
-    private static void DrawSparefulHand(FishConfig fishConfig)
-    {
+    private static void DrawSparefulHand(FishConfig fishConfig) {
         using var _ = ImRaii.PushId("DrawSparefulHand");
         using var tree = ImRaii.TreeNode(UIStrings.SparefulHand_Settings, ImGuiTreeNodeFlags.FramePadding);
         if (!tree) return;
@@ -197,8 +174,7 @@ public class SubTabFish
         ImGui.SameLine();
         ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
         var swimbaitLimit = fishConfig.SparefulHand.SwimbaitCountLimit;
-        if (ImGui.InputInt("###SwimbaitLimit", ref swimbaitLimit, 1, 1))
-        {
+        if (ImGui.InputInt("###SwimbaitLimit", ref swimbaitLimit, 1, 1)) {
             swimbaitLimit = Math.Clamp(swimbaitLimit, 0, 3);
             fishConfig.SparefulHand.SwimbaitCountLimit = swimbaitLimit;
             Service.Save();
@@ -207,26 +183,22 @@ public class SubTabFish
         ImGui.TooltipOnHover(UIStrings.OnlyUseIfSwimbaitCountLessThanHelpText);
     }
 
-    private static void DrawStopAfter(FishConfig fishConfig)
-    {
+    private static void DrawStopAfter(FishConfig fishConfig) {
         using var _ = ImRaii.PushId("DrawStopAfter");
 
         var (stopEnabled, stopLimit) = fishConfig.StopAfterCaughtLimit.Value;
         var stopEnabledLocal = stopEnabled;
         var stopLimitLocal = stopLimit;
         DrawUtil.DrawCheckboxTree(UIStrings.Stop_After_Caught, ref stopEnabledLocal,
-            () =>
-            {
+            () => {
                 ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
-                if (ImGui.InputInt(UIStrings.TimeS, ref stopLimitLocal))
-                {
+                if (ImGui.InputInt(UIStrings.TimeS, ref stopLimitLocal)) {
                     stopLimitLocal = Math.Max(1, stopLimitLocal);
                     fishConfig.StopAfterCaughtLimit.Value = (true, stopLimitLocal);
                     Service.Save();
                 }
 
-                if (ImGui.RadioButton(UIStrings.Stop_Casting, fishConfig.StopFishingStep == FishingSteps.None))
-                {
+                if (ImGui.RadioButton(UIStrings.Stop_Casting, fishConfig.StopFishingStep == FishingSteps.None)) {
                     fishConfig.StopFishingStep = FishingSteps.None;
                     Service.Save();
                 }
@@ -234,8 +206,7 @@ public class SubTabFish
                 ImGui.SameLine();
                 ImGuiComponents.HelpMarker(UIStrings.Auto_Cast_Stopped);
 
-                if (ImGui.RadioButton(UIStrings.Quit_Fishing, fishConfig.StopFishingStep == FishingSteps.Quitting))
-                {
+                if (ImGui.RadioButton(UIStrings.Quit_Fishing, fishConfig.StopFishingStep == FishingSteps.Quitting)) {
                     fishConfig.StopFishingStep = FishingSteps.Quitting;
                     Service.Save();
                 }
@@ -245,15 +216,13 @@ public class SubTabFish
 
                 DrawUtil.Checkbox(UIStrings.Reset_the_counter, ref fishConfig.StopAfterResetCount);
             });
-        if (stopEnabledLocal != stopEnabled || stopLimitLocal != stopLimit)
-        {
+        if (stopEnabledLocal != stopEnabled || stopLimitLocal != stopLimit) {
             fishConfig.StopAfterCaughtLimit.Value = (stopEnabledLocal, stopLimitLocal);
             Service.Save();
         }
     }
 
-    private static void DrawSwapBait(FishConfig fishConfig)
-    {
+    private static void DrawSwapBait(FishConfig fishConfig) {
         using var _ = ImRaii.PushId("DrawSwapBait");
 
         var alreadySwapped = "";
@@ -264,8 +233,7 @@ public class SubTabFish
         var baitEnabledLocal = baitEnabled;
         var baitLimitLocal = baitLimit;
         DrawUtil.DrawCheckboxTree($"{UIStrings.Swap_Bait} {alreadySwapped}", ref baitEnabledLocal,
-            () =>
-            {
+            () => {
                 DrawUtil.DrawComboSelector(
                     GameRes.Baits,
                     bait => $"[#{bait.Id}] {bait.Name}",
@@ -278,8 +246,7 @@ public class SubTabFish
 
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
-                if (ImGui.InputInt(UIStrings.TimeS, ref baitLimitLocal))
-                {
+                if (ImGui.InputInt(UIStrings.TimeS, ref baitLimitLocal)) {
                     baitLimitLocal = Math.Max(1, baitLimitLocal);
                     fishConfig.SwapBaitLimit.Value = (true, baitLimitLocal);
                     Service.Save();
@@ -287,15 +254,13 @@ public class SubTabFish
                 DrawUtil.Checkbox(UIStrings.Reset_Counter_Bait_Swap, ref fishConfig.SwapBaitResetCount);
             }
         );
-        if (baitEnabledLocal != baitEnabled || baitLimitLocal != baitLimit)
-        {
+        if (baitEnabledLocal != baitEnabled || baitLimitLocal != baitLimit) {
             fishConfig.SwapBaitLimit.Value = (baitEnabledLocal, baitLimitLocal);
             Service.Save();
         }
     }
 
-    private static void DrawSwapPreset(FishConfig fishConfig)
-    {
+    private static void DrawSwapPreset(FishConfig fishConfig) {
         using var _ = ImRaii.PushId("DrawSwapPreset");
 
         var alreadySwapped = "";
@@ -305,8 +270,7 @@ public class SubTabFish
         var presetEnabledLocal = presetEnabled;
         var presetLimitLocal = presetLimit;
         DrawUtil.DrawCheckboxTree($"{UIStrings.Swap_Preset} {alreadySwapped}", ref presetEnabledLocal,
-            () =>
-            {
+            () => {
                 DrawUtil.DrawComboSelector(
                     Service.Configuration.HookPresets.CustomPresets,
                     preset => preset.PresetName,
@@ -319,16 +283,14 @@ public class SubTabFish
 
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
-                if (ImGui.InputInt(UIStrings.TimeS, ref presetLimitLocal))
-                {
+                if (ImGui.InputInt(UIStrings.TimeS, ref presetLimitLocal)) {
                     presetLimitLocal = Math.Max(1, presetLimitLocal);
                     fishConfig.SwapPresetLimit.Value = (true, presetLimitLocal);
                     Service.Save();
                 }
             }
         );
-        if (presetEnabledLocal != presetEnabled || presetLimitLocal != presetLimit)
-        {
+        if (presetEnabledLocal != presetEnabled || presetLimitLocal != presetLimit) {
             fishConfig.SwapPresetLimit.Value = (presetEnabledLocal, presetLimitLocal);
             Service.Save();
         }

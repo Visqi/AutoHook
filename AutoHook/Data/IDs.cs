@@ -1,9 +1,7 @@
 namespace AutoHook.Data;
 
-public static class IDs
-{
-    public static class Actions
-    {
+public static class IDs {
+    public static class Actions {
         public const uint
             Cast = 289,
             Quit = 299,
@@ -39,8 +37,7 @@ public static class IDs
             None = 0;
     }
 
-    public static class Status
-    {
+    public static class Status {
         public const uint
             FoodBuff = 48,
             FishersIntuition = 568,
@@ -62,8 +59,7 @@ public static class IDs
             None = 0;
     }
 
-    public static class Item
-    {
+    public static class Item {
         public const uint
             WateredCordial = 16911,
             HQWateredCordial = 1016911,

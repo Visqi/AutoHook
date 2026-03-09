@@ -3,8 +3,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoFishEyes : BaseActionCast
-{
+public class AutoFishEyes : BaseActionCast {
     public override int Priority { get; set; } = 6;
     public override bool IsExcludedPriority { get; set; } = false;
 
@@ -22,8 +21,7 @@ public class AutoFishEyes : BaseActionCast
 
     public override bool CastCondition() => EvaluateConditionSet() && !Service.WorldState.HasStatus(IDs.Status.FishEyes);
 
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
+    protected override DrawOptionsDelegate DrawOptions => () => {
         DrawUtil.Checkbox(UIStrings.IgnoreMooch, ref IgnoreMooch, UIStrings.IgnoreMoochFishEyes);
         ConditionSet = ConditionUi.DrawConditionSetSlim(
             UIStrings.Conditions,

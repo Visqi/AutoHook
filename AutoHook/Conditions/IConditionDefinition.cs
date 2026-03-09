@@ -3,8 +3,7 @@ using Dalamud.Interface.Utility;
 
 namespace AutoHook.Conditions;
 
-public interface IConditionDefinition
-{
+public interface IConditionDefinition {
     string Id { get; }
     string Name { get; }
     string Category { get; }
@@ -15,8 +14,7 @@ public interface IConditionDefinition
 
     void DrawParams(Condition condition);
 
-    public static List<uint> GetIds(IReadOnlyDictionary<string, object> p)
-    {
+    public static List<uint> GetIds(IReadOnlyDictionary<string, object> p) {
         if (!p.TryGetValue("ids", out var o)) return [];
         if (o is List<object> list)
             return [.. list.Select(x => Convert.ToUInt32(x))];
@@ -24,8 +22,7 @@ public interface IConditionDefinition
         return [];
     }
 
-    public static List<uint> GetStatusIds(IReadOnlyDictionary<string, object> p)
-    {
+    public static List<uint> GetStatusIds(IReadOnlyDictionary<string, object> p) {
         if (!p.TryGetValue("ids", out var o)) return [];
         if (o is List<object> list)
             return [.. list.Select(x => Convert.ToUInt32(x))];
@@ -33,8 +30,7 @@ public interface IConditionDefinition
         return [];
     }
 
-    public static List<byte> GetWeatherIds(IReadOnlyDictionary<string, object> p)
-    {
+    public static List<byte> GetWeatherIds(IReadOnlyDictionary<string, object> p) {
         if (!p.TryGetValue("ids", out var o)) return [];
         if (o is List<object> list)
             return [.. list.Select(x => Convert.ToByte(x))];
@@ -42,8 +38,7 @@ public interface IConditionDefinition
         return [];
     }
 
-    public static bool GetBool(IReadOnlyDictionary<string, object> p, string key, bool def)
-    {
+    public static bool GetBool(IReadOnlyDictionary<string, object> p, string key, bool def) {
         if (!p.TryGetValue(key, out var o)) return def;
         if (o is bool b) return b;
         if (o is long l) return l != 0;
@@ -62,10 +57,8 @@ public interface IConditionDefinition
     public static string GetOp(IReadOnlyDictionary<string, object> p, string key, string def)
         => !p.TryGetValue(key, out var o) || o == null ? def : o.ToString() ?? def;
 
-    public static bool CompareInt(int lhs, int rhs, string op)
-    {
-        return op switch
-        {
+    public static bool CompareInt(int lhs, int rhs, string op) {
+        return op switch {
             ">" => lhs > rhs,
             ">=" => lhs >= rhs,
             "<" => lhs < rhs,
@@ -75,8 +68,7 @@ public interface IConditionDefinition
         };
     }
 
-    public static void DrawIdsParams(Condition cond, string label)
-    {
+    public static void DrawIdsParams(Condition cond, string label) {
         var ids = GetIds(cond.Params);
         var text = string.Join(", ", ids);
         var buf = text;
@@ -85,8 +77,7 @@ public interface IConditionDefinition
             return;
 
         var list = new List<object>();
-        foreach (var part in buf.Split(',', StringSplitOptions.RemoveEmptyEntries))
-        {
+        foreach (var part in buf.Split(',', StringSplitOptions.RemoveEmptyEntries)) {
             if (uint.TryParse(part.Trim(), out var id))
                 list.Add((long)id);
         }
@@ -97,8 +88,7 @@ public interface IConditionDefinition
             cond.Params.Remove("ids");
     }
 
-    public static List<(double min, double max)> GetRanges(IReadOnlyDictionary<string, object> p)
-    {
+    public static List<(double min, double max)> GetRanges(IReadOnlyDictionary<string, object> p) {
         if (!p.TryGetValue("r", out var o) || o is not List<object> list) return [];
         var result = new List<(double, double)>();
         for (var i = 0; i + 1 < list.Count; i += 2)
@@ -106,16 +96,12 @@ public interface IConditionDefinition
         return result;
     }
 
-    public readonly record struct RangeParams(IReadOnlyList<(double Min, double Max)> Ranges, bool Invert)
-    {
-        public Dictionary<string, object> ToParams()
-        {
+    public readonly record struct RangeParams(IReadOnlyList<(double Min, double Max)> Ranges, bool Invert) {
+        public Dictionary<string, object> ToParams() {
             var dict = new Dictionary<string, object>();
-            if (Ranges.Count > 0)
-            {
+            if (Ranges.Count > 0) {
                 var list = new List<object>(Ranges.Count * 2);
-                foreach (var (min, max) in Ranges)
-                {
+                foreach (var (min, max) in Ranges) {
                     list.Add(min);
                     list.Add(max);
                 }
@@ -127,19 +113,16 @@ public interface IConditionDefinition
         }
     }
 
-    public static RangeParams GetRangeParams(IReadOnlyDictionary<string, object> p)
-    {
+    public static RangeParams GetRangeParams(IReadOnlyDictionary<string, object> p) {
         var ranges = GetRanges(p);
         var inv = GetBool(p, "inv", false);
         return new RangeParams(ranges, inv);
     }
 }
 
-public static class ConditionDefinitionExtensions
-{
+public static class ConditionDefinitionExtensions {
     public static ConditionTypeDef ToTypeDef(this IConditionDefinition def)
-        => new()
-        {
+        => new() {
             Id = def.Id,
             Name = def.Name,
             Category = def.Category,

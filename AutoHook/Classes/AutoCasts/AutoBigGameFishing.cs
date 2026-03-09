@@ -2,8 +2,7 @@ using AutoHook.Ui;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoBigGameFishing : BaseActionCast
-{
+public class AutoBigGameFishing : BaseActionCast {
     public int AnglersStacks = 2;
 
     [Obsolete("Legacy config")] public bool WithIdenticalC = false;
@@ -14,8 +13,7 @@ public class AutoBigGameFishing : BaseActionCast
     public override string GetName()
         => Name = UIStrings.BigGameFishing;
 
-    public override bool CastCondition()
-    {
+    public override bool CastCondition() {
         if (!EvaluateConditionSet())
             return false;
 
@@ -27,11 +25,9 @@ public class AutoBigGameFishing : BaseActionCast
         return hasStacks;
     }
 
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
+    protected override DrawOptionsDelegate DrawOptions => () => {
         var stack = AnglersStacks;
-        if (DrawUtil.EditNumberField(UIStrings.TabAutoCasts_DrawExtraOptionsThaliaksFavor_, ref stack, "", 1))
-        {
+        if (DrawUtil.EditNumberField(UIStrings.TabAutoCasts_DrawExtraOptionsThaliaksFavor_, ref stack, "", 1)) {
             AnglersStacks = Math.Max(2, Math.Min(stack, 10));
             Service.Save();
         }

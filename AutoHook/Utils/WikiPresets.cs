@@ -5,8 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace AutoHook.Utils;
 
-public static partial class WikiPresets
-{
+public static partial class WikiPresets {
     private const string BaseUrl = "https://github.com/PunishXIV/AutoHook/wiki";
     private const string RawWiki = "https://raw.githubusercontent.com/wiki/PunishXIV/AutoHook";
     private static readonly HttpClient httpClient = new(); // Reuse HttpClient
@@ -17,24 +16,19 @@ public static partial class WikiPresets
     public static Dictionary<string, List<(PresetFolder? folder, List<CustomPresetConfig> Presets)>> Presets = [];
     public static Dictionary<string, List<AutoGigConfig>> PresetsSf = [];
 
-    public static async Task ListWikiPages()
-    {
+    public static async Task ListWikiPages() {
         if (!EzThrottler.Throttle("WikiUpdate", 20000))
             return;
 
         Presets.Clear();
         PresetsSf.Clear();
         var mdUrls = await GetWikiPageUrls(BaseUrl);
-        foreach (var mdUrl in mdUrls)
-        {
-            try
-            {
+        foreach (var mdUrl in mdUrls) {
+            try {
                 var base64 = await ExtractBase64FromWikiPage($"{RawWiki}/{mdUrl}.md");
 
-                Func<string, (PresetFolder? Folder, List<CustomPresetConfig> Presets)> selector = x =>
-                {
-                    if (x.StartsWith(Configuration.ExportPrefixFolder))
-                    {
+                Func<string, (PresetFolder? Folder, List<CustomPresetConfig> Presets)> selector = x => {
+                    if (x.StartsWith(Configuration.ExportPrefixFolder)) {
                         return Configuration.ImportFolder(x) ?? throw new Exception("Failed to import"); // Kill wiki shouldn't have broken presets
                     }
                     var presets = Configuration.ImportPreset(x) ?? throw new Exception("Failed to import");
@@ -49,15 +43,13 @@ public static partial class WikiPresets
                 Presets.Add(mdUrl.Replace(@"-", @" "), list);
                 PresetsSf.Add(mdUrl.Replace(@"-", @" "), listsf);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Svc.Log.Debug($"Can probably ignore: {e.Message}");
             }
         }
     }
 
-    static async Task<List<string>> GetWikiPageUrls(string url)
-    {
+    static async Task<List<string>> GetWikiPageUrls(string url) {
         var pageUrls = new List<string>();
         var htmlDoc = new HtmlDocument();
         htmlDoc.LoadHtml(await httpClient.GetStringAsync(url));
@@ -73,8 +65,7 @@ public static partial class WikiPresets
         return pageUrls;
     }
 
-    static async Task<(List<string> presets, List<string> presetsSf)> ExtractBase64FromWikiPage(string url)
-    {
+    static async Task<(List<string> presets, List<string> presetsSf)> ExtractBase64FromWikiPage(string url) {
         var wikiPageContent = await httpClient.GetStringAsync(url);
         var presets = Ah().Matches(wikiPageContent)
             .Select(match => match.Groups[1].Value)

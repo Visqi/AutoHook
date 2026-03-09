@@ -6,8 +6,7 @@ using FFXIVClientStructs.FFXIV.Common.Math;
 
 namespace AutoHook.Ui;
 
-internal class TabAutoGig : BaseTab
-{
+internal class TabAutoGig : BaseTab {
     public override string TabName => "Spearfishing Presets";
     public override bool Enabled => true;
 
@@ -15,14 +14,11 @@ internal class TabAutoGig : BaseTab
 
     private readonly SpearFishingPresets _gigCfg = Service.Configuration.AutoGigConfig;
 
-    public override void DrawHeader()
-    {
+    public override void DrawHeader() {
         DrawTabDescription(UIStrings.TabAutoGigDescription);
 
-        DrawUtil.DrawCheckboxTree(UIStrings.EnableAutoGig, ref _gigCfg.AutoGigEnabled, () =>
-        {
-            if (_gigCfg is { AutoGigEnabled: true, AutoGigHideOverlay: true })
-            {
+        DrawUtil.DrawCheckboxTree(UIStrings.EnableAutoGig, ref _gigCfg.AutoGigEnabled, () => {
+            if (_gigCfg is { AutoGigEnabled: true, AutoGigHideOverlay: true }) {
                 _gigCfg.AutoGigHideOverlay = false;
                 Service.Save();
             }
@@ -43,8 +39,7 @@ internal class TabAutoGig : BaseTab
             if (DrawUtil.Checkbox(UIStrings.CatchEverything, ref _gigCfg.CatchAll, UIStrings.IgnoresPresets))
                 Service.Save();
 
-            if (_gigCfg.CatchAll)
-            {
+            if (_gigCfg.CatchAll) {
                 ImGui.Text($" └");
                 ImGui.SameLine();
                 if (DrawUtil.Checkbox(UIStrings.Use_Natures_Bounty, ref _gigCfg.CatchAllNaturesBounty,
@@ -63,19 +58,15 @@ internal class TabAutoGig : BaseTab
         DrawPresetSelector();
     }
 
-    public override void Draw()
-    {
+    public override void Draw() {
         using var items = ImRaii.Child($"###ag_cfg1", Vector2.Zero, true);
-        if (_gigCfg.SelectedPreset is { } selectedPreset)
-        {
-            if (_gigCfg.CatchAll)
-            {
+        if (_gigCfg.SelectedPreset is { } selectedPreset) {
+            if (_gigCfg.CatchAll) {
                 ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.CatchAllNotice);
             }
 
             // add new gig button
-            if (ImGui.Button(UIStrings.Add_new_fish))
-            {
+            if (ImGui.Button(UIStrings.Add_new_fish)) {
                 selectedPreset.AddItem(new BaseGig(0));
                 Service.Save();
             }
@@ -83,8 +74,7 @@ internal class TabAutoGig : BaseTab
             ImGui.SameLine();
 
             ImGui.SetNextItemWidth(90);
-            if (ImGui.InputInt(UIStrings.GigHitbox, ref selectedPreset.HitboxSize))
-            {
+            if (ImGui.InputInt(UIStrings.GigHitbox, ref selectedPreset.HitboxSize)) {
                 selectedPreset.HitboxSize = Math.Max(0, Math.Min(selectedPreset.HitboxSize, 300));
                 Service.Save();
             }
@@ -98,8 +88,7 @@ internal class TabAutoGig : BaseTab
         }
     }
 
-    public void DrawPresetSelector()
-    {
+    public void DrawPresetSelector() {
         DrawUtil.DrawComboSelectorPreset(_gigCfg);
         ImGui.SameLine();
         DrawUtil.DrawAddNewPresetButton(_gigCfg);

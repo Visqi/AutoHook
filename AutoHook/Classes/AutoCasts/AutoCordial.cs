@@ -3,8 +3,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoCordial : BaseActionCast
-{
+public class AutoCordial : BaseActionCast {
     private const uint CordialHiRecovery = 400;
     private const uint CordialHqRecovery = 350;
     private const uint CordialRecovery = 300;
@@ -41,22 +40,19 @@ public class AutoCordial : BaseActionCast
         (IDs.Item.HiCordial,        CordialHiRecovery)
     ];
 
-    public AutoCordial(bool isSpearFishing = false) : base(UIStrings.Cordial, IDs.Item.Cordial, ActionType.Item)
-    {
+    public AutoCordial(bool isSpearFishing = false) : base(UIStrings.Cordial, IDs.Item.Cordial, ActionType.Item) {
         IsSpearFishing = isSpearFishing;
     }
 
     public override string GetName()
         => Name = UIStrings.Cordial;
-    public override bool CastCondition()
-    {
+    public override bool CastCondition() {
         var cordialList = _cordialList;
 
         if (InvertCordialPriority)
             cordialList = _invertedList;
 
-        foreach (var (id, recovery) in cordialList)
-        {
+        foreach (var (id, recovery) in cordialList) {
             if (!Service.WorldState.HaveCordialInInventory(id))
                 continue;
 
@@ -68,16 +64,14 @@ public class AutoCordial : BaseActionCast
         return false;
     }
 
-    public override void SetThreshold(int newCost)
-    {
+    public override void SetThreshold(int newCost) {
         if (newCost <= 0)
             GpThreshold = 0;
         else
             GpThreshold = newCost;
     }
 
-    private bool CheckNotOvercaped(uint recovery)
-    {
+    private bool CheckNotOvercaped(uint recovery) {
         if (OvercapConditionSet is { Groups.Count: > 0 } &&
             OvercapConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry))
             return true;
@@ -85,13 +79,11 @@ public class AutoCordial : BaseActionCast
         return Service.WorldState.CurrentGp + recovery <= Service.WorldState.MaxGp;
     }
 
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
+    protected override DrawOptionsDelegate DrawOptions => () => {
         if (DrawUtil.Checkbox(UIStrings.AutoCastCordialPriority, ref InvertCordialPriority))
             Service.Save();
 
-        if (!IsSpearFishing)
-        {
+        if (!IsSpearFishing) {
             if (DrawUtil.Checkbox(UIStrings.CordialOutsideTimeWindow, ref IgnoreTimeWindow, UIStrings.CordialOutsideTimeWindowHelpText))
                 Service.Save();
 

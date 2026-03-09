@@ -2,8 +2,7 @@
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoDoubleHook : BaseActionCast
-{
+public class AutoDoubleHook : BaseActionCast {
     public override int Priority { get; set; } = 5;
     public override bool IsExcludedPriority { get; set; } = false;
 

@@ -5,16 +5,14 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class SwimbaitCountCD : IConditionDefinition
-{
+public sealed class SwimbaitCountCD : IConditionDefinition {
     public string Id => nameof(SwimbaitCountCD);
     public string Name => "Swimbait count";
     public string Category => "Fishing";
     public string Description => "Compares current swimbait count against a value.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast;
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters)
-    {
+    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var val = GetInt(parameters, "val", 0);
         var op = GetOp(parameters, "op", ">=");
         var count = world.GetSwimbaitCount();
@@ -22,8 +20,7 @@ public sealed class SwimbaitCountCD : IConditionDefinition
         return GetBool(parameters, "inv", false) ? !result : result;
     }
 
-    public void DrawParams(Condition condition)
-    {
+    public void DrawParams(Condition condition) {
         var val = GetInt(condition.Params, "val", 0);
         ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
         if (ImGui.InputInt("Swimbaits", ref val))
@@ -36,8 +33,7 @@ public sealed class SwimbaitCountCD : IConditionDefinition
         using var combo = ImRaii.Combo("##swimbait_op", label);
         if (!combo) return;
 
-        foreach (var choice in new[] { ">", ">=", "<", "<=", "=" })
-        {
+        foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
             var sel = choice == op;
             if (ImGui.Selectable(choice, sel))
                 condition.Params["op"] = choice;

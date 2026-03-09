@@ -5,8 +5,7 @@ using System.ComponentModel;
 
 namespace AutoHook.Configurations;
 
-public class FishConfig : BaseOption
-{
+public class FishConfig : BaseOption {
     [DefaultValue(true)]
     public bool Enabled = true;
 
@@ -41,15 +40,13 @@ public class FishConfig : BaseOption
 
     public FishConfig() { }
 
-    public FishConfig(BaitFishClass fish)
-    {
+    public FishConfig(BaitFishClass fish) {
         Fish = fish;
         // TODO: ok this is not the best way, but im tired, and it works for now so be nice to me
         Mooch.Name = UIStrings.Always_Mooch;
     }
 
-    public FishConfig(int fishId)
-    {
+    public FishConfig(int fishId) {
         Fish = new BaitFishClass(fishId);
     }
 

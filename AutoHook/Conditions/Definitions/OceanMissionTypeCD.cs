@@ -6,16 +6,14 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class OceanMissionTypeCD : IConditionDefinition
-{
+public sealed class OceanMissionTypeCD : IConditionDefinition {
     public string Id => nameof(OceanMissionTypeCD);
     public string Name => "Ocean mission type";
     public string Category => "Fishing";
     public string Description => "Matches current ocean fishing mission types (slots 1–3) against selected entries.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters)
-    {
+    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var ids = GetIds(parameters);
         if (ids.Count == 0) return false;
         var of = world.OceanFishing;
@@ -23,21 +21,18 @@ public sealed class OceanMissionTypeCD : IConditionDefinition
         return GetBool(parameters, "inv", false) ? !result : result;
     }
 
-    public void DrawParams(Condition condition)
-    {
+    public void DrawParams(Condition condition) {
         var ids = GetIds(condition.Params);
         var currentId = ids.Count > 0 ? ids[0] : 0;
 
         ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);
         var sheet = Svc.Data.GetExcelSheet<IKDPlayerMissionCondition>();
-        if (sheet == null)
-        {
+        if (sheet == null) {
             DrawIdsParams(condition, "Mission type IDs");
             return;
         }
 
-        string LabelForRow(uint rowId)
-        {
+        string LabelForRow(uint rowId) {
             if (rowId == 0) return "Select mission";
             if (!sheet.TryGetRow(rowId, out var row)) return $"{rowId}";
             var name = MultiString.ParseSeString(row.Unknown0);
@@ -48,8 +43,7 @@ public sealed class OceanMissionTypeCD : IConditionDefinition
         using var combo = ImRaii.Combo("Mission type", label);
         if (!combo) return;
 
-        foreach (var row in sheet)
-        {
+        foreach (var row in sheet) {
             var name = MultiString.ParseSeString(row.Unknown0);
             if (string.IsNullOrEmpty(name)) continue;
             var id = row.RowId;

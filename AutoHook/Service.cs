@@ -6,8 +6,7 @@ using ECommons.Automation.NeoTaskManager;
 
 namespace AutoHook;
 
-public class Service
-{
+public class Service {
     public static void Initialize(IDalamudPluginInterface pluginInterface)
         => pluginInterface.Create<Service>();
 
@@ -28,29 +27,24 @@ public class Service
 
     public static BaitFishClass LastCatch { get; set; } = new(@"-", -1);
 
-    public static string Status
-    {
+    public static string Status {
         get => _status;
         set => _status = value;
     }
 
-    public static readonly TaskManager TaskManager = new()
-    {
+    public static readonly TaskManager TaskManager = new() {
         DefaultConfiguration = { TimeLimitMS = 5000 }
     };
 
-    public static void Save()
-    {
+    public static void Save() {
         Configuration.Save();
     }
 
     private const int MaxLogSize = 50;
     public static Queue<string> LogMessages = new();
     public static bool OpenConsole;
-    public static void PrintDebug(string msg)
-    {
-        if (LogMessages.Count >= MaxLogSize)
-        {
+    public static void PrintDebug(string msg) {
+        if (LogMessages.Count >= MaxLogSize) {
             LogMessages.Dequeue();
         }
 
@@ -58,10 +52,8 @@ public class Service
         Svc.Log.Debug(msg);
     }
 
-    public static void PrintVerbose(string msg)
-    {
-        if (LogMessages.Count >= MaxLogSize)
-        {
+    public static void PrintVerbose(string msg) {
+        if (LogMessages.Count >= MaxLogSize) {
             LogMessages.Dequeue();
         }
 
@@ -69,8 +61,7 @@ public class Service
         Svc.Log.Verbose(msg);
     }
 
-    public static void PrintChat(string msg)
-    {
+    public static void PrintChat(string msg) {
         Status = msg;
 
         if (Configuration.ShowChatLogs)

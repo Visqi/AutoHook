@@ -1,19 +1,16 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
-using Newtonsoft.Json;
 using System.ComponentModel;
 
 namespace AutoHook.Configurations;
 
-public class SwimbaitConfig
-{
+public class SwimbaitConfig {
     public bool UseSwimbait = false;
     public int CountThreshold = 1;
     public ConditionSet? ConditionSet { get; set; }
 }
 
-public class HookConfig : BaseOption
-{
+public class HookConfig : BaseOption {
     [DefaultValue(true)] public bool Enabled = true;
 
     public BaitFishClass BaitFish = new();
@@ -33,18 +30,15 @@ public class HookConfig : BaseOption
 
     public HookConfig() { }
 
-    public HookConfig(BaitFishClass baitFish)
-    {
+    public HookConfig(BaitFishClass baitFish) {
         BaitFish = baitFish;
     }
 
-    public HookConfig(int baitFishId)
-    {
+    public HookConfig(int baitFishId) {
         BaitFish = new BaitFishClass(baitFishId);
     }
 
-    public void SetBiteAndHookType(BiteType bite, HookType hookType, bool isIntuition = false)
-    {
+    public void SetBiteAndHookType(BiteType bite, HookType hookType, bool isIntuition = false) {
         var hookset = isIntuition ? IntuitionHook : NormalHook;
         var hookDictionary = new Dictionary<BiteType, (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph)>
         {
@@ -53,8 +47,7 @@ public class HookConfig : BaseOption
             { BiteType.Legendary, (hookset.TripleLegendary, hookset.DoubleLegendary, hookset.PatienceLegendary) }
         };
 
-        if (hookDictionary.TryGetValue(bite, out var hook))
-        {
+        if (hookDictionary.TryGetValue(bite, out var hook)) {
             hook.ph.HooksetEnabled = true;
             hook.ph.HooksetType = hookType;
 
@@ -63,8 +56,7 @@ public class HookConfig : BaseOption
         }
     }
 
-    public void SetHooksetTimer(BiteType bite, double min, double max, bool isIntuition = false)
-    {
+    public void SetHooksetTimer(BiteType bite, double min, double max, bool isIntuition = false) {
         var hookset = isIntuition ? IntuitionHook : NormalHook;
         var hookDictionary = new Dictionary<BiteType, (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph)>
         {
@@ -81,37 +73,31 @@ public class HookConfig : BaseOption
             SetBiteTimerInConditionSet(biteCfg, biteTimerId, min, maxSec);
     }
 
-    private static void SetBiteTimerInConditionSet(BaseBiteConfig biteCfg, string biteTimerId, double min, double max)
-    {
+    private static void SetBiteTimerInConditionSet(BaseBiteConfig biteCfg, string biteTimerId, double min, double max) {
         var set = biteCfg.ConditionSet ??= new ConditionSet();
         Condition? found = null;
-        foreach (var group in set.Groups)
-        {
+        foreach (var group in set.Groups) {
             found = group.Conditions.FirstOrDefault(c => c.TypeId == biteTimerId);
             if (found != null) break;
         }
-        if (found != null)
-        {
+        if (found != null) {
             found.Params["r"] = new List<object> { min, max };
             return;
         }
         var newGroup = new ConditionGroup { CombineMode = ConditionCombineMode.Any };
-        newGroup.Conditions.Add(new Condition
-        {
+        newGroup.Conditions.Add(new Condition {
             TypeId = biteTimerId,
             Params = new Dictionary<string, object> { ["r"] = new List<object> { min, max } }
         });
         set.Groups.Add(newGroup);
     }
 
-    public void ResetAllHooksets()
-    {
+    public void ResetAllHooksets() {
         ResetHooksets(NormalHook);
         ResetHooksets(IntuitionHook);
     }
 
-    private void ResetHooksets(BaseHookset hookset)
-    {
+    private void ResetHooksets(BaseHookset hookset) {
         var hookDictionary = new Dictionary<BiteType, (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph)>
         {
             { BiteType.Weak, (hookset.TripleWeak, hookset.DoubleWeak, hookset.PatienceWeak) },
@@ -119,16 +105,14 @@ public class HookConfig : BaseOption
             { BiteType.Legendary, (hookset.TripleLegendary, hookset.DoubleLegendary, hookset.PatienceLegendary) }
         };
 
-        foreach (var hookDisable in hookDictionary)
-        {
+        foreach (var hookDisable in hookDictionary) {
             hookDisable.Value.ph.HooksetEnabled = false;
             hookDisable.Value.dh.HooksetEnabled = false;
             hookDisable.Value.th.HooksetEnabled = false;
         }
     }
 
-    public BaseHookset GetHookset()
-    {
+    public BaseHookset GetHookset() {
         /*
             var requiredStatusPreset = new List<BaseHookset> { IntuitionHook };
 
@@ -143,8 +127,7 @@ public class HookConfig : BaseOption
         return Service.WorldState.IntuitionStatus == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook ? IntuitionHook : NormalHook;
     }
 
-    public HookType? GetHook(BiteType bite, double timePassed)
-    {
+    public HookType? GetHook(BiteType bite, double timePassed) {
         var hookset = GetHookset();
 
         var hookDictionary = new Dictionary<BiteType, (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph)>
@@ -156,17 +139,14 @@ public class HookConfig : BaseOption
 
         Service.Status = "";
 
-        if (hookDictionary.TryGetValue(bite, out var hook))
-        {
+        if (hookDictionary.TryGetValue(bite, out var hook)) {
             // Triple Hook
-            if (hookset.UseTripleHook && hook.th.HooksetEnabled)
-            {
+            if (hookset.UseTripleHook && hook.th.HooksetEnabled) {
                 if (CheckHookCondition(hook.th, timePassed))
                     if (GetHookTypeForTime(hook.th, timePassed) is { } ht && IsHookAvailable(hook.th, timePassed))
                         return ht;
 
-                if (hookset.LetFishEscapeTripleHook && Service.WorldState.CurrentGp < 700)
-                {
+                if (hookset.LetFishEscapeTripleHook && Service.WorldState.CurrentGp < 700) {
                     Service.Status = "Not enough GP to use Triple Hook, Letting fish escape is enabled";
                     return HookType.None;
                 }
@@ -175,14 +155,12 @@ public class HookConfig : BaseOption
             }
 
             // Double Hook
-            if (hookset.UseDoubleHook && hook.dh.HooksetEnabled)
-            {
+            if (hookset.UseDoubleHook && hook.dh.HooksetEnabled) {
                 if (CheckHookCondition(hook.dh, timePassed))
                     if (GetHookTypeForTime(hook.dh, timePassed) is { } ht && IsHookAvailable(hook.dh, timePassed))
                         return ht;
 
-                if (hookset.LetFishEscapeDoubleHook && Service.WorldState.CurrentGp < 400)
-                {
+                if (hookset.LetFishEscapeDoubleHook && Service.WorldState.CurrentGp < 400) {
                     Service.Status = "Not enough GP to use Double Hook, Letting fish escape is enabled";
                     return HookType.None;
                 }
@@ -191,10 +169,8 @@ public class HookConfig : BaseOption
             }
 
             // Normal - Patience
-            if (hook.ph.HooksetEnabled)
-            {
-                if (CheckHookCondition(hook.ph, timePassed))
-                {
+            if (hook.ph.HooksetEnabled) {
+                if (CheckHookCondition(hook.ph, timePassed)) {
                     if (GetHookTypeForTime(hook.ph, timePassed) is { } ht)
                         return IsHookAvailable(hook.ph, timePassed) ? ht : HookType.Normal;
                     Service.Status = "(Normal/Patience Hook) No hook type for current bite timer.";
@@ -218,10 +194,8 @@ public class HookConfig : BaseOption
             ? GetTimedHookType(hookType, timePassed) is { } timedHook ? timedHook : null
             : (HookType?)hookType.HooksetType;
 
-    private HookType? GetTimedHookType(BaseBiteConfig hookType, double timePassed)
-    {
-        bool InRange(bool enabled, double min, double max)
-        {
+    private HookType? GetTimedHookType(BaseBiteConfig hookType, double timePassed) {
+        bool InRange(bool enabled, double min, double max) {
             if (!enabled)
                 return false;
 
@@ -247,12 +221,10 @@ public class HookConfig : BaseOption
         return null;
     }
 
-    private bool IsHookAvailable(BaseBiteConfig hookType, double timePassed)
-    {
+    private bool IsHookAvailable(BaseBiteConfig hookType, double timePassed) {
         if (GetHookTypeForTime(hookType, timePassed) is not { } timedHook)
             return false;
-        if (!Service.WorldState.ActionAvailable((uint)timedHook))
-        {
+        if (!Service.WorldState.ActionAvailable((uint)timedHook)) {
             Service.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
             return false;
         }

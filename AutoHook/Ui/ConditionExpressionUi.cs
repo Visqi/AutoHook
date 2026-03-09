@@ -6,10 +6,9 @@ using ExprToken = AutoHook.Conditions.ConditionExpression.Token;
 using ExprTokenKind = AutoHook.Conditions.ConditionExpression.TokenKind;
 
 namespace AutoHook.Ui;
-public static class ConditionExpressionUi
-{
-    public static void DrawExpressionEditor(ConditionSet set)
-    {
+
+public static class ConditionExpressionUi {
+    public static void DrawExpressionEditor(ConditionSet set) {
         ImGui.NewLine();
         ImGui.TextColored(ImGuiColors.DalamudGrey, "Expression:");
 
@@ -22,40 +21,32 @@ public static class ConditionExpressionUi
         var moveTo = -1;
         int? deleteIndex = null;
 
-        if (tokens.Count > 0)
-        {
+        if (tokens.Count > 0) {
             ImGui.SameLine();
 
-            for (var i = 0; i < tokens.Count; i++)
-            {
+            for (var i = 0; i < tokens.Count; i++) {
                 using var _ = ImRaii.PushId(i);
 
                 var label = ConditionExpression.GetTokenLabel(tokens[i]);
                 var isSelected = selStart.HasValue && selEnd.HasValue && i >= selStart && i <= selEnd;
                 var isInvalid = i < invalidFlags.Length && invalidFlags[i];
 
-                using (var colour = ImRaii.PushColor(ImGuiCol.Button, isInvalid ? ImGuiColors.DalamudRed : ImGuiColors.DalamudGrey3, isSelected || isInvalid))
-                {
-                    if (ImGui.SmallButton(label))
-                    {
+                using (var colour = ImRaii.PushColor(ImGuiCol.Button, isInvalid ? ImGuiColors.DalamudRed : ImGuiColors.DalamudGrey3, isSelected || isInvalid)) {
+                    if (ImGui.SmallButton(label)) {
                         var io = ImGui.GetIO();
-                        if (io.KeyShift && selStart.HasValue && selEnd.HasValue)
-                        {
+                        if (io.KeyShift && selStart.HasValue && selEnd.HasValue) {
                             var start = Math.Min(selStart.Value, i);
                             var end = Math.Max(selEnd.Value, i);
                             set.ExprSelectionStart = start;
                             set.ExprSelectionEnd = end;
                         }
-                        else
-                        {
+                        else {
                             // untoggling
-                            if (selStart.HasValue && selEnd.HasValue && selStart.Value == i && selEnd.Value == i)
-                            {
+                            if (selStart.HasValue && selEnd.HasValue && selStart.Value == i && selEnd.Value == i) {
                                 set.ExprSelectionStart = null;
                                 set.ExprSelectionEnd = null;
                             }
-                            else
-                            {
+                            else {
                                 set.ExprSelectionStart = i;
                                 set.ExprSelectionEnd = i;
                             }
@@ -64,8 +55,7 @@ public static class ConditionExpressionUi
                 }
 
                 ImGui.DragDropSource(i, "COND_EXPR_TOKEN"u8, label);
-                ImGui.DragDropTarget(i, "COND_EXPR_TOKEN"u8, tokens.Count, (sourceIndex, insertIndex) =>
-                {
+                ImGui.DragDropTarget(i, "COND_EXPR_TOKEN"u8, tokens.Count, (sourceIndex, insertIndex) => {
                     moveFrom = sourceIndex;
                     moveTo = insertIndex;
                 });
@@ -76,8 +66,7 @@ public static class ConditionExpressionUi
                 ImGui.SameLine();
             }
 
-            if (ImGui.SmallButton("x##expr_clear"))
-            {
+            if (ImGui.SmallButton("x##expr_clear")) {
                 set.Expression = null;
                 set.ExprSelectionStart = null;
                 set.ExprSelectionEnd = null;
@@ -87,8 +76,7 @@ public static class ConditionExpressionUi
         }
 
         // Apply token move
-        if (moveFrom >= 0 && moveTo >= 0 && moveFrom < tokens.Count)
-        {
+        if (moveFrom >= 0 && moveTo >= 0 && moveFrom < tokens.Count) {
             var t = tokens[moveFrom];
             tokens.RemoveAt(moveFrom);
             if (moveTo > moveFrom) moveTo--;
@@ -98,16 +86,14 @@ public static class ConditionExpressionUi
         }
 
         // Apply delete
-        if (deleteIndex.HasValue && deleteIndex.Value >= 0 && deleteIndex.Value < tokens.Count)
-        {
+        if (deleteIndex.HasValue && deleteIndex.Value >= 0 && deleteIndex.Value < tokens.Count) {
             tokens.RemoveAt(deleteIndex.Value);
             changed = true;
         }
 
         var hasSelection = set.ExprSelectionStart.HasValue && set.ExprSelectionEnd.HasValue
                            && tokens.Count > 0;
-        if (hasSelection)
-        {
+        if (hasSelection) {
             var start = Math.Min(set.ExprSelectionStart!.Value, set.ExprSelectionEnd!.Value);
             var end = Math.Max(set.ExprSelectionStart.Value, set.ExprSelectionEnd.Value);
             start = Math.Clamp(start, 0, tokens.Count - 1);
@@ -120,33 +106,27 @@ public static class ConditionExpressionUi
         ImGui.SameLine();
 
         // Group chips A, B, C...
-        for (var i = 0; i < set.Groups.Count && i < 26; i++)
-        {
+        for (var i = 0; i < set.Groups.Count && i < 26; i++) {
             var label = ((char)('A' + i)).ToString();
-            if (ImGui.SmallButton(label))
-            {
+            if (ImGui.SmallButton(label)) {
                 tokens.Add(new ExprToken(ExprTokenKind.Group, i));
                 changed = true;
             }
             ImGui.SameLine();
         }
 
-        if (ImGui.SmallButton("&&##expr_and"))
-        {
+        if (ImGui.SmallButton("&&##expr_and")) {
             tokens.Add(new ExprToken(ExprTokenKind.And));
             changed = true;
         }
         ImGui.SameLine();
-        if (ImGui.SmallButton("||##expr_or"))
-        {
+        if (ImGui.SmallButton("||##expr_or")) {
             tokens.Add(new ExprToken(ExprTokenKind.Or));
             changed = true;
         }
         ImGui.SameLine();
-        if (ImGui.SmallButton("("))
-        {
-            if (hasSelection)
-            {
+        if (ImGui.SmallButton("(")) {
+            if (hasSelection) {
                 var start = set.ExprSelectionStart!.Value;
                 var end = set.ExprSelectionEnd!.Value;
                 tokens.Insert(start, new ExprToken(ExprTokenKind.LParen));
@@ -155,17 +135,14 @@ public static class ConditionExpressionUi
                 set.ExprSelectionStart = start;
                 set.ExprSelectionEnd = end;
             }
-            else
-            {
+            else {
                 tokens.Add(new ExprToken(ExprTokenKind.LParen));
             }
             changed = true;
         }
         ImGui.SameLine();
-        if (ImGui.SmallButton(")"))
-        {
-            if (hasSelection)
-            {
+        if (ImGui.SmallButton(")")) {
+            if (hasSelection) {
                 var start = set.ExprSelectionStart!.Value;
                 var end = set.ExprSelectionEnd!.Value;
                 tokens.Insert(start, new ExprToken(ExprTokenKind.LParen));
@@ -174,28 +151,23 @@ public static class ConditionExpressionUi
                 set.ExprSelectionStart = start;
                 set.ExprSelectionEnd = end;
             }
-            else
-            {
+            else {
                 tokens.Add(new ExprToken(ExprTokenKind.RParen));
             }
             changed = true;
         }
 
-        if (changed)
-        {
-            if (tokens.Count == 0)
-            {
+        if (changed) {
+            if (tokens.Count == 0) {
                 set.Expression = null;
                 set.ExprSelectionStart = null;
                 set.ExprSelectionEnd = null;
             }
-            else
-            {
+            else {
                 set.Expression = ConditionExpression.BuildExpression(tokens);
 
                 // Clamp selection to new token count
-                if (set.ExprSelectionStart.HasValue && set.ExprSelectionEnd.HasValue)
-                {
+                if (set.ExprSelectionStart.HasValue && set.ExprSelectionEnd.HasValue) {
                     var start = Math.Clamp(set.ExprSelectionStart.Value, 0, tokens.Count - 1);
                     var end = Math.Clamp(set.ExprSelectionEnd.Value, 0, tokens.Count - 1);
                     if (start > end)

@@ -1,7 +1,6 @@
 namespace AutoHook.Enums;
 
-public enum BiteType : byte
-{
+public enum BiteType : byte {
     Unknown = 0,
     Weak = 36,
     Strong = 37,

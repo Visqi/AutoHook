@@ -6,8 +6,7 @@ namespace AutoHook.Conditions;
 /// Top-level condition set: groups combined with AND or OR. (X or Y) AND (A or B) = two groups, top-level AND.
 /// Empty groups list = no conditions = evaluate to true.
 /// </summary>
-public class ConditionSet
-{
+public class ConditionSet {
     /// <summary>How to combine groups: All = AND, Any = OR.</summary>
     [JsonProperty("m")]
     public ConditionCombineMode CombineMode { get; set; } = ConditionCombineMode.All;
@@ -39,8 +38,7 @@ public class ConditionSet
     [JsonIgnore]
     public bool SlimAdvancedExpanded { get; set; }
 
-    public bool Evaluate(WorldState world, ConditionRegistry registry)
-    {
+    public bool Evaluate(WorldState world, ConditionRegistry registry) {
         if (Groups.Count == 0) return true;
 
         // Evaluate each group once (disabled groups: true for AND, false for OR so they don't affect result)
@@ -51,21 +49,17 @@ public class ConditionSet
                 : Groups[i].Evaluate(world, registry);
 
         // If an expression is provided, try to use it first
-        if (!string.IsNullOrWhiteSpace(Expression))
-        {
-            try
-            {
+        if (!string.IsNullOrWhiteSpace(Expression)) {
+            try {
                 if (ConditionExpression.TryEvaluate(Expression, values, out var result))
                     return result;
             }
-            catch
-            {
+            catch {
                 // Fallback to CombineMode
             }
         }
 
-        if (CombineMode == ConditionCombineMode.Any)
-        {
+        if (CombineMode == ConditionCombineMode.Any) {
             foreach (var v in values)
                 if (v) return true;
             return false;

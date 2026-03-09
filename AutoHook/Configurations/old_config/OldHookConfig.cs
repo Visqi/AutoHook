@@ -1,7 +1,6 @@
 namespace AutoHook.Configurations.old_config;
 
-public class OldHookConfig
-{
+public class OldHookConfig {
     public bool Enabled = true;
 
     public BaitFishClass BaitFish = new();
@@ -67,8 +66,7 @@ public class OldHookConfig
         BaitName = bait;
     }*/
 
-    public void ConvertV3ToV4()
-    {
+    public void ConvertV3ToV4() {
 
         if (NormalHook == null)
             NormalHook = new(IDs.Status.None);
@@ -82,12 +80,10 @@ public class OldHookConfig
         IntuitionHook.UseCustomStatusHook = UseCustomIntuitionHook;
     }
 
-    private void Convert(BaseHookset hookset, bool isIntuition)
-    {
+    private void Convert(BaseHookset hookset, bool isIntuition) {
         Dictionary<BaseBiteConfig, (bool, HookType, bool, bool, bool)> normal;
 
-        if (isIntuition)
-        {
+        if (isIntuition) {
             normal = new()
             {
                 {
@@ -104,8 +100,7 @@ public class OldHookConfig
                 },
             };
         }
-        else
-        {
+        else {
             normal = new()
             {
                 {
@@ -158,10 +153,8 @@ public class OldHookConfig
         var list = new List<Dictionary<BaseBiteConfig, (bool, HookType, bool, bool, bool)>>
             { normal, doubleHook, tripleHook };
 
-        foreach (var dict in list)
-        {
-            foreach (var (bite, (enabled, type, slapActive, slapNotActive, identicalActive)) in dict)
-            {
+        foreach (var dict in list) {
+            foreach (var (bite, (enabled, type, slapActive, slapNotActive, identicalActive)) in dict) {
                 bite.HooksetEnabled = enabled;
                 bite.HooksetType = type;
                 bite.OnlyWhenActiveSlap = slapActive;
@@ -172,8 +165,7 @@ public class OldHookConfig
                 bite.MinHookTimer = MinTimeDelay;
                 bite.MaxHookTimer = MaxTimeDelay;
 
-                if (MinTimeDelay > 0 || MaxTimeDelay > 0)
-                {
+                if (MinTimeDelay > 0 || MaxTimeDelay > 0) {
                     bite.HookTimerEnabled = true;
                 }
                 bite.ChumMinHookTimer = MinChumTimeDelay;

@@ -2,8 +2,7 @@
 
 namespace AutoHook.Classes;
 
-public abstract class BasePresetConfig()
-{
+public abstract class BasePresetConfig() {
     public string PresetName { get; set; } = "";
 
     [JsonIgnore] public string GroupName { get; set; } = "";
@@ -12,8 +11,7 @@ public abstract class BasePresetConfig()
 
     public abstract void DrawOptions();
 
-    public virtual void RenamePreset(string newName)
-    {
+    public virtual void RenamePreset(string newName) {
         PresetName = newName;
         Service.Save();
     }

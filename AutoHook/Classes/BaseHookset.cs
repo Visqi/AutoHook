@@ -9,8 +9,7 @@ using Dalamud.Interface.Utility.Raii;
 
 namespace AutoHook.Classes;
 
-public class BaseHookset(uint requiredStatus)
-{
+public class BaseHookset(uint requiredStatus) {
     // for future use, maybe we need a hooking condition under a different status?
     public uint RequiredStatus = requiredStatus;
 
@@ -51,19 +50,16 @@ public class BaseHookset(uint requiredStatus)
 
     public AutoLures CastLures = new();
 
-    public Guid GetUniqueId()
-    {
+    public Guid GetUniqueId() {
         if (_uniqueId == Guid.Empty)
             _uniqueId = Guid.NewGuid();
 
         return _uniqueId;
     }
 
-    public void DrawOptions()
-    {
+    public void DrawOptions() {
         using var id = ImRaii.PushId(@"BaseHookset");
-        if (RequiredStatus != 0)
-        {
+        if (RequiredStatus != 0) {
             ImGui.Spacing();
             var statusName = MultiString.GetStatusName(RequiredStatus);
             DrawUtil.Checkbox(string.Format(UIStrings.UseConfigRequiredStatus, statusName), ref UseCustomStatusHook,
@@ -88,11 +84,9 @@ public class BaseHookset(uint requiredStatus)
         DrawStopCondition();
     }
 
-    private void DrawPatience()
-    {
+    private void DrawPatience() {
         if (ImGui.TreeNodeEx(UIStrings.NormalPatienceHookset,
-                ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap))
-        {
+                ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
             PatienceWeak.DrawOptions(UIStrings.HookWeakExclamation, true);
             PatienceStrong.DrawOptions(UIStrings.HookStrongExclamation, true);
             PatienceLegendary.DrawOptions(UIStrings.HookLegendaryExclamation, true);
@@ -100,11 +94,9 @@ public class BaseHookset(uint requiredStatus)
         }
     }
 
-    private void DrawDoubleHook()
-    {
+    private void DrawDoubleHook() {
         if (ImGui.TreeNodeEx(UIStrings.Double_Hook,
-                ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap))
-        {
+                ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
             DrawUtil.Checkbox(UIStrings.UseDoubleHook, ref UseDoubleHook);
             DrawUtil.Checkbox(UIStrings.LetTheFishEscape, ref LetFishEscapeDoubleHook, UIStrings.LetFishEscapeHelpText);
             ImGui.Separator();
@@ -115,11 +107,9 @@ public class BaseHookset(uint requiredStatus)
         }
     }
 
-    private void DrawTripleHook()
-    {
+    private void DrawTripleHook() {
         if (ImGui.TreeNodeEx(UIStrings.Triple_Hook,
-                ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap))
-        {
+                ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
             DrawUtil.Checkbox(UIStrings.UseTripleHook, ref UseTripleHook);
             DrawUtil.Checkbox(UIStrings.LetTheFishEscape, ref LetFishEscapeTripleHook, UIStrings.LetFishEscapeHelpText);
             ImGui.Separator();
@@ -130,17 +120,13 @@ public class BaseHookset(uint requiredStatus)
         }
     }
 
-    private void DrawTimeout()
-    {
+    private void DrawTimeout() {
         if (ImGui.TreeNodeEx(UIStrings.Timeout,
-                ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap))
-        {
+                ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.TimeoutOption);
             ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
-            if (ImGui.InputDouble(UIStrings.TimeLimit, ref TimeoutMax, .1, 1, @"%.1f%"))
-            {
-                switch (TimeoutMax)
-                {
+            if (ImGui.InputDouble(UIStrings.TimeLimit, ref TimeoutMax, .1, 1, @"%.1f%")) {
+                switch (TimeoutMax) {
                     case 0.1:
                         TimeoutMax = 2;
                         break;
@@ -160,10 +146,8 @@ public class BaseHookset(uint requiredStatus)
             ImGuiComponents.HelpMarker($"{UIStrings.TimeoutHelpText}\n\n{UIStrings.DoesntHaveAffectUnderChum}");
 
             ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
-            if (ImGui.InputDouble(UIStrings.ChumTimeLimit, ref ChumTimeoutMax, .1, 1, @"%.1f%"))
-            {
-                switch (ChumTimeoutMax)
-                {
+            if (ImGui.InputDouble(UIStrings.ChumTimeLimit, ref ChumTimeoutMax, .1, 1, @"%.1f%")) {
+                switch (ChumTimeoutMax) {
                     case 0.1:
                         ChumTimeoutMax = 2;
                         break;
@@ -185,29 +169,24 @@ public class BaseHookset(uint requiredStatus)
         }
     }
 
-    private void DrawLures()
-    {
+    private void DrawLures() {
         using var id = ImRaii.PushId($"Lures");
 
         CastLures.DrawConfig();
     }
 
-    private void DrawStopCondition()
-    {
+    private void DrawStopCondition() {
         DrawUtil.DrawCheckboxTree(UIStrings.StopAfterHooking, ref StopAfterCaught,
-            () =>
-            {
+            () => {
                 ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
-                if (ImGui.InputInt(UIStrings.TimeS, ref StopAfterCaughtLimit))
-                {
+                if (ImGui.InputInt(UIStrings.TimeS, ref StopAfterCaughtLimit)) {
                     if (StopAfterCaughtLimit < 1)
                         StopAfterCaughtLimit = 1;
                     Service.Save();
                 }
 
                 ImGui.Spacing();
-                if (ImGui.RadioButton(UIStrings.Stop_Casting, StopFishingStep == FishingSteps.None))
-                {
+                if (ImGui.RadioButton(UIStrings.Stop_Casting, StopFishingStep == FishingSteps.None)) {
                     StopFishingStep = FishingSteps.None;
                     Service.Save();
                 }
@@ -215,8 +194,7 @@ public class BaseHookset(uint requiredStatus)
                 ImGui.SameLine();
                 ImGuiComponents.HelpMarker(UIStrings.Auto_Cast_Stopped);
 
-                if (ImGui.RadioButton(UIStrings.Quit_Fishing, StopFishingStep == FishingSteps.Quitting))
-                {
+                if (ImGui.RadioButton(UIStrings.Quit_Fishing, StopFishingStep == FishingSteps.Quitting)) {
                     StopFishingStep = FishingSteps.Quitting;
                     Service.Save();
                 }

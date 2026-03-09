@@ -1,9 +1,7 @@
 namespace AutoHook.Conditions;
 
-public static class ConditionExpression
-{
-    public enum TokenKind
-    {
+public static class ConditionExpression {
+    public enum TokenKind {
         Group,
         And,
         Or,
@@ -13,8 +11,7 @@ public static class ConditionExpression
 
     public readonly record struct Token(TokenKind Kind, int GroupIndex = 0);
 
-    public static List<Token> ParseTokens(string? expr, int groupCount)
-    {
+    public static List<Token> ParseTokens(string? expr, int groupCount) {
         var tokens = new List<Token>();
         if (string.IsNullOrWhiteSpace(expr))
             return tokens;
@@ -23,17 +20,14 @@ public static class ConditionExpression
         var len = s.Length;
         var pos = 0;
 
-        void SkipWs()
-        {
+        void SkipWs() {
             while (pos < len && char.IsWhiteSpace(s[pos])) pos++;
         }
 
-        bool Match(string token)
-        {
+        bool Match(string token) {
             SkipWs();
             if (pos + token.Length > len) return false;
-            for (var i = 0; i < token.Length; i++)
-            {
+            for (var i = 0; i < token.Length; i++) {
                 if (s[pos + i] != token[i])
                     return false;
             }
@@ -41,40 +35,34 @@ public static class ConditionExpression
             return true;
         }
 
-        while (pos < len)
-        {
+        while (pos < len) {
             SkipWs();
             if (pos >= len) break;
 
-            if (Match("&&"))
-            {
+            if (Match("&&")) {
                 tokens.Add(new Token(TokenKind.And));
                 continue;
             }
 
-            if (Match("||"))
-            {
+            if (Match("||")) {
                 tokens.Add(new Token(TokenKind.Or));
                 continue;
             }
 
             var ch = s[pos];
-            if (ch == '(')
-            {
+            if (ch == '(') {
                 tokens.Add(new Token(TokenKind.LParen));
                 pos++;
                 continue;
             }
 
-            if (ch == ')')
-            {
+            if (ch == ')') {
                 tokens.Add(new Token(TokenKind.RParen));
                 pos++;
                 continue;
             }
 
-            if (char.IsLetter(ch))
-            {
+            if (char.IsLetter(ch)) {
                 var c = char.ToUpperInvariant(ch);
                 var idx = c - 'A';
                 if (idx >= 0 && idx < groupCount)
@@ -90,19 +78,16 @@ public static class ConditionExpression
         return tokens;
     }
 
-    public static bool[] ValidateTokens(List<Token> tokens)
-    {
+    public static bool[] ValidateTokens(List<Token> tokens) {
         var invalid = new bool[tokens.Count];
         if (tokens.Count == 0) return invalid;
 
         var last = TokenKind.LParen; // treat "none" as "expect operand"
         var depth = 0;
 
-        for (var i = 0; i < tokens.Count; i++)
-        {
+        for (var i = 0; i < tokens.Count; i++) {
             var t = tokens[i];
-            switch (t.Kind)
-            {
+            switch (t.Kind) {
                 case TokenKind.Group:
                     // Invalid if previous was also operand or right paren
                     if (last is TokenKind.Group or TokenKind.RParen)
@@ -138,20 +123,16 @@ public static class ConditionExpression
         }
 
         // Trailing operator or '(' is invalid
-        if (tokens.Count > 0)
-        {
+        if (tokens.Count > 0) {
             var lastIdx = tokens.Count - 1;
             if (tokens[lastIdx].Kind is TokenKind.And or TokenKind.Or or TokenKind.LParen)
                 invalid[lastIdx] = true;
         }
 
         // Unmatched '(' – mark from right to left until depth is satisfied
-        if (depth > 0)
-        {
-            for (var i = tokens.Count - 1; i >= 0 && depth > 0; i--)
-            {
-                if (tokens[i].Kind == TokenKind.LParen)
-                {
+        if (depth > 0) {
+            for (var i = tokens.Count - 1; i >= 0 && depth > 0; i--) {
+                if (tokens[i].Kind == TokenKind.LParen) {
                     invalid[i] = true;
                     depth--;
                 }
@@ -161,10 +142,8 @@ public static class ConditionExpression
         return invalid;
     }
 
-    public static string GetTokenLabel(Token token)
-    {
-        return token.Kind switch
-        {
+    public static string GetTokenLabel(Token token) {
+        return token.Kind switch {
             TokenKind.Group => ((char)('A' + token.GroupIndex)).ToString(),
             TokenKind.And => "&&",
             TokenKind.Or => "||",
@@ -174,14 +153,12 @@ public static class ConditionExpression
         };
     }
 
-    public static string BuildExpression(List<Token> tokens)
-    {
+    public static string BuildExpression(List<Token> tokens) {
         if (tokens.Count == 0)
             return string.Empty;
 
         var sb = new StringBuilder();
-        for (var i = 0; i < tokens.Count; i++)
-        {
+        for (var i = 0; i < tokens.Count; i++) {
             if (i > 0)
                 sb.Append(' ');
             sb.Append(GetTokenLabel(tokens[i]));
@@ -190,8 +167,7 @@ public static class ConditionExpression
         return sb.ToString();
     }
 
-    public static bool TryEvaluate(string? expr, bool[] groupValues, out bool result)
-    {
+    public static bool TryEvaluate(string? expr, bool[] groupValues, out bool result) {
         result = false;
         if (string.IsNullOrWhiteSpace(expr) || groupValues.Length == 0)
             return false;
@@ -199,8 +175,7 @@ public static class ConditionExpression
         return TryEvaluateInternal(expr!, groupValues, out result);
     }
 
-    private static bool TryEvaluateInternal(string expr, bool[] groupValues, out bool result)
-    {
+    private static bool TryEvaluateInternal(string expr, bool[] groupValues, out bool result) {
         result = false;
         if (groupValues.Length == 0)
             return false;
@@ -211,14 +186,11 @@ public static class ConditionExpression
 
         bool ParseExpr() => ParseOr();
 
-        bool ParseOr()
-        {
+        bool ParseOr() {
             var left = ParseAnd();
-            while (true)
-            {
+            while (true) {
                 SkipWs();
-                if (Match("||"))
-                {
+                if (Match("||")) {
                     var right = ParseAnd();
                     left = left || right;
                 }
@@ -228,14 +200,11 @@ public static class ConditionExpression
             return left;
         }
 
-        bool ParseAnd()
-        {
+        bool ParseAnd() {
             var left = ParseTerm();
-            while (true)
-            {
+            while (true) {
                 SkipWs();
-                if (Match("&&"))
-                {
+                if (Match("&&")) {
                     var right = ParseTerm();
                     left = left && right;
                 }
@@ -245,11 +214,9 @@ public static class ConditionExpression
             return left;
         }
 
-        bool ParseTerm()
-        {
+        bool ParseTerm() {
             SkipWs();
-            if (Match("("))
-            {
+            if (Match("(")) {
                 var v = ParseOr();
                 SkipWs();
                 if (!Match(")"))
@@ -258,8 +225,7 @@ public static class ConditionExpression
             }
 
             SkipWs();
-            if (pos < len && char.IsLetter(s[pos]))
-            {
+            if (pos < len && char.IsLetter(s[pos])) {
                 var c = char.ToUpperInvariant(s[pos++]);
                 var idx = c - 'A';
                 return idx >= 0 && idx < groupValues.Length && groupValues[idx];
@@ -268,17 +234,14 @@ public static class ConditionExpression
             throw new FormatException("Unexpected token");
         }
 
-        void SkipWs()
-        {
+        void SkipWs() {
             while (pos < len && char.IsWhiteSpace(s[pos])) pos++;
         }
 
-        bool Match(string token)
-        {
+        bool Match(string token) {
             SkipWs();
             if (pos + token.Length > len) return false;
-            for (var i = 0; i < token.Length; i++)
-            {
+            for (var i = 0; i < token.Length; i++) {
                 if (s[pos + i] != token[i])
                     return false;
             }
@@ -286,13 +249,11 @@ public static class ConditionExpression
             return true;
         }
 
-        try
-        {
+        try {
             result = ParseExpr();
             return true;
         }
-        catch
-        {
+        catch {
             return false;
         }
     }

@@ -1,7 +1,6 @@
 ﻿namespace AutoHook.Classes;
 
-public class BiteTimers
-{
+public class BiteTimers {
     public int itemId { get; set; }
 
     public double min { get; set; }

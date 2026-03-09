@@ -5,14 +5,12 @@ using System.Runtime.InteropServices;
 namespace AutoHook.Spearfishing.Struct;
 
 [StructLayout(LayoutKind.Explicit)]
-public struct SpearfishWindow
-{
+public struct SpearfishWindow {
     [FieldOffset(0)]
     public AtkUnitBase Base;
 
     [StructLayout(LayoutKind.Explicit)]
-    public struct Info
-    {
+    public struct Info {
         [FieldOffset(8)]
         public bool Available;
 

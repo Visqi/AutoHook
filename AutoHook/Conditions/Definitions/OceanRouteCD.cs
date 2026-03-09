@@ -6,16 +6,14 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class OceanRouteCD : IConditionDefinition
-{
+public sealed class OceanRouteCD : IConditionDefinition {
     public string Id => nameof(OceanRouteCD);
     public string Name => "Ocean route";
     public string Category => "Fishing";
     public string Description => "Matches the current ocean fishing route against selected routes.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters)
-    {
+    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var ids = GetIds(parameters);
         if (ids.Count == 0) return false;
         var route = world.OceanFishing.CurrentRoute;
@@ -23,22 +21,19 @@ public sealed class OceanRouteCD : IConditionDefinition
         return GetBool(parameters, "inv", false) ? !result : result;
     }
 
-    public void DrawParams(Condition condition)
-    {
+    public void DrawParams(Condition condition) {
         var ids = GetIds(condition.Params);
         var currentId = ids.Count > 0 ? ids[0] : 0;
 
         ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);
         var sheet = Svc.Data.GetExcelSheet<IKDRoute>();
-        if (sheet == null)
-        {
+        if (sheet == null) {
             DrawIdsParams(condition, "Route IDs");
             return;
         }
 
         var unique = new Dictionary<string, uint>();
-        foreach (var row in sheet)
-        {
+        foreach (var row in sheet) {
             if (row.RowId == 0) continue;
             var name = row.Name.ToString();
             if (string.IsNullOrEmpty(name)) continue;
@@ -50,8 +45,7 @@ public sealed class OceanRouteCD : IConditionDefinition
         using var combo = ImRaii.Combo("Route", label);
         if (!combo) return;
 
-        foreach (var kv in unique.OrderBy(k => k.Key))
-        {
+        foreach (var kv in unique.OrderBy(k => k.Key)) {
             var id = kv.Value;
             var name = kv.Key;
             var sel = id == currentId;

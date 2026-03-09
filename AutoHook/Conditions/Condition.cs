@@ -6,8 +6,7 @@ namespace AutoHook.Conditions;
 /// <summary>
 /// One condition: type id + minimal params. Only serialized keys are stored.
 /// </summary>
-public class Condition
-{
+public class Condition {
     [JsonIgnore]
     private static int _nextUiId = 1;
 
@@ -28,8 +27,7 @@ public class Condition
     [JsonProperty("i")]
     public int UiId { get; set; }
 
-    public void EnsureUiId()
-    {
+    public void EnsureUiId() {
         if (UiId <= 0)
             UiId = Interlocked.Increment(ref _nextUiId);
     }

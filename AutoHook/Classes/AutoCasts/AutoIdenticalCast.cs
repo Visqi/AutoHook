@@ -4,8 +4,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoIdenticalCast : BaseActionCast
-{
+public class AutoIdenticalCast : BaseActionCast {
     [Obsolete("Legacy config")] public bool OnlyUseUnderPatience;
     [Obsolete("Legacy config")] public bool OnlyWhenCordialAvailable;
 
@@ -24,8 +23,7 @@ public class AutoIdenticalCast : BaseActionCast
 
     public bool IsAvailableToCast(int caughtAmount) => (!OnlyUseAfterXAmount || caughtAmount >= CaughtAmountLimit) && IsAvailableToCast();
 
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
+    protected override DrawOptionsDelegate DrawOptions => () => {
         ConditionSet = ConditionUi.DrawConditionSetSlim(
             UIStrings.Conditions,
             ConditionSet,
@@ -41,8 +39,7 @@ public class AutoIdenticalCast : BaseActionCast
         ImGui.SameLine();
 
         ImGui.SetNextItemWidth(30);
-        if (ImGui.InputInt(UIStrings.TimeS, ref stack, 0, 0))
-        {
+        if (ImGui.InputInt(UIStrings.TimeS, ref stack, 0, 0)) {
             CaughtAmountLimit = Math.Max(1, Math.Min(stack, 999));
             Service.Save();
         }

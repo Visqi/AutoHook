@@ -3,16 +3,14 @@ using Dalamud.Interface.Utility;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class ChumTimerCD : IConditionDefinition
-{
+public sealed class ChumTimerCD : IConditionDefinition {
     public string Id => nameof(ChumTimerCD);
     public string Name => "Chum timer";
     public string Category => "Time";
     public string Description => "Checks bite timer while Chum is active against one or more ranges.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters)
-    {
+    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var args = IConditionDefinition.GetRangeParams(parameters);
         if (!world.ChumActive) return args.Invert;
         var ranges = args.Ranges;
@@ -24,16 +22,14 @@ public sealed class ChumTimerCD : IConditionDefinition
         return args.Invert ? !result : result;
     }
 
-    public void DrawParams(Condition condition)
-    {
+    public void DrawParams(Condition condition) {
         var args = IConditionDefinition.GetRangeParams(condition.Params);
         var ranges = args.Ranges;
         var min = ranges.Count > 0 ? ranges[0].Min : 0;
         var max = ranges.Count > 0 ? ranges[0].Max : 0;
 
         ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputDouble("Min", ref min, 0.1, 1, "%.1f"))
-        {
+        if (ImGui.InputDouble("Min", ref min, 0.1, 1, "%.1f")) {
             var list = ranges.Count == 0 ? new List<(double, double)>() : [.. ranges];
             if (list.Count == 0)
                 list.Add((min, max));
@@ -45,8 +41,7 @@ public sealed class ChumTimerCD : IConditionDefinition
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputDouble("Max (0 = no cap)", ref max, 0.1, 1, "%.1f"))
-        {
+        if (ImGui.InputDouble("Max (0 = no cap)", ref max, 0.1, 1, "%.1f")) {
             var list = ranges.Count == 0 ? new List<(double, double)>() : [.. ranges];
             if (list.Count == 0)
                 list.Add((min, max));

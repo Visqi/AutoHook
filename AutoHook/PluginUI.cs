@@ -15,8 +15,7 @@ using System.Reflection;
 
 namespace AutoHook;
 
-public class PluginUi : Window, IDisposable
-{
+public class PluginUi : Window, IDisposable {
     private static readonly List<BaseTab> _tabs =
     [
         new TabFishingPresets(),
@@ -29,58 +28,47 @@ public class PluginUi : Window, IDisposable
 
     private static OpenWindow _selectedTab = OpenWindow.FishingPreset;
 
-    public PluginUi() : base($"{Service.PluginName} {Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? ""}###MainAutoHook")
-    {
+    public PluginUi() : base($"{Service.PluginName} {Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? ""}###MainAutoHook") {
         Service.WindowSystem.AddWindow(this);
 
         Flags |= ImGuiWindowFlags.NoScrollbar;
         Flags |= ImGuiWindowFlags.NoScrollWithMouse;
 
-        TitleBarButtons.Add(new()
-        {
+        TitleBarButtons.Add(new() {
             Click = (m) => { Util.OpenLink(@"https://ko-fi.com/initialdet"); },
             Icon = FontAwesomeIcon.Heart,
             ShowTooltip = () => ImGui.SetTooltip("Support AutoHook"),
         });
     }
 
-    public void Dispose()
-    {
+    public void Dispose() {
         Service.Save();
 
-        foreach (var tab in _tabs)
-        {
+        foreach (var tab in _tabs) {
             tab.Dispose();
         }
 
         Service.WindowSystem.RemoveWindow(this);
     }
 
-    public override void Draw()
-    {
+    public override void Draw() {
         if (!IsOpen)
             return;
 
-        try
-        {
+        try {
             DrawNewLayout();
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Svc.Log.Error(e.Message);
         }
     }
-    private void Debug()
-    {
+    private void Debug() {
         using var _ = ImRaii.PushId("debug");
         ImGui.SetNextItemWidth(300);
-        if (ImGui.Begin($"DebugWIndows", ref Service.OpenConsole))
-        {
+        if (ImGui.Begin($"DebugWIndows", ref Service.OpenConsole)) {
             var logs = Service.LogMessages.AsEnumerable().Reverse().ToList();
-            for (var i = 0; i < logs.Count; i++)
-            {
-                if (i == 0)
-                {
+            for (var i = 0; i < logs.Count; i++) {
+                if (i == 0) {
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
                     ImGui.TextWrapped($"{i + 1} - {logs[i]}");
                     ImGui.PopStyleColor();
@@ -97,21 +85,18 @@ public class PluginUi : Window, IDisposable
         ImGui.End();
     }
 
-    private void DrawNewLayout()
-    {
+    private void DrawNewLayout() {
         var region = ImGui.GetContentRegionAvail();
         var topLeftSideHeight = region.Y;
 
-        if (Service.Configuration.ShowStatus)
-        {
+        if (Service.Configuration.ShowStatus) {
             DrawStatus();
         }
 
         if (Service.OpenConsole)
             Debug();
 
-        using (var style = ImRaii.PushStyle(ImGuiStyleVar.CellPadding, new Vector2(5, 0)))
-        {
+        using (var style = ImRaii.PushStyle(ImGuiStyleVar.CellPadding, new Vector2(5, 0))) {
             using var table = ImRaii.Table("###MainTable", 2, ImGuiTableFlags.Resizable);
             ImGui.TableSetupColumn("##LeftColumn", ImGuiTableColumnFlags.WidthFixed, ImGui.GetWindowWidth() / 3);
 
@@ -120,17 +105,13 @@ public class PluginUi : Window, IDisposable
             var regionSize = ImGui.GetContentRegionAvail();
             ImGui.PushStyleVar(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
 
-            using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight }, false, ImGuiWindowFlags.NoDecoration))
-            {
+            using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight }, false, ImGuiWindowFlags.NoDecoration)) {
                 if (ImGui.Selectable($"Start Actions"))
                     AutoHook.Plugin.HookManager.StartFishing();
 
-                using (var c = ImRaii.Child("logo", new(0, 125f.Scale())))
-                {
-                    if (Svc.Texture.GetFromManifestResource(Assembly.GetExecutingAssembly(), $"AutoHook.Assets.Fishy{(Service.Configuration.PluginEnabled ? "" : "_g")}.png").TryGetWrap(out var image, out var _))
-                    {
-                        ImGuiEx.LineCentered("###AHLogo", () =>
-                        {
+                using (var c = ImRaii.Child("logo", new(0, 125f.Scale()))) {
+                    if (Svc.Texture.GetFromManifestResource(Assembly.GetExecutingAssembly(), $"AutoHook.Assets.Fishy{(Service.Configuration.PluginEnabled ? "" : "_g")}.png").TryGetWrap(out var image, out var _)) {
+                        ImGuiEx.LineCentered("###AHLogo", () => {
                             ImGui.Image(image.Handle, new(125f.Scale(), 125f.Scale()));
 
                             if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
@@ -147,8 +128,7 @@ public class PluginUi : Window, IDisposable
                 ImGui.Spacing();
                 ImGui.Separator();
 
-                foreach (var tab in _tabs)
-                {
+                foreach (var tab in _tabs) {
                     if (!tab.Enabled) continue;
 
                     if (ImGui.Selectable($"{tab.TabName}###{tab.TabName}Main", _selectedTab == tab.Type))
@@ -173,15 +153,12 @@ public class PluginUi : Window, IDisposable
             using var rightChild = ImRaii.Child($"###AhRight", Vector2.Zero, false);
             if (_selectedTab == OpenWindow.About)
                 AboutTab.Draw("AutoHook");
-            else if (_selectedTab == OpenWindow.Debug)
-            {
+            else if (_selectedTab == OpenWindow.Debug) {
                 debug.DrawHeader();
                 debug.Draw();
             }
-            else
-            {
-                if (_tabs.FirstOrDefault(x => x.Type == _selectedTab) is { } tab)
-                {
+            else {
+                if (_tabs.FirstOrDefault(x => x.Type == _selectedTab) is { } tab) {
                     tab.DrawHeader();
                     tab.Draw();
                 }
@@ -192,26 +169,19 @@ public class PluginUi : Window, IDisposable
             DrawChangelog();
     }
 
-    private static void DrawStatus()
-    {
-        ImGuiEx.LineCentered("###AhStatus", () =>
-        {
-            if (!Service.Configuration.PluginEnabled)
-            {
+    private static void DrawStatus() {
+        ImGuiEx.LineCentered("###AhStatus", () => {
+            if (!Service.Configuration.PluginEnabled) {
                 ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.Plugin_Disabled);
             }
-            else if (Service.WorldState.FishingState == FishingState.None)
-            {
-                try
-                {
+            else if (Service.WorldState.FishingState == FishingState.None) {
+                try {
                     var preset = _presets.SelectedPreset;
-                    if (preset == null)
-                    {
+                    if (preset == null) {
                         ImGui.TextColored(ImGuiColors.ParsedBlue,
                             UIStrings.StatusNoPreset);
                     }
-                    else
-                    {
+                    else {
                         var baitId = Service.WorldState.CurrentBaitId;
                         var baitName = MultiString.GetItemName(baitId);
 
@@ -231,8 +201,7 @@ public class PluginUi : Window, IDisposable
                         ImGui.TextColored(ImGuiColors.DalamudViolet, $"will be used.");
                     }
                 }
-                catch (Exception e)
-                {
+                catch (Exception e) {
                     Svc.Log.Error(e.Message);
                 }
             }
@@ -245,8 +214,7 @@ public class PluginUi : Window, IDisposable
 
     public override void OnClose() => Service.Save();
 
-    public static void ShowKofi()
-    {
+    public static void ShowKofi() {
         ImGui.SameLine();
         ImGui.PushStyleColor(ImGuiCol.Button, 0xFF000000 | 0x005E5BFF);
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0xDD000000 | 0x005E5BFF);
@@ -262,36 +230,30 @@ public class PluginUi : Window, IDisposable
     private static readonly FishingPresets _presets = Service.Configuration.HookPresets;
 
     [Localizable(false)]
-    private void DrawChangelog()
-    {
+    private void DrawChangelog() {
         var text = UIStrings.Changelog;
         ImGui.SetCursorPosX(ImGui.GetWindowWidth() - ImGuiHelpers.GetButtonSize(text).X - 5);
 
         ImGui.SetNextItemWidth(400);
-        if (ImGui.Begin($"{text}", ref _openChangelog))
-        {
+        if (ImGui.Begin($"{text}", ref _openChangelog)) {
             var changes = PluginChangelog.Versions;
 
-            if (changes.Count > 0)
-            {
+            if (changes.Count > 0) {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
                 ImGui.TextWrapped($"{changes[0].VersionNumber}");
                 ImGui.PopStyleColor();
                 ImGui.Separator();
 
                 //First value is the current Version
-                foreach (var mainChange in changes[0].Main)
-                {
+                foreach (var mainChange in changes[0].Main) {
                     ImGui.TextWrapped($"- {mainChange}");
                 }
 
                 ImGui.Spacing();
 
-                if (changes[0].Minor.Count > 0)
-                {
+                if (changes[0].Minor.Count > 0) {
                     ImGui.TextWrapped("Minor Changes");
-                    foreach (var minorChange in changes[0].Minor)
-                    {
+                    foreach (var minorChange in changes[0].Minor) {
                         ImGui.TextWrapped($"- {minorChange}");
                     }
                 }
@@ -299,16 +261,14 @@ public class PluginUi : Window, IDisposable
                 ImGui.Separator();
 
                 using var item = ImRaii.Child("###old_versions", new Vector2(0, 0), true);
-                for (var i = 1; i < changes.Count; i++)
-                {
+                for (var i = 1; i < changes.Count; i++) {
                     if (!ImGui.TreeNode($"{changes[i].VersionNumber}"))
                         continue;
 
                     foreach (var mainChange in changes[i].Main)
                         ImGui.TextWrapped($"- {mainChange}");
 
-                    if (changes[i].Minor.Count > 0)
-                    {
+                    if (changes[i].Minor.Count > 0) {
                         ImGui.Spacing();
                         ImGui.TextWrapped("Minor Changes");
 

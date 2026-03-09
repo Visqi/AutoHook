@@ -1,13 +1,11 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using Newtonsoft.Json;
 using System.ComponentModel;
 
 namespace AutoHook.Configurations;
 
-public class AutoCastsConfig
-{
+public class AutoCastsConfig {
     public bool EnableAll = false;
 
     [DefaultValue(true)] public bool DontCancelMooch = true;
@@ -40,8 +38,7 @@ public class AutoCastsConfig
     public AutoIdenticalCast CastIdenticalCast = new();
     //public AutoLures CastLures = new();
 
-    private List<BaseActionCast> GetAutoCastOrder()
-    {
+    private List<BaseActionCast> GetAutoCastOrder() {
         var output = new List<BaseActionCast>
         {
             CastThaliaksFavor,
@@ -59,8 +56,7 @@ public class AutoCastsConfig
         return output;
     }
 
-    public BaseActionCast? GetNextAutoCast(bool ignoreCurrentMooch)
-    {
+    public BaseActionCast? GetNextAutoCast(bool ignoreCurrentMooch) {
         if (!EnableAll)
             return null;
 
@@ -68,8 +64,7 @@ public class AutoCastsConfig
 
         var order = GetAutoCastOrder();
 
-        foreach (var action in order.Where(action => action.IsAvailableToCast(ignoreCurrentMooch)))
-        {
+        foreach (var action in order.Where(action => action.IsAvailableToCast(ignoreCurrentMooch))) {
             if (action.RequiresTimeWindow() && !IsWithinTimeWindow())
                 continue;
 
@@ -80,8 +75,7 @@ public class AutoCastsConfig
         return cast;
     }
 
-    private bool IsWithinTimeWindow()
-    {
+    private bool IsWithinTimeWindow() {
         if (TimeWindow.BackingSet is not { Groups.Count: > 0 } set)
             return true;
         return set.Evaluate(Service.WorldState, ConditionRegistry.Registry);
@@ -91,8 +85,7 @@ public class AutoCastsConfig
     [JsonConverter(typeof(SingleConditionConverter))]
     public SingleCondition<TimeWindowCD, (bool Enabled, TimeOnly Start, TimeOnly End)> TimeWindow { get; set; } = new SingleCondition<TimeWindowCD, (bool Enabled, TimeOnly Start, TimeOnly End)>();
 
-    public bool TryCastAction(BaseActionCast? action, bool noDelay = false, bool ignoreCurrentMooch = false)
-    {
+    public bool TryCastAction(BaseActionCast? action, bool noDelay = false, bool ignoreCurrentMooch = false) {
         if (action == null || !EnableAll)
             return false;
 
@@ -112,8 +105,7 @@ public class AutoCastsConfig
         return true;
     }
 
-    private void TryChumAnimationCancel()
-    {
+    private void TryChumAnimationCancel() {
         Service.PrintDebug("Trying to cancel chum animation");
         // Make sure Salvage is disabled before chum
 

@@ -10,10 +10,8 @@ using System.Numerics;
 
 namespace AutoHook.Classes;
 
-public abstract class BaseActionCast
-{
-    protected BaseActionCast(string name, uint id, ActionType actionType = ActionType.Action)
-    {
+public abstract class BaseActionCast {
+    protected BaseActionCast(string name, uint id, ActionType actionType = ActionType.Action) {
         Name = name;
         Id = id;
         Enabled = false;
@@ -56,20 +54,17 @@ public abstract class BaseActionCast
         => ConditionSet is not { Groups.Count: > 0 }
            || ConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry);
 
-    public virtual void SetThreshold(int newCost)
-    {
+    public virtual void SetThreshold(int newCost) {
         var actionCost = Id == IDs.Actions.ThaliaksFavor ? 0 : (int)PlayerRes.CastActionCost(Id, ActionType);
         GpThreshold = (newCost < 0) ? 0 : Math.Max(newCost, actionCost);
         Service.Save();
     }
 
-    public bool IsAvailableToCast(bool ignoreCurrentMooch = false)
-    {
+    public bool IsAvailableToCast(bool ignoreCurrentMooch = false) {
         if (!Enabled)
             return false;
 
-        if (DoesCancelMooch() && Service.WorldState.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch)
-        {
+        if (DoesCancelMooch() && Service.WorldState.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch) {
             return false;
         }
 
@@ -100,14 +95,11 @@ public abstract class BaseActionCast
     public virtual void DrawConfig(List<BaseActionCast>? availableActs = null)
         => DrawConfigWithLabel(GetName(), availableActs);
 
-    public void DrawConfigWithLabel(string label, List<BaseActionCast>? availableActs = null)
-    {
+    public void DrawConfigWithLabel(string label, List<BaseActionCast>? availableActs = null) {
         using var cfgId = ImRaii.PushId(@$"{label}_cfg");
 
-        if (DrawOptions != null)
-        {
-            if (DrawUtil.Checkbox(@$"###{label}", ref Enabled, HelpText, true))
-            {
+        if (DrawOptions != null) {
+            if (DrawUtil.Checkbox(@$"###{label}", ref Enabled, HelpText, true)) {
                 Service.PrintDebug(@$"[BaseAction] {Name} - {(Enabled ? @"Enabled" : @"Disabled")}");
                 Service.Save();
             }
@@ -115,30 +107,25 @@ public abstract class BaseActionCast
             ImGui.SameLine(0, 3);
 
             var x = ImGui.GetCursorPosX();
-            if (ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.FramePadding))
-            {
+            if (ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.FramePadding)) {
                 ImGui.SameLine(200 * ImGui.GetIO().FontGlobalScale * (ImGui.GetFontSize() / 12f));
                 DrawGpThreshold();
                 DrawUpDownArrows(availableActs);
                 ImGui.SetCursorPosX(x);
-                using (ImRaii.Group())
-                {
+                using (ImRaii.Group()) {
                     DrawOptions?.Invoke();
                     ImGui.Separator();
                 }
                 ImGui.TreePop();
             }
-            else
-            {
+            else {
                 ImGui.SameLine(200 * ImGui.GetIO().FontGlobalScale * (ImGui.GetFontSize() / 12f));
                 DrawGpThreshold();
                 DrawUpDownArrows(availableActs);
             }
         }
-        else
-        {
-            if (DrawUtil.Checkbox(@$"###{label}", ref Enabled, HelpText, true))
-            {
+        else {
+            if (DrawUtil.Checkbox(@$"###{label}", ref Enabled, HelpText, true)) {
                 Service.PrintDebug(@$"[BaseAction] {Name} - {(Enabled ? @"Enabled" : @"Disabled")}");
                 Service.Save();
             }
@@ -151,13 +138,11 @@ public abstract class BaseActionCast
         }
     }
 
-    public virtual void DrawConfigOptions()
-    {
+    public virtual void DrawConfigOptions() {
         DrawOptions?.Invoke();
     }
 
-    private void DrawUpDownArrows(List<BaseActionCast>? availableActs)
-    {
+    private void DrawUpDownArrows(List<BaseActionCast>? availableActs) {
         if (availableActs is null || IsExcludedPriority) return;
 
         if (GetPriority() == 0) //failsafe I guess
@@ -170,10 +155,8 @@ public abstract class BaseActionCast
         if (!availableActs.Any(x => x.Priority < Priority && !x.IsExcludedPriority))
             ImGui.BeginDisabled();
 
-        if (ImGui.ArrowButton(@"###UpArrow", ImGuiDir.Up))
-        {
-            if (availableActs.Any(x => x.Priority < Priority && !x.IsExcludedPriority))
-            {
+        if (ImGui.ArrowButton(@"###UpArrow", ImGuiDir.Up)) {
+            if (availableActs.Any(x => x.Priority < Priority && !x.IsExcludedPriority)) {
                 var nextAct = availableActs.Where(x => x.Priority < Priority && !x.IsExcludedPriority)
                     .OrderByDescending(x => x.Priority).First();
                 nextAct.Priority = Priority;
@@ -189,10 +172,8 @@ public abstract class BaseActionCast
         if (!availableActs.Any(x => x.Priority > Priority && !x.IsExcludedPriority))
             ImGui.BeginDisabled();
 
-        if (ImGui.ArrowButton(@"###DownArrow", ImGuiDir.Down))
-        {
-            if (availableActs.Any(x => x.Priority > Priority && !x.IsExcludedPriority))
-            {
+        if (ImGui.ArrowButton(@"###DownArrow", ImGuiDir.Down)) {
+            if (availableActs.Any(x => x.Priority > Priority && !x.IsExcludedPriority)) {
                 var lastAct = availableActs.Where(x => x.Priority > Priority && !x.IsExcludedPriority)
                     .OrderBy(x => x.Priority).First();
                 lastAct.Priority = Priority;
@@ -204,11 +185,9 @@ public abstract class BaseActionCast
             ImGui.EndDisabled();
     }
 
-    public virtual void DrawGpThreshold()
-    {
+    public virtual void DrawGpThreshold() {
         using var gpId = ImRaii.PushId(@$"{GetName()}_gp");
-        if (ImGui.Button(UIStrings.GPlabel))
-        {
+        if (ImGui.Button(UIStrings.GPlabel)) {
             ImGui.OpenPopup(strId: @"gp_cfg");
         }
 
@@ -226,16 +205,14 @@ public abstract class BaseActionCast
                 @$"{GetName()} {UIStrings.WillBeUsedWhenYourGPIsEqualOr} {(GpThresholdAbove ? UIStrings.Above : UIStrings.Below)} {GpThreshold}");
 
         ImGui.Separator();
-        if (ImGui.RadioButton(UIStrings.Above, GpThresholdAbove))
-        {
+        if (ImGui.RadioButton(UIStrings.Above, GpThresholdAbove)) {
             GpThresholdAbove = true;
             Service.Save();
         }
 
         //ImGui.SameLine();
 
-        if (ImGui.RadioButton(UIStrings.Below, !GpThresholdAbove))
-        {
+        if (ImGui.RadioButton(UIStrings.Below, !GpThresholdAbove)) {
             GpThresholdAbove = false;
             Service.Save();
         }
@@ -243,8 +220,7 @@ public abstract class BaseActionCast
         //ImGui.SameLine();
 
         ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputInt(UIStrings.GP, ref GpThreshold, 1, 1))
-        {
+        if (ImGui.InputInt(UIStrings.GP, ref GpThreshold, 1, 1)) {
             GpThreshold = Math.Max(GpThreshold, 0);
             SetThreshold(GpThreshold);
             Service.Save();

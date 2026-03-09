@@ -5,11 +5,9 @@ using ItemRow = Lumina.Excel.Sheets.Item;
 
 namespace AutoHook.Classes;
 
-public class BaitFishClass : IComparable<BaitFishClass>
-{
+public class BaitFishClass : IComparable<BaitFishClass> {
     [JsonIgnore]
-    public string Name => Id switch
-    {
+    public string Name => Id switch {
         GameRes.AllMoochesId => UIStrings.All_Mooches,
         GameRes.AllBaitsId => UIStrings.All_Baits,
         _ => MultiString.GetItemName((uint)Id)
@@ -21,39 +19,32 @@ public class BaitFishClass : IComparable<BaitFishClass>
 
     // check the bait type
     [JsonIgnore]
-    public BaitType BaitType
-    {
-        get
-        {
+    public BaitType BaitType {
+        get {
             return GameRes.Baits.Any(b => b.Id == Id) ? BaitType.Bait :
                 GameRes.Fishes.Any(f => f.Id == Id) ? BaitType.Mooch : BaitType.Unknown;
         }
     }
 
-    public BaitFishClass(ItemRow data)
-    {
+    public BaitFishClass(ItemRow data) {
         Id = (int)data.RowId;
     }
 
-    public BaitFishClass(FishRow fishRow)
-    {
+    public BaitFishClass(FishRow fishRow) {
         var itemData = fishRow.Item.GetValueOrDefault<ItemRow>() ?? new ItemRow();
         LureMessage = fishRow.Unknown_70_1.ToString();
         Id = (int)itemData.RowId;
     }
 
-    public BaitFishClass(string name, int id)
-    {
+    public BaitFishClass(string name, int id) {
         Id = id;
     }
 
-    public BaitFishClass()
-    {
+    public BaitFishClass() {
         Id = -1;
     }
 
-    public BaitFishClass(Number id)
-    {
+    public BaitFishClass(Number id) {
         Id = id;
     }
 
