@@ -1,13 +1,9 @@
 using AutoHook.Ui;
-using System.ComponentModel;
 
 namespace AutoHook.Classes.AutoCasts;
 
 public class AutoCastLine : BaseActionCast {
-    [Obsolete("Legacy config")] public bool OnlyCastWithFishEyes = false;
-    [Obsolete("Legacy config")] public bool OnlyCastLarge = false;
-
-    [DefaultValue(true)] public bool IgnoreMooch = true;
+    public bool IgnoreMooch = true;
 
     public override bool DoesCancelMooch() => !IgnoreMooch;
 

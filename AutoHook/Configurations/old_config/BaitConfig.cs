@@ -1,4 +1,4 @@
-namespace AutoHook.Configurations.old_config;
+namespace AutoHook.Configurations.Legacy;
 
 public class BaitConfig(string bait) {
     /* old config, dont use*/
@@ -87,20 +87,17 @@ public class BaitConfig(string bait) {
     public bool CheckHookEnabled(BiteType bite)
         => bite == BiteType.Weak ? HookWeakEnabled :
         bite == BiteType.Strong ? HookStrongEnabled :
-        bite == BiteType.Legendary ? HookLegendaryEnabled :
-        false;
+        bite == BiteType.Legendary && HookLegendaryEnabled;
 
     public bool CheckHookIntuitionEnabled(BiteType bite)
         => bite == BiteType.Weak ? HookWeakIntuitionEnabled :
         bite == BiteType.Strong ? HookStrongIntuitionEnabled :
-        bite == BiteType.Legendary ? HookLegendaryIntuitionEnabled :
-        false;
+        bite == BiteType.Legendary && HookLegendaryIntuitionEnabled;
 
     public bool CheckHookDHTHEnabled(BiteType bite)
         => bite == BiteType.Weak ? HookWeakDHTHEnabled :
         bite == BiteType.Strong ? HookStrongDHTHEnabled :
-        bite == BiteType.Legendary ? HookLegendaryDHTHEnabled :
-        false;
+        bite == BiteType.Legendary && HookLegendaryDHTHEnabled;
 
     private HookType GetPatienceHook(BiteType bite) => bite switch {
         BiteType.Weak => HookTypeWeak,

@@ -5,9 +5,6 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 namespace AutoHook.Classes.AutoCasts;
 
 public class AutoIdenticalCast : BaseActionCast {
-    [Obsolete("Legacy config")] public bool OnlyUseUnderPatience;
-    [Obsolete("Legacy config")] public bool OnlyWhenCordialAvailable;
-
     public bool OnlyUseAfterXAmount;
     public int CaughtAmountLimit = 1;
 

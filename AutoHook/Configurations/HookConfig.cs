@@ -11,16 +11,12 @@ public class SwimbaitConfig {
 }
 
 public class HookConfig : BaseOption {
-    [DefaultValue(true)] public bool Enabled = true;
+    public bool Enabled = true;
 
     public BaitFishClass BaitFish = new();
 
     public BaseHookset NormalHook = new(IDs.Status.None);
     public BaseHookset IntuitionHook = new(IDs.Status.FishersIntuition);
-
-    [Obsolete("Legacy config")] public bool UseSwimbait = false;
-    [Obsolete("Legacy config")] public int SwimbaitCountThreshold = 1;
-    [Obsolete("Legacy config")] public bool OnlyUseWhenNoMoochAvailable = true;
 
     public SwimbaitConfig SwimbaitNormal { get; set; } = new();
     public SwimbaitConfig SwimbaitIntuition { get; set; } = new();

@@ -8,14 +8,7 @@ namespace AutoHook.Configurations;
 public class AutoCastsConfig {
     public bool EnableAll = false;
 
-    [DefaultValue(true)] public bool DontCancelMooch = true;
-
-    [Obsolete("Legacy; migrated into TimeWindowConditionSet. Only read for migration.")]
-    public TimeOnly StartTime = new(0);
-    [Obsolete("Legacy; migrated into TimeWindowConditionSet. Only read for migration.")]
-    public TimeOnly EndTime = new(0);
-    [Obsolete("Legacy; migrated into TimeWindowConditionSet. Only read for migration.")]
-    public bool OnlyCastDuringSpecificTime = false;
+    public bool DontCancelMooch = true;
 
     public bool RecastAnimationCancel;
     public bool TurnCollectOff;

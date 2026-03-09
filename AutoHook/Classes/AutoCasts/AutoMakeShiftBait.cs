@@ -6,10 +6,6 @@ namespace AutoHook.Classes.AutoCasts;
 public class AutoMakeShiftBait : BaseActionCast {
     public int MakeshiftBaitStacks = 5;
 
-    [Obsolete("Legacy config")] public bool _onlyUseWithIntuition;
-    [Obsolete("Legacy config")] public bool OnlyWhenMoochNotUp;
-    [Obsolete("Legacy config")] public bool UseOnlyWhenMoochIIOnCD;
-
     public override bool RequiresTimeWindow() => true;
 
     public AutoMakeShiftBait() : base(UIStrings.MakeShift_Bait, IDs.Actions.MakeshiftBait, ActionType.Action)

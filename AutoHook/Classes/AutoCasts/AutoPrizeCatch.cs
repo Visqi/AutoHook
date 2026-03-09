@@ -4,10 +4,6 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 namespace AutoHook.Classes.AutoCasts;
 
 public class AutoPrizeCatch : BaseActionCast {
-    [Obsolete("Legacy config")] public bool UseWhenMoochIIOnCD = false;
-    [Obsolete("Legacy config")] public bool UseOnlyWithIdenticalCast = false;
-    [Obsolete("Legacy config")] public bool UseOnlyWithActiveSlap = false;
-
     public override bool DoesCancelMooch() => true;
 
     public AutoPrizeCatch() : base(UIStrings.Prize_Catch, IDs.Actions.PrizeCatch, ActionType.Action) {

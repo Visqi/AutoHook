@@ -1,3 +1,4 @@
+using AutoHook.Conditions.Definitions;
 using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
@@ -178,12 +179,16 @@ public class PresetCreator {
 
         if (_createAnglersPreset) {
             var anglers = CreateAnglerPreset();
-            anglers.ExtraCfg.AnglerStackQtd = 10;
-            anglers.ExtraCfg.SwapBaitAnglersArt = true;
-            anglers.ExtraCfg.BaitToSwapAnglersArt = new BaitFishClass(newPreset.ExtraCfg.ForcedBaitId);
-            anglers.ExtraCfg.SwapPresetAnglersArt = true;
-            anglers.ExtraCfg.PresetToSwapAnglersArt = newPreset.PresetName;
-
+            anglers.ExtraCfg.Enabled = true;
+            anglers.ExtraCfg.Triggers.Add(new ExtraTrigger {
+                Enabled = true,
+                ConditionSet = Configuration.ConditionSetBuilder.SingleStatusStacks(IDs.Status.AnglersArt, 10),
+                SwapPreset = true,
+                PresetToSwap = newPreset.PresetName,
+                SwapBait = true,
+                BaitToSwap = new BaitFishClass(newPreset.ExtraCfg.ForcedBaitId),
+                StopAction = ExtraStopAction.None,
+            });
             Presets.CustomPresets.Add(anglers);
         }
 
@@ -203,13 +208,13 @@ public class PresetCreator {
 
         newPreset.AutoCastsCfg.EnableAll = true;
         newPreset.AutoCastsCfg.CastLine.Enabled = true;
-        newPreset.AutoCastsCfg.CastLine.OnlyCastWithFishEyes = true;
+        newPreset.AutoCastsCfg.CastLine.ConditionSet = Configuration.ConditionSetBuilder.SingleStatus(IDs.Status.FishEyes);
         newPreset.AutoCastsCfg.CastCordial.Enabled = true;
         newPreset.AutoCastsCfg.CastFishEyes.Enabled = true;
         newPreset.AutoCastsCfg.CastFishEyes.IgnoreMooch = true;
 
         if (_selectedTargetFish!.Mooches.Count > 0) {
-            newPreset.AutoCastsCfg.CastFishEyes.OnlyWhenMakeShiftUp = true;
+            newPreset.AutoCastsCfg.CastFishEyes.ConditionSet = Configuration.ConditionSetBuilder.SingleStatus(IDs.Status.MakeshiftBait);
             newPreset.AutoCastsCfg.CastPatience.Enabled = true;
             newPreset.AutoCastsCfg.CastPatience.Id = IDs.Actions.Patience;
             newPreset.AutoCastsCfg.CastPatience.GpThreshold = 770;
@@ -226,7 +231,7 @@ public class PresetCreator {
 
             SetupBaitAndMooch(newPreset, fish.InitialBait, fish, mooches);
             var fishConfig = new FishConfig(fishPrep.Item1.ItemId) {
-                IgnoreOnIntuition = true
+                IgnoreConditionSet = Configuration.ConditionSetBuilder.SingleFlag<IntuitionActiveCD>()
             };
 
             newPreset.ExtraCfg.ForcedBaitId = fish.InitialBait;
@@ -255,7 +260,7 @@ public class PresetCreator {
                 cl.Enabled = true;
                 cl.CancelAttempt = true;
                 cl.LureTarget = LureTarget.Special;
-                cl.OnlyCastLarge = true;
+                cl.ConditionSet = Configuration.ConditionSetBuilder.SingleStatus(IDs.Status.PrizeCatch);
                 cl.Id = fishTarget!.HookType == HookType.Powerful
                     ? IDs.Actions.AmbitiousLure
                     : IDs.Actions.ModestLure;

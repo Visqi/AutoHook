@@ -12,8 +12,6 @@ public class AutoCordial : BaseActionCast {
 
     public bool InvertCordialPriority;
 
-    [Obsolete("Legacy config")] public bool AllowOvercapIC;
-
     public bool IgnoreTimeWindow;
 
     public ConditionSet? OvercapConditionSet { get; set; }

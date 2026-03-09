@@ -1,12 +1,15 @@
-﻿namespace AutoHook.Configurations.old_config;
+namespace AutoHook.Configurations.Legacy;
 
 public class BaitPresetConfig {
     /* old config, dont use*/
     public string PresetName { get; set; } = UIStrings.New_Preset;
     public List<BaitConfig> ListOfBaits { get; set; } = [];
 
-    public BaitPresetConfig(string presetName) {
-        ListOfBaits ??= [];
+    public BaitPresetConfig() {
+        ListOfBaits = [];
+    }
+
+    public BaitPresetConfig(string presetName) : this() {
         PresetName = presetName;
     }
 

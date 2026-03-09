@@ -9,28 +9,9 @@ using System.ComponentModel;
 namespace AutoHook.Classes;
 
 public class BaseBiteConfig(HookType type) {
-    [DefaultValue(true)]
     public bool HooksetEnabled = true;
 
     public bool EnableHooksetSwap;
-
-    [Obsolete("Legacy config")] public bool HookTimerEnabled;
-    [Obsolete("Legacy config")] public double MinHookTimer;
-    [Obsolete("Legacy config")] public double MaxHookTimer;
-    [Obsolete("Legacy config")] public bool ChumTimerEnabled;
-    [Obsolete("Legacy config")] public double ChumMinHookTimer;
-    [Obsolete("Legacy config")] public double ChumMaxHookTimer;
-    [Obsolete("Legacy config")] public bool OnlyWhenActiveSlap;
-    [Obsolete("Legacy config")] public bool OnlyWhenNotActiveSlap;
-
-    public bool OnlyWhenActiveIdentical;
-    public bool OnlyWhenNotActiveIdentical;
-
-    public bool PrizeCatchReq;
-    public bool PrizeCatchNotReq;
-
-    public bool OnlyWhenActiveMultihook;
-    public bool OnlyWhenNotActiveMultihook;
 
     public ConditionSet? ConditionSet { get; set; }
 

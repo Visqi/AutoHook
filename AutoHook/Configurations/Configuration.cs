@@ -1,24 +1,20 @@
-using AutoHook.Conditions;
-using AutoHook.Conditions.Definitions;
-using AutoHook.Configurations.old_config;
+using AutoHook.Configurations.Legacy;
 using AutoHook.Spearfishing;
 using Dalamud.Configuration;
 using Newtonsoft.Json;
-using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
-using static AutoHook.Conditions.ConditionRegistry;
 
 namespace AutoHook.Configurations;
 
 [Serializable]
-public class Configuration : IPluginConfiguration {
+public partial class Configuration : IPluginConfiguration {
     public int Version { get; set; } = 6;
     public string CurrentLanguage { get; set; } = @"en";
 
     public bool HideLocButtonn = true;
 
-    [DefaultValue(true)] public bool PluginEnabled = true;
+    public bool PluginEnabled = true;
 
     public FishingPresets HookPresets = new();
 
@@ -26,7 +22,7 @@ public class Configuration : IPluginConfiguration {
 
     public bool ShowDebugConsole = false;
 
-    [DefaultValue(true)] public bool ShowChatLogs = true;
+    public bool ShowChatLogs = true;
 
     public int DelayBetweenCastsMin = 600;
     public int DelayBetweenCastsMax = 1000;
@@ -37,7 +33,7 @@ public class Configuration : IPluginConfiguration {
     public int DelayBeforeCancelMin = 1500;
     public int DelayBeforeCancelMax = 2000;
 
-    [DefaultValue(true)] public bool ShowStatus = true;
+    public bool ShowStatus = true;
     public bool ShowPresetsAsSidebar = false;
 
     public bool HideTabDescription = false;
@@ -45,17 +41,11 @@ public class Configuration : IPluginConfiguration {
     public bool SwapToButtons = false;
     public int SwapType;
 
-    [DefaultValue(true)] public bool DontHideOptionsDisabled = true;
-
-    [DefaultValue(true)] public bool ResetAfkTimer = true;
-
-    [DefaultValue(false)] public bool AutoStartFishing = false;
-
-    [DefaultValue(false)] public bool DtrBarEnabled = false;
-
-    [DefaultValue(false)] public bool DtrPresetBarEnabled = false;
-
-    [Obsolete("Legacy config")] public List<BaitPresetConfig> BaitPresetList = [];
+    public bool DontHideOptionsDisabled = true;
+    public bool ResetAfkTimer = true;
+    public bool AutoStartFishing = false;
+    public bool DtrBarEnabled = false;
+    public bool DtrPresetBarEnabled = false;
 
     private void WriteVersionBackup(int fromVersion) {
         try {
@@ -85,742 +75,6 @@ public class Configuration : IPluginConfiguration {
 
     public void Save() => Svc.PluginInterface.SavePluginConfig(this);
 
-    public void UpdateVersion() {
-        if (Version == 1) {
-            WriteVersionBackup(1);
-            Version = 2;
-        }
-
-        if (Version == 2) {
-            WriteVersionBackup(2);
-            try {
-                foreach (var preset in BaitPresetList) {
-                    var newPreset = ConvertOldPreset(preset);
-                    if (newPreset != null)
-                        HookPresets.CustomPresets.Add(newPreset);
-                }
-
-                Version = 3;
-            }
-            catch (Exception e) {
-                Service.PrintDebug(@$"[Configuration] {e.Message}");
-            }
-        }
-
-        if (Version == 3) {
-            Service.PrintDebug(@$"[Configuration] Updating to v4");
-
-            WriteVersionBackup(3);
-            Save();
-            Version = 4;
-        }
-
-        if (Version == 4) {
-            Service.PrintDebug(@$"[Configuration] Updating to v5");
-
-            WriteVersionBackup(4);
-            foreach (var gig in AutoGigConfig.Presets) {
-                Service.PrintDebug($"Renaming {gig.PresetName} to {gig.Name}");
-                gig.PresetName = gig.Name;
-            }
-
-            HookPresets.DefaultPreset.PresetName = Service.GlobalPresetName;
-
-            Save();
-            Version = 5;
-        }
-
-        if (Version == 5) {
-            Service.PrintDebug(@$"[Configuration] Updating to v6");
-
-            WriteVersionBackup(5);
-            try {
-                MigrateConditionsToConditionSets();
-                MigrateExtraToTriggers();
-            }
-            catch (Exception e) {
-                Service.PrintDebug(@$"[Configuration] v6 migration failed: {e.Message}");
-            }
-
-            Save();
-            Version = 6;
-        }
-    }
-
-    private static void SetFieldNewClass(HookConfig newOne, BaitConfig old) {
-        var oldType = old.GetType();
-        var newType = newOne.GetType();
-
-        var oldFields = oldType.GetFields();
-        var newFields = newType.GetFields();
-
-        foreach (var sourceField in oldFields) {
-            var targetField =
-                newFields.FirstOrDefault(f => f.Name == sourceField.Name && f.FieldType == sourceField.FieldType);
-            if (targetField != null) {
-                var value = sourceField.GetValue(old);
-                targetField.SetValue(newOne, value);
-            }
-        }
-    }
-
-    /// <summary>
-    /// v6 migration: populate ConditionSet-backed fields from legacy flags/timers.
-    /// This keeps old fields for backward compat while enabling the new condition engine.
-    /// </summary>
-    private void MigrateConditionsToConditionSets() {
-        static void MigratePreset(CustomPresetConfig preset) {
-            preset.ListOfBaits.ForEach(MigrateHookConfig);
-            preset.ListOfMooch.ForEach(MigrateHookConfig);
-            preset.ListOfMooch.ForEach(MigrateHookConfigSwimbaitMooch);
-            preset.ListOfFish.ForEach(MigrateFishConfig);
-            preset.ListOfFish.ForEach(MigrateFishConfigStopSwap);
-
-            MigrateAutoCordial(preset.AutoCastsCfg.CastCordial);
-            MigrateAutoIdenticalCast(preset.AutoCastsCfg.CastIdenticalCast);
-            MigrateAutoCastsTimeWindow(preset.AutoCastsCfg);
-        }
-
-        MigratePreset(HookPresets.DefaultPreset);
-        foreach (var preset in HookPresets.CustomPresets)
-            MigratePreset(preset);
-    }
-
-    /// <summary>
-    /// v6 migration: convert legacy ExtraConfig flags (intuition, spectral, angler's art, swimbait)
-    /// into generic trigger-based ExtraConfig.Triggers using ConditionSets.
-    /// </summary>
-    private void MigrateExtraToTriggers() {
-        static void MigratePreset(CustomPresetConfig preset) {
-            var extra = preset.ExtraCfg;
-            if (extra == null)
-                return;
-
-            // Intuition gained
-            if ((extra.SwapPresetIntuitionGain || extra.SwapBaitIntuitionGain) && extra.Triggers.Count < 16) {
-                var set = new ConditionSet {
-                    CombineMode = ConditionCombineMode.All,
-                    Groups =
-                    [
-                        new()
-                        {
-                            CombineMode = ConditionCombineMode.All,
-                            Conditions =
-                            [
-                                new()
-                                {
-                                    TypeId = Registry.GetId<IntuitionActiveCD>(),
-                                    Params = []
-                                }
-                            ]
-                        }
-                    ]
-                };
-
-                extra.Triggers.Add(new ExtraTrigger {
-                    ConditionSet = set,
-                    SwapPreset = extra.SwapPresetIntuitionGain,
-                    PresetToSwap = extra.PresetToSwapIntuitionGain,
-                    SwapBait = extra.SwapBaitIntuitionGain,
-                    BaitToSwap = extra.BaitToSwapIntuitionGain,
-                    StopAction = ExtraStopAction.None,
-                });
-            }
-
-            // Intuition lost
-            if ((extra.SwapPresetIntuitionLost || extra.SwapBaitIntuitionLost || extra.QuitOnIntuitionLost || extra.StopOnIntuitionLost) && extra.Triggers.Count < 16) {
-                var set = new ConditionSet {
-                    CombineMode = ConditionCombineMode.All,
-                    Groups =
-                    [
-                        new()
-                        {
-                            CombineMode = ConditionCombineMode.All,
-                            Conditions =
-                            [
-                                new()
-                                {
-                                    TypeId = Registry.GetId<IntuitionActiveCD>(),
-                                    Params = []
-                                }
-                            ]
-                        }
-                    ]
-                };
-
-                var stop = ExtraStopAction.None;
-                if (extra.QuitOnIntuitionLost)
-                    stop = ExtraStopAction.QuitFishing;
-                else if (extra.StopOnIntuitionLost)
-                    stop = ExtraStopAction.StopOnly;
-
-                // OnLose Intuition = (NOT IntuitionActive)
-                set.Groups[0].Conditions[0].Params["inv"] = true;
-
-                extra.Triggers.Add(new ExtraTrigger {
-                    ConditionSet = set,
-                    SwapPreset = extra.SwapPresetIntuitionLost,
-                    PresetToSwap = extra.PresetToSwapIntuitionLost,
-                    SwapBait = extra.SwapBaitIntuitionLost,
-                    BaitToSwap = extra.BaitToSwapIntuitionLost,
-                    StopAction = stop,
-                });
-            }
-
-            // Spectral gained
-            if ((extra.SwapPresetSpectralCurrentGain || extra.SwapBaitSpectralCurrentGain) && extra.Triggers.Count < 16) {
-                var set = new ConditionSet {
-                    CombineMode = ConditionCombineMode.All,
-                    Groups =
-                    [
-                        new()
-                        {
-                            CombineMode = ConditionCombineMode.All,
-                            Conditions =
-                            [
-                                new()
-                                {
-                                    TypeId = Registry.GetId<SpectralActiveCD>(),
-                                    Params = []
-                                }
-                            ]
-                        }
-                    ]
-                };
-
-                extra.Triggers.Add(new ExtraTrigger {
-                    ConditionSet = set,
-                    SwapPreset = extra.SwapPresetSpectralCurrentGain,
-                    PresetToSwap = extra.PresetToSwapSpectralCurrentGain,
-                    SwapBait = extra.SwapBaitSpectralCurrentGain,
-                    BaitToSwap = extra.BaitToSwapSpectralCurrentGain,
-                    StopAction = ExtraStopAction.None,
-                });
-            }
-
-            // Spectral lost
-            if ((extra.SwapPresetSpectralCurrentLost || extra.SwapBaitSpectralCurrentLost) && extra.Triggers.Count < 16) {
-                var set = new ConditionSet {
-                    CombineMode = ConditionCombineMode.All,
-                    Groups =
-                    [
-                        new()
-                        {
-                            CombineMode = ConditionCombineMode.All,
-                            Conditions =
-                            [
-                                new()
-                                {
-                                    TypeId = Registry.GetId<SpectralActiveCD>(),
-                                    Params = []
-                                }
-                            ]
-                        }
-                    ]
-                };
-
-                // OnLose Spectral = (NOT SpectralActive)
-                set.Groups[0].Conditions[0].Params["inv"] = true;
-
-                extra.Triggers.Add(new ExtraTrigger {
-                    ConditionSet = set,
-                    SwapPreset = extra.SwapPresetSpectralCurrentLost,
-                    PresetToSwap = extra.PresetToSwapSpectralCurrentLost,
-                    SwapBait = extra.SwapBaitSpectralCurrentLost,
-                    BaitToSwap = extra.BaitToSwapSpectralCurrentLost,
-                    StopAction = ExtraStopAction.None,
-                });
-            }
-
-            // Angler's Art stacks reached
-            if ((extra.SwapPresetAnglersArt || extra.SwapBaitAnglersArt || extra.StopAfterAnglersArt) && extra.AnglerStackQtd > 0 && extra.Triggers.Count < 16) {
-                var set = new ConditionSet {
-                    CombineMode = ConditionCombineMode.All,
-                    Groups =
-                    [
-                        new()
-                        {
-                            CombineMode = ConditionCombineMode.All,
-                            Conditions =
-                            [
-                                new()
-                                {
-                                    TypeId = Registry.GetId<StatusStacksCD>(),
-                                    Params = new Dictionary<string, object>
-                                    {
-                                        ["ids"] = new List<object> { (long)IDs.Status.AnglersArt },
-                                        ["minStacks"] = extra.AnglerStackQtd,
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                };
-
-                var stop = ExtraStopAction.None;
-                if (extra.StopAfterAnglersArt) {
-                    stop = extra.AnglerStopFishingStep == FishingSteps.Quitting
-                        ? ExtraStopAction.QuitFishing
-                        : ExtraStopAction.StopOnly;
-                }
-
-                extra.Triggers.Add(new ExtraTrigger {
-                    ConditionSet = set,
-                    SwapPreset = extra.SwapPresetAnglersArt,
-                    PresetToSwap = extra.PresetToSwapAnglersArt,
-                    SwapBait = extra.SwapBaitAnglersArt,
-                    BaitToSwap = extra.BaitToSwapAnglersArt,
-                    StopAction = stop,
-                });
-            }
-
-            // Swimbait fills
-            if (extra.SwimbaitFillsAction != SwimbaitAction.None && extra.Triggers.Count < 16) {
-                var set = new ConditionSet {
-                    CombineMode = ConditionCombineMode.All,
-                    Groups =
-                    [
-                        new()
-                        {
-                            CombineMode = ConditionCombineMode.All,
-                            Conditions =
-                            [
-                                new()
-                                {
-                                    TypeId = Registry.GetId<SwimbaitCountCD>(),
-                                    Params = new Dictionary<string, object>
-                                    {
-                                        ["val"] = 3,
-                                        ["above"] = true,
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                };
-
-                var stop = extra.SwimbaitFillsAction == SwimbaitAction.Stop
-                    ? ExtraStopAction.StopOnly
-                    : ExtraStopAction.None;
-
-                extra.Triggers.Add(new ExtraTrigger {
-                    ConditionSet = set,
-                    SwapPreset = extra.SwimbaitFillsAction == SwimbaitAction.SwapPreset,
-                    PresetToSwap = extra.PresetToSwapSwimbaitFills,
-                    SwapBait = false,
-                    StopAction = stop,
-                });
-            }
-
-            // Swimbait runs out
-            if (extra.SwimbaitRunsOutAction != SwimbaitAction.None && extra.Triggers.Count < 16) {
-                var set = new ConditionSet {
-                    CombineMode = ConditionCombineMode.All,
-                    Groups =
-                    [
-                        new()
-                        {
-                            CombineMode = ConditionCombineMode.All,
-                            Conditions =
-                            [
-                                new()
-                                {
-                                    TypeId = Registry.GetId<SwimbaitCountCD>(),
-                                    Params = new Dictionary<string, object>
-                                    {
-                                        ["val"] = 0,
-                                        ["above"] = false,
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                };
-
-                var stop = extra.SwimbaitRunsOutAction == SwimbaitAction.Stop
-                    ? ExtraStopAction.StopOnly
-                    : ExtraStopAction.None;
-
-                extra.Triggers.Add(new ExtraTrigger {
-                    ConditionSet = set,
-                    SwapPreset = extra.SwimbaitRunsOutAction == SwimbaitAction.SwapPreset,
-                    PresetToSwap = extra.PresetToSwapSwimbaitRunsOut,
-                    SwapBait = false,
-                    StopAction = stop,
-                });
-            }
-        }
-
-        MigratePreset(HookPresets.DefaultPreset);
-        foreach (var preset in HookPresets.CustomPresets)
-            MigratePreset(preset);
-    }
-
-    private static void MigrateHookConfig(HookConfig hook) {
-        if (hook == null) return;
-        MigrateHookset(hook.NormalHook);
-        MigrateHookset(hook.IntuitionHook);
-    }
-
-    private static void MigrateHookset(BaseHookset hookset) {
-        if (hookset == null) return;
-
-        void MigrateBite(BaseBiteConfig b) {
-            if (b == null) return;
-            // Do not overwrite existing ConditionSets
-            if (b.ConditionSet is { Groups.Count: > 0 }) return;
-
-            var set = b.ConditionSet ??= new ConditionSet();
-            var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-
-            void AddStatus(uint statusId, bool inverse) {
-                var cond = new Condition {
-                    TypeId = Registry.GetId<StatusActiveCD>(),
-                    Params = new Dictionary<string, object> {
-                        ["ids"] = new List<object> { (long)statusId }
-                    }
-                };
-                if (inverse)
-                    cond.Params["inv"] = true;
-                group.Conditions.Add(cond);
-            }
-
-            void AddRange(string typeId, double min, double max) {
-                if (min <= 0 && max <= 0)
-                    return;
-                var cond = new Condition {
-                    TypeId = typeId,
-                    Params = new Dictionary<string, object> {
-                        // "r": [min, max]; max 0 => no upper bound
-                        ["r"] = new List<object> { min, max }
-                    }
-                };
-                group.Conditions.Add(cond);
-            }
-
-            // Surface Slap
-            if (b.OnlyWhenActiveSlap)
-                AddStatus(IDs.Status.SurfaceSlap, inverse: false);
-            if (b.OnlyWhenNotActiveSlap)
-                AddStatus(IDs.Status.SurfaceSlap, inverse: true);
-
-            // Identical Cast
-            if (b.OnlyWhenActiveIdentical)
-                AddStatus(IDs.Status.IdenticalCast, inverse: false);
-            if (b.OnlyWhenNotActiveIdentical)
-                AddStatus(IDs.Status.IdenticalCast, inverse: true);
-
-            // Prize Catch
-            if (b.PrizeCatchReq)
-                AddStatus(IDs.Status.PrizeCatch, inverse: false);
-            if (b.PrizeCatchNotReq)
-                AddStatus(IDs.Status.PrizeCatch, inverse: true);
-
-            // Multihook: only map the positive case; negative case remains on legacy flag.
-            if (b.OnlyWhenActiveMultihook) {
-                var cond = new Condition {
-                    TypeId = Registry.GetId<MultihookAvailableCD>(),
-                    Params = []
-                };
-                group.Conditions.Add(cond);
-            }
-
-            // Timers
-            if (b.HookTimerEnabled)
-                AddRange(Registry.GetId<BiteTimerCD>(), b.MinHookTimer, b.MaxHookTimer);
-            if (b.ChumTimerEnabled)
-                AddRange(Registry.GetId<ChumTimerCD>(), b.ChumMinHookTimer, b.ChumMaxHookTimer);
-
-            if (group.Conditions.Count > 0)
-                set.Groups.Add(group);
-        }
-
-        MigrateBite(hookset.TripleWeak);
-        MigrateBite(hookset.TripleStrong);
-        MigrateBite(hookset.TripleLegendary);
-        MigrateBite(hookset.DoubleWeak);
-        MigrateBite(hookset.DoubleStrong);
-        MigrateBite(hookset.DoubleLegendary);
-        MigrateBite(hookset.PatienceWeak);
-        MigrateBite(hookset.PatienceStrong);
-        MigrateBite(hookset.PatienceLegendary);
-
-        // AutoLures: map its legacy flags into a ConditionSet on the action itself.
-        MigrateLures(hookset.CastLures);
-    }
-
-    private static void MigrateLures(AutoLures lures) {
-        if (lures == null) return;
-        if (lures.ConditionSet is { Groups.Count: > 0 }) return;
-
-        var set = lures.ConditionSet ??= new ConditionSet();
-        var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-
-        void AddStatus(uint statusId, bool inverse) {
-            var cond = new Condition {
-                TypeId = Registry.GetId<StatusActiveCD>(),
-                Params = new Dictionary<string, object> {
-                    ["ids"] = new List<object> { (long)statusId }
-                }
-            };
-            if (inverse)
-                cond.Params["inv"] = true;
-            group.Conditions.Add(cond);
-        }
-
-        // Surface Slap
-        if (lures.OnlyWhenActiveSlap)
-            AddStatus(IDs.Status.SurfaceSlap, inverse: false);
-        if (lures.OnlyWhenNotActiveSlap)
-            AddStatus(IDs.Status.SurfaceSlap, inverse: true);
-
-        // Identical Cast
-        if (lures.OnlyWhenActiveIdentical)
-            AddStatus(IDs.Status.IdenticalCast, inverse: false);
-        if (lures.OnlyWhenNotActiveIdentical)
-            AddStatus(IDs.Status.IdenticalCast, inverse: true);
-
-        if (group.Conditions.Count > 0)
-            set.Groups.Add(group);
-
-        // "Only use when Patience/Prize Catch is active" → OR of Patience or Prize Catch.
-        if (lures.OnlyCastLarge) {
-            var largeGroup = new ConditionGroup { CombineMode = ConditionCombineMode.Any };
-            var statusActiveId = Registry.GetId<StatusActiveCD>();
-
-            largeGroup.Conditions.Add(new Condition {
-                TypeId = statusActiveId,
-                Params = new Dictionary<string, object> {
-                    ["ids"] = new List<object> { (long)IDs.Status.AnglersFortune }
-                }
-            });
-
-            largeGroup.Conditions.Add(new Condition {
-                TypeId = statusActiveId,
-                Params = new Dictionary<string, object> {
-                    ["ids"] = new List<object> { (long)IDs.Status.PrizeCatch }
-                }
-            });
-
-            set.Groups.Add(largeGroup);
-        }
-    }
-
-    private static void MigrateFishConfig(FishConfig fish) {
-        if (fish == null) return;
-        if (fish.IgnoreConditionSet is { Groups.Count: > 0 }) return;
-        if (!fish.IgnoreOnIntuition) return;
-
-        var set = fish.IgnoreConditionSet ??= new ConditionSet();
-        var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-        var cond = new Condition {
-            TypeId = Registry.GetId<IntuitionActiveCD>(),
-            Params = []
-        };
-        group.Conditions.Add(cond);
-        set.Groups.Add(group);
-    }
-
-    private static void MigrateAutoCordial(AutoCordial cordial) {
-        if (cordial == null) return;
-        if (cordial.OvercapConditionSet is { Groups.Count: > 0 }) return;
-        if (!cordial.AllowOvercapIC) return;
-
-        var set = cordial.OvercapConditionSet ??= new ConditionSet();
-        var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-        var cond = new Condition {
-            TypeId = Registry.GetId<StatusActiveCD>(),
-            Params = new Dictionary<string, object> {
-                ["ids"] = new List<object> { (long)IDs.Status.IdenticalCast }
-            }
-        };
-        group.Conditions.Add(cond);
-        set.Groups.Add(group);
-    }
-
-    /// <summary>
-    /// v6 migration: convert legacy AutoIdenticalCast flags (Patience / Cordial) into ConditionSet-based rules.
-    /// </summary>
-    private static void MigrateAutoIdenticalCast(AutoIdenticalCast ic) {
-        if (ic == null) return;
-        // If user already configured a ConditionSet, don't touch it.
-        if (ic.ConditionSet is { Groups.Count: > 0 }) return;
-
-        var anyLegacy = ic.OnlyUseUnderPatience || ic.OnlyWhenCordialAvailable;
-        if (!anyLegacy) return;
-
-        var set = ic.ConditionSet ??= new ConditionSet();
-
-        // Build a single group that ANDs Patience + (any cordial available) if both are set;
-        // or just the one that is set.
-        var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-
-        if (ic.OnlyUseUnderPatience) {
-            group.Conditions.Add(new Condition {
-                TypeId = Registry.GetId<StatusActiveCD>(),
-                Params = new Dictionary<string, object> {
-                    ["ids"] = new List<object> { (long)IDs.Status.AnglersFortune }
-                }
-            });
-        }
-
-        if (ic.OnlyWhenCordialAvailable) {
-            // OR of any cordial item being available.
-            // Achieve this by a subgroup with CombineMode.Any over multiple ActionAvailable conditions.
-            var cordialGroup = new ConditionGroup {
-                CombineMode = ConditionCombineMode.Any,
-                Conditions =
-                [
-                    new Condition
-                    {
-                        TypeId = Registry.GetId<ActionCooldownCD>(),
-                        Params = new Dictionary<string, object>
-                        {
-                            ["id"] = (long)IDs.Item.Cordial,
-                            ["type"] = 1L, // ActionType.Item
-                        }
-                    },
-                    new Condition
-                    {
-                        TypeId = Registry.GetId<ActionCooldownCD>(),
-                        Params = new Dictionary<string, object>
-                        {
-                            ["id"] = (long)IDs.Item.HQCordial,
-                            ["type"] = 1L,
-                        }
-                    },
-                    new Condition
-                    {
-                        TypeId = Registry.GetId<ActionCooldownCD>(),
-                        Params = new Dictionary<string, object>
-                        {
-                            ["id"] = (long)IDs.Item.HiCordial,
-                            ["type"] = 1L,
-                        }
-                    },
-                    new Condition
-                    {
-                        TypeId = Registry.GetId<ActionCooldownCD>(),
-                        Params = new Dictionary<string, object>
-                        {
-                            ["id"] = (long)IDs.Item.WateredCordial,
-                            ["type"] = 1L,
-                        }
-                    },
-                    new Condition
-                    {
-                        TypeId = Registry.GetId<ActionCooldownCD>(),
-                        Params = new Dictionary<string, object>
-                        {
-                            ["id"] = (long)IDs.Item.HQWateredCordial,
-                            ["type"] = 1L,
-                        }
-                    },
-                ]
-            };
-
-            // Represent cordialGroup as a single logical term "C" in Expression by
-            // appending it as another group, and using Expression to AND A && C if needed.
-            // For simplicity, if we already have a Patience condition, we just AND it with
-            // "(B || C || D ...)" by using the Expression over the two groups.
-            if (group.Conditions.Count == 0) {
-                // Only cordial flag set: just use cordialGroup as the sole group.
-                set.Groups.Add(cordialGroup);
-                return;
-            }
-
-            // Both patience + cordial: group index 0 = patience, index 1 = cordialGroup
-            set.Groups.Add(group);
-            set.Groups.Add(cordialGroup);
-            set.Expression = "A && B";
-            return;
-        }
-
-        if (group.Conditions.Count > 0)
-            set.Groups.Add(group);
-    }
-
-    /// <summary>v6 migration: legacy time-window → TimeWindowConditionSet (single source of truth).</summary>
-    private static void MigrateAutoCastsTimeWindow(AutoCastsConfig acCfg) {
-        if (acCfg == null) return;
-        if (acCfg.TimeWindow.BackingSet is { Groups.Count: > 0 }) return;
-        if (!acCfg.OnlyCastDuringSpecificTime) return;
-
-        var set = acCfg.TimeWindow.BackingSet ??= new ConditionSet { CombineMode = ConditionCombineMode.All };
-        var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-        group.Conditions.Add(new Condition {
-            TypeId = Registry.GetId<TimeWindowCD>(),
-            Params = new TimeWindowCD.TimeWindowParams(acCfg.StartTime, acCfg.EndTime, false).ToParams(),
-        });
-        set.Groups.Add(group);
-    }
-
-    /// <summary>v6 migration: legacy swimbait fields → per-window SwimbaitConfig.</summary>
-    private static void MigrateHookConfigSwimbaitMooch(HookConfig hook) {
-        if (hook == null) return;
-
-        // 1) Legacy UseSwimbait → enable both windows if neither has been explicitly configured.
-        if (hook.UseSwimbait && !hook.SwimbaitNormal.UseSwimbait && !hook.SwimbaitIntuition.UseSwimbait) {
-            hook.SwimbaitNormal.UseSwimbait = true;
-            hook.SwimbaitIntuition.UseSwimbait = true;
-        }
-
-        if (!hook.SwimbaitNormal.UseSwimbait && !hook.SwimbaitIntuition.UseSwimbait)
-            return;
-
-        // 2) Migrate legacy count threshold into both configs if they are still at default.
-        if (hook.SwimbaitCountThreshold > 1) {
-            if (hook.SwimbaitNormal.CountThreshold == 1)
-                hook.SwimbaitNormal.CountThreshold = hook.SwimbaitCountThreshold;
-            if (hook.SwimbaitIntuition.CountThreshold == 1)
-                hook.SwimbaitIntuition.CountThreshold = hook.SwimbaitCountThreshold;
-        }
-
-        // 3) Migrate legacy "OnlyUseWhenNoMoochAvailable" into a MoochAvailableCD condition.
-        // This is only done when new configs don't already have a condition set.
-        if (hook.OnlyUseWhenNoMoochAvailable) {
-            var legacySet = new ConditionSet { CombineMode = ConditionCombineMode.All };
-            var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-            group.Conditions.Add(new Condition {
-                TypeId = Registry.GetId<MoochAvailableCD>(),
-                Params = new MoochAvailableCD.MoochAvailableParams(true).ToParams(),
-            });
-            legacySet.Groups.Add(group);
-
-            if (hook.SwimbaitNormal.ConditionSet is not { Groups.Count: > 0 })
-                hook.SwimbaitNormal.ConditionSet = legacySet;
-            if (hook.SwimbaitIntuition.ConditionSet is not { Groups.Count: > 0 })
-                hook.SwimbaitIntuition.ConditionSet = legacySet;
-        }
-    }
-
-    /// <summary>v6 migration: legacy stop/swap counts → ConditionSets (single source of truth).</summary>
-    private static void MigrateFishConfigStopSwap(FishConfig fish) {
-        if (fish == null || fish.Fish.Id <= 0) return;
-        var fishId = fish.Fish.Id;
-        var typeId = Registry.GetId<FishCaughtCountCD>();
-
-        ConditionSet? EnsureCountConditionSet(ConditionSet? current, int limit) {
-            if (limit < 1) return current;
-            if (current is { Groups.Count: > 0 }) return current;
-            var set = current ?? new ConditionSet { CombineMode = ConditionCombineMode.All };
-            var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };
-            group.Conditions.Add(new Condition {
-                TypeId = typeId,
-                Params = new FishCaughtCountCD.FishCaughtParams(fishId, limit, ">=", false).ToParams(),
-            });
-            set.Groups.Add(group);
-            return set;
-        }
-
-        if (fish.StopAfterCaught)
-            fish.StopAfterCaughtLimit.BackingSet = EnsureCountConditionSet(fish.StopAfterCaughtLimit.BackingSet, fish.LegacyStopAfterCaughtLimit);
-        if (fish.SwapBait)
-            fish.SwapBaitLimit.BackingSet = EnsureCountConditionSet(fish.SwapBaitLimit.BackingSet, fish.LegacySwapBaitCount);
-        if (fish.SwapPresets)
-            fish.SwapPresetLimit.BackingSet = EnsureCountConditionSet(fish.SwapPresetLimit.BackingSet, fish.LegacySwapPresetCount);
-    }
-
     public void Initiate() {
         if (HookPresets.DefaultPreset.ListOfBaits.Count != 0)
             return;
@@ -834,17 +88,38 @@ public class Configuration : IPluginConfiguration {
 
     public static Configuration Load() {
         try {
-            if (Svc.PluginInterface.GetPluginConfig() is Configuration config) {
-                config.Initiate();
-                config.UpdateVersion();
-                config.Save();
-                return config;
+            var file = Svc.PluginInterface.ConfigFile;
+
+            if (file.Exists) {
+                var json = File.ReadAllText(file.FullName, Encoding.UTF8);
+                var migratedJson = ConfigurationJsonMigrator.MigrateToLatest(json);
+
+                Configuration? config;
+                try {
+                    config = JsonConvert.DeserializeObject<Configuration>(migratedJson,
+                        new JsonSerializerSettings {
+                            ObjectCreationHandling = ObjectCreationHandling.Replace
+                        });
+                }
+                catch (Exception ex) {
+                    Svc.Log.Error(@$"[Configuration] Failed to deserialize migrated config JSON: {ex.Message}");
+                    config = null;
+                }
+
+                if (config != null) {
+                    config.Initiate();
+                    config.Save();
+                    return config;
+                }
+
+                Svc.Log.Warning(@"[Configuration] Config file exists but could not be deserialized; recreating defaults.");
             }
 
-            config = new Configuration();
-            config.Initiate();
-            config.Save();
-            return config;
+            // No existing or valid config file: start fresh with defaults.
+            var fresh = new Configuration();
+            fresh.Initiate();
+            fresh.Save();
+            return fresh;
         }
         catch (Exception e) {
             Svc.Log.Error(@$"[Configuration] {e.Message}");
@@ -856,12 +131,6 @@ public class Configuration : IPluginConfiguration {
     }
 
     // Got the export/import function from the UnknownX7's ReAction repo
-    /*public static string ExportPreset(CustomPresetConfig preset)
-    {
-        return CompressString(JsonConvert.SerializeObject(preset,
-            new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore }));
-    }*/
-
     public static string ExportPreset(BasePresetConfig preset) {
         var exported = CompressString(JsonConvert.SerializeObject(
             preset,
@@ -928,14 +197,14 @@ public class Configuration : IPluginConfiguration {
         if (import.StartsWith(ExportPrefixV2)) {
             var old = JsonConvert.DeserializeObject<BaitPresetConfig>(DecompressString(import),
                 new JsonSerializerSettings() { ObjectCreationHandling = ObjectCreationHandling.Replace });
-            return ConvertOldPreset(old);
+            return LegacyPresetMapper.ConvertOldPreset(old);
         }
 
         if (import.StartsWith(ExportPrefixV3)) {
             var old = JsonConvert.DeserializeObject<OldPresetConfig>(DecompressString(import),
                 new JsonSerializerSettings() { ObjectCreationHandling = ObjectCreationHandling.Replace });
 
-            return ConvertOldPresetV3(old);
+            return LegacyPresetMapper.ConvertOldPresetV3(old);
         }
 
         if (import.StartsWith(ExportPrefixSf)) {
@@ -1010,73 +279,5 @@ public class Configuration : IPluginConfiguration {
             Svc.Log.Error(@$"Failed to DecompressBase64: {e.Message}");
             return "";
         }
-    }
-
-    private static CustomPresetConfig? ConvertOldPreset(BaitPresetConfig? preset) {
-        if (preset == null)
-            return null;
-
-        var filteredBaits = new List<HookConfig>();
-        var filteredMooch = new List<HookConfig>();
-        foreach (var old in preset.ListOfBaits) {
-            var matchingBait = GameRes.Baits.FirstOrDefault(b => b.Name == old.BaitName);
-            var matchingFish = GameRes.Fishes.FirstOrDefault(f => f.Name == old.BaitName);
-
-            if (matchingBait != null) {
-                var newOne = new HookConfig(matchingBait);
-                SetFieldNewClass(newOne, old);
-                filteredBaits.Add(newOne);
-            }
-            else if (matchingFish != null) {
-                var newOne = new HookConfig(matchingFish);
-                SetFieldNewClass(newOne, old);
-                filteredMooch.Add(newOne);
-            }
-        }
-
-        CustomPresetConfig newPreset = new(@$"[Old Version] {preset.PresetName}") {
-            ListOfBaits = filteredBaits,
-            ListOfMooch = filteredMooch
-        };
-        return newPreset;
-    }
-
-    private static CustomPresetConfig? ConvertOldPresetV3(OldPresetConfig? old) {
-        if (old == null)
-            return null;
-
-        var newPreset = new CustomPresetConfig(old.PresetName);
-
-        Service.PrintDebug($"Converting v3 to v4: {old.PresetName}");
-        foreach (var bait in old.ListOfBaits) {
-            bait.ConvertV3ToV4();
-
-            var newBait = new HookConfig(bait.BaitFish) {
-                Enabled = bait.Enabled,
-                NormalHook = bait.NormalHook,
-                IntuitionHook = bait.IntuitionHook
-            };
-            newBait.IntuitionHook.UseCustomStatusHook = bait.UseCustomIntuitionHook;
-
-            newPreset.AddItem(newBait);
-        }
-
-        foreach (var mooch in old.ListOfMooch) {
-            mooch.ConvertV3ToV4();
-            var newMooch = new HookConfig(mooch.BaitFish) {
-                Enabled = mooch.Enabled,
-                NormalHook = mooch.NormalHook,
-                IntuitionHook = mooch.IntuitionHook
-            };
-            newMooch.IntuitionHook.UseCustomStatusHook = mooch.UseCustomIntuitionHook;
-
-            newPreset.AddItem(newMooch);
-        }
-
-        newPreset.ListOfFish = old.ListOfFish;
-        newPreset.ExtraCfg = old.ExtraCfg;
-        newPreset.AutoCastsCfg = old.AutoCastsCfg;
-
-        return newPreset;
     }
 }

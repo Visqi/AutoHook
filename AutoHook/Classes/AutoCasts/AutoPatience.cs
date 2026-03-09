@@ -7,8 +7,6 @@ namespace AutoHook.Classes.AutoCasts;
 public class AutoPatience : BaseActionCast {
     public int RefreshEarlyTime = 0;
 
-    [Obsolete("Legacy config")] public bool UseOnlyWhenMoochIIOnCD;
-
     public override bool RequiresTimeWindow() => true;
 
     public override bool DoesCancelMooch() => true;

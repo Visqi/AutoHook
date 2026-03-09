@@ -13,12 +13,6 @@ public class AutoLures : BaseActionCast {
 
     public AutoLures() : base(UIStrings.UseLures, IDs.Actions.AmbitiousLure) { }
 
-    [Obsolete("Legacy config")] public bool OnlyWhenActiveSlap;
-    [Obsolete("Legacy config")] public bool OnlyWhenNotActiveSlap;
-    [Obsolete("Legacy config")] public bool OnlyWhenActiveIdentical;
-    [Obsolete("Legacy config")] public bool OnlyWhenNotActiveIdentical;
-    [Obsolete("Legacy config")] public bool OnlyCastLarge;
-
     public override string GetName()
         => Name = UIStrings.UseLures;
 

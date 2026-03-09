@@ -5,7 +5,6 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using System.ComponentModel;
 using System.Numerics;
 
 namespace AutoHook.Classes;
@@ -26,7 +25,7 @@ public abstract class BaseActionCast {
 
     [NonSerialized] public string HelpText = @"";
 
-    [DefaultValue(false)] public bool Enabled;
+    public bool Enabled;
 
     public uint Id;
 
@@ -34,11 +33,11 @@ public abstract class BaseActionCast {
 
     [NonSerialized] public bool IsSpearFishing;
 
-    [DefaultValue(true)] public bool GpThresholdAbove { get; set; } = true;
+    public bool GpThresholdAbove { get; set; } = true;
 
     public virtual bool DoesCancelMooch() => false;
 
-    [DefaultValue(true)] public bool DontCancelMooch = true;
+    public bool DontCancelMooch = true;
 
     public virtual bool RequiresAutoCastAvailabl() => false;
 

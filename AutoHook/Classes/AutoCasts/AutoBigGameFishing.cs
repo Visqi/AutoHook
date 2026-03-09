@@ -5,9 +5,6 @@ namespace AutoHook.Classes.AutoCasts;
 public class AutoBigGameFishing : BaseActionCast {
     public int AnglersStacks = 2;
 
-    [Obsolete("Legacy config")] public bool WithIdenticalC = false;
-    [Obsolete("Legacy config")] public bool WithSlap = false;
-
     public AutoBigGameFishing() : base(UIStrings.BigGameFishing, IDs.Actions.BigGameFishing) { }
 
     public override string GetName()

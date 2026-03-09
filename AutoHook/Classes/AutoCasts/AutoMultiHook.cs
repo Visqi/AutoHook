@@ -4,8 +4,6 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 namespace AutoHook.Classes.AutoCasts;
 
 public class AutoMultiHook : BaseActionCast {
-    [Obsolete("Legacy config")] public bool OnlyUseWhenIdenticalCastActive;
-
     public AutoMultiHook() : base(UIStrings.Multihook, IDs.Actions.MultiHook) { }
 
     public override int Priority { get; set; } = 0;

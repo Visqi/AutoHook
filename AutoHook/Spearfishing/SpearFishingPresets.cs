@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using System.ComponentModel;
 
 namespace AutoHook.Spearfishing;
 
@@ -7,10 +6,8 @@ public class SpearFishingPresets : BasePreset {
     public bool AutoGigEnabled = false;
     public bool AutoGigHideOverlay = false;
 
-    [DefaultValue(true)]
     public bool AutoGigDrawFishHitbox = true;
 
-    [DefaultValue(true)]
     public bool AutoGigDrawGigHitbox = true;
 
     public AutoThaliaksFavor ThaliaksFavor = new(true);

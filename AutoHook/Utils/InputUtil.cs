@@ -29,7 +29,7 @@ internal static class InputUtil {
     }
 
     public static void SendKeycode(IntPtr hwnd, int keycode) {
-        SendMessage(hwnd, WM_KEYDOWN, (IntPtr)keycode, (IntPtr)0);
-        SendMessage(hwnd, WM_KEYUP, (IntPtr)keycode, (IntPtr)0);
+        SendMessage(hwnd, WM_KEYDOWN, keycode, 0);
+        SendMessage(hwnd, WM_KEYUP, keycode, 0);
     }
 }

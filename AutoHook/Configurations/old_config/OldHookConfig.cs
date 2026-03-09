@@ -1,4 +1,7 @@
-namespace AutoHook.Configurations.old_config;
+using AutoHook.Conditions;
+using AutoHook.Conditions.Definitions;
+
+namespace AutoHook.Configurations.Legacy;
 
 public class OldHookConfig {
     public bool Enabled = true;
@@ -68,11 +71,8 @@ public class OldHookConfig {
 
     public void ConvertV3ToV4() {
 
-        if (NormalHook == null)
-            NormalHook = new(IDs.Status.None);
-
-        if (IntuitionHook == null)
-            IntuitionHook = new(IDs.Status.None);
+        NormalHook ??= new(IDs.Status.None);
+        IntuitionHook ??= new(IDs.Status.None);
 
         Convert(NormalHook, false);
         Convert(IntuitionHook, true);
@@ -157,20 +157,24 @@ public class OldHookConfig {
             foreach (var (bite, (enabled, type, slapActive, slapNotActive, identicalActive)) in dict) {
                 bite.HooksetEnabled = enabled;
                 bite.HooksetType = type;
-                bite.OnlyWhenActiveSlap = slapActive;
-                bite.OnlyWhenNotActiveSlap = slapNotActive;
 
-                bite.OnlyWhenActiveIdentical = identicalActive;
-
-                bite.MinHookTimer = MinTimeDelay;
-                bite.MaxHookTimer = MaxTimeDelay;
-
+                var conditions = new List<Condition>();
+                if (slapActive)
+                    conditions.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.SurfaceSlap));
+                if (slapNotActive)
+                    conditions.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.SurfaceSlap, inverse: true));
+                if (identicalActive)
+                    conditions.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.IdenticalCast));
                 if (MinTimeDelay > 0 || MaxTimeDelay > 0) {
-                    bite.HookTimerEnabled = true;
+                    var timer = Configuration.ConditionSetBuilder.Range<BiteTimerCD>(MinTimeDelay, MaxTimeDelay);
+                    if (timer != null) conditions.Add(timer);
                 }
-                bite.ChumMinHookTimer = MinChumTimeDelay;
-                bite.ChumMaxHookTimer = MaxChumTimeDelay;
-                bite.ChumTimerEnabled = UseChumTimer;
+                if (UseChumTimer) {
+                    var chum = Configuration.ConditionSetBuilder.Range<ChumTimerCD>(MinChumTimeDelay, MaxChumTimeDelay);
+                    if (chum != null) conditions.Add(chum);
+                }
+                if (conditions.Count > 0)
+                    bite.ConditionSet = new ConditionSet { CombineMode = ConditionCombineMode.All, Groups = [new ConditionGroup { CombineMode = ConditionCombineMode.All, Conditions = conditions }] };
             }
         }
 

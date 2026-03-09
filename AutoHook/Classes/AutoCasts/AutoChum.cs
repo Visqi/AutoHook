@@ -3,9 +3,6 @@ using AutoHook.Ui;
 namespace AutoHook.Classes.AutoCasts;
 
 public class AutoChum : BaseActionCast {
-    [Obsolete("Legacy config")] public bool _onlyUseWithIntuition;
-    [Obsolete("Legacy config")] public int _useWhenIntuitionExceeds = 0;
-
     public override bool DoesCancelMooch() => true;
 
     public AutoChum() : base(UIStrings.Chum, IDs.Actions.Chum) => HelpText = UIStrings.CancelsCurrentMooch;

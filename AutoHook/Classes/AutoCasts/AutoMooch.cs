@@ -6,8 +6,6 @@ namespace AutoHook.Classes.AutoCasts;
 public class AutoMooch : BaseActionCast {
     public AutoMooch2 Mooch2 = new();
 
-    [Obsolete("Legacy config")] public bool OnlyMoochIntuition = false;
-
     public override bool RequiresTimeWindow() => true;
 
     public AutoMooch() : base(UIStrings.AutoMooch, IDs.Actions.Mooch, ActionType.Action)

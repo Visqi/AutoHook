@@ -1,4 +1,4 @@
-namespace AutoHook.Configurations.old_config;
+namespace AutoHook.Configurations.Legacy;
 
 public class OldPresetConfig(string presetName) {
     public string PresetName { get; set; } = presetName;

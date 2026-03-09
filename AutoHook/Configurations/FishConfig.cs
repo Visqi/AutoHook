@@ -1,18 +1,11 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
 using Newtonsoft.Json;
-using System.ComponentModel;
 
 namespace AutoHook.Configurations;
 
 public class FishConfig : BaseOption {
-    [DefaultValue(true)]
     public bool Enabled = true;
-
-    [Obsolete("Legacy config")] public bool IgnoreOnIntuition = false;
-    [JsonProperty(nameof(StopAfterCaughtLimit))] internal int LegacyStopAfterCaughtLimit = 1;
-    [JsonProperty("SwapBaitCount")] internal int LegacySwapBaitCount = 1;
-    [JsonProperty("SwapPresetCount")] internal int LegacySwapPresetCount = 1;
 
     public ConditionSet? IgnoreConditionSet { get; set; }
 
