@@ -673,7 +673,7 @@ public class Configuration : IPluginConfiguration {
                 [
                     new Condition
                     {
-                        TypeId = Registry.GetId<ActionAvailableCD>(),
+                        TypeId = Registry.GetId<ActionCooldownCD>(),
                         Params = new Dictionary<string, object>
                         {
                             ["id"] = (long)IDs.Item.Cordial,
@@ -682,7 +682,7 @@ public class Configuration : IPluginConfiguration {
                     },
                     new Condition
                     {
-                        TypeId = Registry.GetId<ActionAvailableCD>(),
+                        TypeId = Registry.GetId<ActionCooldownCD>(),
                         Params = new Dictionary<string, object>
                         {
                             ["id"] = (long)IDs.Item.HQCordial,
@@ -691,7 +691,7 @@ public class Configuration : IPluginConfiguration {
                     },
                     new Condition
                     {
-                        TypeId = Registry.GetId<ActionAvailableCD>(),
+                        TypeId = Registry.GetId<ActionCooldownCD>(),
                         Params = new Dictionary<string, object>
                         {
                             ["id"] = (long)IDs.Item.HiCordial,
@@ -700,7 +700,7 @@ public class Configuration : IPluginConfiguration {
                     },
                     new Condition
                     {
-                        TypeId = Registry.GetId<ActionAvailableCD>(),
+                        TypeId = Registry.GetId<ActionCooldownCD>(),
                         Params = new Dictionary<string, object>
                         {
                             ["id"] = (long)IDs.Item.WateredCordial,
@@ -709,7 +709,7 @@ public class Configuration : IPluginConfiguration {
                     },
                     new Condition
                     {
-                        TypeId = Registry.GetId<ActionAvailableCD>(),
+                        TypeId = Registry.GetId<ActionCooldownCD>(),
                         Params = new Dictionary<string, object>
                         {
                             ["id"] = (long)IDs.Item.HQWateredCordial,

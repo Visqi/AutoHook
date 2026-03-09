@@ -93,7 +93,7 @@ public static class ConditionPresetsUi {
         ImGui.SameLine();
 
         if (DrawActionIconButton(IDs.Actions.Mooch2, UIStrings.AutoCastExtraOptionPatience)) {
-            var typeId = Registry.GetId<ActionAvailableCD>();
+            var typeId = Registry.GetId<ActionCooldownCD>();
             if (!group.Conditions.Any(c => c.TypeId == typeId && c.Params.TryGetValue("id", out var idObj) && Convert.ToUInt32(idObj) == IDs.Actions.Mooch2)) {
                 group.Conditions.Add(new Condition {
                     TypeId = typeId,
