@@ -21,20 +21,11 @@ public class HookConfig : BaseOption
     public BaseHookset NormalHook = new(IDs.Status.None);
     public BaseHookset IntuitionHook = new(IDs.Status.FishersIntuition);
 
-    [Obsolete("Legacy config")]
-    public bool UseSwimbait = false;
-    [Obsolete("Legacy config")]
-    public int SwimbaitCountThreshold = 1;
+    [Obsolete("Legacy config")] public bool UseSwimbait = false;
+    [Obsolete("Legacy config")] public int SwimbaitCountThreshold = 1;
+    [Obsolete("Legacy config")] public bool OnlyUseWhenNoMoochAvailable = true;
 
-    [Obsolete("Legacy config")]
-    [JsonProperty(nameof(OnlyUseWhenNoMoochAvailable))]
-    public bool LegacyOnlyUseWhenNoMoochAvailable = true;
-
-    /// <summary>Per-window swimbait configs (normal vs Intuition).</summary>
-    [JsonProperty("SwimbaitNormal")]
     public SwimbaitConfig SwimbaitNormal { get; set; } = new();
-
-    [JsonProperty("SwimbaitIntuition")]
     public SwimbaitConfig SwimbaitIntuition { get; set; } = new();
 
     //todo enable more hook settings based on the current status

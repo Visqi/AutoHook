@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace AutoHook.Fishing;
 
@@ -76,6 +76,16 @@ public class FishingPresets : BasePreset
         Service.Save();
     }
 
+    public void AddNewFolder(string folderName, Guid? parentFolderId)
+    {
+        var newFolder = new PresetFolder(folderName)
+        {
+            ParentFolderId = parentFolderId
+        };
+        Folders.Add(newFolder);
+        Service.Save();
+    }
+
     public void RemoveFolder(Guid folderId)
     {
         var folder = Folders.Find(f => f.UniqueId == folderId);
@@ -84,6 +94,31 @@ public class FishingPresets : BasePreset
 
         Folders.Remove(folder);
         Service.Save();
+    }
+
+    public void RemoveFolderWithContents(Guid folderId)
+    {
+        var folder = Folders.Find(f => f.UniqueId == folderId);
+        if (folder == null)
+            return;
+
+        RemoveFolderWithContentsRecursive(folder);
+        Service.Save();
+    }
+
+    private void RemoveFolderWithContentsRecursive(PresetFolder folder)
+    {
+        // Remove child folders first
+        var childFolders = Folders.Where(f => f.ParentFolderId == folder.UniqueId).ToList();
+        foreach (var child in childFolders)
+            RemoveFolderWithContentsRecursive(child);
+
+        // Remove presets contained in this folder
+        foreach (var presetId in folder.PresetIds.ToList())
+            RemovePreset(presetId);
+
+        // Finally remove this folder
+        Folders.Remove(folder);
     }
 
     public bool IsPresetInAnyFolder(Guid presetId)

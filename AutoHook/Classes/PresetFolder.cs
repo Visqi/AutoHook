@@ -7,6 +7,8 @@ public class PresetFolder(string folderName)
     public bool IsExpanded { get; set; } = true;
     public List<Guid> PresetIds { get; set; } = [];
 
+    public Guid? ParentFolderId { get; set; }
+
     public void AddPreset(Guid presetId)
     {
         if (!PresetIds.Contains(presetId))

@@ -826,7 +826,7 @@ public class Configuration : IPluginConfiguration
 
         // 3) Migrate legacy "OnlyUseWhenNoMoochAvailable" into a MoochAvailableCD condition.
         // This is only done when new configs don't already have a condition set.
-        if (hook.LegacyOnlyUseWhenNoMoochAvailable)
+        if (hook.OnlyUseWhenNoMoochAvailable)
         {
             var legacySet = new ConditionSet { CombineMode = ConditionCombineMode.All };
             var group = new ConditionGroup { CombineMode = ConditionCombineMode.All };

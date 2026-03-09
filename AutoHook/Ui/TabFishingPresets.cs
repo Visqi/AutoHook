@@ -23,6 +23,7 @@ public class TabFishingPresets : BaseTab
 
     private string newFolderName = string.Empty;
     private bool promptingForFolderName = false;
+    private Guid? _parentFolderForNewFolder = null;
 
     private string renameFolderName = string.Empty;
     private Guid? renameFolderId = null;
@@ -117,10 +118,14 @@ public class TabFishingPresets : BaseTab
         for (var folderIndex = 0; folderIndex < _basePreset.Folders.Count; folderIndex++)
         {
             var folder = _basePreset.Folders[folderIndex];
+
+            // Only draw top-level folders here; child folders are drawn within their parents
+            if (folder.ParentFolderId.HasValue)
+                continue;
             if (searchActive)
             {
                 var folderNameMatches = MatchesSearch(folder.FolderName);
-                var anyPresetMatches = folder.PresetIds.Any(id =>
+                var anyPresetMatches = GetAllPresetIdsInFolderTree(folder).Any(id =>
                 {
                     var p = _basePreset.CustomPresets.FirstOrDefault(c => c.UniqueId == id);
                     return p != null && MatchesSearch(p.PresetName);
@@ -147,6 +152,45 @@ public class TabFishingPresets : BaseTab
             if (preset is CustomPresetConfig customPreset)
                 DrawItem(customPreset, i);
         }
+    }
+
+    private IEnumerable<Guid> GetAllPresetIdsInFolderTree(PresetFolder rootFolder)
+    {
+        var result = new List<Guid>();
+        Collect(rootFolder, result);
+        return result;
+
+        void Collect(PresetFolder folder, List<Guid> acc)
+        {
+            acc.AddRange(folder.PresetIds);
+
+            for (var i = 0; i < _basePreset.Folders.Count; i++)
+            {
+                var child = _basePreset.Folders[i];
+                if (child.ParentFolderId == folder.UniqueId)
+                {
+                    Collect(child, acc);
+                }
+            }
+        }
+    }
+
+    private bool IsFolderDescendantOf(PresetFolder potentialAncestor, PresetFolder candidate)
+    {
+        var currentParentId = candidate.ParentFolderId;
+        while (currentParentId.HasValue)
+        {
+            if (currentParentId.Value == potentialAncestor.UniqueId)
+                return true;
+
+            var parent = _basePreset.Folders.FirstOrDefault(f => f.UniqueId == currentParentId.Value);
+            if (parent == null)
+                break;
+
+            currentParentId = parent.ParentFolderId;
+        }
+
+        return false;
     }
 
     private void DrawFolder(PresetFolder folder, int folderIndex)
@@ -243,18 +287,32 @@ public class TabFishingPresets : BaseTab
                 ImGui.EndDragDropSource();
             }
 
-            // Handle folder reordering
+            // Handle folder reparenting by dropping one folder onto another
             if (ImGui.BeginDragDropTarget())
             {
                 if (ImGuiDragDrop.AcceptDragDropPayload("FOLDER_ORDER", out int sourceFolderIndex))
                 {
                     if (ImGui.IsMouseReleased(ImGuiMouseButton.Left) && sourceFolderIndex != folderIndex)
                     {
-                        // Swap folders
-                        var temp = _basePreset.Folders[sourceFolderIndex];
-                        _basePreset.Folders.RemoveAt(sourceFolderIndex);
-                        _basePreset.Folders.Insert(folderIndex, temp);
-                        Service.Save();
+                        if (sourceFolderIndex >= 0 && sourceFolderIndex < _basePreset.Folders.Count)
+                        {
+                            var movingFolder = _basePreset.Folders[sourceFolderIndex];
+
+                            // Special-case: if dropping a parent onto its direct child, swap places
+                            if (folder.ParentFolderId == movingFolder.UniqueId)
+                            {
+                                var oldParent = movingFolder.ParentFolderId;
+                                movingFolder.ParentFolderId = folder.UniqueId;
+                                folder.ParentFolderId = oldParent;
+                                Service.Save();
+                            }
+                            // Otherwise, prevent creating cycles (cannot parent a folder under its own descendant)
+                            else if (!IsFolderDescendantOf(movingFolder, folder))
+                            {
+                                movingFolder.ParentFolderId = folder.UniqueId;
+                                Service.Save();
+                            }
+                        }
                     }
                 }
 
@@ -275,6 +333,16 @@ public class TabFishingPresets : BaseTab
         // Draw folder contents if expanded
         if (isOpen)
         {
+            // Draw child folders
+            for (var childIndex = 0; childIndex < _basePreset.Folders.Count; childIndex++)
+            {
+                var childFolder = _basePreset.Folders[childIndex];
+                if (childFolder.ParentFolderId == folder.UniqueId)
+                {
+                    DrawFolder(childFolder, childIndex);
+                }
+            }
+
             foreach (var presetId in folder.PresetIds)
             {
                 var preset = _basePreset.CustomPresets.FirstOrDefault(p => p.UniqueId == presetId);
@@ -366,6 +434,33 @@ public class TabFishingPresets : BaseTab
                 }
             }
 
+            // Allow dropping a folder here to reparent it to this preset's folder level
+            if (ImGuiDragDrop.AcceptDragDropPayload("FOLDER_ORDER", out int sourceFolderIndex))
+            {
+                if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+                {
+                    if (sourceFolderIndex >= 0 && sourceFolderIndex < _basePreset.Folders.Count)
+                    {
+                        var movingFolder = _basePreset.Folders[sourceFolderIndex];
+
+                        // Determine target folder level (the folder that contains this preset)
+                        var targetFolder = _basePreset.GetFolderContainingPreset(preset.UniqueId);
+
+                        // If the preset is in the moving folder's subtree, ignore to avoid cycles
+                        if (targetFolder != null && (targetFolder.UniqueId == movingFolder.UniqueId || IsFolderDescendantOf(movingFolder, targetFolder)))
+                        {
+                            // do nothing
+                        }
+                        else
+                        {
+                            // If preset is in a folder, become sibling at that level; otherwise become root-level
+                            movingFolder.ParentFolderId = targetFolder?.UniqueId;
+                            Service.Save();
+                        }
+                    }
+                }
+            }
+
             ImGui.EndDragDropTarget();
         }
 
@@ -439,6 +534,33 @@ public class TabFishingPresets : BaseTab
                 }
             }
 
+            // Allow dropping a folder here to reparent it to this preset's level
+            if (ImGuiDragDrop.AcceptDragDropPayload("FOLDER_ORDER", out int sourceFolderIndex))
+            {
+                if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+                {
+                    if (sourceFolderIndex >= 0 && sourceFolderIndex < _basePreset.Folders.Count)
+                    {
+                        var movingFolder = _basePreset.Folders[sourceFolderIndex];
+
+                        // Determine target folder level (the folder that contains this preset)
+                        var targetFolder = _basePreset.GetFolderContainingPreset(preset.UniqueId);
+
+                        // If the preset is in the moving folder's subtree, ignore to avoid cycles
+                        if (targetFolder != null && (targetFolder.UniqueId == movingFolder.UniqueId || IsFolderDescendantOf(movingFolder, targetFolder)))
+                        {
+                            // do nothing
+                        }
+                        else
+                        {
+                            // If preset is in a folder, become sibling at that level; otherwise become root-level
+                            movingFolder.ParentFolderId = targetFolder?.UniqueId;
+                            Service.Save();
+                        }
+                    }
+                }
+            }
+
             ImGui.EndDragDropTarget();
         }
 
@@ -465,7 +587,10 @@ public class TabFishingPresets : BaseTab
 
         ImGui.SameLine(0, 3);
         if (ImGuiComponents.IconButton(FontAwesomeIcon.FolderPlus))
+        {
             promptingForFolderName = true;
+            _parentFolderForNewFolder = null;
+        }
         ImGui.TooltipOnHover(UIStrings.CreateFolder);
 
         ImGui.SameLine(0, 3);
@@ -710,9 +835,13 @@ public class TabFishingPresets : BaseTab
             {
                 if (!string.IsNullOrWhiteSpace(newFolderName))
                 {
-                    _basePreset.AddNewFolder(newFolderName);
+                    if (_parentFolderForNewFolder.HasValue)
+                        _basePreset.AddNewFolder(newFolderName, _parentFolderForNewFolder.Value);
+                    else
+                        _basePreset.AddNewFolder(newFolderName);
                     newFolderName = string.Empty;
                     promptingForFolderName = false;
+                    _parentFolderForNewFolder = null;
                 }
             }
 
@@ -722,6 +851,7 @@ public class TabFishingPresets : BaseTab
             {
                 newFolderName = string.Empty;
                 promptingForFolderName = false;
+                _parentFolderForNewFolder = null;
             }
         }
     }
@@ -779,6 +909,12 @@ public class TabFishingPresets : BaseTab
         using var ctx = ImRaii.ContextPopupItem(folder.UniqueId.ToString());
         if (!ctx.Success) return;
 
+        if (ImGui.Selectable(UIStrings.CreateNewFolder, false))
+        {
+            _parentFolderForNewFolder = folder.UniqueId;
+            promptingForFolderName = true;
+        }
+
         if (ImGui.Selectable(UIStrings.Rename, false, ImGuiSelectableFlags.DontClosePopups))
         {
             renameFolderId = folder.UniqueId;
@@ -788,7 +924,10 @@ public class TabFishingPresets : BaseTab
         if (ImGui.Selectable(UIStrings.MakeACopy, false))
         {
 
-            var newFolder = new PresetFolder($"Copy_{folder.FolderName}");
+            var newFolder = new PresetFolder($"Copy_{folder.FolderName}")
+            {
+                ParentFolderId = folder.ParentFolderId
+            };
 
             // First, collect all presets in the source folder
             var presetsToCopy = new List<CustomPresetConfig>();
@@ -832,21 +971,24 @@ public class TabFishingPresets : BaseTab
         }
 
         var isEmpty = folder.PresetIds.Count == 0;
-        using (var disabled = ImRaii.Disabled(!isEmpty || !ImGui.GetIO().KeyShift))
+        var hasChildFolders = _basePreset.Folders.Any(f => f.ParentFolderId == folder.UniqueId);
+        var hasContents = !isEmpty || hasChildFolders;
+
+        using (var disabled = ImRaii.Disabled(!ImGui.GetIO().KeyShift))
         {
             if (ImGui.Selectable(UIStrings.Delete, false, ImGuiSelectableFlags.DontClosePopups))
             {
-                _basePreset.RemoveFolder(folder.UniqueId);
+                if (hasContents)
+                    _basePreset.RemoveFolderWithContents(folder.UniqueId);
+                else
+                    _basePreset.RemoveFolder(folder.UniqueId);
                 Service.Save();
             }
         }
 
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
         {
-            if (!isEmpty)
-                ImGui.SetTooltip(UIStrings.FolderMostBeEmpty);
-            else
-                ImGui.SetTooltip(UIStrings.HoldShiftToDelete);
+            ImGui.SetTooltip(UIStrings.HoldShiftToDelete);
         }
     }
 
