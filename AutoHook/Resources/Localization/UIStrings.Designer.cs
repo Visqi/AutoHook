@@ -2089,6 +2089,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ignore fish setting when.
+        /// </summary>
+        internal static string IgnoreFishSettingWhen {
+            get {
+                return ResourceManager.GetString("IgnoreFishSettingWhen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ignore Mooch.
         /// </summary>
         internal static string IgnoreMooch {

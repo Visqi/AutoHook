@@ -59,7 +59,7 @@ public class SubTabFish {
                     ImGui.Spacing();
 
                     fish.IgnoreConditionSet = ConditionUi.DrawConditionSetSlim(
-                        UIStrings.Ignore_When_Intuition,
+                        UIStrings.IgnoreFishSettingWhen,
                         fish.IgnoreConditionSet,
                         ConditionScope.FishIgnore,
                         showAdvanced: true,

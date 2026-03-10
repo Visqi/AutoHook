@@ -16,10 +16,12 @@ public partial class FishingManager {
         if (lastFishCatchCfg == null || !lastFishCatchCfg.Enabled || Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped))
             return false;
 
-        // Ignore logic is entirely driven by the condition set; legacy bools are used only for migration.
-        if (lastFishCatchCfg.IgnoreConditionSet is { Groups.Count: > 0 } &&
-            lastFishCatchCfg.IgnoreConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry))
-            return false;
+        // Treat an "empty" ignore set (only empty groups, no conditions) as if it wasn't configured at all.
+        // Can't delete all groups in advanced mode because slim mode always ensures there's a group, even if empty
+        if (lastFishCatchCfg.IgnoreConditionSet is { Groups.Count: > 0 } ignoreSet && ignoreSet.Groups.Any(g => g.Conditions.Count > 0)) {
+            if (ignoreSet.Evaluate(Service.WorldState, ConditionRegistry.Registry))
+                return false;
+        }
 
         var caughtCount = FishingHelper.GetFishCount(lastFishCatchCfg.UniqueId);
 
