@@ -1,7 +1,3 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
-
 namespace AutoHook.Conditions.Definitions;
 
 public sealed class StatusActiveCD : IConditionDefinition {
@@ -33,25 +29,27 @@ public sealed class StatusActiveCD : IConditionDefinition {
         var args = GetParams(condition.Params);
         var currentId = args.Ids.Count > 0 ? args.Ids[0] : 0;
 
-        var label = currentId != 0
+        var statuses = typeof(IDs.Status).GetFields()
+            .Select(f => f.GetValue(null))
+            .OfType<uint>()
+            .Where(id => id != 0)
+            .Select(id => (Id: id, Name: MultiString.GetStatusName(id)))
+            .Where(x => !string.IsNullOrEmpty(x.Name))
+            .OrderBy(x => x.Name)
+            .ToList();
+
+        var selectedLabel = currentId != 0
             ? $"{currentId}: {MultiString.GetStatusName(currentId)}"
             : "Select status";
 
-        ImGui.SetNextItemWidth(180 * ImGuiHelpers.GlobalScale);
-        using var combo = ImRaii.Combo("Status", label);
-        if (!combo) return;
-
-        foreach (var field in typeof(IDs.Status).GetFields()) {
-            if (field.GetValue(null) is not uint id || id == 0) continue;
-            var name = MultiString.GetStatusName(id);
-            var isSel = id == currentId;
-            if (!ImGui.Selectable($"{id}: {name}", isSel))
-                continue;
-
-            currentId = id;
-            var newArgs = args with { Ids = [id] };
-            condition.Params = newArgs.ToParams();
-        }
+        DrawUtil.DrawComboSelector(
+            statuses,
+            s => $"{s.Id}: {s.Name}",
+            selectedLabel,
+            s => {
+                var newArgs = args with { Ids = [s.Id] };
+                condition.Params = newArgs.ToParams();
+            });
     }
 
     private static StatusActiveParams GetParams(IReadOnlyDictionary<string, object> p) {

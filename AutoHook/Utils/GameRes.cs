@@ -1,4 +1,3 @@
-using AutoHook.Spearfishing.Enums;
 using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
 using System.IO;

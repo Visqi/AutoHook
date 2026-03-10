@@ -1,6 +1,3 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
 using Lumina.Excel.Sheets;
 using static AutoHook.Conditions.IConditionDefinition;
 
@@ -25,7 +22,6 @@ public sealed class OceanMissionTypeCD : IConditionDefinition {
         var ids = GetIds(condition.Params);
         var currentId = ids.Count > 0 ? ids[0] : 0;
 
-        ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);
         var sheet = Svc.Data.GetExcelSheet<IKDPlayerMissionCondition>();
         if (sheet == null) {
             DrawIdsParams(condition, "Mission type IDs");
@@ -39,20 +35,20 @@ public sealed class OceanMissionTypeCD : IConditionDefinition {
             return string.IsNullOrEmpty(name) ? $"{rowId}" : $"{rowId}: {name}";
         }
 
+        var missions = sheet
+            .Where(row => !string.IsNullOrEmpty(MultiString.ParseSeString(row.Unknown0)))
+            .Select(row => (Id: row.RowId, Name: MultiString.ParseSeString(row.Unknown0)))
+            .OrderBy(x => x.Name)
+            .ToList();
+
         var label = LabelForRow(currentId);
-        using var combo = ImRaii.Combo("Mission type", label);
-        if (!combo) return;
 
-        foreach (var row in sheet) {
-            var name = MultiString.ParseSeString(row.Unknown0);
-            if (string.IsNullOrEmpty(name)) continue;
-            var id = row.RowId;
-            var sel = id == currentId;
-            if (!ImGui.Selectable($"{id}: {name}", sel))
-                continue;
-
-            currentId = id;
-            condition.Params["ids"] = new List<object> { (long)id };
-        }
+        DrawUtil.DrawComboSelector(
+            missions,
+            m => $"{m.Id}: {m.Name}",
+            label,
+            m => {
+                condition.Params["ids"] = new List<object> { (long)m.Id };
+            });
     }
 }

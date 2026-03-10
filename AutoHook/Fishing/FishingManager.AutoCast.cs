@@ -5,9 +5,7 @@ namespace AutoHook.Fishing;
 
 public partial class FishingManager {
     public AutoCastsConfig GetAutoCastCfg()
-        => Presets.SelectedPreset?.AutoCastsCfg.EnableAll ?? false
-            ? Presets.SelectedPreset.AutoCastsCfg
-            : Presets.DefaultPreset.AutoCastsCfg;
+        => Presets.SelectedPreset?.AutoCastsCfg ?? Presets.DefaultPreset.AutoCastsCfg;
 
     private void CheckWhileFishingActions() {
         if (!EzThrottler.Throttle("CheckWhileFishingActions", 500))

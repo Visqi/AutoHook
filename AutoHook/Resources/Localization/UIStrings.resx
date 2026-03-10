@@ -605,7 +605,7 @@ If Auto Mooch (Global or Custom Preset) is not enabled, the line will be casted 
     <value>This might conflict with Auto Thaliak's Favor</value>
   </data>
   <data name="TabAutoCasts_DrawExtraOptionsThaliaksFavor_" xml:space="preserve">
-    <value>When Stacks =</value>
+    <value>When Stacks &gt;=</value>
   </data>
   <data name="TabAutoCasts_DrawThaliaksFavor_HelpText" xml:space="preserve">
     <value>This might conflict with Auto MakeShift Bait</value>

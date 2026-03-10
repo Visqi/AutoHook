@@ -1,6 +1,3 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
 using Lumina.Excel.Sheets;
 using static AutoHook.Conditions.IConditionDefinition;
 
@@ -43,7 +40,6 @@ public sealed class WeatherCD : IConditionDefinition {
         var ids = GetWeatherIds(condition.Params);
         var currentId = ids.Count > 0 ? ids[0] : (byte)0;
 
-        ImGui.SetNextItemWidth(180 * ImGuiHelpers.GlobalScale);
         var sheet = Svc.Data.GetExcelSheet<Weather>();
         if (sheet == null) {
             DrawIdsParams(condition, "Weather IDs");
@@ -58,19 +54,21 @@ public sealed class WeatherCD : IConditionDefinition {
                 unique[name] = (byte)row.RowId;
         }
 
-        var label = currentId != 0 && sheet.TryGetRow(currentId, out var currentRow) ? currentRow.Name.ToString() : "Any weather";
-        using var combo = ImRaii.Combo("Weather", label);
-        if (!combo) return;
+        var weathers = unique
+            .OrderBy(k => k.Key)
+            .Select(k => (Id: k.Value, Name: k.Key))
+            .ToList();
 
-        foreach (var kv in unique.OrderBy(k => k.Key)) {
-            var id = kv.Value;
-            var name = kv.Key;
-            var sel = id == currentId;
-            if (!ImGui.Selectable(name, sel))
-                continue;
+        var label = currentId != 0 && sheet.TryGetRow(currentId, out var currentRow)
+            ? currentRow.Name.ToString()
+            : "Any weather";
 
-            currentId = id;
-            condition.Params["ids"] = new List<object> { (long)id };
-        }
+        DrawUtil.DrawComboSelector(
+            weathers,
+            w => w.Name,
+            label,
+            w => {
+                condition.Params["ids"] = new List<object> { (long)w.Id };
+            });
     }
 }

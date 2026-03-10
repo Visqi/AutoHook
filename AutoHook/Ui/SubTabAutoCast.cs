@@ -54,17 +54,11 @@ public class SubTabAutoCast {
         }
 
         if (!_preset.IsGlobal) {
-            if (Service.Configuration.HookPresets.DefaultPreset.AutoCastsCfg.EnableAll && !acCfg.EnableAll)
-                ImGui.TextColored(ImGuiColors.DalamudViolet, UIStrings.GlobalActionsBeingUsed);
-            else if (!acCfg.EnableAll)
+            if (!acCfg.EnableAll)
                 ImGui.TextColored(ImGuiColors.ParsedBlue, UIStrings.AllActionsDisabled);
         }
         else {
-            if (Service.Configuration.HookPresets.SelectedPreset?.AutoCastsCfg.EnableAll ?? false)
-                ImGui.TextColored(ImGuiColors.DalamudViolet,
-                    string.Format(UIStrings.Custom_AutoCast_Being_Used,
-                        Service.Configuration.HookPresets.SelectedPreset.PresetName));
-            else if (!acCfg.EnableAll)
+            if (!acCfg.EnableAll)
                 ImGui.TextColored(ImGuiColors.ParsedBlue, UIStrings.SubAuto_Disabled);
         }
 

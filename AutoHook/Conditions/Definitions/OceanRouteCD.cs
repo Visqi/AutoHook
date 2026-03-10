@@ -1,6 +1,3 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
 using Lumina.Excel.Sheets;
 using static AutoHook.Conditions.IConditionDefinition;
 
@@ -25,7 +22,6 @@ public sealed class OceanRouteCD : IConditionDefinition {
         var ids = GetIds(condition.Params);
         var currentId = ids.Count > 0 ? ids[0] : 0;
 
-        ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);
         var sheet = Svc.Data.GetExcelSheet<IKDRoute>();
         if (sheet == null) {
             DrawIdsParams(condition, "Route IDs");
@@ -41,19 +37,21 @@ public sealed class OceanRouteCD : IConditionDefinition {
                 unique[name] = row.RowId;
         }
 
-        var label = currentId != 0 && sheet.TryGetRow(currentId, out var currentRow) ? $"{currentRow.RowId}: {currentRow.Name}" : "Select route";
-        using var combo = ImRaii.Combo("Route", label);
-        if (!combo) return;
+        var routes = unique
+            .OrderBy(k => k.Key)
+            .Select(k => (Id: k.Value, Name: k.Key))
+            .ToList();
 
-        foreach (var kv in unique.OrderBy(k => k.Key)) {
-            var id = kv.Value;
-            var name = kv.Key;
-            var sel = id == currentId;
-            if (!ImGui.Selectable($"{id}: {name}", sel))
-                continue;
+        var label = currentId != 0 && sheet.TryGetRow(currentId, out var currentRow)
+            ? $"{currentRow.RowId}: {currentRow.Name}"
+            : "Select route";
 
-            currentId = id;
-            condition.Params["ids"] = new List<object> { (long)id };
-        }
+        DrawUtil.DrawComboSelector(
+            routes,
+            r => $"{r.Id}: {r.Name}",
+            label,
+            r => {
+                condition.Params["ids"] = new List<object> { (long)r.Id };
+            });
     }
 }

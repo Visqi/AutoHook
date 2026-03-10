@@ -71,41 +71,51 @@ public sealed class ActionCooldownCD : IConditionDefinition {
         ImGui.SameLine();
         var currentId = args.Id;
         var idLabel = GetIdLabel(typeInt, currentId);
-        ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);
-        using (var comboId = ImRaii.Combo("##act_id", idLabel)) {
-            if (comboId.Success) {
-                switch (typeInt) {
-                    case 1: // Item
-                        foreach (var field in typeof(IDs.Item).GetFields()) {
-                            if (field.GetValue(null) is not uint id || id == 0) continue;
-                            var (baseId, itemKind) = ItemUtil.GetBaseId(id);
-                            var name = MultiString.GetItemName(baseId);
-                            if (string.IsNullOrEmpty(name)) continue;
-                            var sel = id == currentId;
-                            if (!ImGui.Selectable($"{id}: {name}{(itemKind is ItemKind.Hq ? $" {SeIconChar.HighQuality.ToIconString()}" : string.Empty)}", sel))
-                                continue;
 
-                            currentId = id;
-                            args = args with { Id = id };
-                            condition.Params = args.ToParams();
-                        }
-                        break;
-                    default:
-                        foreach (var field in typeof(IDs.Actions).GetFields()) {
-                            if (field.GetValue(null) is not uint id || id == 0) continue;
-                            var name = MultiString.GetActionName(id);
-                            if (string.IsNullOrEmpty(name)) continue;
-                            var sel = id == currentId;
-                            if (!ImGui.Selectable($"{id}: {name}", sel))
-                                continue;
+        if (typeInt == 1) {
+            var items = typeof(IDs.Item).GetFields()
+                .Select(f => f.GetValue(null))
+                .OfType<uint>()
+                .Where(id => id != 0)
+                .Select(id => {
+                    var (baseId, itemKind) = ItemUtil.GetBaseId(id);
+                    var name = MultiString.GetItemName(baseId);
+                    var hq = itemKind is ItemKind.Hq ? $" {SeIconChar.HighQuality.ToIconString()}" : string.Empty;
+                    return (Id: id, Name: $"{id}: {name}{hq}");
+                })
+                .Where(x => !string.IsNullOrEmpty(x.Name))
+                .OrderBy(x => x.Name)
+                .ToList();
 
-                            currentId = id;
-                            args = args with { Id = id };
-                            condition.Params = args.ToParams();
-                        }
-                        break;
-                }
-            }
+            DrawUtil.DrawComboSelector(
+                items,
+                i => i.Name,
+                idLabel,
+                i => {
+                    currentId = i.Id;
+                    args = args with { Id = i.Id };
+                    condition.Params = args.ToParams();
+                });
+        }
+        else {
+            var actions = typeof(IDs.Actions).GetFields()
+                .Select(f => f.GetValue(null))
+                .OfType<uint>()
+                .Where(id => id != 0)
+                .Select(id => (Id: id, Name: $"{id}: {MultiString.GetActionName(id)}"))
+                .Where(x => !string.IsNullOrEmpty(x.Name))
+                .OrderBy(x => x.Name)
+                .ToList();
+
+            DrawUtil.DrawComboSelector(
+                actions,
+                a => a.Name,
+                idLabel,
+                a => {
+                    currentId = a.Id;
+                    args = args with { Id = a.Id };
+                    condition.Params = args.ToParams();
+                });
         }
 
         var sec = args.Seconds;
