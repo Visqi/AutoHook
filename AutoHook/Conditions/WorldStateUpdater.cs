@@ -61,7 +61,6 @@ public sealed class WorldStateUpdater : IDisposable {
 
         ws.Execute(new WorldState.OpBiteContext(biteContext.BiteTimeSeconds, biteContext.ChumActive));
         ws.Execute(new WorldState.OpIntuition(biteContext.IntuitionStatus, biteContext.IntuitionTimeRemaining));
-        ws.Execute(new WorldState.OpLastCatch(biteContext.LastCaughtFishId));
     }
 
     private static BiteContext CollectBiteContext(WorldState ws) {

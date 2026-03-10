@@ -309,7 +309,6 @@ public partial class FishingManager : IDisposable {
         ws.Execute(new WorldState.OpBiteContext(timePassed, ws.HasStatus(IDs.Status.Chum)));
         ws.Execute(new WorldState.OpIntuition(ws.IntuitionStatus, ws.GetStatusTime(IDs.Status.FishersIntuition)));
         ws.Execute(new WorldState.OpOceanFishing(ws.OceanFishing));
-        ws.Execute(new WorldState.OpLastCatch(ws.LastCaughtFishId));
 
         var hook = currentHook.GetHook(bite, timePassed);
 
