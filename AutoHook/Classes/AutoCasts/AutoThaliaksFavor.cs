@@ -7,7 +7,6 @@ public class AutoThaliaksFavor : BaseActionCast {
     public int ThaliaksFavorStacks = 3;
     public int ThaliaksFavorRecover = 150;
 
-
     public AutoThaliaksFavor(bool isSpearfishing = false) : base(UIStrings.Thaliaks_Favor, IDs.Actions.ThaliaksFavor, ActionType.Action) {
         HelpText = UIStrings.TabAutoCasts_DrawThaliaksFavor_HelpText;
         IsSpearFishing = isSpearfishing;
@@ -20,12 +19,13 @@ public class AutoThaliaksFavor : BaseActionCast {
         if (!EvaluateConditionSet())
             return false;
 
-        var allowedToUseThaliaks = true;
-        var hasStacks = Service.WorldState.HasAnglersArtStacks(ThaliaksFavorStacks);
+        var currentStacks = Service.WorldState.GetStatusStacks(IDs.Status.AnglersArt);
+        var hasStacks = currentStacks >= ThaliaksFavorStacks;
 
-        var notOvercaped = (Service.WorldState.CurrentGp + ThaliaksFavorRecover) < Service.WorldState.MaxGp;
+        var projectedGp = Service.WorldState.CurrentGp + ThaliaksFavorRecover;
+        var notOvercaped = projectedGp < Service.WorldState.MaxGp;
 
-        return hasStacks && notOvercaped && allowedToUseThaliaks; // dont use if its going to overcap gp
+        return hasStacks && notOvercaped; // dont use if its going to overcap gp
     }
 
     protected override DrawOptionsDelegate DrawOptions => () => {

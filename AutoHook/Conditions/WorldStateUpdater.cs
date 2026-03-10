@@ -5,6 +5,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using Lumina.Excel.Sheets;
 
 namespace AutoHook.Conditions;
 
@@ -25,11 +26,14 @@ public sealed class WorldStateUpdater : IDisposable {
         byte level, byte unk7, byte unk8, byte unk9, byte unk10, byte unk11, byte unk12);
     private readonly Hook<UpdateCatchDelegate>? _updateCatchHook;
 
+    private static IReadOnlyList<Lumina.Excel.Sheets.Action> FshActions = [];
+
     public unsafe WorldStateUpdater() {
         _updateCatchHook = Svc.Hook.HookFromSignature<UpdateCatchDelegate>(SignaturePatterns.UpdateCatch, UpdateCatchDetour);
         _useActionHook = Svc.Hook.HookFromAddress<ActionManager.Delegates.UseAction>((nint)ActionManager.MemberFunctionPointers.UseAction, UseActionDetour);
         _updateCatchHook?.Enable();
         _useActionHook?.Enable();
+        FshActions = ClassJob.Get(18).GetActions();
     }
 
     public void Dispose() {
@@ -178,6 +182,7 @@ public sealed class WorldStateUpdater : IDisposable {
 
     private static WorldState.OpActionAvailability CollectActionAvailability() {
         var available = new List<(uint Id, ActionType Type)>();
+
         bool Add(uint id, ActionType actionType = ActionType.Action) {
             if (ActionTypeAvailable(id, actionType)) {
                 available.Add((id, actionType));
@@ -185,35 +190,14 @@ public sealed class WorldStateUpdater : IDisposable {
             }
             return false;
         }
-        Add(IDs.Actions.Mooch);
-        Add(IDs.Actions.Mooch2);
-        Add(IDs.Actions.MultiHook, ActionType.EventAction);
-        Add(IDs.Actions.SurfaceSlap);
-        Add(IDs.Actions.IdenticalCast);
-        Add(IDs.Actions.Patience);
-        Add(IDs.Actions.Patience2);
-        Add(IDs.Actions.DoubleHook);
-        Add(IDs.Actions.TripleHook);
-        Add(IDs.Actions.StellarHook);
-        Add(IDs.Actions.PrecisionHS);
-        Add(IDs.Actions.PowerfulHS);
-        Add(IDs.Actions.AmbitiousLure);
-        Add(IDs.Actions.ModestLure);
-        Add(IDs.Actions.Chum);
-        Add(IDs.Actions.FishEyes);
-        Add(IDs.Actions.PrizeCatch);
-        Add(IDs.Actions.SparefulHand);
-        Add(IDs.Actions.Collect);
-        Add(IDs.Actions.BigGameFishing);
-        Add(IDs.Actions.Cast);
-        Add(IDs.Actions.Hook);
-        Add(IDs.Actions.Rest);
-        Add(IDs.Actions.Quit);
+
+        FshActions.ForEach(a => Add(a.RowId));
         Add(IDs.Item.Cordial, ActionType.Item);
         Add(IDs.Item.HQCordial, ActionType.Item);
         Add(IDs.Item.HiCordial, ActionType.Item);
         Add(IDs.Item.WateredCordial, ActionType.Item);
         Add(IDs.Item.HQWateredCordial, ActionType.Item);
+
         return new WorldState.OpActionAvailability(available);
     }
 
