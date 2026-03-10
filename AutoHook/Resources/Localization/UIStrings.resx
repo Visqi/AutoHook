@@ -1624,4 +1624,13 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="OnlyUseWhenMakeshiftBaitActive" xml:space="preserve">
     <value>Only use when Makeshift Bait active</value>
   </data>
+  <data name="Previous" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="Current" xml:space="preserve">
+    <value>Current</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
 </root>
