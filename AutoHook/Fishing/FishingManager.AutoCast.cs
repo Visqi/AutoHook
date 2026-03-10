@@ -129,7 +129,7 @@ public partial class FishingManager {
                 continue;
             }
 
-            if (Service.BaitManager.ChangeSwimbait((uint)slotIndex) == BaitManager.ChangeBaitReturn.Success) {
+            if (ChangeSwimbait((uint)slotIndex) == ChangeBaitReturn.Success) {
                 Service.PrintDebug($"[Swimbait] Using swimbait slot {slotIndex} (fish ID: {fishId})");
                 Service.Status = $"Using swimbait: {MultiString.GetItemName((int)fishId)}";
                 return true;

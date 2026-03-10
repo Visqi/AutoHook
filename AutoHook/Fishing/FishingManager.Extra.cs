@@ -63,10 +63,10 @@ public partial class FishingManager {
 
         // Swap bait
         if (trig.SwapBait && !Ws.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
-            var result = Service.BaitManager.ChangeBait(trig.BaitToSwap);
+            var result = ChangeBait(trig.BaitToSwap);
             Ws.Execute(new WorldState.OpOrFishingStep(FishingSteps.BaitSwapped));
 
-            if (result == BaitManager.ChangeBaitReturn.Success) {
+            if (result == ChangeBaitReturn.Success) {
                 Service.PrintChat(@$"[Extra] Trigger: Swapping bait to {trig.BaitToSwap.Name}");
                 Service.Save();
             }

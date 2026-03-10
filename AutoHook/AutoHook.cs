@@ -45,31 +45,23 @@ public class AutoHook : IDalamudPlugin {
     };
 
     private static PluginUi _pluginUi = null!;
-
     private static AutoGig _autoGig = null!;
-
     private readonly WorldStateUpdater _wsSync;
-
     public readonly FishingManager HookManager;
-
     public AutoHookIPC AutoHookIpc;
 
     public AutoHook(IDalamudPluginInterface pluginInterface, IDtrBar dtrBar) {
         ECommonsMain.Init(pluginInterface, this, Module.DalamudReflector, Module.ObjectFunctions);
         CLibMain.Init(pluginInterface, this);
         Service.Initialize(pluginInterface);
-        PunishLibMain.Init(pluginInterface, "AutoHook",
-            new AboutPlugin() { Developer = "InitialDet", Sponsor = "https://ko-fi.com/initialdet" });
+        PunishLibMain.Init(pluginInterface, "AutoHook", new AboutPlugin() { Developer = "InitialDet", Sponsor = "https://ko-fi.com/initialdet" });
+
         Plugin = this;
         Service.WorldState = new WorldState();
-        Service.BaitManager = new BaitManager();
-        Service.TugType = new SeTugType(Svc.SigScanner);
         _wsSync = new WorldStateUpdater();
         Svc.PluginInterface.UiBuilder.Draw += () => { _wsSync.Update(); Service.WindowSystem.Draw(); };
         Svc.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
-
-        Service.Language = Svc.ClientState.ClientLanguage;
 
         GameRes.Initialize();
 
@@ -158,7 +150,7 @@ public class AutoHook : IDalamudPlugin {
 
     private static void SwapBait(string args) {
         var bait = GameRes.Baits.FirstOrDefault(f => f.Name.ToLower() == args.ToLower() || f.Id.ToString() == args);
-        Service.BaitManager.ChangeBait((uint)bait?.Id!);
+        FishingManager.ChangeBait((uint)bait?.Id!);
     }
 
     private static void SetPreset(string presetName) {

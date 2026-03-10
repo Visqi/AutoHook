@@ -104,11 +104,11 @@ public partial class FishingManager {
             var readyForBaitSwap = baitSet.Evaluate(Ws, ConditionRegistry.Registry);
             if (readyForBaitSwap &&
                 lastCatchCfg.BaitToSwap.Id != Ws.CurrentBaitId) {
-                var result = Service.BaitManager.ChangeBait(lastCatchCfg.BaitToSwap);
+                var result = ChangeBait(lastCatchCfg.BaitToSwap);
 
                 FishingHelper.AddBaitSwap(guid);
                 Ws.Execute(new WorldState.OpOrFishingStep(FishingSteps.BaitSwapped));
-                if (result == BaitManager.ChangeBaitReturn.Success) {
+                if (result == ChangeBaitReturn.Success) {
                     Service.PrintChat(@$"[Fish Caught] Swapping bait to {lastCatchCfg.BaitToSwap.Name}");
                     Service.Save();
                 }

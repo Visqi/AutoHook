@@ -96,10 +96,8 @@ public class AutoHookIPC {
     }
 
     [EzIPC]
-    public bool SwapBaitById(uint baitId) {
-        var result = Service.BaitManager.ChangeBait(baitId);
-        return result is BaitManager.ChangeBaitReturn.Success or BaitManager.ChangeBaitReturn.AlreadyEquipped;
-    }
+    public bool SwapBaitById(uint baitId)
+        => FishingManager.ChangeBait(baitId) is FishingManager.ChangeBaitReturn.Success or FishingManager.ChangeBaitReturn.AlreadyEquipped;
 
     [EzIPC]
     public bool SwapBait(string baitNameOrId) {
@@ -115,14 +113,11 @@ public class AutoHookIPC {
         if (bait == null || bait.Id <= 0)
             return false;
 
-        var result = Service.BaitManager.ChangeBait((uint)bait.Id);
-        return result is BaitManager.ChangeBaitReturn.Success or BaitManager.ChangeBaitReturn.AlreadyEquipped;
+        return FishingManager.ChangeBait((uint)bait.Id) is FishingManager.ChangeBaitReturn.Success or FishingManager.ChangeBaitReturn.AlreadyEquipped;
     }
 
     // Swaps the current swimbait slot by index (0,1,2).
     [EzIPC]
-    public bool SwapSwimbaitByIndex(byte index) {
-        var result = Service.BaitManager.ChangeSwimbait(index);
-        return result is BaitManager.ChangeBaitReturn.Success or BaitManager.ChangeBaitReturn.AlreadyEquipped;
-    }
+    public bool SwapSwimbaitByIndex(byte index)
+        => FishingManager.ChangeSwimbait(index) is FishingManager.ChangeBaitReturn.Success or FishingManager.ChangeBaitReturn.AlreadyEquipped;
 }

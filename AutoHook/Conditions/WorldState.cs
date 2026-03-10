@@ -46,6 +46,7 @@ public sealed class WorldState {
     public uint? CurrentSwimbaitId { get; private set; }
     public bool IsMooching { get; private set; }
     public int CurrentBaitMoochId { get; private set; }
+    public FishingHookStrength TugType { get; private set; }
 
     public double BiteTimeSeconds { get; private set; }
     public bool ChumActive { get; private set; }
@@ -260,5 +261,9 @@ public sealed class WorldState {
     /// <summary>Reset all per-fish caught counters (typically on fishing stop).</summary>
     public sealed record OpResetFishCaught() : Operation {
         protected override void Exec(WorldState ws) => ws._fishCaughtCounts.Clear();
+    }
+
+    public sealed record OpTugType(FishingHookStrength HookStrength) : Operation {
+        protected override void Exec(WorldState ws) => ws.TugType = HookStrength;
     }
 }

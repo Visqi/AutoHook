@@ -1,10 +1,12 @@
 using Dalamud.Hooking;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Lumina.Excel.Sheets;
 
 namespace AutoHook.Conditions;
@@ -20,17 +22,14 @@ public readonly struct BiteContext {
 
 public sealed class WorldStateUpdater : IDisposable {
     private readonly Hook<ActionManager.Delegates.UseAction>? _useActionHook;
-
-    // TODO replace with cs once it's live
-    public delegate void UpdateCatchDelegate(IntPtr module, uint fishId, bool large, ushort size, byte amount,
-        byte level, byte unk7, byte unk8, byte unk9, byte unk10, byte unk11, byte unk12);
-    private readonly Hook<UpdateCatchDelegate>? _updateCatchHook;
-
+    private readonly Hook<AgentCatch.Delegates.UpdateCatch>? _updateCatchHook;
+    private readonly Hook<FishingEventHandler.Delegates.PlayAnimation>? _playAnimationHook;
     private static IReadOnlyList<Lumina.Excel.Sheets.Action> FshActions = [];
 
     public unsafe WorldStateUpdater() {
-        _updateCatchHook = Svc.Hook.HookFromSignature<UpdateCatchDelegate>(SignaturePatterns.UpdateCatch, UpdateCatchDetour);
+        _updateCatchHook = Svc.Hook.HookFromAddress<AgentCatch.Delegates.UpdateCatch>((nint)AgentCatch.MemberFunctionPointers.UpdateCatch, UpdateCatchDetour);
         _useActionHook = Svc.Hook.HookFromAddress<ActionManager.Delegates.UseAction>((nint)ActionManager.MemberFunctionPointers.UseAction, UseActionDetour);
+        _playAnimationHook = Svc.Hook.HookFromVTable<FishingEventHandler.Delegates.PlayAnimation>((nint)FishingEventHandler.StaticVirtualTablePointer, 275, PlayAnimationDetour);
         _updateCatchHook?.Enable();
         _useActionHook?.Enable();
         FshActions = ClassJob.Get(18).GetActions();
@@ -39,6 +38,7 @@ public sealed class WorldStateUpdater : IDisposable {
     public void Dispose() {
         _useActionHook?.Dispose();
         _updateCatchHook?.Dispose();
+        _playAnimationHook?.Dispose();
     }
 
     /// <summary>
@@ -118,11 +118,19 @@ public sealed class WorldStateUpdater : IDisposable {
         return _useActionHook!.Original(thisPtr, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
     }
 
-    private void UpdateCatchDetour(IntPtr module, uint fishId, bool large, ushort size, byte amount, byte level,
-        byte unk7, byte unk8, byte unk9, byte unk10, byte unk11, byte unk12) {
-        _updateCatchHook!.Original(module, fishId, large, size, amount, level, unk7, unk8, unk9, unk10, unk11, unk12);
-        Service.WorldState.Execute(new WorldState.OpLastCatch((int?)ItemUtil.GetBaseId(fishId).ItemId, amount));
+    private unsafe void UpdateCatchDetour(AgentCatch* thisPtr, uint itemId, bool isLarge, ushort size, byte amount, byte level, byte stars, byte oceanStars, bool isMoochable, bool isFirstTimeCatch, byte a11, byte a12) {
+        _updateCatchHook!.Original(thisPtr, itemId, isLarge, size, amount, level, stars, oceanStars, isMoochable, isFirstTimeCatch, a11, a12);
+        Service.WorldState.Execute(new WorldState.OpLastCatch((int?)ItemUtil.GetBaseId(itemId).ItemId, amount));
         Service.WorldState.Execute(new WorldState.OpSetFishingStep(FishingSteps.FishCaught));
+    }
+
+    private unsafe void PlayAnimationDetour(FishingEventHandler* thisPtr, Character* chara, ushort actionTimelineId, nint a4) {
+        var tugType = (FishingHookStrength)actionTimelineId;
+        if (tugType is FishingHookStrength.Weak or FishingHookStrength.Strong or FishingHookStrength.Legendary)
+            Service.WorldState.Execute(new WorldState.OpTugType(tugType));
+        else
+            Service.WorldState.Execute(new WorldState.OpTugType(0));
+        _playAnimationHook!.Original(thisPtr, chara, actionTimelineId, a4);
     }
 
     public static int ComputeCurrentBaitMoochId(uint currentId, uint? swimbaitId, bool isMooching, BiteContext biteContext) {

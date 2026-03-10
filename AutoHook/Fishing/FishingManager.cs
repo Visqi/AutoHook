@@ -70,9 +70,9 @@ public partial class FishingManager : IDisposable {
 
         var extraCfg = GetExtraCfg();
         if (extraCfg is { ForceBaitSwap: true, Enabled: true }) {
-            var result = Service.BaitManager.ChangeBait((uint)extraCfg.ForcedBaitId);
+            var result = ChangeBait((uint)extraCfg.ForcedBaitId);
 
-            if (result == BaitManager.ChangeBaitReturn.Success) {
+            if (result == ChangeBaitReturn.Success) {
                 Service.PrintChat(
                     @$"[AutoHook] Starting with bait: {MultiString.GetItemName(extraCfg.ForcedBaitId)}");
                 Service.Save();
@@ -155,8 +155,9 @@ public partial class FishingManager : IDisposable {
         return currentHook;
     }
 
-    private void OnFrameworkUpdate(IFramework _) {
-        if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null || !Service.BaitManager.IsValid) return;
+    private unsafe void OnFrameworkUpdate(IFramework _) {
+        if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null || EventFramework.Instance() is not null and var ef && ef->EventHandlerModule.FishingEventHandler is not null)
+            return;
 
         var currentState = Service.WorldState.FishingState;
         if (currentState == FishingState.None) {
@@ -294,7 +295,7 @@ public partial class FishingManager : IDisposable {
             PlayerRes.CastAction(IDs.Actions.Salvage);
 
         Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.FishBit));
-        HookFish(Service.TugType?.Bite ?? BiteType.Unknown, currentHook);
+        HookFish(Ws.TugType.ToBiteType(), currentHook);
     }
 
     private void HookFish(BiteType bite, HookConfig currentHook) {
@@ -381,8 +382,6 @@ public partial class FishingManager : IDisposable {
                 if (hookset.StopAfterResetCount) FishingHelper.ToBeRemoved.Add(guid);
             }
         }
-
-        // Extra stop conditions run only via Triggers; legacy fields are migration-only.
     }
 
     private void OnFishingStop() {

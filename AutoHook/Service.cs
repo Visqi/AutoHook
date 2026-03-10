@@ -1,5 +1,4 @@
 using AutoHook.Conditions;
-using Dalamud.Game;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using ECommons.Automation.NeoTaskManager;
@@ -16,11 +15,8 @@ public class Service {
 
     public static WorldState WorldState { get; set; } = null!;
 
-    public static BaitManager BaitManager { get; set; } = null!;
     public static Configuration Configuration { get; set; } = null!;
     public static WindowSystem WindowSystem { get; } = new(PluginName);
-    public static SeTugType TugType { get; set; } = null!; // TODO replace with FishingEventHandler.PlayAnimation hook
-    public static ClientLanguage Language { get; set; }
 
     public static string _status = @"";
 
