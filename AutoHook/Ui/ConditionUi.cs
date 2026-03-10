@@ -6,6 +6,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using Newtonsoft.Json;
 using static AutoHook.Conditions.ConditionRegistry;
 using static AutoHook.Conditions.IConditionDefinition;
 
@@ -20,6 +21,7 @@ public enum ConditionScope {
 
 public static class ConditionUi {
     private static ConditionSet? _clipboard;
+    private static string _exportBase64 = string.Empty;
 
     public static ConditionSet? DrawConditionSet(string label, ConditionSet? set, ConditionScope scope, bool showPresets = true) {
         using var tree = ImRaii.TreeNode(label, ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.SpanAvailWidth);
@@ -228,6 +230,60 @@ public static class ConditionUi {
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Clipboard))
             if (_clipboard != null && _clipboard.Groups.Count > 0)
                 ApplyClipboard(set, _clipboard);
+
+        ImGui.SameLine();
+        if (ImGuiComponents.IconButton(FontAwesomeIcon.ShareAlt)) {
+            ImGui.OpenPopup("CondExport");
+        }
+        ImGui.TooltipOnHover("Export/import conditions & expression (Base64)");
+
+        using (var popup = ImRaii.Popup("CondExport")) {
+            if (popup.Success) {
+                ImGui.TextColored(ImGuiColors.DalamudYellow, "Conditions / Expression Export");
+                ImGui.Separator();
+
+                if (ImGui.Button("Export conditions")) {
+                    var json = JsonConvert.SerializeObject(set);
+                    var bytes = Encoding.UTF8.GetBytes(json);
+                    _exportBase64 = Convert.ToBase64String(bytes);
+                    ImGui.SetClipboardText(_exportBase64);
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("Export expression")) {
+                    var expr = set.Expression ?? string.Empty;
+                    var bytes = Encoding.UTF8.GetBytes(expr);
+                    var exprBase64 = Convert.ToBase64String(bytes);
+                    ImGui.SetClipboardText(exprBase64);
+                }
+
+                if (ImGui.Button("Import conditions")) {
+                    try {
+                        var fromClipboard = ImGui.GetClipboardText();
+                        var data = Convert.FromBase64String(fromClipboard.Trim());
+                        var json = Encoding.UTF8.GetString(data);
+                        var imported = JsonConvert.DeserializeObject<ConditionSet>(json);
+                        if (imported != null && imported.Groups.Count > 0) {
+                            ApplyClipboard(set, imported);
+                            Service.Save();
+                        }
+                    }
+                    catch { }
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("Import expression")) {
+                    try {
+                        var fromClipboard = ImGui.GetClipboardText();
+                        var data = Convert.FromBase64String(fromClipboard.Trim());
+                        var expr = Encoding.UTF8.GetString(data);
+                        set.Expression = string.IsNullOrWhiteSpace(expr) ? null : expr;
+                        Service.Save();
+                    }
+                    catch { }
+                }
+            }
+        }
 
         if (!set.ExprVisible)
             return;
