@@ -5,7 +5,6 @@ global using AutoHook.Data;
 global using AutoHook.Enums;
 global using AutoHook.Fishing;
 global using AutoHook.Resources.Localization;
-global using AutoHook.SeFunctions;
 global using AutoHook.Utils;
 global using clib.Extensions;
 global using ECommons;
