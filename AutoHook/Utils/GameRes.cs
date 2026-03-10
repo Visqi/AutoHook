@@ -1,3 +1,4 @@
+using AutoHook.Spearfishing.Enums;
 using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
 using System.IO;
@@ -15,7 +16,7 @@ public static class GameRes {
     public static List<BaitFishClass> LureFishes => [.. Fishes.Where(f => f.LureMessage != "")];
     public static List<BaitFishClass> MoochableFish { get; private set; } = [];
     public static List<ImportedFish> ImportedFishes { get; private set; } = [];
-
+    public static List<ImportedFish> SpearfishFishes { get; private set; } = [];
     public static List<BiteTimers> BiteTimers { get; private set; } = [];
 
     public static void Initialize() {
@@ -29,22 +30,35 @@ public static class GameRes {
         MoochableFish = FindRows<FishingBaitParameter>(x => x.Item.Value.ItemUICategory.RowId != 33).Select(f => new BaitFishClass(f.Item.RowId)).ToList() ?? [];
 
         try {
-            var fishList = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName!,
-                $"Data\\FishData\\fish_list.json");
+            var fishList = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName!, $"Data\\FishData\\fish_list.json");
 
             if (File.Exists(fishList)) {
-                var json = File.ReadAllText(fishList);
-
-                ImportedFishes = JsonSerializer.Deserialize<List<ImportedFish>>(json)!;
+                ImportedFishes = JsonSerializer.Deserialize<List<ImportedFish>>(File.ReadAllText(fishList))!;
             }
 
-            var biteTimers = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName!,
-                $"Data\\FishData\\bitetimers.json");
+            var byId = ImportedFishes.ToDictionary(f => f.ItemId, f => f);
+            var list = new List<ImportedFish>();
 
+            foreach (var row in Svc.Data.GetExcelSheet<SpearfishingItem>()) {
+                // fish_list is wrong when it comes to most timeworn maps not being spearfish so build a list of actual spearfish and match fish_list to it
+                var itemId = (int)row.Item.RowId;
+                if (itemId == 0) continue;
+
+                if (byId.GetValueOrDefault(itemId) is { } match) {
+                    list.Add(new ImportedFish {
+                        ItemId = itemId,
+                        IsSpearFish = true,
+                        Size = match.Size,
+                        Speed = match.Speed,
+                    });
+                }
+            }
+
+            SpearfishFishes = list;
+
+            var biteTimers = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName!, $"Data\\FishData\\bitetimers.json");
             if (File.Exists(biteTimers)) {
-                var json = File.ReadAllText(biteTimers);
-
-                BiteTimers = JsonSerializer.Deserialize<List<BiteTimers>>(json)!;
+                BiteTimers = JsonSerializer.Deserialize<List<BiteTimers>>(File.ReadAllText(biteTimers))!;
             }
         }
         catch (Exception e) {

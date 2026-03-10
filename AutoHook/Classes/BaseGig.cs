@@ -9,8 +9,8 @@ public class BaseGig(int itemId) : BaseOption {
     public ImportedFish? Fish {
         get {
             if (field == null && _itemId != 0) {
-                Service.PrintDebug($"[AutoGig] BaseGig.Fish - Lazy initializing for itemId: {_itemId}, ImportedFishes count: {GameRes.ImportedFishes.Count}");
-                field = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == _itemId);
+                Service.PrintDebug($"[AutoGig] BaseGig.Fish - Lazy initializing for itemId: {_itemId}, SpearfishFishes count: {GameRes.SpearfishFishes.Count}");
+                field = GameRes.SpearfishFishes.FirstOrDefault(f => f.ItemId == _itemId);
                 Service.PrintDebug($"[AutoGig] BaseGig.Fish - Found: {(field != null ? field.Name : "null")}");
             }
             return field;
@@ -19,7 +19,7 @@ public class BaseGig(int itemId) : BaseOption {
             Service.PrintDebug($"[AutoGig] BaseGig.Fish - Setting to: {(value != null ? value.Name : "null")}");
             field = value;
         }
-    } = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == itemId);
+    } = GameRes.SpearfishFishes.FirstOrDefault(f => f.ItemId == itemId);
 
     public bool UseNaturesBounty;
 
@@ -31,7 +31,7 @@ public class BaseGig(int itemId) : BaseOption {
 
     public override void DrawOptions() {
         DrawUtil.DrawComboSelector(
-            [.. GameRes.ImportedFishes.Where(f => f.IsSpearFish)],
+            [.. GameRes.SpearfishFishes],
             item => item.Name,
             Fish?.Name ?? UIStrings.None,
             item => Fish = item);
