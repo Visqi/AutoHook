@@ -1,4 +1,3 @@
-using AutoHook.Conditions;
 using AutoHook.IPC;
 using AutoHook.Spearfishing;
 using clib;

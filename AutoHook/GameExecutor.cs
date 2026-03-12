@@ -1,4 +1,3 @@
-using AutoHook.Conditions;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Task = System.Threading.Tasks.Task;
