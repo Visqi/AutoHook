@@ -2,7 +2,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 
-namespace AutoHook.Conditions;
+namespace AutoHook.Data;
 
 /// <summary>Ocean fishing instance state from <see cref="InstanceContentOceanFishing"/>.</summary>
 public sealed class OceanFishingState {
