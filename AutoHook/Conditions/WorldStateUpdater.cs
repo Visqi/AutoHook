@@ -32,6 +32,7 @@ public sealed class WorldStateUpdater : IDisposable {
         _playAnimationHook = Svc.Hook.HookFromVTable<FishingEventHandler.Delegates.PlayAnimation>((nint)FishingEventHandler.StaticVirtualTablePointer, 275, PlayAnimationDetour);
         _updateCatchHook?.Enable();
         _useActionHook?.Enable();
+        _playAnimationHook?.Enable();
         FshActions = ClassJob.Get(18).GetActions();
     }
 

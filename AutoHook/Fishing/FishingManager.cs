@@ -156,7 +156,9 @@ public partial class FishingManager : IDisposable {
     }
 
     private unsafe void OnFrameworkUpdate(IFramework _) {
-        if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null || EventFramework.Instance() is not null and var ef && ef->EventHandlerModule.FishingEventHandler is not null)
+        if (!Service.Configuration.PluginEnabled
+            || !Svc.ClientState.IsLoggedIn
+            || Svc.Objects.LocalPlayer == null)
             return;
 
         var currentState = Service.WorldState.FishingState;
