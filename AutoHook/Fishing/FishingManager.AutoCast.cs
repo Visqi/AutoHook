@@ -84,7 +84,7 @@ public partial class FishingManager {
             return false;
 
         var swimbaitIds = Ws.SwimbaitIds;
-        var isIntuition = Ws.IntuitionStatus == IntuitionStatus.Active;
+        var isIntuition = Ws.Fishing.Intuition.Status == IntuitionStatus.Active;
         foreach (var (fishId, slotIndex) in swimbaitIds.ToArray().WithIndex()) {
             if (fishId == 0)
                 continue;

@@ -119,8 +119,8 @@ public class SubTabBaitMooch {
         ImGui.SameLine();
 
         if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowLeft)) {
-            if (Service.WorldState.CurrentBaitId > 0) // just make sure bait is bait
-                hookConfig.BaitFish = list.Single(x => x.Id == Service.WorldState.CurrentBaitId);
+            if (Service.WorldState.Fishing.BaitInfo.BaitId > 0) // just make sure bait is bait
+                hookConfig.BaitFish = list.Single(x => x.Id == Service.WorldState.Fishing.BaitInfo.BaitId);
         }
 
         ImGui.TooltipOnHover(UIStrings.UIUseCurrentBait);

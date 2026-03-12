@@ -27,8 +27,8 @@ public sealed class IntuitionTimerCD : IConditionDefinition {
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var args = GetParams(parameters);
-        if (world.IntuitionStatus != IntuitionStatus.Active) return args.Invert;
-        var lhs = (int)Math.Floor(world.IntuitionTimeRemaining);
+        if (world.Fishing.Intuition.Status != IntuitionStatus.Active) return args.Invert;
+        var lhs = (int)Math.Floor(world.Fishing.Intuition.TimeRemaining);
         var rhs = args.Seconds;
         var result = CompareInt(lhs, rhs, args.Op);
         return args.Invert ? !result : result;

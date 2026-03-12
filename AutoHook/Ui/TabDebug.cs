@@ -43,26 +43,22 @@ public class TabDebug : BaseTab {
 
             // Fishing state
             if (ImGui.CollapsingHeader("Fishing state", ImGuiTreeNodeFlags.DefaultOpen)) {
+                var f = ws.Fishing;
                 ImGui.Text($"FishingState: {ws.FishingState}");
                 ImGui.Text($"PreviousFishingState: {ws.PreviousFishingState}");
                 ImGui.Text($"FishingStep: {ws.FishingStep} (0x{(uint)ws.FishingStep:X})");
-                ImGui.Text($"CurrentBaitId: {ws.CurrentBaitId}");
-                ImGui.Text($"CurrentSwimbaitId: {ws.CurrentSwimbaitId}");
-                ImGui.Text($"CurrentBaitMoochId: {ws.CurrentBaitMoochId}");
-                ImGui.Text($"CurrentBaitSwimBait: {ws.CurrentBaitSwimBait}");
-                ImGui.Text($"IsMooching (Mooch/Swimbait from flags): {ws.IsMooching}");
+                ImGui.Text($"BaitInfo: BaitId={f.BaitInfo.BaitId} SwimbaitId={f.BaitInfo.SelectedSwimbaitId} MoochId={f.BaitInfo.MoochId} IsMooching={f.BaitInfo.IsMooching}");
             }
 
             // Bite / context
             if (ImGui.CollapsingHeader("Bite / context")) {
-                ImGui.Text($"BiteTimeSeconds: {ws.BiteTimeSeconds:F2}");
+                ImGui.Text($"BiteInfo: Time={ws.Fishing.BiteInfo.BiteTimeSeconds:F2} TugType={ws.Fishing.BiteInfo.TugType}");
                 ImGui.Text($"ChumActive: {ws.ChumActive}");
             }
 
             // Intuition
             if (ImGui.CollapsingHeader("Intuition")) {
-                ImGui.Text($"IntuitionStatus: {ws.IntuitionStatus}");
-                ImGui.Text($"IntuitionTimeRemaining: {ws.IntuitionTimeRemaining:F1}s");
+                ImGui.Text($"Intuition: Status={ws.Fishing.Intuition.Status} TimeRemaining={ws.Fishing.Intuition.TimeRemaining:F1}s");
                 ImGui.Text($"SpectralCurrentStatus: {ws.SpectralCurrentStatus}");
             }
 
@@ -72,24 +68,31 @@ public class TabDebug : BaseTab {
                 ImGui.Text($"SpectralCurrentActive: {of.SpectralCurrentActive}");
                 ImGui.Text($"CurrentRoute: {of.CurrentRoute}");
                 ImGui.Text($"CurrentZone: {of.CurrentZone}");
-                ImGui.Text($"Mission1: type={of.Mission1Type} progress={of.Mission1Progress}");
-                ImGui.Text($"Mission2: type={of.Mission2Type} progress={of.Mission2Progress}");
-                ImGui.Text($"Mission3: type={of.Mission3Type} progress={of.Mission3Progress}");
+                ImGui.Text($"Mission1: type={of.Mission1.Type} progress={of.Mission1.Progress}");
+                ImGui.Text($"Mission2: type={of.Mission2.Type} progress={of.Mission2.Progress}");
+                ImGui.Text($"Mission3: type={of.Mission3.Type} progress={of.Mission3.Progress}");
                 ImGui.Text($"FishData count: {of.FishData?.Count ?? 0}");
             }
 
             // Last catch
             if (ImGui.CollapsingHeader("Last catch")) {
-                ImGui.Text($"LastCaughtFishId: {ws.LastCaughtFishId}");
-                ImGui.Text($"LastCatchAmount: {ws.LastCatchAmount}");
+                var lc = ws.Fishing.LastCatch;
+                if (lc.HasValue)
+                    ImGui.Text($"LastCatch: FishId={lc.Value.FishId} Amount={lc.Value.Amount}");
+                else
+                    ImGui.Text("LastCatch: (none)");
                 if (Service.LastCatch != null)
                     ImGui.Text($"LastCatch (name): {Service.LastCatch.Name} (Id: {Service.LastCatch.Id})");
+                ImGui.Text($"SessionCatches count: {ws.Fishing.SessionCatches.Count}");
             }
 
             // Actions
             if (ImGui.CollapsingHeader("Actions")) {
-                ImGui.Text($"LastUsedActionId: {ws.LastUsedActionId}");
-                ImGui.Text($"LastUsedActionType: {ws.LastUsedActionType}");
+                var ua = ws.Fishing.LastUsedAction;
+                if (ua.HasValue)
+                    ImGui.Text($"LastUsedAction: {ua.Value.ActionId} ({ua.Value.ActionType})");
+                else
+                    ImGui.Text("LastUsedAction: (none)");
                 ImGui.Text($"LureSuccess: {ws.LureSuccess}");
             }
 
@@ -113,7 +116,7 @@ public class TabDebug : BaseTab {
 
             // Pot
             if (ImGui.CollapsingHeader("Pot")) {
-                ImGui.Text($"IsPotOffCooldown: {ws.IsPotOffCooldown}");
+                ImGui.Text($"IsPotOffCooldown: {ws.Player.IsPotOffCooldown}");
             }
 
             // Item counts (known IDs)

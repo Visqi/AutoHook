@@ -14,7 +14,7 @@ public sealed class OceanMissionTypeCD : IConditionDefinition {
         var ids = GetIds(parameters);
         if (ids.Count == 0) return false;
         var of = world.OceanFishing;
-        var result = ids.Contains(of.Mission1Type) || ids.Contains(of.Mission2Type) || ids.Contains(of.Mission3Type);
+        var result = ids.Contains(of.Mission1.Type) || ids.Contains(of.Mission2.Type) || ids.Contains(of.Mission3.Type);
         return GetBool(parameters, "inv", false) ? !result : result;
     }
 

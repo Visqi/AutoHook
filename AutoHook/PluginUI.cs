@@ -182,7 +182,7 @@ public class PluginUi : Window, IDisposable {
                             UIStrings.StatusNoPreset);
                     }
                     else {
-                        var baitId = Service.WorldState.CurrentBaitId;
+                        var baitId = Service.WorldState.Fishing.BaitInfo.BaitId;
                         var baitName = MultiString.GetItemName(baitId);
 
                         var hasBait = preset != null && preset.HasBaitOrMooch(baitId);

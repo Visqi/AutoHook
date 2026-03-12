@@ -18,9 +18,9 @@ public sealed class OceanMissionProgressCD : IConditionDefinition {
         var op = GetOp(parameters, "op", ">=");
         var of = world.OceanFishing;
         var progress = slot switch {
-            2 => of.Mission2Progress,
-            3 => of.Mission3Progress,
-            _ => of.Mission1Progress,
+            2 => of.Mission2.Progress,
+            3 => of.Mission3.Progress,
+            _ => of.Mission1.Progress,
         };
         var result = CompareInt(progress, val, op);
         return GetBool(parameters, "inv", false) ? !result : result;

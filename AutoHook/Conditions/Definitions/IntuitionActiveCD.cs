@@ -10,7 +10,7 @@ public sealed class IntuitionActiveCD : IConditionDefinition {
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.All;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
-        var result = world.IntuitionStatus == IntuitionStatus.Active;
+        var result = world.Fishing.Intuition.Status == IntuitionStatus.Active;
         return GetBool(parameters, "inv", false) ? !result : result;
     }
 

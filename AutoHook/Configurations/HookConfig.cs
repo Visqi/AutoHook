@@ -1,5 +1,6 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Configurations;
 
@@ -113,13 +114,13 @@ public class HookConfig : BaseOption {
 
             foreach (var preset in requiredStatusPreset)
             {
-                if (Service.WorldState.HasStatus(preset.RequiredStatus) && preset.UseCustomStatusHook)
+                if (Service.WorldState.Player.HasStatus(preset.RequiredStatus) && preset.UseCustomStatusHook)
                 {
                     return preset;
                 }
             }*/
 
-        return Service.WorldState.IntuitionStatus == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook ? IntuitionHook : NormalHook;
+        return Service.WorldState.Fishing.Intuition.Status == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook ? IntuitionHook : NormalHook;
     }
 
     public HookType? GetHook(BiteType bite, double timePassed) {
@@ -141,7 +142,7 @@ public class HookConfig : BaseOption {
                     if (GetHookTypeForTime(hook.th, timePassed) is { } ht && IsHookAvailable(hook.th, timePassed))
                         return ht;
 
-                if (hookset.LetFishEscapeTripleHook && Service.WorldState.CurrentGp < 700) {
+                if (hookset.LetFishEscapeTripleHook && Service.WorldState.Player.CurrentGp < 700) {
                     Service.Status = "Not enough GP to use Triple Hook, Letting fish escape is enabled";
                     return HookType.None;
                 }
@@ -155,7 +156,7 @@ public class HookConfig : BaseOption {
                     if (GetHookTypeForTime(hook.dh, timePassed) is { } ht && IsHookAvailable(hook.dh, timePassed))
                         return ht;
 
-                if (hookset.LetFishEscapeDoubleHook && Service.WorldState.CurrentGp < 400) {
+                if (hookset.LetFishEscapeDoubleHook && Service.WorldState.Player.CurrentGp < 400) {
                     Service.Status = "Not enough GP to use Double Hook, Letting fish escape is enabled";
                     return HookType.None;
                 }
@@ -219,7 +220,7 @@ public class HookConfig : BaseOption {
     private bool IsHookAvailable(BaseBiteConfig hookType, double timePassed) {
         if (GetHookTypeForTime(hookType, timePassed) is not { } timedHook)
             return false;
-        if (!Service.WorldState.ActionAvailable((uint)timedHook)) {
+        if (!Service.WorldState.ActionAvailable((uint)timedHook, ActionType.Action)) {
             Service.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
             return false;
         }

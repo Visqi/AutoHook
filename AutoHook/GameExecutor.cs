@@ -78,7 +78,7 @@ public sealed class GameExecutor(WorldState ws) {
     };
 
     public ChangeBaitReturn ChangeBait(uint baitId) {
-        if (baitId == ws.CurrentBaitId) return ChangeBaitReturn.AlreadyEquipped;
+        if (baitId == ws.Fishing.BaitInfo.BaitId) return ChangeBaitReturn.AlreadyEquipped;
         if (baitId == 0 || GameRes.Baits.All(b => b.Id != baitId)) return ChangeBaitReturn.InvalidBait;
         if (ws.GetItemCount(baitId) <= 0) return ChangeBaitReturn.NotInInventory;
         return GameMain.ExecuteCommand(701, 4, (int)baitId, 0, 0) ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
@@ -90,7 +90,7 @@ public sealed class GameExecutor(WorldState ws) {
     }
 
     public ChangeBaitReturn ChangeBait(BaitFishClass bait) {
-        if (bait.Id == ws.CurrentBaitId) {
+        if (bait.Id == ws.Fishing.BaitInfo.BaitId) {
             Service.PrintChat($"Bait \"{bait.Name}\" is already equipped.");
             return ChangeBaitReturn.AlreadyEquipped;
         }

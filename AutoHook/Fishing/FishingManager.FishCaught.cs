@@ -4,10 +4,10 @@ namespace AutoHook.Fishing;
 
 public partial class FishingManager {
     private FishConfig? GetLastCatchConfig() {
-        if (Ws.LastCaughtFishId == null)
+        if (Ws.Fishing.LastCatch is not { } lc || lc.FishId <= 0)
             return null;
 
-        return Presets.SelectedPreset?.GetFishById(Ws.LastCaughtFishId.Value) ?? Presets.DefaultPreset.GetFishById(Ws.LastCaughtFishId.Value);
+        return Presets.SelectedPreset?.GetFishById(lc.FishId) ?? Presets.DefaultPreset.GetFishById(lc.FishId);
     }
 
     private bool UseFishCaughtActions(FishConfig? lastFishCatchCfg) {
@@ -25,8 +25,8 @@ public partial class FishingManager {
 
         var caughtCount = FishingHelper.GetFishCount(lastFishCatchCfg.UniqueId);
 
-        if (Ws.LastCaughtFishId != null)
-            lastFishCatchCfg.SparefulHand.FishIdToCheck = (uint)Ws.LastCaughtFishId.Value;
+        if (Ws.Fishing.LastCatch is { } lc && lc.FishId > 0)
+            lastFishCatchCfg.SparefulHand.FishIdToCheck = (uint)lc.FishId;
 
         if (lastFishCatchCfg.IdenticalCast.IsAvailableToCast(caughtCount))
             cast = lastFishCatchCfg.IdenticalCast;
@@ -103,7 +103,7 @@ public partial class FishingManager {
             !FishingHelper.SwappedBait(guid) && !Ws.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
             var readyForBaitSwap = baitSet.Evaluate(Ws, ConditionRegistry.Registry);
             if (readyForBaitSwap &&
-                lastCatchCfg.BaitToSwap.Id != Ws.CurrentBaitId) {
+                lastCatchCfg.BaitToSwap.Id != Ws.Fishing.BaitInfo.BaitId) {
                 var result = ChangeBait(lastCatchCfg.BaitToSwap);
 
                 FishingHelper.AddBaitSwap(guid);
