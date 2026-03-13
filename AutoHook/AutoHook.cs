@@ -56,18 +56,17 @@ public class AutoHook : IDalamudPlugin {
         PunishLibMain.Init(pluginInterface, "AutoHook", new AboutPlugin() { Developer = "InitialDet", Sponsor = "https://ko-fi.com/initialdet" });
 
         Plugin = this;
+
         Service.WorldState = new WorldState();
-        _wsSync = new WorldStateUpdater();
-        Svc.PluginInterface.UiBuilder.Draw += () => { _wsSync.Update(); Service.WindowSystem.Draw(); };
-        Svc.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
-        Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
-
-        GameRes.Initialize();
-
         Service.Configuration = Configuration.Load();
         UIStrings.Culture = new CultureInfo(Service.Configuration.CurrentLanguage);
+        Service.AutoCollectables = new AutoCollectables();
+
+        _wsSync = new WorldStateUpdater();
         _pluginUi = new PluginUi();
         _autoGig = new AutoGig();
+        HookManager = new FishingManager();
+        AutoHookIpc = new AutoHookIPC();
 
         foreach (var (command, help) in CommandHelp) {
             Svc.Commands.AddHandler(command, new CommandInfo(OnCommand) {
@@ -75,8 +74,11 @@ public class AutoHook : IDalamudPlugin {
             });
         }
 
-        HookManager = new FishingManager();
-        AutoHookIpc = new AutoHookIPC();
+        GameRes.Initialize();
+
+        Svc.PluginInterface.UiBuilder.Draw += () => { _wsSync.Update(); Service.WindowSystem.Draw(); };
+        Svc.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
+        Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
 
         _ = new EzDtr(() =>
             $"{((SeIconChar)0xE05E).ToIconString()} {(Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled)}",
@@ -189,6 +191,7 @@ public class AutoHook : IDalamudPlugin {
         HookManager.Dispose();
         _wsSync.Dispose();
         Service.Save();
+        Service.AutoCollectables.Dispose();
         Svc.PluginInterface.UiBuilder.Draw -= () => { _wsSync.Update(); Service.WindowSystem.Draw(); };
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;

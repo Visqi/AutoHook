@@ -28,6 +28,11 @@ public class ExtraTrigger {
 
     public ExtraStopAction StopAction { get; set; } = ExtraStopAction.None;
 
+    public bool ResolveCollectablesWindow { get; set; }
+    public bool ResolveCollectablesForceNo { get; set; }
+
+    public bool StartFishing { get; set; }
+
     public void EnsureUiId() {
         if (UiId <= 0)
             UiId = Interlocked.Increment(ref _nextUiId);
@@ -43,7 +48,6 @@ public class ExtraConfig : BaseOption {
 
     public List<ExtraTrigger> Triggers { get; set; } = [];
 
-    /// <summary>Per-trigger last evaluation result (not serialized) used to detect BecomesTrue/BecomesFalse.</summary>
     [JsonIgnore] public List<bool> LastTriggerStates { get; } = [];
 
     public override void DrawOptions() { }

@@ -1,3 +1,4 @@
+using AutoHook.Conditions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -21,16 +22,6 @@ public class TabSettings : BaseTab {
         if (ImGui.Button(UIStrings.TabGeneral_DrawHeader_Localization_Help)) {
             Process.Start(new ProcessStartInfo { FileName = "https://crowdin.com/project/autohook", UseShellExecute = true });
         }
-
-        ImGui.Spacing();
-
-        if (ImGui.Button(UIStrings.TabAutoCasts_DrawHeader_Guide_Collectables)) {
-            Process.Start(new ProcessStartInfo {
-                FileName = "https://github.com/PunishXIV/AutoHook/blob/main/AcceptCollectable.md",
-                UseShellExecute = true
-            });
-        }
-
         ImGui.Spacing();
     }
 
@@ -54,6 +45,9 @@ public class TabSettings : BaseTab {
         DrawUtil.Checkbox(UIStrings.AntiAfkOption, ref Service.Configuration.ResetAfkTimer);
 
         DrawUtil.Checkbox(UIStrings.AutoStartFishing, ref Service.Configuration.AutoStartFishing, UIStrings.AutoStartFishingHelpText);
+
+        DrawUtil.Checkbox("Enable auto-collectables", ref Service.Configuration.AutoCollectablesEnabled,
+            "Auto accepts the prompt when a collectable appears. Can be overridden per preset in Extra options.");
 
         DrawUtil.Checkbox(UIStrings.DontHideExtraAutoCast, ref Service.Configuration.DontHideOptionsDisabled);
 

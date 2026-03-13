@@ -1,3 +1,4 @@
+using AutoHook.Conditions;
 using AutoHook.Configurations.Legacy;
 using AutoHook.Spearfishing;
 using Dalamud.Configuration;
@@ -46,6 +47,9 @@ public partial class Configuration : IPluginConfiguration {
     public bool AutoStartFishing = false;
     public bool DtrBarEnabled = false;
     public bool DtrPresetBarEnabled = false;
+
+    public bool AutoCollectablesEnabled = true;
+    public ConditionSet? AutoCollectablesConditions { get; set; }
 
     private void WriteVersionBackup(int fromVersion) {
         try {

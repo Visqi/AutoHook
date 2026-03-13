@@ -172,6 +172,7 @@ public partial class FishingManager : IDisposable {
                     StartFishing();
                 }
             }
+
             return;
         }
 

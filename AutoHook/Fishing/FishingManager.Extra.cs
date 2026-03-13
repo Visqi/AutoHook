@@ -1,4 +1,6 @@
 using AutoHook.Conditions;
+using ECommons.Throttlers;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
 namespace AutoHook.Fishing;
 
@@ -70,6 +72,17 @@ public partial class FishingManager {
                 Service.PrintChat(@$"[Extra] Trigger: Swapping bait to {trig.BaitToSwap.Name}");
                 Service.Save();
             }
+        }
+
+        if (trig.ResolveCollectablesWindow) {
+            Service.AutoCollectables.ResolvePending(trig.ResolveCollectablesForceNo);
+        }
+
+        if (trig.StartFishing
+            && Ws.Fishing.FishingState is FishingState.None or FishingState.PoleReady
+            && Ws.IsCastAvailable()
+            && EzThrottler.Throttle("ExtraStartFishingRule", 1000)) {
+            StartFishing();
         }
     }
 }

@@ -113,7 +113,6 @@ public class SubTabExtra {
             var removed = false;
 
             if (DrawUtil.DrawCheckboxHeader(headerLabel, ref enabled, ImGuiTreeNodeFlags.DefaultOpen, () => {
-                // Slim editor with only Extra-relevant condition types (Intuition, Spectral, Angler's stacks, Swimbait).
                 trig.ConditionSet = ConditionUi.DrawConditionSetSlim(
                     "When",
                     trig.ConditionSet,
@@ -134,6 +133,10 @@ public class SubTabExtra {
 
                 ImGui.Separator();
                 ImGui.Indent(20 * ImGuiHelpers.GlobalScale);
+
+                var startFishing = trig.StartFishing;
+                DrawUtil.DrawCheckboxTree("Start fishing", ref startFishing, null);
+                trig.StartFishing = startFishing;
 
                 var stopEnabled = trig.StopAction != ExtraStopAction.None;
                 DrawUtil.DrawCheckboxTree(UIStrings.StopQuitFishing, ref stopEnabled,
@@ -172,6 +175,12 @@ public class SubTabExtra {
                 DrawBaitSwap(ref swapBait, ref bait);
                 trig.SwapBait = swapBait;
                 trig.BaitToSwap = bait;
+
+                var resolve = trig.ResolveCollectablesWindow;
+                var forceNo = trig.ResolveCollectablesForceNo;
+                DrawUtil.DrawCheckboxTree("Resolve collectables window", ref resolve, () => DrawUtil.Checkbox("Force NO", ref forceNo));
+                trig.ResolveCollectablesWindow = resolve;
+                trig.ResolveCollectablesForceNo = forceNo;
 
                 ImGui.Unindent(20 * ImGuiHelpers.GlobalScale);
             }, helpText: string.Empty, forceOpen: forceOpen)) {

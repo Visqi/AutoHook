@@ -16,6 +16,7 @@ public class Service {
     public static Configuration Configuration { get; set; } = null!;
     public static WindowSystem WindowSystem { get; } = new(PluginName);
     public static BaitFishClass LastCatch { get; set; } = new(@"-", -1);
+    public static AutoCollectables AutoCollectables { get; set; } = null!;
 
     public static string Status {
         get => _status;

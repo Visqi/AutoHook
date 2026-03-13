@@ -383,7 +383,7 @@ public static class DrawUtil {
 
     }
 
-    public static void DrawCheckboxTree(string treeName, ref bool enable, Action action, string helpText = "", bool forceOpen = false) {
+    public static void DrawCheckboxTree(string treeName, ref bool enable, Action? action = null, string helpText = "", bool forceOpen = false) {
         using var id = ImRaii.PushId(treeName);
         if (ImGui.Checkbox($"###checkbox{treeName}", ref enable)) {
             if (enable) ImGui.SetNextItemOpen(true);
@@ -394,6 +394,7 @@ public static class DrawUtil {
             ImGui.TooltipOnHover(helpText);
 
         ImGui.SameLine(0, 3);
+
         if (Service.Configuration.SwapToButtons) {
             switch (Service.Configuration.SwapType) {
                 case 0:
@@ -406,6 +407,15 @@ public static class DrawUtil {
         }
         else {
             var x = ImGui.GetCursorPosX();
+
+            if (action == null) {
+                ImGui.TreeNodeEx(treeName,
+                    ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen);
+                if (!string.IsNullOrEmpty(helpText))
+                    ImGui.TooltipOnHover(helpText);
+                return;
+            }
+
             if (forceOpen)
                 ImGui.SetNextItemOpen(true, ImGuiCond.Always);
             if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding)) {
