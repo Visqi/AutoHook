@@ -9,7 +9,7 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
     public string Name => "Time window";
     public string Category => "Time";
     public string Description => "Checks current Eorzea time between start and end.";
-    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.AutoCast;
+    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.All;
 
     public readonly record struct TimeWindowParams(TimeOnly Start, TimeOnly End, bool Invert) {
         public Dictionary<string, object> ToParams() {

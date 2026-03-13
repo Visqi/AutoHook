@@ -119,7 +119,6 @@ public class SubTabExtra {
                     trig.ConditionSet,
                     ConditionScope.Hook,
                     showAdvanced: true,
-                    allowedTypeIds: [nameof(IntuitionActiveCD), nameof(SpectralActiveCD), nameof(StatusStacksCD), nameof(SwimbaitCountCD)],
                     drawHeaderExtras: () => {
                         ImGui.SameLine(0, 3);
                         if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
