@@ -37,6 +37,7 @@ public class FishConfig : BaseOption {
         Fish = fish;
         // TODO: ok this is not the best way, but im tired, and it works for now so be nice to me
         Mooch.Name = UIStrings.Always_Mooch;
+        Mooch.HelpText = string.Empty;
     }
 
     public FishConfig(int fishId) {

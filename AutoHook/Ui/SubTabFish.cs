@@ -149,6 +149,7 @@ public class SubTabFish {
     private static void DrawMooch(FishConfig fishConfig) {
         using var _ = ImRaii.PushId(@"DrawMooch");
         if (ImGui.TreeNodeEx(UIStrings.Mooch_Setting, ImGuiTreeNodeFlags.FramePadding)) {
+            fishConfig.Mooch.HelpText = string.Empty; // hack
             fishConfig.Mooch.DrawConfig();
 
             if (DrawUtil.Checkbox(UIStrings.Never_Mooch, ref fishConfig.NeverMooch, UIStrings.NeverMoochHelpText)) {

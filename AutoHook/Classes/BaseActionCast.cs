@@ -199,9 +199,7 @@ public abstract class BaseActionCast {
         ImGui.SameLine();
         ImGui.TextColored(ImGuiColors.DalamudYellow, @$"GP - {GetName()}");
 
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(
-                @$"{GetName()} {UIStrings.WillBeUsedWhenYourGPIsEqualOr} {(GpThresholdAbove ? UIStrings.Above : UIStrings.Below)} {GpThreshold}");
+        ImGui.TooltipOnHover(@$"{GetName()} {UIStrings.WillBeUsedWhenYourGPIsEqualOr} {(GpThresholdAbove ? UIStrings.Above : UIStrings.Below)} {GpThreshold}");
 
         ImGui.Separator();
         if (ImGui.RadioButton(UIStrings.Above, GpThresholdAbove)) {
