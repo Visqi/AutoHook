@@ -9,16 +9,12 @@ public class Service {
         => pluginInterface.Create<Service>();
 
     public const string PluginName = "AutoHook";
-
     public const string GlobalPresetName = "Global Preset";
-
-    public static WorldState WorldState { get; set; } = null!;
-
-    public static Configuration Configuration { get; set; } = null!;
-    public static WindowSystem WindowSystem { get; } = new(PluginName);
-
     public static string _status = @"";
 
+    public static WorldState WorldState { get; set; } = null!;
+    public static Configuration Configuration { get; set; } = null!;
+    public static WindowSystem WindowSystem { get; } = new(PluginName);
     public static BaitFishClass LastCatch { get; set; } = new(@"-", -1);
 
     public static string Status {

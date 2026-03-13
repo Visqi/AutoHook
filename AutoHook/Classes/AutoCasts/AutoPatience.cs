@@ -23,6 +23,9 @@ public class AutoPatience : BaseActionCast {
         if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune) && Service.WorldState.GetStatusTime(IDs.Status.AnglersFortune) > RefreshEarlyTime)
             return false;
 
+        if (Service.WorldState.HasStatus(IDs.Status.MakeshiftBait))
+            return false;
+
         return !Service.WorldState.HasStatus(IDs.Status.PrizeCatch);
     }
 

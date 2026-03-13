@@ -24,6 +24,9 @@ public class AutoMakeShiftBait : BaseActionCast {
         if (Service.WorldState.HasStatus(IDs.Status.PrizeCatch))
             return false;
 
+        if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune))
+            return false;
+
         var available = Service.WorldState.ActionAvailable(IDs.Actions.MakeshiftBait);
         var hasStacks = Service.WorldState.HasAnglersArtStacks(MakeshiftBaitStacks);
 
