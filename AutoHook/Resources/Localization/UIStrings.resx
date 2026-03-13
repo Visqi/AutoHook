@@ -497,7 +497,7 @@ This could save you 100gp if going only for mooches</value>
     <value>Opens Config Window</value>
   </data>
   <data name="TabAutoCasts_When_Stack_Equals" xml:space="preserve">
-    <value>When Stacks = </value>
+    <value>When Stacks &gt;= </value>
   </data>
   <data name="Use_Prize_Catch" xml:space="preserve">
     <value>Use Prize Catch</value>

@@ -3912,7 +3912,7 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to When Stacks = .
+        ///   Looks up a localized string similar to When Stacks &gt;= .
         /// </summary>
         internal static string TabAutoCasts_When_Stack_Equals {
             get {
