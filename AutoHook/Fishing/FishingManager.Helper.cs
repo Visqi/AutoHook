@@ -1,3 +1,4 @@
+using Dalamud.Game.Chat;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using ECommons.Throttlers;
@@ -43,14 +44,13 @@ public partial class FishingManager
     private const XivChatType FishingMessage = (XivChatType)2243;
     private const XivChatType SystemAlert = (XivChatType)2115; //idk what to call this
 
-    private void OnMessageDelegate(XivChatType type, int timeStamp, ref SeString sender, ref SeString messageSe,
-        ref bool isHandled)
+    private void OnMessageDelegate(IHandleableChatMessage message)
     {
         try
         {
-            if (type is FishingMessage)
+            if (message.LogKind is FishingMessage)
             {
-                var text = messageSe.TextValue;
+                var text = message.Message.TextValue;
                 if (GetHookCfg().GetHookset().CastLures.LureTarget != LureTarget.NotSpecial)
                 {
                     // Check if a special fish is found
@@ -64,9 +64,9 @@ public partial class FishingManager
                     _lureSuccess = FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess };
                 }
             }
-            else if (type is SystemAlert)
+            else if (message.LogKind is SystemAlert)
             {
-                var text = messageSe.TextValue;
+                var text = message.Message.TextValue;
                 if (FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.CantFish })
                     Service.Status = UIStrings.CantFishHere;
             }
