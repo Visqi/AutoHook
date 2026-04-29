@@ -13,6 +13,8 @@ public class Service {
     public static string _status = @"";
 
     public static WorldState WorldState { get; set; } = null!;
+    /// <summary>Pushed each frame before fishing logic reads <see cref="WorldState"/> (framework tick).</summary>
+    public static WorldStateUpdater WorldStateUpdater { get; set; } = null!;
     public static Configuration Configuration { get; set; } = null!;
     public static WindowSystem WindowSystem { get; } = new(PluginName);
     public static BaitFishClass LastCatch { get; set; } = new(@"-", -1);

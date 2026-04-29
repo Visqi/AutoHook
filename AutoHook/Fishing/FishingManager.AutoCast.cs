@@ -4,6 +4,7 @@ using ECommons.Throttlers;
 namespace AutoHook.Fishing;
 
 public partial class FishingManager {
+    private const int MaxStartFishingAutoCastDepth = 12;
     public AutoCastsConfig GetAutoCastCfg()
         => Presets.SelectedPreset?.AutoCastsCfg ?? Presets.DefaultPreset.AutoCastsCfg;
 
@@ -57,8 +58,65 @@ public partial class FishingManager {
         }, "AutoCasting");
     }
 
+    /// <summary>
+    /// After <see cref="StartFishing"/>, run buff/item auto-casts in sequence, then always attempt cast line / mooch
+    /// (avoids stopping after Cordial/Patience with no cast).
+    /// </summary>
+    private void UseAutoCastsAfterStartFishing() {
+        if (Ws.FishingStep.HasFlag(FishingSteps.None) || Ws.FishingStep.HasFlag(FishingSteps.BeganFishing) || Ws.FishingStep.HasFlag(FishingSteps.Quitting))
+            return;
+
+        if (!Ws.IsCastAvailable() || Service.TaskManager.IsBusy)
+            return;
+
+        Service.TaskManager.Enqueue(() => RunStartFishingAutoCastStep(0), "AutoCastingStart");
+    }
+
+    private void RunStartFishingAutoCastStep(int depth) {
+        var lastFishCatchCfg = GetLastCatchConfig();
+        var acCfg = GetAutoCastCfg();
+        var ignoreMooch = lastFishCatchCfg?.NeverMooch ?? false;
+
+        if (depth >= MaxStartFishingAutoCastDepth) {
+            CastLineMoochOrRelease(acCfg, lastFishCatchCfg);
+            return;
+        }
+
+        if (!acCfg.EnableAll) {
+            CastLineMoochOrRelease(acCfg, lastFishCatchCfg);
+            return;
+        }
+
+        var next = acCfg.GetNextAutoCast(ignoreMooch);
+        if (next == null || ReferenceEquals(next, acCfg.CastLine) || ReferenceEquals(next, acCfg.CastMooch)) {
+            CastLineMoochOrRelease(acCfg, lastFishCatchCfg);
+            return;
+        }
+
+        if (!acCfg.TryCastAction(next, false, ignoreMooch)) {
+            CastLineMoochOrRelease(acCfg, lastFishCatchCfg);
+            return;
+        }
+
+        var delayMs = 1200;
+        try {
+            delayMs = new Random().Next(
+                Service.Configuration.DelayBetweenCastsMin,
+                Service.Configuration.DelayBetweenCastsMax) + 1200;
+        }
+        catch {
+            // keep delayMs default
+        }
+
+        Service.TaskManager.EnqueueDelay(delayMs);
+        Service.TaskManager.Enqueue(() => RunStartFishingAutoCastStep(depth + 1), "AutoCastingStart");
+    }
+
     private void CastLineMoochOrRelease(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg) {
         var blockMooch = lastFishCatchCfg is { Enabled: true, NeverMooch: true };
+
+        if (TryMoochBeforeSwimbaitForSameFish(acCfg, lastFishCatchCfg, blockMooch))
+            return;
 
         if (TryUseSwimbait(acCfg, lastFishCatchCfg, blockMooch))
             if (acCfg.TryCastAction(acCfg.CastLine, true))
@@ -77,6 +135,28 @@ public partial class FishingManager {
 
         if (acCfg.TryCastAction(acCfg.CastLine, true))
             return;
+    }
+
+    /// <summary>
+    /// Mooching the same fish again does not consume swimbait; prefer mooch when the last catch is also in a swimbait slot.
+    /// </summary>
+    private bool TryMoochBeforeSwimbaitForSameFish(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg, bool blockMooch) {
+        if (blockMooch)
+            return false;
+
+        if (Ws.Fishing.LastCatch is not { FishId: > 0 } lastCatch)
+            return false;
+
+        var fishId = (uint)lastCatch.FishId;
+        if (!Ws.SwimbaitIds.Any(id => id == fishId))
+            return false;
+
+        if (lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast()) {
+            PlayerRes.CastActionNoDelay(lastFishCatchCfg.Mooch.Id, lastFishCatchCfg.Mooch.ActionType, UIStrings.Mooch);
+            return true;
+        }
+
+        return acCfg.TryCastAction(acCfg.CastMooch, true);
     }
 
     private bool TryUseSwimbait(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg, bool blockMooch) {
@@ -130,6 +210,8 @@ public partial class FishingManager {
             }
 
             if (ChangeSwimbait((uint)slotIndex) == ChangeBaitReturn.Success) {
+                Service.WorldStateUpdater?.RefreshFishingStateSnapshot();
+                UpdateStatusAndTimer();
                 Service.PrintDebug($"[Swimbait] Using swimbait slot {slotIndex} (fish ID: {fishId})");
                 Service.Status = $"Using swimbait: {MultiString.GetItemName((int)fishId)}";
                 return true;

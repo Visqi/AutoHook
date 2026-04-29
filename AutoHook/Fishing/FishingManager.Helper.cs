@@ -1,3 +1,4 @@
+using Dalamud.Game.Chat;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Lumina.Excel.Sheets;
@@ -28,10 +29,10 @@ public partial class FishingManager {
     private const XivChatType FishingMessage = (XivChatType)2243;
     private const XivChatType SystemAlert = (XivChatType)2115; //idk what to call this
 
-    private void OnMessageDelegate(XivChatType type, int timeStamp, ref SeString sender, ref SeString messageSe, ref bool isHandled) {
+    private void OnMessageDelegate(IHandleableChatMessage message) {
         try {
-            if (type is FishingMessage) {
-                var text = messageSe.TextValue;
+            if (message.LogKind is FishingMessage) {
+                var text = message.Message.TextValue;
                 if (GetHookCfg().GetHookset().CastLures.LureTarget != LureTarget.NotSpecial) {
                     var success = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
                     Ws.Execute(new WorldState.OpSetLureSuccess(success));
@@ -43,8 +44,8 @@ public partial class FishingManager {
                     Ws.Execute(new WorldState.OpSetLureSuccess(success));
                 }
             }
-            else if (type is SystemAlert) {
-                var text = messageSe.TextValue;
+            else if (message.LogKind is SystemAlert) {
+                var text = message.Message.TextValue;
                 if (FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.CantFish })
                     Service.Status = UIStrings.CantFishHere;
             }

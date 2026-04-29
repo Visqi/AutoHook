@@ -29,13 +29,18 @@ public class AutoCollectables : IDisposable {
 
     // public method for handling the addon outside of postsetup
     public unsafe void ResolvePending(bool forceNo) {
+        Svc.Log.Debug($"[AutoCollectables] Resolve pending called");
         var mgr = RaptureAtkUnitManager.Instance();
         if (mgr == null)
             return;
 
+        Svc.Log.Debug($"[AutoCollectables] Resolve pending RAUM ready");
+
         var unit = mgr->GetAddonByName("SelectYesno");
         if (unit == null || !unit->IsReady)
             return;
+
+        Svc.Log.Debug($"[AutoCollectables] Resolve pending addon ready");
 
         var addon = (AddonSelectYesno*)unit;
         SelectYesNo(addon, forceNo);

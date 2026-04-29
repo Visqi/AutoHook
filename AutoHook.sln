@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11520.95 d18.3
+VisualStudioVersion = 18.3.11520.95
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoHook", "AutoHook\AutoHook.csproj", "{B00DE705-685B-4CAD-AEC1-37BA94BD537D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunishLib", "PunishLib\PunishLib\PunishLib.csproj", "{CB14784B-D047-49F0-BB31-37AA8984B213}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clib", "clib\clib.csproj", "{937C0018-997C-1624-E53D-BB135DDEB066}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		{CB14784B-D047-49F0-BB31-37AA8984B213}.Debug|x64.Build.0 = Debug|x64
 		{CB14784B-D047-49F0-BB31-37AA8984B213}.Release|x64.ActiveCfg = Release|x64
 		{CB14784B-D047-49F0-BB31-37AA8984B213}.Release|x64.Build.0 = Release|x64
-		{937C0018-997C-1624-E53D-BB135DDEB066}.Debug|x64.ActiveCfg = Debug|x64
-		{937C0018-997C-1624-E53D-BB135DDEB066}.Debug|x64.Build.0 = Debug|x64
-		{937C0018-997C-1624-E53D-BB135DDEB066}.Release|x64.ActiveCfg = Release|x64
-		{937C0018-997C-1624-E53D-BB135DDEB066}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

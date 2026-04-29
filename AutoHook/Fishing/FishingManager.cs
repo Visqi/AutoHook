@@ -9,6 +9,8 @@ using System.Diagnostics;
 namespace AutoHook.Fishing;
 
 public partial class FishingManager : IDisposable {
+    private const uint FisherJobId = 18;
+
     // todo: refactor this entire class
     private static readonly FishingPresets Presets = Service.Configuration.HookPresets;
 
@@ -81,8 +83,7 @@ public partial class FishingManager : IDisposable {
         }
 
         Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.StartedCasting));
-        UseAutoCasts();
-        //Service.TaskManager.Enqueue(() => UseAutoCasts());
+        UseAutoCastsAfterStartFishing();
     }
 
     // The current config is updates two times: When we began fishing (to get the config based on the mooch/bait) and when we hooked the fish (in case the user updated their configs).
@@ -164,6 +165,13 @@ public partial class FishingManager : IDisposable {
             || Svc.Objects.LocalPlayer == null)
             return;
 
+        Service.WorldStateUpdater.Update();
+
+        if (Player.ClassJob.RowId != FisherJobId) {
+            SanitizeWorldStateWhenNotFisher();
+            return;
+        }
+
         var currentState = Service.WorldState.Fishing.FishingState;
         if (currentState == FishingState.None) {
             if (Service.Configuration.AutoStartFishing && EzThrottler.Throttle("AutoStartFishing", 1000)) {
@@ -215,14 +223,30 @@ public partial class FishingManager : IDisposable {
         }
     }
 
+    /// <summary>
+    /// When not on Fisher, <see cref="WorldStateUpdater"/> does not refresh fishing fields; clear stale automation state
+    /// so gathering/other jobs are not blocked by leftover block-casting or fishing flags.
+    /// </summary>
+    private void SanitizeWorldStateWhenNotFisher() {
+        var f = Ws.Fishing;
+        if (!Ws.Player.BlockCasting
+            && f.FishingState == FishingState.None
+            && f.FishingStep == FishingSteps.None
+            && f.PreviousFishingState == FishingState.None)
+            return;
+
+        Ws.Execute(new WorldState.OpSetBlockCasting(false));
+        Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.None));
+        Ws.Execute(new FishingInfo.OpSetPreviousFishingState(FishingState.None));
+        Ws.Execute(new FishingInfo.OpFishingState(FishingState.None, new BaitInfo(0, null, 0, false)));
+    }
+
     private void InitFinishing() {
         if (!_fishingTimer.IsRunning)
             _fishingTimer.Start();
 
         UpdateStatusAndTimer();
     }
-
-    FishConfig? lastCatchCfg = null;
 
     private void CheckPluginActions() {
         if (!EzThrottler.Throttle(@"CheckPluginActions", 500))
@@ -231,7 +255,7 @@ public partial class FishingManager : IDisposable {
         if (!Ws.IsCastAvailable())
             return;
 
-        lastCatchCfg ??= GetLastCatchConfig();
+        var lastCatchCfg = GetLastCatchConfig();
 
         var extraCfg = GetExtraCfg();
 
@@ -267,7 +291,6 @@ public partial class FishingManager : IDisposable {
             Service.PrintDebug(@$"Started mooching/swimbait with {baitname}");
 
         Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.BeganFishing));
-        lastCatchCfg = null;
 
         Service.TaskManager.EnqueueDelay(2500);
         Service.TaskManager.Enqueue(CastCollect);

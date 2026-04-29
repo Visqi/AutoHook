@@ -12,6 +12,30 @@ using System.Globalization;
 
 namespace AutoHook;
 
+/* 
+ * TODO: 
+ * Add the ability to NOT a whole group
+ * get rid of "don't cancel mooch" configs under per fish surface slap/IC
+ * get rid of all other configs that could be conditions in auto casts et al. Migrate them to conditions.
+ * adding/changing a condition should default the tree node to be uncollapsed e.g. open
+ * under each swap/stop rule, add the ability to reset counters
+ * in the condition editor ui, highlight conditions that are currently true
+ * add snagging support
+ * show complex condition ui by default if there are multiple groups
+ * notification master ipc
+ * BUGS:
+ * Condition evaluation seems to be stale at times (like auto mooch on + fisher's int condition doesn't work at first, but deleting it and readding it suddenly works)
+ * When a preset is changed while autohook is actively running, the changes don't seem to be reflected in the behaviour. You have to stop fishing and restart
+ * if you change preset and tell it to use swimbait it uses the normal baits timeout options for the first one. this seems to happen regardless if you have a timer on...
+ * resolve collectables window under swap/stop rules doesn't seem to be doing anything when checked. If it's checked but force no isn't, we treat that as resolve as it would normally if the global option was checked
+ * when autohook is active, this seems to mess with gathering and prevents gathering items off fisher
+ * start fishing rule doesn't seem to work?
+ * remooching doesn't work. If you have the fish in the swimbait it will use that over mooching the same fish.
+ * mutltihook is checking gp for triple hook/double hook? idk what this report was about
+ * with no overcap condition set on cordial, it just checks the gp value which by default is above 0. This allows overcapping when the default behaviour should be to disallow it unless any condition is set. And right now if you hit start actions with cordial and patience 2 selected it will use the cordial then just do nothing
+ * 
+ */
+
 public class AutoHook : IDalamudPlugin {
     public string Name => UIStrings.AutoHook;
 
@@ -45,7 +69,6 @@ public class AutoHook : IDalamudPlugin {
 
     private static PluginUi _pluginUi = null!;
     private static AutoGig _autoGig = null!;
-    private readonly WorldStateUpdater _wsSync;
     public readonly FishingManager HookManager;
     public AutoHookIPC AutoHookIpc;
 
@@ -61,8 +84,8 @@ public class AutoHook : IDalamudPlugin {
         Service.Configuration = Configuration.Load();
         UIStrings.Culture = new CultureInfo(Service.Configuration.CurrentLanguage);
         Service.AutoCollectables = new AutoCollectables();
+        Service.WorldStateUpdater = new WorldStateUpdater();
 
-        _wsSync = new WorldStateUpdater();
         _pluginUi = new PluginUi();
         _autoGig = new AutoGig();
         HookManager = new FishingManager();
@@ -76,9 +99,9 @@ public class AutoHook : IDalamudPlugin {
 
         GameRes.Initialize();
 
-        Svc.PluginInterface.UiBuilder.Draw += () => { _wsSync.Update(); Service.WindowSystem.Draw(); };
-        Svc.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
-        Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
+        Svc.PluginInterface.UiBuilder.Draw += Service.WindowSystem.Draw;
+        Svc.PluginInterface.UiBuilder.OpenConfigUi += _pluginUi.Toggle;
+        Svc.PluginInterface.UiBuilder.OpenMainUi += _pluginUi.Toggle;
 
         _ = new EzDtr(() =>
             $"{((SeIconChar)0xE05E).ToIconString()} {(Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled)}",
@@ -107,7 +130,7 @@ public class AutoHook : IDalamudPlugin {
         );
 
 #if DEBUG
-        OnOpenConfigUi();
+        _pluginUi.Toggle();
 #endif
     }
 
@@ -115,7 +138,7 @@ public class AutoHook : IDalamudPlugin {
         switch (command.Trim()) {
             case CmdAhCfg:
             case CmdAh:
-                OnOpenConfigUi();
+                _pluginUi.Toggle();
                 break;
             case CmdAhOn:
                 Svc.Chat.Print(UIStrings.AutoHook_Enabled);
@@ -189,18 +212,15 @@ public class AutoHook : IDalamudPlugin {
         _pluginUi.Dispose();
         _autoGig.Dispose();
         HookManager.Dispose();
-        _wsSync.Dispose();
         Service.Save();
         Service.AutoCollectables.Dispose();
-        Svc.PluginInterface.UiBuilder.Draw -= () => { _wsSync.Update(); Service.WindowSystem.Draw(); };
-        Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
-        Svc.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;
+        Svc.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
+        Svc.PluginInterface.UiBuilder.OpenConfigUi -= _pluginUi.Toggle;
+        Svc.PluginInterface.UiBuilder.OpenMainUi -= _pluginUi.Toggle;
 
         foreach (var (command, _) in CommandHelp)
             Svc.Commands.RemoveHandler(command);
 
         ECommonsMain.Dispose();
     }
-
-    private static void OnOpenConfigUi() => _pluginUi.Toggle();
 }

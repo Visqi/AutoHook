@@ -75,6 +75,22 @@ public sealed class WorldStateUpdater : IDisposable {
         ws.Execute(new FishingInfo.OpIntuition(new IntuitionInfo(biteContext.IntuitionStatus, biteContext.IntuitionTimeRemaining)));
     }
 
+    /// <summary>
+    /// Re-read fishing handler bait/swimbait/mooch ids from the game and apply to <see cref="Service.WorldState"/>.
+    /// Call after commands like swimbait slot swap so hook/timeout logic sees the new selection immediately.
+    /// </summary>
+    public void RefreshFishingStateSnapshot() {
+        if (Player.ClassJob.RowId is not 18 || Svc.Objects.LocalPlayer is null)
+            return;
+
+        var ws = Service.WorldState;
+        var biteContext = CollectBiteContext(ws);
+        ws.Execute(CollectFishingState(biteContext));
+        ws.Execute(CollectSwimbaitIds());
+        ws.Execute(new FishingInfo.OpBiteContext(biteContext.BiteTimeSeconds, biteContext.ChumActive));
+        ws.Execute(new FishingInfo.OpIntuition(new IntuitionInfo(biteContext.IntuitionStatus, biteContext.IntuitionTimeRemaining)));
+    }
+
     private void OnInventoryChanged(IReadOnlyCollection<InventoryEventArgs> _)
         => _needInventoryUpdate = true;
 

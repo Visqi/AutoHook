@@ -127,3 +127,5 @@ public sealed class WorldState {
         protected override void Exec(WorldState ws) => ws.Fishing.LureSuccess = Value;
     }
 }
+
+
