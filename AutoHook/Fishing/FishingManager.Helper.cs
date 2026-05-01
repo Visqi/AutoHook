@@ -41,21 +41,17 @@ public partial class FishingManager
             PlayerRes.CastAction(IDs.Actions.Salvage);
     }
 
-    private const XivChatType FishingMessage = (XivChatType)2243;
-    private const XivChatType SystemAlert = (XivChatType)2115; //idk what to call this
-
     private void OnMessageDelegate(IHandleableChatMessage message)
     {
         try
         {
-            if (message.LogKind is FishingMessage)
+            if (message.LogKind is XivChatType.Gathering)
             {
                 var text = message.Message.TextValue;
                 if (GetHookCfg().GetHookset().CastLures.LureTarget != LureTarget.NotSpecial)
                 {
                     // Check if a special fish is found
                     _lureSuccess = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
-
                     if (_lureSuccess)
                         return;
                 }
@@ -64,7 +60,7 @@ public partial class FishingManager
                     _lureSuccess = FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess };
                 }
             }
-            else if (message.LogKind is SystemAlert)
+            else if (message.LogKind is XivChatType.SystemError)
             {
                 var text = message.Message.TextValue;
                 if (FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.CantFish })
