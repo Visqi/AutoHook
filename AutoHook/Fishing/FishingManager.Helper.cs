@@ -59,10 +59,7 @@ public partial class FishingManager
                 {
                     _lureSuccess = FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess };
                 }
-            }
-            else if (message.LogKind is XivChatType.SystemError)
-            {
-                var text = message.Message.TextValue;
+
                 if (FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.CantFish })
                     Service.Status = UIStrings.CantFishHere;
             }
