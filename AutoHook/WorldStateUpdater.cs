@@ -31,7 +31,7 @@ public sealed class WorldStateUpdater : IDisposable {
     public unsafe WorldStateUpdater() {
         _updateCatchHook = Svc.Hook.HookFromAddress<AgentCatch.Delegates.UpdateCatch>((nint)AgentCatch.MemberFunctionPointers.UpdateCatch, UpdateCatchDetour);
         _useActionHook = Svc.Hook.HookFromAddress<ActionManager.Delegates.UseAction>((nint)ActionManager.MemberFunctionPointers.UseAction, UseActionDetour);
-        _playAnimationHook = Svc.Hook.HookFromVTable<FishingEventHandler.Delegates.PlayAnimation>((nint)FishingEventHandler.StaticVirtualTablePointer, 275, PlayAnimationDetour);
+        _playAnimationHook = Svc.Hook.HookFromVTable<FishingEventHandler.Delegates.PlayAnimation>((nint)FishingEventHandler.StaticVirtualTablePointer, 276, PlayAnimationDetour);
         _updateCatchHook?.Enable();
         _useActionHook?.Enable();
         _playAnimationHook?.Enable();
@@ -156,8 +156,10 @@ public sealed class WorldStateUpdater : IDisposable {
 
     private unsafe void PlayAnimationDetour(FishingEventHandler* thisPtr, Character* chara, ushort actionTimelineId, nint a4) {
         var tugType = (FishingHookStrength)actionTimelineId;
-        if (tugType is FishingHookStrength.Weak or FishingHookStrength.Strong or FishingHookStrength.Legendary)
+        if (tugType is FishingHookStrength.Weak or FishingHookStrength.Strong or FishingHookStrength.Legendary) {
+            Service.WorldState.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.FishBit));
             Service.WorldState.Execute(new FishingInfo.OpTugType(tugType));
+        }
         else
             Service.WorldState.Execute(new FishingInfo.OpTugType(0));
         _playAnimationHook!.Original(thisPtr, chara, actionTimelineId, a4);

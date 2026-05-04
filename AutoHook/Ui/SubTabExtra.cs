@@ -1,5 +1,4 @@
 using AutoHook.Conditions;
-using AutoHook.Conditions.Definitions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;

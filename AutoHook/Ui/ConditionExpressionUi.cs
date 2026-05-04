@@ -125,6 +125,11 @@ public static class ConditionExpressionUi {
             changed = true;
         }
         ImGui.SameLine();
+        if (ImGui.SmallButton("!##expr_not")) {
+            tokens.Add(new ExprToken(ExprTokenKind.Not));
+            changed = true;
+        }
+        ImGui.SameLine();
         if (ImGui.SmallButton("(")) {
             if (hasSelection) {
                 var start = set.ExprSelectionStart!.Value;

@@ -23,6 +23,7 @@ namespace AutoHook;
  * add snagging support
  * show complex condition ui by default if there are multiple groups
  * notification master ipc
+ * stop movement while fishing
  * BUGS:
  * Condition evaluation seems to be stale at times (like auto mooch on + fisher's int condition doesn't work at first, but deleting it and readding it suddenly works)
  * When a preset is changed while autohook is actively running, the changes don't seem to be reflected in the behaviour. You have to stop fishing and restart
@@ -130,7 +131,8 @@ public class AutoHook : IDalamudPlugin {
         );
 
 #if DEBUG
-        _pluginUi.Toggle();
+        if (Svc.ClientState.IsLoggedIn)
+            _pluginUi.Toggle();
 #endif
     }
 
@@ -213,6 +215,7 @@ public class AutoHook : IDalamudPlugin {
         _autoGig.Dispose();
         HookManager.Dispose();
         Service.Save();
+        Service.WorldStateUpdater.Dispose();
         Service.AutoCollectables.Dispose();
         Svc.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= _pluginUi.Toggle;

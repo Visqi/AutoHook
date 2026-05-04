@@ -1,5 +1,3 @@
-using AutoHook.Data;
-
 namespace AutoHook.Conditions;
 
 /// <summary>

@@ -5,6 +5,7 @@ public static class ConditionExpression {
         Group,
         And,
         Or,
+        Not,
         LParen,
         RParen,
     }
@@ -58,6 +59,12 @@ public static class ConditionExpression {
 
             if (ch == ')') {
                 tokens.Add(new Token(TokenKind.RParen));
+                pos++;
+                continue;
+            }
+
+            if (ch == '!') {
+                tokens.Add(new Token(TokenKind.Not));
                 pos++;
                 continue;
             }
@@ -119,13 +126,20 @@ public static class ConditionExpression {
                         depth--;
                     last = TokenKind.RParen;
                     break;
+
+                case TokenKind.Not:
+                    // Prefix only; invalid after another operand
+                    if (last is TokenKind.Group or TokenKind.RParen)
+                        invalid[i] = true;
+                    last = TokenKind.LParen; // expect operand (same as after '(')
+                    break;
             }
         }
 
-        // Trailing operator or '(' is invalid
+        // Trailing operator, '(', or unary '!' is invalid
         if (tokens.Count > 0) {
             var lastIdx = tokens.Count - 1;
-            if (tokens[lastIdx].Kind is TokenKind.And or TokenKind.Or or TokenKind.LParen)
+            if (tokens[lastIdx].Kind is TokenKind.And or TokenKind.Or or TokenKind.LParen or TokenKind.Not)
                 invalid[lastIdx] = true;
         }
 
@@ -147,6 +161,7 @@ public static class ConditionExpression {
             TokenKind.Group => ((char)('A' + token.GroupIndex)).ToString(),
             TokenKind.And => "&&",
             TokenKind.Or => "||",
+            TokenKind.Not => "!",
             TokenKind.LParen => "(",
             TokenKind.RParen => ")",
             _ => "?",
@@ -216,6 +231,9 @@ public static class ConditionExpression {
 
         bool ParseTerm() {
             SkipWs();
+            if (Match("!"))
+                return !ParseTerm();
+
             if (Match("(")) {
                 var v = ParseOr();
                 SkipWs();

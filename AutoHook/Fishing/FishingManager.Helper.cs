@@ -1,6 +1,5 @@
 using Dalamud.Game.Chat;
 using Dalamud.Game.Text;
-using Dalamud.Game.Text.SeStringHandling;
 using Lumina.Excel.Sheets;
 
 namespace AutoHook.Fishing;
@@ -26,12 +25,9 @@ public partial class FishingManager {
             PlayerRes.CastAction(IDs.Actions.Salvage);
     }
 
-    private const XivChatType FishingMessage = (XivChatType)2243;
-    private const XivChatType SystemAlert = (XivChatType)2115; //idk what to call this
-
     private void OnMessageDelegate(IHandleableChatMessage message) {
         try {
-            if (message.LogKind is FishingMessage) {
+            if (message.LogKind is XivChatType.Gathering) {
                 var text = message.Message.TextValue;
                 if (GetHookCfg().GetHookset().CastLures.LureTarget != LureTarget.NotSpecial) {
                     var success = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
@@ -43,9 +39,6 @@ public partial class FishingManager {
                     var success = FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess };
                     Ws.Execute(new WorldState.OpSetLureSuccess(success));
                 }
-            }
-            else if (message.LogKind is SystemAlert) {
-                var text = message.Message.TextValue;
                 if (FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.CantFish })
                     Service.Status = UIStrings.CantFishHere;
             }

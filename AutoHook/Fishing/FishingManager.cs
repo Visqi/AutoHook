@@ -1,5 +1,4 @@
 using AutoHook.Conditions;
-using AutoHook.Data;
 using Dalamud.Plugin.Services;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -22,7 +21,7 @@ public partial class FishingManager : IDisposable {
     public FishingManager() {
         try {
             Svc.Framework.Update += OnFrameworkUpdate;
-            Svc.Chat.CheckMessageHandled += OnMessageDelegate;
+            Svc.Chat.ChatMessage += OnMessageDelegate;
             Ws.Modified += OnWorldStateModified;
         }
         catch (Exception e) {
@@ -32,7 +31,7 @@ public partial class FishingManager : IDisposable {
 
     public void Dispose() {
         Svc.Framework.Update -= OnFrameworkUpdate;
-        Svc.Chat.CheckMessageHandled -= OnMessageDelegate;
+        Svc.Chat.ChatMessage -= OnMessageDelegate;
         Ws.Modified -= OnWorldStateModified;
     }
 
@@ -160,9 +159,7 @@ public partial class FishingManager : IDisposable {
     }
 
     private unsafe void OnFrameworkUpdate(IFramework _) {
-        if (!Service.Configuration.PluginEnabled
-            || !Svc.ClientState.IsLoggedIn
-            || Svc.Objects.LocalPlayer == null)
+        if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null)
             return;
 
         Service.WorldStateUpdater.Update();
@@ -215,9 +212,11 @@ public partial class FishingManager : IDisposable {
                 InitFinishing();
                 break;
             case FishingState.Bite:
-                if (!Ws.FishingStep.HasFlag(FishingSteps.FishBit)) Service.TaskManager.Enqueue(OnBite);
+                Service.TaskManager.Enqueue(OnBite);
                 break;
             case FishingState.Quitting:
+                if (!Ws.FishingStep.HasFlag(FishingSteps.Quitting))
+                    Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.Quitting));
                 OnFishingStop();
                 break;
         }
@@ -323,7 +322,6 @@ public partial class FishingManager : IDisposable {
         if (Ws.Player.HasStatus(IDs.Status.Salvage) && GetAutoCastCfg().ChumAnimationCancel)
             PlayerRes.CastAction(IDs.Actions.Salvage);
 
-        Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.FishBit));
         HookFish(Ws.Fishing.BiteInfo.TugType.ToBiteType(), currentHook);
     }
 
