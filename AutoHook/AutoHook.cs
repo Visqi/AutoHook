@@ -14,13 +14,11 @@ namespace AutoHook;
 
 /* 
  * TODO: 
- * Add the ability to NOT a whole group
  * get rid of "don't cancel mooch" configs under per fish surface slap/IC
  * get rid of all other configs that could be conditions in auto casts et al. Migrate them to conditions.
  * adding/changing a condition should default the tree node to be uncollapsed e.g. open
  * under each swap/stop rule, add the ability to reset counters
  * in the condition editor ui, highlight conditions that are currently true
- * add snagging support
  * show complex condition ui by default if there are multiple groups
  * notification master ipc
  * stop movement while fishing
@@ -29,7 +27,6 @@ namespace AutoHook;
  * When a preset is changed while autohook is actively running, the changes don't seem to be reflected in the behaviour. You have to stop fishing and restart
  * if you change preset and tell it to use swimbait it uses the normal baits timeout options for the first one. this seems to happen regardless if you have a timer on...
  * resolve collectables window under swap/stop rules doesn't seem to be doing anything when checked. If it's checked but force no isn't, we treat that as resolve as it would normally if the global option was checked
- * when autohook is active, this seems to mess with gathering and prevents gathering items off fisher
  * start fishing rule doesn't seem to work?
  * remooching doesn't work. If you have the fish in the swimbait it will use that over mooching the same fish.
  * mutltihook is checking gp for triple hook/double hook? idk what this report was about
