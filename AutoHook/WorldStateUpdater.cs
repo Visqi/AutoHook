@@ -31,7 +31,7 @@ public sealed class WorldStateUpdater : IDisposable {
     public unsafe WorldStateUpdater() {
         _updateCatchHook = Svc.Hook.HookFromAddress<AgentCatch.Delegates.UpdateCatch>((nint)AgentCatch.MemberFunctionPointers.UpdateCatch, UpdateCatchDetour);
         _useActionHook = Svc.Hook.HookFromAddress<ActionManager.Delegates.UseAction>((nint)ActionManager.MemberFunctionPointers.UseAction, UseActionDetour);
-        _playAnimationHook = Svc.Hook.HookFromVTable<FishingEventHandler.Delegates.PlayAnimation>((nint)FishingEventHandler.StaticVirtualTablePointer, 276, PlayAnimationDetour);
+        _playAnimationHook = Svc.Hook.HookFromAddress<FishingEventHandler.Delegates.PlayAnimation>((nint)FishingEventHandler.StaticVirtualTablePointer->PlayAnimation, PlayAnimationDetour);
         _updateCatchHook?.Enable();
         _useActionHook?.Enable();
         _playAnimationHook?.Enable();
@@ -155,6 +155,8 @@ public sealed class WorldStateUpdater : IDisposable {
     }
 
     private unsafe void PlayAnimationDetour(FishingEventHandler* thisPtr, Character* chara, ushort actionTimelineId, nint a4) {
+        _playAnimationHook!.Original(thisPtr, chara, actionTimelineId, a4);
+
         var tugType = (FishingHookStrength)actionTimelineId;
         if (tugType is FishingHookStrength.Weak or FishingHookStrength.Strong or FishingHookStrength.Legendary) {
             Service.WorldState.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.FishBit));
@@ -162,7 +164,6 @@ public sealed class WorldStateUpdater : IDisposable {
         }
         else
             Service.WorldState.Execute(new FishingInfo.OpTugType(0));
-        _playAnimationHook!.Original(thisPtr, chara, actionTimelineId, a4);
     }
 
     public static int ComputeCurrentBaitMoochId(uint currentId, uint? swimbaitId, bool isMooching, BiteContext biteContext) {
@@ -176,15 +177,15 @@ public sealed class WorldStateUpdater : IDisposable {
         return (int)currentId;
     }
 
-    private static Data.PlayerInfo.OpGp CollectGp()
+    private static PlayerInfo.OpGp CollectGp()
         => new(Svc.Objects.LocalPlayer?.CurrentGp ?? 0, Svc.Objects.LocalPlayer?.MaxGp ?? 0);
 
-    private static Data.PlayerInfo.OpStatuses CollectStatuses() {
+    private static PlayerInfo.OpStatuses CollectStatuses() {
         var dict = new Dictionary<uint, (float Time, int Stacks)>();
         if (Svc.Objects.LocalPlayer is { StatusList: var statuses })
             foreach (var buff in statuses)
                 dict[buff.StatusId] = (buff.RemainingTime, buff.Param);
-        return new Data.PlayerInfo.OpStatuses(dict);
+        return new PlayerInfo.OpStatuses(dict);
     }
 
     private static unsafe FishingInfo.OpFishingState CollectFishingState(BiteContext biteContext) {
@@ -233,7 +234,7 @@ public sealed class WorldStateUpdater : IDisposable {
         return new FishingInfo.OpFishingState(state, new BaitInfo(baitId, swimbaitId, baitMoochId, isMooching));
     }
 
-    private static unsafe Data.PlayerInfo.OpItemCounts CollectItemCounts() {
+    private static unsafe PlayerInfo.OpItemCounts CollectItemCounts() {
         var dict = new Dictionary<uint, int>();
         try {
             var inv = InventoryManager.Instance();
@@ -251,27 +252,27 @@ public sealed class WorldStateUpdater : IDisposable {
             }
         }
         catch { }
-        return new Data.PlayerInfo.OpItemCounts(dict);
+        return new PlayerInfo.OpItemCounts(dict);
     }
 
-    private static unsafe Data.FishingInfo.OpSwimbaitIds CollectSwimbaitIds() {
+    private static unsafe FishingInfo.OpSwimbaitIds CollectSwimbaitIds() {
         var list = new List<uint>();
         try {
             if (EventFramework.Instance() is not null and var ef && ef->EventHandlerModule.FishingEventHandler is not null and var handler)
                 list.Add(handler->SwimBaitItemIds.ToArray());
         }
         catch { }
-        return new Data.FishingInfo.OpSwimbaitIds(list);
+        return new FishingInfo.OpSwimbaitIds(list);
     }
 
-    private static unsafe Data.PlayerInfo.OpPotCooldown CollectPotCooldown() {
+    private static unsafe PlayerInfo.OpPotCooldown CollectPotCooldown() {
         var off = false;
         try {
             var recast = ActionManager.Instance()->GetRecastGroupDetail(68);
             off = recast->Total - recast->Elapsed <= 0;
         }
         catch { }
-        return new Data.PlayerInfo.OpPotCooldown(off);
+        return new PlayerInfo.OpPotCooldown(off);
     }
 
     private static unsafe WorldState.OpZone CollectZone()
