@@ -154,6 +154,7 @@ public class TabDebug : BaseTab {
             IDs.Status.NaturesBounty => "NaturesBounty",
             IDs.Status.Chum => "Chum",
             IDs.Status.CollectorsGlove => "CollectorsGlove",
+            IDs.Status.Snagging => "Snagging",
             IDs.Status.Salvage => "Salvage",
             IDs.Status.FishEyes => "FishEyes",
             IDs.Status.TruthOcean => "TruthOcean",

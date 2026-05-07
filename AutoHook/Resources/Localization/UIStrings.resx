@@ -947,6 +947,12 @@ Check the Guide Tab for Guides.</value>
   <data name="CollectHelpText" xml:space="preserve">
     <value>Collector's Glove will be activated when you start fishing</value>
   </data>
+  <data name="Snagging" xml:space="preserve">
+    <value>Snagging</value>
+  </data>
+  <data name="SnaggingHelpText" xml:space="preserve">
+    <value>Snagging will be activated when you start fishing</value>
+  </data>
   <data name="RefreshWhenTimeIsLessThanOrEqual" xml:space="preserve">
     <value>Refresh when buff timer is less than or equal to</value>
   </data>

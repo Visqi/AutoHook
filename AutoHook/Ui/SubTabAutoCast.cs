@@ -21,6 +21,7 @@ public class SubTabAutoCast {
             acCfg.CastMooch,
             acCfg.CastChum,
             acCfg.CastCollect,
+            acCfg.CastSnagging,
             acCfg.CastCordial,
             acCfg.CastFishEyes,
             acCfg.CastMakeShiftBait,
@@ -118,7 +119,7 @@ public class SubTabAutoCast {
 
         using var item = ImRaii.Child("###AutoCastItems", new Vector2(0, 0), true);
         foreach (var action in _actionsAvailable.OrderBy(x => x.GetType() == typeof(AutoCastLine))
-                     .ThenBy(x => x.GetType() == typeof(AutoMooch)).ThenBy(x => x.GetType() == typeof(AutoCollect)).ThenBy(x => x.GetType() == typeof(AutoMultiHook))
+                     .ThenBy(x => x.GetType() == typeof(AutoMooch)).ThenBy(x => x.GetType() == typeof(AutoCollect)).ThenBy(x => x.GetType() == typeof(AutoSnagging)).ThenBy(x => x.GetType() == typeof(AutoMultiHook))
                      .ThenBy(x => x.Priority)) {
             try {
                 using var id = ImRaii.PushId(action.GetType().ToString());

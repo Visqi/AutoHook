@@ -3412,6 +3412,24 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Snagging.
+        /// </summary>
+        internal static string Snagging {
+            get {
+                return ResourceManager.GetString("Snagging", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Snagging will be activated when you start fishing.
+        /// </summary>
+        internal static string SnaggingHelpText {
+            get {
+                return ResourceManager.GetString("SnaggingHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Spareful Hand.
         /// </summary>
         internal static string SparefulHand {

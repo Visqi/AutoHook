@@ -18,6 +18,7 @@ public class AutoCastsConfig {
     public AutoMooch CastMooch = new();
     public AutoChum CastChum = new();
     public AutoCollect CastCollect = new();
+    public AutoSnagging CastSnagging = new();
     public AutoCordial CastCordial = new();
     public AutoFishEyes CastFishEyes = new();
     public AutoMakeShiftBait CastMakeShiftBait = new();
@@ -41,6 +42,7 @@ public class AutoCastsConfig {
             CastFishEyes,
             CastPrizeCatch,
             //CastCollect,
+            CastSnagging,
             CastBigGame,
             CastMultihook,
         }.OrderBy(x => x.Priority).ToList();
