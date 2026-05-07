@@ -123,9 +123,6 @@ public sealed class WorldState {
         protected override void Exec(WorldState ws) => ws.Fishing.FishingStep |= Flag;
     }
 
-    public sealed record OpSetLureSuccess(bool Value) : Operation {
-        protected override void Exec(WorldState ws) => ws.Fishing.LureSuccess = Value;
-    }
 }
 
 

@@ -29,17 +29,18 @@ public partial class FishingManager {
         try {
             if (message.LogKind is XivChatType.Gathering) {
                 var text = message.Message.TextValue;
+                var logMessage = FindRow<LogMessage>(x => x.Text.ToString() == text);
                 if (GetHookCfg().GetHookset().CastLures.LureTarget != LureTarget.NotSpecial) {
                     var success = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
-                    Ws.Execute(new WorldState.OpSetLureSuccess(success));
+                    Ws.Execute(new FishingInfo.OpSetLureSuccess(success));
                     if (success)
                         return;
                 }
                 if (GetHookCfg().GetHookset().CastLures.LureTarget is LureTarget.Any or LureTarget.NotSpecial) {
-                    var success = FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess };
-                    Ws.Execute(new WorldState.OpSetLureSuccess(success));
+                    var success = logMessage is { RowId: XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess };
+                    Ws.Execute(new FishingInfo.OpSetLureSuccess(success));
                 }
-                if (FindRow<LogMessage>(x => x.Text.ToString() == text) is { RowId: XivChatLog.CantFish })
+                if (logMessage is { RowId: XivChatLog.CantFish })
                     Service.Status = UIStrings.CantFishHere;
             }
         }
