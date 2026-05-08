@@ -154,9 +154,7 @@ public sealed class WorldStateUpdater : IDisposable {
         Service.WorldState.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.FishCaught));
     }
 
-    private unsafe void PlayAnimationDetour(FishingEventHandler* thisPtr, Character* chara, ushort actionTimelineId, nint a4) {
-        _playAnimationHook!.Original(thisPtr, chara, actionTimelineId, a4);
-
+    private unsafe bool PlayAnimationDetour(FishingEventHandler* thisPtr, Character* chara, ushort actionTimelineId, ulong a4) {
         var tugType = (FishingHookStrength)actionTimelineId;
         if (tugType is FishingHookStrength.Weak or FishingHookStrength.Strong or FishingHookStrength.Legendary) {
             Service.WorldState.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.FishBit));
@@ -164,6 +162,7 @@ public sealed class WorldStateUpdater : IDisposable {
         }
         else
             Service.WorldState.Execute(new FishingInfo.OpTugType(0));
+        return _playAnimationHook!.Original(thisPtr, chara, actionTimelineId, a4);
     }
 
     public static int ComputeCurrentBaitMoochId(uint currentId, uint? swimbaitId, bool isMooching, BiteContext biteContext) {
