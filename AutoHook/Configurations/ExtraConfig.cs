@@ -16,6 +16,7 @@ public class ExtraTrigger {
 
     public bool Enabled { get; set; } = true;
 
+    [JsonIgnore]
     public int UiId { get; set; }
 
     public ConditionSet? ConditionSet { get; set; }

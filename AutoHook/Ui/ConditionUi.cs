@@ -332,7 +332,7 @@ public static class ConditionUi {
             if (combo) {
                 foreach (var def in defs) {
                     var sel = def.Id == cond.TypeId;
-                    if (ImGui.Selectable(def.Name, sel)) {
+                    if (ImGui.Selectable($"{def.Name}##{def.Id}", sel)) {
                         cond.TypeId = def.Id;
                         cond.Params.Clear();
                     }

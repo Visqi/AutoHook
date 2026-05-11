@@ -24,7 +24,7 @@ public class Condition {
     public bool Enabled { get; set; } = true;
 
     /// <summary>UI-only identifier used for stable ImGui IDs; prevents reusing open/closed state across deleted/recreated conditions.</summary>
-    [JsonProperty("i")]
+    [JsonIgnore]
     public int UiId { get; set; }
 
     public void EnsureUiId() {
