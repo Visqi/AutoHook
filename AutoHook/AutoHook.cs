@@ -222,6 +222,7 @@ public class AutoHook : IDalamudPlugin {
         foreach (var (command, _) in CommandHelp)
             Svc.Commands.RemoveHandler(command);
 
+        CLibMain.Dispose();
         ECommonsMain.Dispose();
     }
 }
