@@ -1,4 +1,5 @@
 using AutoHook.Conditions;
+using AutoHook.IPC;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
@@ -84,5 +85,7 @@ public partial class FishingManager {
             && EzThrottler.Throttle("ExtraStartFishingRule", 1000)) {
             StartFishing();
         }
+
+        Service.NotificationMasterIpc.Notify(trig.NotifyOnSuccess, "Rule condition success");
     }
 }

@@ -20,7 +20,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="croizat.clib" Version="1.0.4" />
+        <PackageReference Include="croizat.clib" Version="1.0.13" />
         <PackageReference Include="ECommons" Version="3.2.0.16" />
         <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
         <ProjectReference Include="..\PunishLib\PunishLib\PunishLib.csproj" />

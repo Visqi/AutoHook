@@ -5,6 +5,8 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using System.Diagnostics;
 
+using AutoHook.IPC;
+
 namespace AutoHook.Fishing;
 
 public partial class FishingManager : IDisposable {
@@ -365,6 +367,7 @@ public partial class FishingManager : IDisposable {
         var lastCatchFish = GameRes.Fishes.FirstOrDefault(fish => fish.Id == fishId) ?? new BaitFishClass(@"-", -1);
         Ws.Execute(new FishingInfo.OpAddFishCaught(fishId, amount));
         var lastFishCatchCfg = GetLastCatchConfig();
+        var currentHook = GetHookCfg();
 
         Service.LastCatch = lastCatchFish;
 
@@ -374,11 +377,18 @@ public partial class FishingManager : IDisposable {
             for (var i = 0; i < amount; i++) {
                 FishingHelper.AddFishCount(lastFishCatchCfg.UniqueId);
             }
+
+            Service.NotificationMasterIpc.Notify(
+                lastFishCatchCfg.NotifyOnSuccess,
+                $"Caught {lastCatchFish.Name} x{amount}");
         }
 
-        var hook = GetHookCfg();
-        if (hook.Enabled)
-            FishingHelper.AddFishCount(hook.UniqueId);
+        if (currentHook.Enabled) {
+            FishingHelper.AddFishCount(currentHook.UniqueId);
+            Service.NotificationMasterIpc.Notify(
+                currentHook.NotifyOnSuccess,
+                $"Hook success with {currentHook.BaitFish.Name}: {lastCatchFish.Name} x{amount}");
+        }
     }
 
     private void CheckStopCondition() {

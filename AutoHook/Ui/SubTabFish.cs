@@ -58,6 +58,9 @@ public class SubTabFish {
                     DrawStopAfter(fish);
                     ImGui.Spacing();
 
+                    fish.NotifyOnSuccess.DrawConfig($"Fish caught: {fish.Fish.Name}!");
+                    ImGui.Spacing();
+
                     fish.IgnoreConditionSet = ConditionUi.DrawConditionSetSlim(
                         UIStrings.IgnoreFishSettingWhen,
                         fish.IgnoreConditionSet,

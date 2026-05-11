@@ -33,6 +33,7 @@ public class ExtraTrigger {
     public bool ResolveCollectablesForceNo { get; set; }
 
     public bool StartFishing { get; set; }
+    public NotificationMasterConfig NotifyOnSuccess { get; set; } = new();
 
     public void EnsureUiId() {
         if (UiId <= 0)

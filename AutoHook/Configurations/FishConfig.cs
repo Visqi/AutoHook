@@ -19,6 +19,7 @@ public class FishConfig : BaseOption {
     public AutoMooch Mooch = new();
     public AutoSparefulHand SparefulHand = new();
     public AutoMultiHook Multihook = new();
+    public NotificationMasterConfig NotifyOnSuccess { get; set; } = new();
 
     public bool SwapBait = false;
     public BaitFishClass BaitToSwap = new();

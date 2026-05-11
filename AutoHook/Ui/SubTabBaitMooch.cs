@@ -92,6 +92,9 @@ public class SubTabBaitMooch {
                         }
                     }
                 }
+
+                ImGui.Spacing();
+                hook.NotifyOnSuccess.DrawConfig($"Hook success: {hook.BaitFish.Name}");
             }, UIStrings.EnabledConfigArrowhelpMarker)) {
                 Service.Save();
             }

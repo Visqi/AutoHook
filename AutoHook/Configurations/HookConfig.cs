@@ -20,6 +20,7 @@ public class HookConfig : BaseOption {
 
     public SwimbaitConfig SwimbaitNormal { get; set; } = new();
     public SwimbaitConfig SwimbaitIntuition { get; set; } = new();
+    public NotificationMasterConfig NotifyOnSuccess { get; set; } = new();
 
     //todo enable more hook settings based on the current status
     //List<BaseHookset> CustomHooksets = new();

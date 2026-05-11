@@ -181,6 +181,8 @@ public class SubTabExtra {
                 trig.ResolveCollectablesWindow = resolve;
                 trig.ResolveCollectablesForceNo = forceNo;
 
+                trig.NotifyOnSuccess.DrawConfig(string.Empty);
+
                 ImGui.Unindent(20 * ImGuiHelpers.GlobalScale);
             }, helpText: string.Empty, forceOpen: forceOpen)) {
                 trig.Enabled = enabled;
