@@ -81,20 +81,11 @@ public static class DrawUtil {
     }
 
     public static void TextV(string s) {
-        var cur = ImGui.GetCursorPos();
-        using (ImRaii.PushStyle(ImGuiStyleVar.Alpha, 0))
-            ImGui.Button("");
-        ImGui.SameLine();
-        ImGui.SetCursorPos(cur);
+        ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted(s);
     }
 
     public static void Info(string text) {
-        var cur = ImGui.GetCursorPos();
-        using (ImRaii.PushStyle(ImGuiStyleVar.Alpha, 0))
-            ImGui.Button("");
-        ImGui.SameLine(0, 1);
-        ImGui.SetCursorPos(cur);
         using (ImRaii.PushFont(UiBuilder.IconFont))
             ImGui.TextDisabled(FontAwesomeIcon.QuestionCircle.ToIconString());
 

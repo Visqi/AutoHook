@@ -71,11 +71,11 @@ public class TabFishingPresets : BaseTab {
             return;
 
         ImGui.TableSetupColumn($"###OptionColumn", ImGuiTableColumnFlags.WidthStretch, 2f);
+        ImGui.TableSetupColumn($"###PresetColumn", ImGuiTableColumnFlags.WidthStretch, 1f);
         ImGui.TableNextColumn();
         using (var left = ImRaii.Child($"###OptionSide"))
             DrawPresetOptions(displayed);
 
-        ImGui.TableSetupColumn($"###PresetColumn", ImGuiTableColumnFlags.WidthStretch, 1f);
         ImGui.TableNextColumn();
         using var right = ImRaii.Child($"###PresetSide");
         DrawPresetButtons();

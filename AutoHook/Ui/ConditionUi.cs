@@ -54,6 +54,8 @@ public static class ConditionUi {
                     DrawConditions(group, scope);
                 }
 
+                ImGui.SameLine(0, 6);
+                ImGui.SmallButton($"::##grp_drag{gi}");
                 ImGui.DragDropSource(gi, "COND_GROUP"u8, $"Moving group {groupLetter}");
                 ImGui.DragDropTarget(gi, "COND_GROUP"u8, set.Groups.Count, (sourceIndex, insertIndex) => {
                     if (sourceIndex == insertIndex || sourceIndex < 0 || sourceIndex >= set.Groups.Count)
@@ -188,6 +190,8 @@ public static class ConditionUi {
                 g.Enabled = gEnabled;
                 Service.Save();
             }
+            ImGui.SameLine(0, 6);
+            ImGui.SmallButton($"::##slim_grp_drag{gi}");
             ImGui.DragDropSource(gi, "COND_GROUP"u8, $"Moving group {groupLetter}");
             ImGui.DragDropTarget(gi, "COND_GROUP"u8, set.Groups.Count, (sourceIndex, insertIndex) => {
                 if (sourceIndex == insertIndex || sourceIndex < 0 || sourceIndex >= set.Groups.Count) return;
