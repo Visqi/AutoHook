@@ -174,6 +174,11 @@ public class TabFishingPresets : BaseTab {
         return false;
     }
 
+    private int GetFolderImmediateItemCount(PresetFolder folder) {
+        var directChildFolderCount = _basePreset.Folders.Count(f => f.ParentFolderId == folder.UniqueId);
+        return folder.PresetIds.Count + directChildFolderCount;
+    }
+
     private void DrawFolder(PresetFolder folder, int folderIndex) {
         bool isOpen;
         using (var id = ImRaii.PushId($"folder_{folder.UniqueId}")) {
@@ -188,7 +193,7 @@ public class TabFishingPresets : BaseTab {
             // Use orange color for folders containing the selected preset
             using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudOrange, containsSelectedPreset)) {
                 // Display folder name with item count
-                var displayName = $"{folder.FolderName} ({folder.PresetIds.Count})";
+                var displayName = $"{folder.FolderName} ({GetFolderImmediateItemCount(folder)})";
 
                 // Draw folder with tree node
                 isOpen = ImGui.TreeNodeEx(displayName,
