@@ -3,6 +3,7 @@ using AutoHook.Configurations.Legacy;
 using AutoHook.Spearfishing;
 using Dalamud.Configuration;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.IO;
 using System.IO.Compression;
 
@@ -138,7 +139,7 @@ public partial class Configuration : IPluginConfiguration {
     public static string ExportPreset(BasePresetConfig preset) {
         var exported = CompressString(JsonConvert.SerializeObject(
             preset,
-            new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore }));
+            new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Include }));
 
         // check if preset is type of AutoGigConfig or CustomPresetConfig
         if (preset is AutoGigConfig)
@@ -165,9 +166,17 @@ public partial class Configuration : IPluginConfiguration {
         }
 
         var exported = CompressString(JsonConvert.SerializeObject(folderExport,
-            new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore }));
+            new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Include }));
 
         return ExportPrefixFolder + exported;
+    }
+
+    private static T? DeserializePresetImport<T>(string json) where T : class {
+        var token = JToken.Parse(json);
+        var result = token.ToObject<T>(JsonSerializer.Create(new() { ObjectCreationHandling = ObjectCreationHandling.Replace }));
+        if (result != null)
+            LegacyDefaults.Apply(token, result);
+        return result;
     }
 
     public static (PresetFolder Folder, List<CustomPresetConfig> Presets)? ImportFolder(string import) {
@@ -175,8 +184,7 @@ public partial class Configuration : IPluginConfiguration {
             return null;
 
         try {
-            var folderData = JsonConvert.DeserializeObject<FolderExport>(DecompressString(import),
-                new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace });
+            var folderData = DeserializePresetImport<FolderExport>(DecompressString(import));
 
             if (folderData == null)
                 return null;
@@ -198,37 +206,30 @@ public partial class Configuration : IPluginConfiguration {
     }
 
     public static BasePresetConfig? ImportPreset(string import) {
+        var json = DecompressString(import);
+
         if (import.StartsWith(ExportPrefixV2)) {
-            var old = JsonConvert.DeserializeObject<BaitPresetConfig>(DecompressString(import),
-                new JsonSerializerSettings() { ObjectCreationHandling = ObjectCreationHandling.Replace });
-            return LegacyPresetMapper.ConvertOldPreset(old);
+            var old = DeserializePresetImport<BaitPresetConfig>(json);
+            return old == null ? null : LegacyPresetMapper.ConvertOldPreset(old);
         }
 
         if (import.StartsWith(ExportPrefixV3)) {
-            var old = JsonConvert.DeserializeObject<OldPresetConfig>(DecompressString(import),
-                new JsonSerializerSettings() { ObjectCreationHandling = ObjectCreationHandling.Replace });
-
-            return LegacyPresetMapper.ConvertOldPresetV3(old);
+            var old = DeserializePresetImport<OldPresetConfig>(json);
+            return old == null ? null : LegacyPresetMapper.ConvertOldPresetV3(old);
         }
 
-        if (import.StartsWith(ExportPrefixSf)) {
-            var autogig = JsonConvert.DeserializeObject<AutoGigConfig>(DecompressString(import),
-                new JsonSerializerSettings() { ObjectCreationHandling = ObjectCreationHandling.Replace });
+        if (import.StartsWith(ExportPrefixSf))
+            return DeserializePresetImport<AutoGigConfig>(json);
 
-            return autogig;
-        }
-
-        var importActionStack = JsonConvert.DeserializeObject<CustomPresetConfig>(DecompressString(import),
-            new JsonSerializerSettings() { ObjectCreationHandling = ObjectCreationHandling.Replace });
-        return importActionStack;
+        return DeserializePresetImport<CustomPresetConfig>(json);
     }
 
-    [NonSerialized] public static string ExportPrefixV2 = "AH_";
-    [NonSerialized] public static string ExportPrefixV3 = "AH3_";
-    [NonSerialized] public static string ExportPrefixV4 = "AH4_";
-    [NonSerialized] public static string ExportPrefixV6 = "AH6_";
-    [NonSerialized] public static string ExportPrefixSf = "AHSF1_";
-    [NonSerialized] public static string ExportPrefixFolder = "AHFOLDER_";
+    [NonSerialized] public const string ExportPrefixV2 = "AH_";
+    [NonSerialized] public const string ExportPrefixV3 = "AH3_";
+    [NonSerialized] public const string ExportPrefixV4 = "AH4_";
+    [NonSerialized] public const string ExportPrefixV6 = "AH6_";
+    [NonSerialized] public const string ExportPrefixSf = "AHSF1_";
+    [NonSerialized] public const string ExportPrefixFolder = "AHFOLDER_";
 
     [NonSerialized]
     private static readonly List<string> ExportPrefixes =

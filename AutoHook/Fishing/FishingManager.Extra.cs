@@ -1,5 +1,4 @@
 using AutoHook.Conditions;
-using AutoHook.IPC;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 

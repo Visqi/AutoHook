@@ -5,8 +5,6 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using System.Diagnostics;
 
-using AutoHook.IPC;
-
 namespace AutoHook.Fishing;
 
 public partial class FishingManager : IDisposable {
