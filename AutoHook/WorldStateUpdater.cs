@@ -61,6 +61,14 @@ public sealed class WorldStateUpdater : IDisposable {
 
         ws.Execute(CollectFishingState(biteContext));
 
+        if (ws.Fishing is { PreviousFishingState: FishingState.None, FishingState: not FishingState.None }) {
+            Svc.Log.Info("began fishing");
+            ws.Execute(new WorldState.OpBeganSession());
+        }
+        else if (ws.Fishing is { PreviousFishingState: not FishingState.None, FishingState: FishingState.None }) {
+            ws.Execute(new WorldState.OpEndedSession());
+        }
+
         if (_needInventoryUpdate) {
             ws.Execute(CollectItemCounts());
             _needInventoryUpdate = false;
