@@ -1,5 +1,6 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
+using AutoHook.Utils;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -23,6 +24,14 @@ public static class ConditionUi {
     private static ConditionSet? _clipboard;
     private static string _exportBase64 = string.Empty;
 
+    public static bool IsConditionCurrentlyTrue(Condition cond)
+        => cond.Enabled && cond.Evaluate(Service.WorldState, Registry);
+
+    public static bool IsGroupCurrentlyTrue(ConditionGroup group)
+        => group.Enabled
+           && group.Conditions.Any(c => c.Enabled)
+           && group.Evaluate(Service.WorldState, Registry);
+
     public static ConditionSet? DrawConditionSet(string label, ConditionSet? set, ConditionScope scope, bool showPresets = true) {
         using var tree = ImRaii.TreeNode(label, ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.SpanAvailWidth);
         if (!tree)
@@ -41,6 +50,7 @@ public static class ConditionUi {
                 using var _ = ImRaii.PushId($"grp{gi}");
 
                 var deleteGroup = false;
+                using (IsGroupCurrentlyTrue(group) ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
                 if (ImGui.CollapsingHeader($"Group {groupLetter}###grp_header", ImGuiTreeNodeFlags.DefaultOpen)) {
                     deleteGroup = DrawGroupHeader(set, group, gi, scope);
                     ImGui.Spacing();
@@ -144,7 +154,7 @@ public static class ConditionUi {
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash))
                     toRemove.Add(ci);
                 ImGui.TooltipOnHover("Delete condition");
-            }, forceOpen: forceOpen);
+            }, forceOpen: forceOpen, highlightLabel: IsConditionCurrentlyTrue(cond));
             if (enabled != cond.Enabled) {
                 cond.Enabled = enabled;
                 Service.Save();
@@ -185,7 +195,7 @@ public static class ConditionUi {
                     toRemoveGroup.Add(gi);
                 ImGui.Spacing();
                 DrawConditionsWithTypes(g, scope, [.. GetScopedTypes(scope)]);
-            });
+            }, highlightLabel: IsGroupCurrentlyTrue(g));
             if (gEnabled != g.Enabled) {
                 g.Enabled = gEnabled;
                 Service.Save();
@@ -352,7 +362,8 @@ public static class ConditionUi {
             var cond = group.Conditions[ci];
             cond.EnsureUiId();
             using var _ = ImRaii.PushId($"cond{cond.UiId}");
-            DrawConditionContent(cond, scope, defs);
+            using (IsConditionCurrentlyTrue(cond) ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
+                DrawConditionContent(cond, scope, defs);
             ImGui.SameLine();
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
                 group.Conditions.RemoveAt(ci);

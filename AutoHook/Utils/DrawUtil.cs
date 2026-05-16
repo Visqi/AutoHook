@@ -374,7 +374,7 @@ public static class DrawUtil {
 
     }
 
-    public static void DrawCheckboxTree(string treeName, ref bool enable, Action? action = null, string helpText = "", bool forceOpen = false) {
+    public static void DrawCheckboxTree(string treeName, ref bool enable, Action? action = null, string helpText = "", bool forceOpen = false, bool highlightLabel = false) {
         using var id = ImRaii.PushId(treeName);
         if (ImGui.Checkbox($"###checkbox{treeName}", ref enable)) {
             if (enable) ImGui.SetNextItemOpen(true);
@@ -389,10 +389,10 @@ public static class DrawUtil {
         if (Service.Configuration.SwapToButtons) {
             switch (Service.Configuration.SwapType) {
                 case 0:
-                    DrawButtonPopupType0(treeName, action, helpText);
+                    DrawButtonPopupType0(treeName, action, helpText, highlightLabel);
                     break;
                 case 1:
-                    DrawButtonPopupType1(treeName, action, helpText);
+                    DrawButtonPopupType1(treeName, action, helpText, highlightLabel);
                     break;
             }
         }
@@ -400,8 +400,9 @@ public static class DrawUtil {
             var x = ImGui.GetCursorPosX();
 
             if (action == null) {
-                ImGui.TreeNodeEx(treeName,
-                    ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen);
+                using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
+                    ImGui.TreeNodeEx(treeName,
+                        ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen);
                 if (!string.IsNullOrEmpty(helpText))
                     ImGui.TooltipOnHover(helpText);
                 return;
@@ -409,6 +410,7 @@ public static class DrawUtil {
 
             if (forceOpen)
                 ImGui.SetNextItemOpen(true, ImGuiCond.Always);
+            using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
             if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding)) {
                 ImGui.SetCursorPosX(x);
                 TextV($" └");
@@ -488,7 +490,7 @@ public static class DrawUtil {
         }
     }
 
-    public static void DrawButtonPopupType0(string popupName, Action action, string helpText = "") {
+    public static void DrawButtonPopupType0(string popupName, Action action, string helpText = "", bool highlightLabel = false) {
         using var id = ImRaii.PushId(popupName);
 
         var indexOfId = popupName.IndexOf('#');
@@ -496,7 +498,8 @@ public static class DrawUtil {
             popupName = popupName[..indexOfId];
         }
 
-        TextV(popupName);
+        using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
+            TextV(popupName);
         ImGui.SameLine();
         if (ImGui.Button(UIStrings.Configure)) {
             ImGui.OpenPopup(popupName);
@@ -516,8 +519,9 @@ public static class DrawUtil {
         }
     }
 
-    public static void DrawButtonPopupType1(string popupName, Action action, string helpText = "") {
+    public static void DrawButtonPopupType1(string popupName, Action action, string helpText = "", bool highlightLabel = false) {
         using var id = ImRaii.PushId(popupName);
+        using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
         if (ImGui.Button(popupName)) {
             ImGui.OpenPopup(popupName);
         }

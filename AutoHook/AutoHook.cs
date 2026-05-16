@@ -18,20 +18,16 @@ namespace AutoHook;
  * get rid of all other configs that could be conditions in auto casts et al. Migrate them to conditions.
  * adding/changing a condition should default the tree node to be uncollapsed e.g. open
  * under each swap/stop rule, add the ability to reset counters
- * in the condition editor ui, highlight conditions that are currently true
  * show complex condition ui by default if there are multiple groups
- * notification master ipc
  * stop movement while fishing
  * BUGS:
- * Condition evaluation seems to be stale at times (like auto mooch on + fisher's int condition doesn't work at first, but deleting it and readding it suddenly works)
- * When a preset is changed while autohook is actively running, the changes don't seem to be reflected in the behaviour. You have to stop fishing and restart
  * if you change preset and tell it to use swimbait it uses the normal baits timeout options for the first one. this seems to happen regardless if you have a timer on...
  * resolve collectables window under swap/stop rules doesn't seem to be doing anything when checked. If it's checked but force no isn't, we treat that as resolve as it would normally if the global option was checked
  * start fishing rule doesn't seem to work?
- * remooching doesn't work. If you have the fish in the swimbait it will use that over mooching the same fish.
  * mutltihook is checking gp for triple hook/double hook? idk what this report was about
- * with no overcap condition set on cordial, it just checks the gp value which by default is above 0. This allows overcapping when the default behaviour should be to disallow it unless any condition is set. And right now if you hit start actions with cordial and patience 2 selected it will use the cordial then just do nothing
- * 
+ *
+ * the rule success (condition: fisher's int || status: surface slap) -> swap presets doesn't seem to work
+ * force resolve collectables doesn't seem to do anything. The general one works but not the force setting
  */
 
 public class AutoHook : IDalamudPlugin {

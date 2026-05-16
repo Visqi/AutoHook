@@ -30,8 +30,18 @@ public static class ConditionExpressionUi {
                 var label = ConditionExpression.GetTokenLabel(tokens[i]);
                 var isSelected = selStart.HasValue && selEnd.HasValue && i >= selStart && i <= selEnd;
                 var isInvalid = i < invalidFlags.Length && invalidFlags[i];
+                var groupTrue = tokens[i].Kind == ExprTokenKind.Group
+                                && tokens[i].GroupIndex is var gi
+                                && gi >= 0
+                                && gi < set.Groups.Count
+                                && ConditionUi.IsGroupCurrentlyTrue(set.Groups[gi]);
+                var buttonColor = isInvalid
+                    ? ImGuiColors.DalamudRed
+                    : groupTrue
+                        ? ImGuiColors.ParsedGreen
+                        : ImGuiColors.DalamudGrey3;
 
-                using (var colour = ImRaii.PushColor(ImGuiCol.Button, isInvalid ? ImGuiColors.DalamudRed : ImGuiColors.DalamudGrey3, isSelected || isInvalid)) {
+                using (var colour = ImRaii.PushColor(ImGuiCol.Button, buttonColor, isSelected || isInvalid)) {
                     if (ImGui.SmallButton(label)) {
                         var io = ImGui.GetIO();
                         if (io.KeyShift && selStart.HasValue && selEnd.HasValue) {
@@ -108,6 +118,7 @@ public static class ConditionExpressionUi {
         // Group chips A, B, C...
         for (var i = 0; i < set.Groups.Count && i < 26; i++) {
             var label = ((char)('A' + i)).ToString();
+            using (ConditionUi.IsGroupCurrentlyTrue(set.Groups[i]) ? ImRaii.PushColor(ImGuiCol.Button, ImGuiColors.ParsedGreen) : null)
             if (ImGui.SmallButton(label)) {
                 tokens.Add(new ExprToken(ExprTokenKind.Group, i));
                 changed = true;
