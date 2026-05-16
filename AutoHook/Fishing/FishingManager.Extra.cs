@@ -86,6 +86,6 @@ public partial class FishingManager {
             StartFishing();
         }
 
-        Service.NotificationMasterIpc.Notify(trig.NotifyOnSuccess, "Rule condition success");
+        Service.NotificationMaster.Notify(trig.NotifyOnSuccess, "Rule condition success");
     }
 }

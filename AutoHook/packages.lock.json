@@ -36,6 +36,12 @@
         "resolved": "1.12.4",
         "contentHash": "ljqvBabvFwKoLniuoQKO8b5bJfJweKLs4fUNS/V5dsvpo0A8MlJqxxn9XVmP2DaskbUXty6IYaWAi1SArGIMeQ=="
       },
+      "NotificationMasterAPI": {
+        "type": "Direct",
+        "requested": "[1.0.0.1, )",
+        "resolved": "1.0.0.1",
+        "contentHash": "ta+lQtxQzHkqPC3doDn3ud8MvtwNnTgTIeXqfqu92G4lAy+/UJZ6iEefFH4MRZmX8Z99nUmUJZ4zcRvVMABzjQ=="
+      },
       "AllaganLib.GameSheets": {
         "type": "Transitive",
         "resolved": "2.2.2",

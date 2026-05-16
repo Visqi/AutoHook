@@ -78,7 +78,7 @@ public class AutoHook : IDalamudPlugin {
         Service.Configuration = Configuration.Load();
         UIStrings.Culture = new CultureInfo(Service.Configuration.CurrentLanguage);
         Service.AutoCollectables = new AutoCollectables();
-        Service.NotificationMasterIpc = new NotificationMasterIPC();
+        Service.NotificationMaster = new(pluginInterface);
         Service.WorldStateUpdater = new WorldStateUpdater();
 
         _pluginUi = new PluginUi();

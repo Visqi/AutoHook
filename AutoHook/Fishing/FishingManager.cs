@@ -378,16 +378,12 @@ public partial class FishingManager : IDisposable {
                 FishingHelper.AddFishCount(lastFishCatchCfg.UniqueId);
             }
 
-            Service.NotificationMasterIpc.Notify(
-                lastFishCatchCfg.NotifyOnSuccess,
-                $"Caught {lastCatchFish.Name} x{amount}");
+            Service.NotificationMaster.Notify(lastFishCatchCfg.NotifyOnSuccess, $"Caught {lastCatchFish.Name} x{amount}");
         }
 
         if (currentHook.Enabled) {
             FishingHelper.AddFishCount(currentHook.UniqueId);
-            Service.NotificationMasterIpc.Notify(
-                currentHook.NotifyOnSuccess,
-                $"Hook success with {currentHook.BaitFish.Name}: {lastCatchFish.Name} x{amount}");
+            Service.NotificationMaster.Notify(currentHook.NotifyOnSuccess, $"Hook success with {currentHook.BaitFish.Name}: {lastCatchFish.Name} x{amount}");
         }
     }
 
