@@ -28,7 +28,7 @@ public class TabFishingPresets : BaseTab {
     private Guid? renameFolderId = null;
 
     private BasePresetConfig? _tempImportPreset = null;
-    private (PresetFolder Folder, List<CustomPresetConfig> Presets)? _tempImportFolder = null;
+    private (PresetFolder Folder, List<PresetFolder> Folders, List<CustomPresetConfig> Presets)? _tempImportFolder = null;
     private string _tempImportName = string.Empty;
     private bool _isImportingFolder = false;
 
@@ -156,6 +156,41 @@ public class TabFishingPresets : BaseTab {
                 }
             }
         }
+    }
+
+    private void CopyFolderTree(PresetFolder source, Guid? parentFolderId, bool prefixName) {
+        var newFolder = new PresetFolder(prefixName ? $"Copy_{source.FolderName}" : source.FolderName) {
+            ParentFolderId = parentFolderId,
+            IsExpanded = source.IsExpanded
+        };
+
+        foreach (var presetId in source.PresetIds) {
+            var originalPreset = _basePreset.CustomPresets.FirstOrDefault(p => p.UniqueId == presetId);
+            if (originalPreset == null)
+                continue;
+
+            var json = JsonConvert.SerializeObject(originalPreset);
+            var presetCopy = JsonConvert.DeserializeObject<CustomPresetConfig>(json);
+            presetCopy!.UniqueId = Guid.NewGuid();
+            presetCopy.PresetName = originalPreset.PresetName;
+
+            _basePreset.CustomPresets.Add(presetCopy);
+            newFolder.AddPreset(presetCopy.UniqueId);
+        }
+
+        _basePreset.Folders.Add(newFolder);
+
+        foreach (var childFolder in _basePreset.Folders.Where(f => f.ParentFolderId == source.UniqueId))
+            CopyFolderTree(childFolder, newFolder.UniqueId, prefixName: false);
+    }
+
+    private static bool FolderTreeHasSelectedPresets(PresetFolder folder, List<PresetFolder> allFolders, HashSet<Guid> selectedPresetIds) {
+        if (folder.PresetIds.Any(selectedPresetIds.Contains))
+            return true;
+
+        return allFolders
+            .Where(f => f.ParentFolderId == folder.UniqueId)
+            .Any(child => FolderTreeHasSelectedPresets(child, allFolders, selectedPresetIds));
     }
 
     private bool IsFolderDescendantOf(PresetFolder potentialAncestor, PresetFolder candidate) {
@@ -650,25 +685,34 @@ public class TabFishingPresets : BaseTab {
                             return;
                         }
 
-                        folder.PresetIds = [];
-                        // Add only selected presets to the preset list and folder
-                        foreach (var preset in _tempImportFolder.Value.Presets) {
-                            if (_selectedPresetsForImport[preset.UniqueId]) {
-                                // Apply the new name if it was changed
-                                if (_presetImportNames.TryGetValue(preset.UniqueId, out var newName)) {
-                                    preset.PresetName = newName;
-                                }
+                        var selectedPresetIds = _tempImportFolder.Value.Presets
+                            .Where(p => _selectedPresetsForImport[p.UniqueId])
+                            .Select(p => p.UniqueId)
+                            .ToHashSet();
 
-                                _basePreset.CustomPresets.Add(preset);
-                                folder.AddPreset(preset.UniqueId);
-                            }
+                        foreach (var preset in _tempImportFolder.Value.Presets) {
+                            if (!_selectedPresetsForImport[preset.UniqueId])
+                                continue;
+
+                            if (_presetImportNames.TryGetValue(preset.UniqueId, out var newName))
+                                preset.PresetName = newName;
+
+                            _basePreset.CustomPresets.Add(preset);
                         }
 
-                        // Add the folder
-                        _basePreset.Folders.Add(folder);
+                        foreach (var importedFolder in _tempImportFolder.Value.Folders) {
+                            importedFolder.PresetIds = [.. importedFolder.PresetIds.Where(selectedPresetIds.Contains)];
+                        }
+
+                        var foldersToAdd = _tempImportFolder.Value.Folders
+                            .Where(f => FolderTreeHasSelectedPresets(f, _tempImportFolder.Value.Folders, selectedPresetIds))
+                            .ToList();
+
+                        foreach (var importedFolder in foldersToAdd)
+                            _basePreset.Folders.Add(importedFolder);
 
                         Service.Save();
-                        Notify.Success($"Folder imported with {folder.PresetIds.Count} presets");
+                        Notify.Success($"Folder imported with {selectedPresetIds.Count} presets");
 
                         _tempImportFolder = null;
                         _selectedPresetsForImport.Clear();
@@ -814,44 +858,12 @@ public class TabFishingPresets : BaseTab {
         }
 
         if (ImGui.Selectable(UIStrings.MakeACopy, false)) {
-
-            var newFolder = new PresetFolder($"Copy_{folder.FolderName}") {
-                ParentFolderId = folder.ParentFolderId
-            };
-
-            // First, collect all presets in the source folder
-            var presetsToCopy = new List<CustomPresetConfig>();
-            foreach (var presetId in folder.PresetIds) {
-                var originalPreset = _basePreset.CustomPresets.FirstOrDefault(p => p.UniqueId == presetId);
-                if (originalPreset != null) {
-                    presetsToCopy.Add(originalPreset);
-                }
-            }
-
-            // Create copies of each preset and add them to the new folder
-            foreach (var origPreset in presetsToCopy) {
-                // Create a completely new copy with new GUID
-                var json = JsonConvert.SerializeObject(origPreset);
-                var presetCopy = JsonConvert.DeserializeObject<CustomPresetConfig>(json);
-
-                // Generate a new GUID for the copy
-                presetCopy!.UniqueId = Guid.NewGuid();
-                presetCopy.PresetName = origPreset.PresetName;
-
-                // Add to preset list first
-                _basePreset.CustomPresets.Add(presetCopy);
-
-                // Then add to folder
-                newFolder.AddPreset(presetCopy.UniqueId);
-            }
-
-            // Add the folder to the list
-            _basePreset.Folders.Add(newFolder);
+            CopyFolderTree(folder, folder.ParentFolderId, prefixName: true);
             Service.Save();
         }
 
         if (ImGui.Selectable(UIStrings.ExportFolderClipboard, false)) {
-            var exportData = Configuration.ExportFolder(folder, _basePreset.CustomPresets);
+            var exportData = Configuration.ExportFolder(folder, _basePreset.CustomPresets, _basePreset.Folders);
             ImGui.SetClipboardText(exportData);
             Notify.Success(UIStrings.FolderExported);
         }

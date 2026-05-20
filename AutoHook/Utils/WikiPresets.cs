@@ -29,7 +29,8 @@ public static partial class WikiPresets {
 
                 Func<string, (PresetFolder? Folder, List<CustomPresetConfig> Presets)> selector = x => {
                     if (x.StartsWith(Configuration.ExportPrefixFolder)) {
-                        return Configuration.ImportFolder(x) ?? throw new Exception("Failed to import"); // Kill wiki shouldn't have broken presets
+                        var imported = Configuration.ImportFolder(x) ?? throw new Exception("Failed to import"); // Kill wiki shouldn't have broken presets
+                        return (imported.Folder, imported.Presets);
                     }
                     var presets = Configuration.ImportPreset(x) ?? throw new Exception("Failed to import");
 

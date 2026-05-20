@@ -153,22 +153,31 @@ public partial class Configuration : IPluginConfiguration {
     public class FolderExport(string name) {
         public string FolderName { get; set; } = name;
         public List<CustomPresetConfig> Presets { get; set; } = [];
+        public List<FolderExport> ChildFolders { get; set; } = [];
     }
 
-    public static string ExportFolder(PresetFolder folder, List<CustomPresetConfig> presets) {
-        var folderExport = new FolderExport(folder.FolderName);
-
-        foreach (var presetId in folder.PresetIds) {
-            var preset = presets.FirstOrDefault(p => p.UniqueId == presetId);
-            if (preset != null) {
-                folderExport.Presets.Add(preset);
-            }
-        }
+    public static string ExportFolder(PresetFolder folder, List<CustomPresetConfig> presets, List<PresetFolder> allFolders) {
+        var folderExport = BuildFolderExport(folder, presets, allFolders);
 
         var exported = CompressString(JsonConvert.SerializeObject(folderExport,
             new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Include }));
 
         return ExportPrefixFolder + exported;
+    }
+
+    private static FolderExport BuildFolderExport(PresetFolder folder, List<CustomPresetConfig> presets, List<PresetFolder> allFolders) {
+        var folderExport = new FolderExport(folder.FolderName);
+
+        foreach (var presetId in folder.PresetIds) {
+            var preset = presets.FirstOrDefault(p => p.UniqueId == presetId);
+            if (preset != null)
+                folderExport.Presets.Add(preset);
+        }
+
+        foreach (var childFolder in allFolders.Where(f => f.ParentFolderId == folder.UniqueId))
+            folderExport.ChildFolders.Add(BuildFolderExport(childFolder, presets, allFolders));
+
+        return folderExport;
     }
 
     private static T? DeserializePresetImport<T>(string json) where T : class {
@@ -179,7 +188,7 @@ public partial class Configuration : IPluginConfiguration {
         return result;
     }
 
-    public static (PresetFolder Folder, List<CustomPresetConfig> Presets)? ImportFolder(string import) {
+    public static (PresetFolder Folder, List<PresetFolder> Folders, List<CustomPresetConfig> Presets)? ImportFolder(string import) {
         if (!import.StartsWith(ExportPrefixFolder))
             return null;
 
@@ -189,20 +198,35 @@ public partial class Configuration : IPluginConfiguration {
             if (folderData == null)
                 return null;
 
-            var folder = new PresetFolder(folderData.FolderName);
+            var allFolders = new List<PresetFolder>();
+            var allPresets = new List<CustomPresetConfig>();
+            var root = ImportFolderExport(folderData, null, allFolders, allPresets);
 
-            // Generate new GUIDs for all presets to avoid conflicts
-            foreach (var preset in folderData.Presets) {
-                preset.UniqueId = Guid.NewGuid();
-                folder.AddPreset(preset.UniqueId);
-            }
-
-            return (folder, folderData.Presets);
+            return (root, allFolders, allPresets);
         }
         catch (Exception e) {
             Svc.Log.Error($"Failed to import folder: {e.Message}");
             return null;
         }
+    }
+
+    private static PresetFolder ImportFolderExport(FolderExport data, Guid? parentFolderId, List<PresetFolder> allFolders, List<CustomPresetConfig> allPresets) {
+        var folder = new PresetFolder(data.FolderName) {
+            ParentFolderId = parentFolderId
+        };
+
+        foreach (var preset in data.Presets) {
+            preset.UniqueId = Guid.NewGuid();
+            folder.AddPreset(preset.UniqueId);
+            allPresets.Add(preset);
+        }
+
+        allFolders.Add(folder);
+
+        foreach (var child in data.ChildFolders ?? [])
+            ImportFolderExport(child, folder.UniqueId, allFolders, allPresets);
+
+        return folder;
     }
 
     public static BasePresetConfig? ImportPreset(string import) {
