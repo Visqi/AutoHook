@@ -254,15 +254,13 @@ public partial class FishingManager : IDisposable {
         if (!Ws.IsCastAvailable())
             return;
 
-        var lastCatchCfg = GetLastCatchConfig();
-
-        var extraCfg = GetExtraCfg();
-
         if (Ws.Fishing.FishingStep.HasFlag(FishingSteps.FishCaught) &&
             (Ws.Fishing.FishingStep & (FishingSteps.None | FishingSteps.Quitting)) == 0)
             CheckStopCondition();
 
-        CheckExtraActions(extraCfg);
+        CheckExtraActions();
+
+        var lastCatchCfg = GetLastCatchConfig();
 
         var casted = false;
         if (Ws.FishingStep.HasFlag(FishingSteps.FishCaught) && !Ws.FishingStep.HasFlag(FishingSteps.Quitting)) {

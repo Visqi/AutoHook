@@ -10,9 +10,27 @@ public partial class FishingManager {
             ? Presets.SelectedPreset.ExtraCfg
             : Presets.DefaultPreset.ExtraCfg;
 
-    private void CheckExtraActions(ExtraConfig extraCfg) {
-        if (extraCfg.Triggers.Count > 0)
+    private void CheckExtraActions() {
+        var anyPresetSwapped = false;
+
+        while (true) {
+            Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.PresetSwapped));
+
+            var presetBefore = Presets.SelectedPreset?.UniqueId;
+            var extraCfg = GetExtraCfg();
+            if (extraCfg.Triggers.Count == 0)
+                break;
+
             RunExtraTriggers(extraCfg);
+
+            if (Presets.SelectedPreset?.UniqueId == presetBefore)
+                break;
+
+            anyPresetSwapped = true;
+        }
+
+        if (anyPresetSwapped)
+            Ws.Execute(new WorldState.OpOrFishingStep(FishingSteps.PresetSwapped));
     }
 
     private void RunExtraTriggers(ExtraConfig extraCfg) {
@@ -55,6 +73,7 @@ public partial class FishingManager {
             if (preset != null) {
                 Service.Save();
                 Presets.SelectedPreset = preset;
+                preset.ExtraCfg.LastTriggerStates.Clear();
                 Service.PrintChat(@$"[Extra] Trigger: Swapping preset to {trig.PresetToSwap}");
                 Service.Save();
             }

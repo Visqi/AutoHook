@@ -145,6 +145,10 @@ public sealed class FishingInfo {
         protected override void Exec(WorldState ws) => ws.Fishing.FishingStep |= Flag;
     }
 
+    public sealed record OpClearFishingStepFlag(FishingSteps Flag) : WorldState.Operation {
+        protected override void Exec(WorldState ws) => ws.Fishing.FishingStep &= ~Flag;
+    }
+
     public sealed record OpPlayerUsedAction(UsedAction Value) : WorldState.Operation {
         protected override void Exec(WorldState ws) => ws.Fishing.LastUsedAction = Value;
     }

@@ -127,6 +127,10 @@ public sealed class WorldState {
         protected override void Exec(WorldState ws) => ws.Fishing.FishingStep |= Flag;
     }
 
+    public sealed record OpClearFishingStepFlag(FishingSteps Flag) : Operation {
+        protected override void Exec(WorldState ws) => ws.Fishing.FishingStep &= ~Flag;
+    }
+
     public Event<OpBeganSession> BeganSession = new();
     public sealed record OpBeganSession() : Operation {
         protected override void Exec(WorldState ws) {
