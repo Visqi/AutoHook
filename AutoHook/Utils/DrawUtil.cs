@@ -154,7 +154,7 @@ public static class DrawUtil {
         using (var combo = ImRaii.Combo("###search", selectedItem)) {
             if (combo.Success) {
                 ImGui.SetNextItemWidth(190 * ImGuiHelpers.GlobalScale);
-                ImGui.InputTextWithHint("", UIStrings.Search_Hint, ref _filterText, 100);
+                ImGui.InputTextWithHint("##filter", UIStrings.Search_Hint, ref _filterText, 100);
                 ImGui.Separator();
 
                 using var child = ImRaii.Child($"###ComboSelector", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false);
@@ -185,7 +185,7 @@ public static class DrawUtil {
             comboOpen = combo.Success;
             if (combo.Success) {
                 ImGui.SetNextItemWidth(210 * ImGuiHelpers.GlobalScale);
-                ImGui.InputTextWithHint("", UIStrings.Search_Hint, ref _filterText, 100);
+                ImGui.InputTextWithHint("##filter", UIStrings.Search_Hint, ref _filterText, 100);
                 ImGui.Separator();
 
                 using var child = ImRaii.Child("###ComboPreset", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false);
