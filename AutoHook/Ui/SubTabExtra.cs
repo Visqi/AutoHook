@@ -254,13 +254,23 @@ public class SubTabExtra {
                     var v = 0;
                     if (cond.Params.TryGetValue("val", out var vObj))
                         v = Convert.ToInt32(vObj);
-                    var above = true;
-                    if (cond.Params.TryGetValue("above", out var aObj)) {
-                        if (aObj is bool b) above = b;
-                        else if (aObj is long l) above = l != 0;
+                    var op = cond.Params.TryGetValue("op", out var opObj) ? opObj?.ToString() ?? ">=" : ">=";
+                    if (!cond.Params.ContainsKey("op") && cond.Params.TryGetValue("above", out var aObj)) {
+                        var above = aObj is bool b ? b : Convert.ToInt32(aObj) != 0;
+                        op = above ? ">=" : "<=";
                     }
-                    var cmp = above ? "≥" : "≤";
-                    return $"Swimbaits {cmp} {v}";
+                    var cmp = op switch {
+                        ">" => ">",
+                        "<" => "<",
+                        "<=" => "≤",
+                        "=" => "=",
+                        _ => "≥",
+                    };
+                    var fishId = 0;
+                    if (cond.Params.TryGetValue("id", out var idObj))
+                        fishId = Convert.ToInt32(idObj);
+                    var fishLabel = fishId == 0 ? "slot fish" : MultiString.GetItemName(fishId);
+                    return $"Swimbaits ({fishLabel}) {cmp} {v}";
                 }
             default:
                 return string.Empty;

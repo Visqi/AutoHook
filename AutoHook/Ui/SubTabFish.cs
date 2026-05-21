@@ -171,20 +171,6 @@ public class SubTabFish {
 
         fishConfig.SparefulHand.FishIdToCheck = (uint)fishConfig.Fish.Id;
         fishConfig.SparefulHand.DrawConfig();
-
-        ImGui.Spacing();
-
-        DrawUtil.DrawWordWrappedString(UIStrings.OnlyUseIfSwimbaitCountLessThan);
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
-        var swimbaitLimit = fishConfig.SparefulHand.SwimbaitCountLimit;
-        if (ImGui.InputInt("###SwimbaitLimit", ref swimbaitLimit, 1, 1)) {
-            swimbaitLimit = Math.Clamp(swimbaitLimit, 0, 3);
-            fishConfig.SparefulHand.SwimbaitCountLimit = swimbaitLimit;
-            Service.Save();
-        }
-
-        ImGui.TooltipOnHover(UIStrings.OnlyUseIfSwimbaitCountLessThanHelpText);
     }
 
     private static void DrawStopAfter(FishConfig fishConfig) {

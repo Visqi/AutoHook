@@ -6,7 +6,6 @@ namespace AutoHook.Configurations;
 
 public class SwimbaitConfig {
     public bool UseSwimbait = false;
-    public int CountThreshold = 1;
     public ConditionSet? ConditionSet { get; set; }
 }
 

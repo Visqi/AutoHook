@@ -163,31 +163,11 @@ public class SubTabBaitMooch {
 
             if (config.UseSwimbait) {
                 ImGui.Spacing();
-
-                var countText = isGlobal ? UIStrings.OnlyUseWhenSwimbaitCountGlobal : UIStrings.OnlyUseWhenSwimbaitCount;
-                var countHelpText = isGlobal ? UIStrings.OnlyUseWhenSwimbaitCountHelpTextGlobal : UIStrings.OnlyUseWhenSwimbaitCountHelpText;
-
-                DrawUtil.DrawWordWrappedString(countText);
-                ImGui.SameLine();
-                ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
-                var threshold = config.CountThreshold;
-                if (ImGui.InputInt("###SwimbaitThreshold", ref threshold, 1, 1)) {
-                    threshold = Math.Clamp(threshold, 1, 3);
-                    config.CountThreshold = threshold;
-                    Service.Save();
-                }
-
-                ImGui.TooltipOnHover(countHelpText);
-
-                ImGui.Spacing();
-
                 config.ConditionSet =
-                    ConditionUi.DrawConditionSetSlim(
+                    ConditionUi.DrawConditionSet(
                         UIStrings.Conditions,
                         config.ConditionSet,
-                        ConditionScope.Hook,
-                        showAdvanced: true,
-                        showSubPrefix: true);
+                        ConditionScope.Hook);
             }
 
             ImGui.TreePop();

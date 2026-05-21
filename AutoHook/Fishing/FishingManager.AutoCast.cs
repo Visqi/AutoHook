@@ -200,13 +200,15 @@ public partial class FishingManager {
                 }
             }
 
-            var swimbaitCountForFish = Ws.GetSwimbaitCountForFish(fishId);
-            if (swimbaitCountForFish < activeSwimbaitCfg.CountThreshold)
-                continue;
-
-            if (activeSwimbaitCfg.ConditionSet is { Groups.Count: > 0 } condSet &&
-                !condSet.Evaluate(Ws, ConditionRegistry.Registry)) {
-                continue;
+            Ws.SwimbaitEvaluationFishId = fishId;
+            try {
+                if (activeSwimbaitCfg.ConditionSet is { Groups.Count: > 0 } condSet &&
+                    !condSet.Evaluate(Ws, ConditionRegistry.Registry)) {
+                    continue;
+                }
+            }
+            finally {
+                Ws.SwimbaitEvaluationFishId = 0;
             }
 
             if (ChangeSwimbait((uint)slotIndex) == ChangeBaitReturn.Success) {

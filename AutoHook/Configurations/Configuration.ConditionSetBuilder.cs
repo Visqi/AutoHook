@@ -37,11 +37,24 @@ public partial class Configuration {
                 TypeId = Registry.GetId<SwimbaitCountCD>(),
                 Params = new Dictionary<string, object> {
                     ["val"] = value,
-                    ["above"] = above,
+                    ["op"] = above ? ">=" : "<=",
                 }
             };
 
             return Single(cond);
+        }
+
+        public static Condition SwimbaitCount(int value, string op = ">=", int fishId = 0) {
+            var p = new Dictionary<string, object> {
+                ["val"] = value,
+                ["op"] = op,
+            };
+            if (fishId != 0)
+                p["id"] = (long)fishId;
+            return new Condition {
+                TypeId = Registry.GetId<SwimbaitCountCD>(),
+                Params = p,
+            };
         }
 
         public static ConditionSet SingleFishCaughtCount(int fishId, int limit) {

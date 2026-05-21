@@ -45,6 +45,10 @@ public sealed class WorldState {
     public bool HaveCordialInInventory(uint id) => Player.HaveCordialInInventory(id);
 
     public IReadOnlyList<uint> SwimbaitIds => Fishing.SwimbaitIds;
+
+    /// <summary>Fish id used while evaluating swimbait slot conditions (0 = unset).</summary>
+    public uint SwimbaitEvaluationFishId { get; set; }
+
     public int GetSwimbaitCount() => Fishing.SwimbaitIds.Count(id => id != 0);
     public int GetSwimbaitCountForFish(uint fishId) => Fishing.SwimbaitIds.Count(id => id == fishId);
     public bool IsSwimbaitFull() => GetSwimbaitCount() >= 3;

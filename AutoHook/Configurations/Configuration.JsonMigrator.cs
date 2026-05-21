@@ -1,6 +1,7 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
 using AutoHook.Configurations.Legacy;
+using AutoHook.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static AutoHook.Conditions.ConditionRegistry;
@@ -47,6 +48,9 @@ public static class ConfigurationJsonMigrator {
             MigrateV6(root);
             root["Version"] = 6;
         }
+
+        MigrateSwimbaitCountThresholdToConditions(root);
+        MigrateSparefulHandSwimbaitLimits(root);
 
         return root.ToString(Formatting.None);
     }
@@ -132,12 +136,15 @@ public static class ConfigurationJsonMigrator {
             if (hook is JObject hookObj) {
                 MigrateHookConfigJson(hookObj);
                 MigrateHookSwimbaitJson(hookObj);
+                var hookFishId = (int?)(hookObj["BaitFish"]?["Id"] ?? 0) ?? 0;
+                MigrateHookSwimbaitCountThreshold(hookObj, hookFishId);
             }
         }
         foreach (var token in EnumerateArray(preset["ListOfFish"])) {
             if (token is JObject fishObj) {
                 MigrateFishConfigJson(fishObj);
                 MigrateFishConfigStopSwapJson(fishObj);
+                MigrateFishSparefulHandSwimbaitLimit(fishObj);
             }
         }
         if (preset["AutoCastsCfg"] is JObject autoCasts) {
@@ -346,15 +353,14 @@ public static class ConfigurationJsonMigrator {
 
     private static void MigrateHookSwimbaitJson(JObject hook) {
         var useSwimbait = (bool?)hook["UseSwimbait"] == true;
-        var threshold = (int?)(hook["SwimbaitCountThreshold"] ?? 1) ?? 1;
+        var threshold = Math.Clamp((int?)(hook["SwimbaitCountThreshold"] ?? 1) ?? 1, 1, 3);
         var onlyWhenNoMooch = (bool?)hook["OnlyUseWhenNoMoochAvailable"] != false;
         if (!useSwimbait) return;
+        var hookFishId = (int?)(hook["BaitFish"]?["Id"] ?? 0) ?? 0;
         var normal = hook["SwimbaitNormal"] as JObject ?? [];
         var intuition = hook["SwimbaitIntuition"] as JObject ?? [];
         normal["UseSwimbait"] = true;
-        normal["CountThreshold"] = threshold;
         intuition["UseSwimbait"] = true;
-        intuition["CountThreshold"] = threshold;
         if (onlyWhenNoMooch) {
             var set = Configuration.ConditionSetBuilder.SingleFlag<MoochAvailableCD>(inverse: true);
             normal["ConditionSet"] = JToken.FromObject(set);
@@ -362,6 +368,194 @@ public static class ConfigurationJsonMigrator {
         }
         hook["SwimbaitNormal"] = normal;
         hook["SwimbaitIntuition"] = intuition;
+        MigrateSwimbaitCfgCountThreshold(normal, hookFishId, threshold);
+        MigrateSwimbaitCfgCountThreshold(intuition, hookFishId, threshold);
+    }
+
+    private static void MigrateSwimbaitCountThresholdToConditions(JObject root) {
+        if (root["HookPresets"] is not JObject hookPresets)
+            return;
+
+        MigratePresetSwimbaitCountThreshold(hookPresets["DefaultPreset"] as JObject);
+        foreach (var token in EnumerateArray(hookPresets["CustomPresets"])) {
+            if (token is JObject presetObj)
+                MigratePresetSwimbaitCountThreshold(presetObj);
+        }
+    }
+
+    private static void MigratePresetSwimbaitCountThreshold(JObject? preset) {
+        if (preset == null) return;
+        foreach (var hook in EnumerateArray(preset["ListOfBaits"]).Concat(EnumerateArray(preset["ListOfMooch"]))) {
+            if (hook is not JObject hookObj) continue;
+            var hookFishId = (int?)(hookObj["BaitFish"]?["Id"] ?? 0) ?? 0;
+            MigrateHookSwimbaitCountThreshold(hookObj, hookFishId);
+        }
+    }
+
+    private static void MigrateHookSwimbaitCountThreshold(JObject hook, int hookFishId) {
+        MigrateSwimbaitCfgCountThreshold(hook["SwimbaitNormal"] as JObject, hookFishId);
+        MigrateSwimbaitCfgCountThreshold(hook["SwimbaitIntuition"] as JObject, hookFishId);
+    }
+
+    private static void MigrateSwimbaitCfgCountThreshold(JObject? swimbait, int hookFishId, int? legacyThreshold = null) {
+        if (swimbait == null || (bool?)swimbait["UseSwimbait"] != true)
+            return;
+
+        var hadExplicitThreshold = swimbait["CountThreshold"] is JValue;
+        var threshold = legacyThreshold ?? Math.Clamp((int?)swimbait["CountThreshold"] ?? 1, 1, 3);
+        if (hadExplicitThreshold)
+            swimbait.Remove("CountThreshold");
+
+        if (!hadExplicitThreshold && legacyThreshold == null && ConditionSetHasSwimbaitCount(swimbait["ConditionSet"] as JObject))
+            return;
+
+        if (!hadExplicitThreshold && legacyThreshold == null && !ConditionSetHasAnyCondition(swimbait["ConditionSet"] as JObject))
+            threshold = 1;
+
+        if (ConditionSetHasSwimbaitCountAtLeast(swimbait["ConditionSet"] as JObject, threshold))
+            return;
+
+        MergeSwimbaitCountCondition(swimbait, hookFishId, threshold);
+    }
+
+    private static void MergeSwimbaitCountCondition(JObject swimbait, int hookFishId, int threshold) {
+        var fishId = hookFishId != GameRes.AllMoochesId ? hookFishId : 0;
+        var countCond = Configuration.ConditionSetBuilder.SwimbaitCount(threshold, ">=", fishId);
+        var setObj = swimbait["ConditionSet"] as JObject;
+        if (setObj?["g"] is JArray { Count: > 0 } groups && groups[0] is JObject firstGroup) {
+            if (firstGroup["c"] is not JArray conditions)
+                firstGroup["c"] = conditions = [];
+            conditions.Add(JToken.FromObject(countCond));
+            return;
+        }
+
+        var set = new ConditionSet {
+            CombineMode = ConditionCombineMode.All,
+            Groups =
+            [
+                new ConditionGroup
+                {
+                    CombineMode = ConditionCombineMode.All,
+                    Conditions = [countCond],
+                }
+            ]
+        };
+        swimbait["ConditionSet"] = JToken.FromObject(set);
+    }
+
+    private static bool ConditionSetHasAnyCondition(JObject? setObj)
+        => setObj?["g"] is JArray groups && groups.OfType<JObject>().Any(g => g["c"] is JArray { Count: > 0 });
+
+    private static bool ConditionSetHasSwimbaitCount(JObject? setObj) {
+        var typeId = Registry.GetId<SwimbaitCountCD>();
+        return ConditionSetHasConditionType(setObj, typeId);
+    }
+
+    private static bool ConditionSetHasSwimbaitCountAtLeast(JObject? setObj, int threshold) {
+        var typeId = Registry.GetId<SwimbaitCountCD>();
+        if (setObj?["g"] is not JArray groups) return false;
+        foreach (var group in groups.OfType<JObject>()) {
+            if (group["c"] is not JArray conditions) continue;
+            foreach (var cond in conditions.OfType<JObject>()) {
+                if ((string?)cond["t"] != typeId) continue;
+                if (cond["p"] is not JObject p) continue;
+                var op = (string?)p["op"] ?? ((bool?)p["above"] != false ? ">=" : "<=");
+                if (op is not ">=" and not ">") continue;
+                if ((int?)(p["val"] ?? 0) >= threshold)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private static bool ConditionSetHasConditionType(JObject? setObj, string typeId) {
+        if (setObj?["g"] is not JArray groups) return false;
+        return groups.OfType<JObject>()
+            .SelectMany(g => g["c"] is JArray c ? c.OfType<JObject>() : [])
+            .Any(cond => (string?)cond["t"] == typeId);
+    }
+
+    private static void MigrateSparefulHandSwimbaitLimits(JObject root) {
+        if (root["HookPresets"] is not JObject hookPresets)
+            return;
+
+        MigratePresetSparefulHandSwimbaitLimits(hookPresets["DefaultPreset"] as JObject);
+        foreach (var token in EnumerateArray(hookPresets["CustomPresets"])) {
+            if (token is JObject presetObj)
+                MigratePresetSparefulHandSwimbaitLimits(presetObj);
+        }
+    }
+
+    private static void MigratePresetSparefulHandSwimbaitLimits(JObject? preset) {
+        if (preset == null) return;
+        foreach (var token in EnumerateArray(preset["ListOfFish"])) {
+            if (token is JObject fishObj)
+                MigrateFishSparefulHandSwimbaitLimit(fishObj);
+        }
+    }
+
+    private static void MigrateFishSparefulHandSwimbaitLimit(JObject fish) {
+        if (fish["SparefulHand"] is not JObject spareful)
+            return;
+
+        if (spareful["SwimbaitCountLimit"] is not JValue)
+            return;
+
+        var limit = (int?)spareful["SwimbaitCountLimit"] ?? 0;
+        spareful.Remove("SwimbaitCountLimit");
+        if (limit <= 0)
+            return;
+
+        var fishId = (int?)(fish["Fish"]?["Id"] ?? 0) ?? 0;
+        if (fishId <= 0)
+            return;
+
+        if (ConditionSetHasSwimbaitCountLessThan(spareful["ConditionSet"] as JObject, limit, fishId))
+            return;
+
+        MergeSparefulHandSwimbaitCondition(spareful, fishId, limit);
+    }
+
+    private static void MergeSparefulHandSwimbaitCondition(JObject spareful, int fishId, int limit) {
+        var countCond = Configuration.ConditionSetBuilder.SwimbaitCount(limit, "<", fishId);
+        var setObj = spareful["ConditionSet"] as JObject;
+        if (setObj?["g"] is JArray { Count: > 0 } groups && groups[0] is JObject firstGroup) {
+            if (firstGroup["c"] is not JArray conditions)
+                firstGroup["c"] = conditions = [];
+            conditions.Add(JToken.FromObject(countCond));
+            return;
+        }
+
+        spareful["ConditionSet"] = JToken.FromObject(new ConditionSet {
+            CombineMode = ConditionCombineMode.All,
+            Groups =
+            [
+                new ConditionGroup
+                {
+                    CombineMode = ConditionCombineMode.All,
+                    Conditions = [countCond],
+                }
+            ]
+        });
+    }
+
+    private static bool ConditionSetHasSwimbaitCountLessThan(JObject? setObj, int limit, int fishId) {
+        var typeId = Registry.GetId<SwimbaitCountCD>();
+        if (setObj?["g"] is not JArray groups) return false;
+        foreach (var group in groups.OfType<JObject>()) {
+            if (group["c"] is not JArray conditions) continue;
+            foreach (var cond in conditions.OfType<JObject>()) {
+                if ((string?)cond["t"] != typeId) continue;
+                if (cond["p"] is not JObject p) continue;
+                var op = (string?)p["op"] ?? "<";
+                if (op is not "<" and not "<=") continue;
+                if ((int?)(p["val"] ?? 0) != limit) continue;
+                var id = (int?)(p["id"] ?? 0) ?? 0;
+                if (id == fishId)
+                    return true;
+            }
+        }
+        return false;
     }
 
     private static void MigrateFishConfigJson(JObject fish) {

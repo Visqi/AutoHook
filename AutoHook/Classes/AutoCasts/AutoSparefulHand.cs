@@ -1,10 +1,9 @@
+using AutoHook.Ui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
 public class AutoSparefulHand : BaseActionCast {
-    public int SwimbaitCountLimit { get; set; } = 3;
-
     public AutoSparefulHand() : base(UIStrings.SparefulHand, IDs.Actions.SparefulHand, ActionType.Action) => HelpText = UIStrings.SparefulHand_HelpText;
 
     public override string GetName()
@@ -13,15 +12,25 @@ public class AutoSparefulHand : BaseActionCast {
     public uint? FishIdToCheck { get; set; }
 
     public override bool CastCondition() {
-        // Check swimbait count for this specific fish if limit is set
-        if (SwimbaitCountLimit > 0 && FishIdToCheck.HasValue) {
-            var currentSwimbaitCount = Service.WorldState.GetSwimbaitCountForFish(FishIdToCheck.Value);
-            if (currentSwimbaitCount >= SwimbaitCountLimit)
-                return false;
+        var ws = Service.WorldState;
+        if (FishIdToCheck is { } fishId)
+            ws.SwimbaitEvaluationFishId = fishId;
+        try {
+            return EvaluateConditionSet();
         }
-
-        return true;
+        finally {
+            ws.SwimbaitEvaluationFishId = 0;
+        }
     }
+
+    protected override DrawOptionsDelegate? DrawOptions => () => {
+        ConditionSet = ConditionUi.DrawConditionSetSlim(
+            UIStrings.Conditions,
+            ConditionSet,
+            ConditionScope.AutoCast,
+            showAdvanced: true,
+            showSubPrefix: false);
+    };
 
     public override int Priority { get; set; } = 20;
     public override bool IsExcludedPriority { get; set; } = false;

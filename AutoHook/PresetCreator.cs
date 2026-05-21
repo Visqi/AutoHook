@@ -1,4 +1,6 @@
+using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
+using AutoHook.Configurations;
 using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
@@ -414,7 +416,12 @@ public class PresetCreator {
 
         fishConfig.SparefulHand.Enabled = true;
         fishConfig.SparefulHand.FishIdToCheck = (uint)_selectedTargetFish.ItemId;
-        fishConfig.SparefulHand.SwimbaitCountLimit = 3;
+        fishConfig.SparefulHand.ConditionSet = Configuration.ConditionSetBuilder.SwimbaitCount(3, "<", (int)_selectedTargetFish.ItemId) is { } cond
+            ? new ConditionSet {
+                CombineMode = ConditionCombineMode.All,
+                Groups = [new ConditionGroup { CombineMode = ConditionCombineMode.All, Conditions = [cond] } ],
+            }
+            : null;
 
         fishConfig.StopAfterCaughtLimit.Value = (true, 4);
 
