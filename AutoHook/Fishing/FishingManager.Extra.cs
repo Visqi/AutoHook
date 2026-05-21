@@ -39,8 +39,7 @@ public partial class FishingManager {
                 continue;
 
             var current = trig.ConditionSet.Evaluate(Ws, ConditionRegistry.Registry);
-            var last = i < extraCfg.LastTriggerStates.Count ? extraCfg.LastTriggerStates[i] : false;
-
+            var last = i < extraCfg.LastTriggerStates.Count && extraCfg.LastTriggerStates[i];
             var fire = !last && current;
 
             if (i < extraCfg.LastTriggerStates.Count)
