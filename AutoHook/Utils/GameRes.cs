@@ -1,6 +1,8 @@
+using AutoHook.Data;
 using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
 using System.IO;
+using System.Reflection;
 using System.Text.Json;
 
 namespace AutoHook.Utils;
@@ -17,8 +19,15 @@ public static class GameRes {
     public static List<ImportedFish> ImportedFishes { get; private set; } = [];
     public static List<ImportedFish> SpearfishFishes { get; private set; } = [];
     public static List<BiteTimers> BiteTimers { get; private set; } = [];
+    public static List<uint> FishingStatuses { get; private set; } = [];
 
     public static void Initialize() {
+        FishingStatuses = [.. typeof(IDs.Status).GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Select(f => f.GetValue(null))
+            .OfType<uint>()
+            .Where(id => id != 0)
+            .OrderBy(id => id)];
+
         Baits = [.. FindRows<Item>(i => i.ItemSearchCategory.RowId == FishingTackleRow).ToList()
             .Concat([.. FindRows<WKSItemInfo>(i => i.WKSItemSubCategory.RowId == 5).Select(i => i.Item.Value)])
             .Select(b => new BaitFishClass(b))];

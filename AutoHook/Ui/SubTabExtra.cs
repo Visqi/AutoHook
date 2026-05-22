@@ -1,4 +1,5 @@
 using AutoHook.Conditions;
+using AutoHook.Utils;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -181,6 +182,14 @@ public class SubTabExtra {
                 trig.ResolveCollectablesWindow = resolve;
                 trig.ResolveCollectablesForceNo = forceNo;
 
+                var removeStatus = trig.RemoveStatus;
+                var statusToRemove = trig.StatusToRemove;
+                DrawRemoveStatus(ref removeStatus, ref statusToRemove);
+                if (removeStatus && statusToRemove == 0 && GameRes.FishingStatuses.Count > 0)
+                    statusToRemove = GameRes.FishingStatuses[0];
+                trig.RemoveStatus = removeStatus;
+                trig.StatusToRemove = statusToRemove;
+
                 trig.NotifyOnSuccess.DrawConfig(string.Empty);
 
                 ImGui.Unindent(20 * ImGuiHelpers.GlobalScale);
@@ -204,6 +213,9 @@ public class SubTabExtra {
     }
 
     private static string SummarizeTrigger(ExtraTrigger trig) {
+        if (trig.RemoveStatus && trig.StatusToRemove != 0)
+            return $"Remove {MultiString.GetStatusName(trig.StatusToRemove)}";
+
         if (trig.ConditionSet is not { Groups.Count: > 0 })
             return string.Empty;
 
@@ -292,6 +304,25 @@ public class SubTabExtra {
         );
 
         presetName = text;
+    }
+
+    private static void DrawRemoveStatus(ref bool enable, ref uint statusId) {
+        using var _ = ImRaii.PushId(@$"{nameof(DrawRemoveStatus)}");
+
+        var selectedId = statusId;
+        DrawUtil.DrawCheckboxTree("Remove status", ref enable,
+            () => {
+                if (GameRes.FishingStatuses.Count == 0)
+                    return;
+
+                if (selectedId == 0 || GameRes.FishingStatuses.All(s => s != selectedId))
+                    selectedId = GameRes.FishingStatuses[0];
+
+                var selectedLabel = $"{selectedId}: {MultiString.GetStatusName(selectedId)}";
+                DrawUtil.DrawComboSelector(GameRes.FishingStatuses, s => $"{s}: {MultiString.GetStatusName(s)}", selectedLabel, s => selectedId = s);
+            });
+
+        statusId = selectedId;
     }
 
     private static void DrawBaitSwap(ref bool enable, ref BaitFishClass baitSwap) {

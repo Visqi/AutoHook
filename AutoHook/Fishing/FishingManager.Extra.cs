@@ -1,5 +1,6 @@
 using AutoHook.Conditions;
 using ECommons.Throttlers;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
 namespace AutoHook.Fishing;
@@ -96,10 +97,13 @@ public partial class FishingManager {
             Service.AutoCollectables.ResolvePending(trig.ResolveCollectablesForceNo);
         }
 
-        if (trig.StartFishing
-            && Ws.Fishing.FishingState is FishingState.None or FishingState.PoleReady
-            && Ws.IsCastAvailable()
-            && EzThrottler.Throttle("ExtraStartFishingRule", 1000)) {
+        if (trig.RemoveStatus && trig.StatusToRemove != 0 && Ws.HasStatus(trig.StatusToRemove) && EzThrottler.Throttle("ExtraRemoveStatus", 500)) {
+            if (StatusManager.ExecuteStatusOff(trig.StatusToRemove)) {
+                Service.PrintChat(@$"[Extra] Trigger: Removed {MultiString.GetStatusName(trig.StatusToRemove)}");
+            }
+        }
+
+        if (trig.StartFishing && Ws.Fishing.FishingState is FishingState.None or FishingState.PoleReady && Ws.IsCastAvailable() && EzThrottler.Throttle("ExtraStartFishingRule", 1000)) {
             StartFishing();
         }
 

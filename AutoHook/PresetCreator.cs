@@ -1,6 +1,5 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
-using AutoHook.Configurations;
 using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
@@ -355,29 +354,6 @@ public class PresetCreator {
         return anglers;
     }
 
-    private CustomPresetConfig CreateAnglerPresetTest() {
-        CustomPresetConfig anglers = new($"Auto - 600gp StackAngler {DateTime.Now}");
-
-        var bait = new HookConfig(29717); // versatile lure
-        bait.NormalHook.UseDoubleHook = true;
-        bait.NormalHook.UseTripleHook = true;
-
-        anglers.ExtraCfg.Enabled = true;
-        anglers.ExtraCfg.ForceBaitSwap = true;
-        anglers.ExtraCfg.ForcedBaitId = 29717;
-
-        anglers.AutoCastsCfg.EnableAll = true;
-        anglers.AutoCastsCfg.CastCordial.Enabled = true;
-        anglers.AutoCastsCfg.CastPrizeCatch.Enabled = true;
-        anglers.AutoCastsCfg.CastPrizeCatch.GpThreshold = 600;
-        anglers.AutoCastsCfg.CastLine.Enabled = true;
-        anglers.AutoCastsCfg.DontCancelMooch = false;
-
-        anglers.AddItem(bait);
-
-        return anglers;
-    }
-
     private static string GetBiteType(BiteType bite)
         => bite switch {
             BiteType.Weak => "(!)",
@@ -416,10 +392,10 @@ public class PresetCreator {
 
         fishConfig.SparefulHand.Enabled = true;
         fishConfig.SparefulHand.FishIdToCheck = (uint)_selectedTargetFish.ItemId;
-        fishConfig.SparefulHand.ConditionSet = Configuration.ConditionSetBuilder.SwimbaitCount(3, "<", (int)_selectedTargetFish.ItemId) is { } cond
+        fishConfig.SparefulHand.ConditionSet = Configuration.ConditionSetBuilder.SwimbaitCount(3, "<", _selectedTargetFish.ItemId) is { } cond
             ? new ConditionSet {
                 CombineMode = ConditionCombineMode.All,
-                Groups = [new ConditionGroup { CombineMode = ConditionCombineMode.All, Conditions = [cond] } ],
+                Groups = [new ConditionGroup { CombineMode = ConditionCombineMode.All, Conditions = [cond] }],
             }
             : null;
 
