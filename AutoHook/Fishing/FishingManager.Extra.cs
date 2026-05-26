@@ -94,7 +94,7 @@ public partial class FishingManager {
         }
 
         if (trig.ResolveCollectablesWindow) {
-            Service.AutoCollectables.ResolvePending(trig.ResolveCollectablesForceNo);
+            Service.AutoCollectables.RequestResolve(trig.ResolveCollectablesForceNo);
         }
 
         if (trig.RemoveStatus && trig.StatusToRemove != 0 && Ws.HasStatus(trig.StatusToRemove) && EzThrottler.Throttle("ExtraRemoveStatus", 500)) {

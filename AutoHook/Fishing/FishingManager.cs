@@ -259,8 +259,9 @@ public partial class FishingManager : IDisposable {
 
         var casted = false;
         if (Ws.FishingStep.HasFlag(FishingSteps.FishCaught) && !Ws.FishingStep.HasFlag(FishingSteps.Quitting)) {
-            casted = UseFishCaughtActions(lastCatchCfg);
             CheckFishCaughtSwap(lastCatchCfg);
+            lastCatchCfg = GetLastCatchConfig();
+            casted = UseFishCaughtActions(lastCatchCfg);
         }
 
         FishingHelper.RemoveGuidQueue();

@@ -120,8 +120,17 @@ public class HookConfig : BaseOption {
                 }
             }*/
 
-        return Service.WorldState.Fishing.Intuition.Status == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook ? IntuitionHook : NormalHook;
+        return UsesIntuitionHookConfig() ? IntuitionHook : NormalHook;
     }
+
+    /// <summary>
+    /// Same intuition vs normal window as <see cref="GetHookset"/> — used for swimbait selection.
+    /// </summary>
+    public SwimbaitConfig GetSwimbaitConfig()
+        => UsesIntuitionHookConfig() ? SwimbaitIntuition : SwimbaitNormal;
+
+    public bool UsesIntuitionHookConfig()
+        => Service.WorldState.Fishing.Intuition.Status == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook;
 
     public HookType? GetHook(BiteType bite, double timePassed) {
         var hookset = GetHookset();

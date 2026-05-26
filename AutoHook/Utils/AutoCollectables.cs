@@ -10,9 +10,13 @@ using System.Text.RegularExpressions;
 namespace AutoHook.Utils;
 
 public class AutoCollectables : IDisposable {
+    private bool _pendingResolve;
+    private bool _pendingForceNo;
+
     public AutoCollectables() {
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SelectYesno", HandleAddon);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SelectYesno", HandleAddon);
     }
+
     public void Dispose() {
         Svc.AddonLifecycle.UnregisterListener(HandleAddon);
     }
@@ -26,52 +30,50 @@ public class AutoCollectables : IDisposable {
         // if someone could add the chinese and korean translations that'd be nice
     ];
 
-    // public method for handling the addon outside of postsetup
-    public unsafe void ResolvePending(bool forceNo) {
-        Svc.Log.Debug($"[AutoCollectables] Resolve pending called");
-        var mgr = RaptureAtkUnitManager.Instance();
-        if (mgr == null)
-            return;
-
-        Svc.Log.Debug($"[AutoCollectables] Resolve pending RAUM ready");
-
-        var unit = mgr->GetAddonByName("SelectYesno");
-        if (unit == null || !unit->IsReady)
-            return;
-
-        Svc.Log.Debug($"[AutoCollectables] Resolve pending addon ready");
-
-        var addon = (AddonSelectYesno*)unit;
-        SelectYesNo(addon, forceNo);
+    public void RequestResolve(bool forceNo) {
+        _pendingForceNo = forceNo;
+        _pendingResolve = true;
     }
 
     private unsafe void HandleAddon(AddonEvent type, AddonArgs args) {
-        if (!Service.Configuration.PluginEnabled || !Service.Configuration.AutoCollectablesEnabled)
+        if (!Service.Configuration.PluginEnabled)
             return;
 
         var addon = args.GetAddon<AddonSelectYesno>();
-        SelectYesNo(addon, forceNo: false);
+        if (!addon->AtkUnitBase.IsReady)
+            return;
+
+        if (_pendingResolve) {
+            if (TrySelectYesNo(addon, _pendingForceNo))
+                _pendingResolve = false;
+            return;
+        }
+
+        if (!Service.Configuration.AutoCollectablesEnabled)
+            return;
+
+        TrySelectYesNo(addon, forceNo: false);
     }
 
-    private unsafe void SelectYesNo(AddonSelectYesno* addon, bool forceNo) {
+    private unsafe bool TrySelectYesNo(AddonSelectYesno* addon, bool forceNo) {
         var text = addon->PromptText->NodeText.AsReadOnlySeString();
         if (!text.ContainsAny(collectablePatterns))
-            return;
+            return false;
 
         var name = Enum.GetValues<SeIconChar>().Cast<SeIconChar>().Aggregate(addon->AtkValues[15].String.AsDalamudSeString().GetText(), (current, enumValue) => current.Replace(enumValue.ToIconString(), "")).Trim();
         if (FindRow<Item>(x => x.IsCollectable && !x.Singular.IsEmpty && name.Contains(x.Singular.GetText(), StringComparison.InvariantCultureIgnoreCase)) is not { RowId: > 0 } item)
-            return;
+            return false;
 
         Svc.Log.Debug($"[AutoCollectables] Detected item [#{item.RowId}] {item.Name}");
 
         if (forceNo) {
             Svc.Log.Debug($"[AutoCollectables] Force NO for [#{item.RowId}] {item.Name}");
             No(addon);
-            return;
+            return true;
         }
 
         if (!int.TryParse(Regex.Match(text.ExtractText(), @"\d+").Value, out var value))
-            return;
+            return false;
 
         if (CollectablesShopItem.FirstOrNull(x => x.Item.Value.RowId == item.RowId) is { } collectability) {
             var min = collectability.CollectablesShopRefine.Value.LowCollectability;
@@ -84,20 +86,24 @@ public class AutoCollectables : IDisposable {
                 Svc.Log.Debug($"[AutoCollectables] Entry is [#{item.RowId}] {item.Name} with an insufficient collectability of {value}");
                 No(addon);
             }
+
+            return true;
         }
-        else {
-            if (item.AetherialReduce > 0) {
-                Svc.Log.Debug($"[AutoCollectables] Entry is [#{item.RowId}] {item.Name} and probably an aethersand fish. Skipping collectability check.");
-                Yes(addon);
-            }
-            else if (TryGetRow<WKSItemInfo>(item.AdditionalData.RowId, out var wksItem)) {
-                Svc.Log.Debug($"[AutoCollectables] Entry is [#{item.RowId}] {item.Name} for {wksItem.WKSItemSubCategory.ValueNullable?.Name ?? "null"}. Skipping collectability check.");
-                Yes(addon);
-            }
-            else {
-                Svc.Log.Debug($"[AutoCollectables] Failed to find matching CollectablesShopItem for [#{item.RowId}] {item.Name}. Not an aethersand fish or a CE fish.");
-            }
+
+        if (item.AetherialReduce > 0) {
+            Svc.Log.Debug($"[AutoCollectables] Entry is [#{item.RowId}] {item.Name} and probably an aethersand fish. Skipping collectability check.");
+            Yes(addon);
+            return true;
         }
+
+        if (TryGetRow<WKSItemInfo>(item.AdditionalData.RowId, out var wksItem)) {
+            Svc.Log.Debug($"[AutoCollectables] Entry is [#{item.RowId}] {item.Name} for {wksItem.WKSItemSubCategory.ValueNullable?.Name ?? "null"}. Skipping collectability check.");
+            Yes(addon);
+            return true;
+        }
+
+        Svc.Log.Debug($"[AutoCollectables] Failed to find matching CollectablesShopItem for [#{item.RowId}] {item.Name}. Not an aethersand fish or a CE fish.");
+        return false;
     }
 
     public static unsafe void Yes(AddonSelectYesno* addon) {
