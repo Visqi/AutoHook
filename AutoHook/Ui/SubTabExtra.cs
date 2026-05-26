@@ -1,5 +1,4 @@
 using AutoHook.Conditions;
-using AutoHook.Utils;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -34,8 +33,6 @@ public class SubTabExtra {
                     Service.Configuration.HookPresets.DefaultPreset.ExtraCfg.Enabled = false;
                 }
             }
-
-            Service.Save();
         }
 
         if (!_preset.IsGlobal) {
@@ -80,8 +77,7 @@ public class SubTabExtra {
 
             DrawUtil.SpacingSeparator();
 
-            if (DrawUtil.Checkbox(UIStrings.Reset_counter_after_swapping_presets, ref config.ResetCounterPresetSwap))
-                Service.Save();
+            DrawUtil.Checkbox(UIStrings.Reset_counter_after_swapping_presets, ref config.ResetCounterPresetSwap);
         }
     }
 
@@ -137,6 +133,11 @@ public class SubTabExtra {
                 var startFishing = trig.StartFishing;
                 DrawUtil.DrawCheckboxTree("Start fishing", ref startFishing, null);
                 trig.StartFishing = startFishing;
+
+                var reduceFish = trig.ReduceFish;
+                DrawUtil.DrawCheckboxTree(UIStrings.AetherialReduction_ReduceFish, ref reduceFish, null,
+                    UIStrings.AetherialReduction_ReduceFishHelp);
+                trig.ReduceFish = reduceFish;
 
                 var stopEnabled = trig.StopAction != ExtraStopAction.None;
                 DrawUtil.DrawCheckboxTree(UIStrings.StopQuitFishing, ref stopEnabled,
@@ -213,6 +214,9 @@ public class SubTabExtra {
     }
 
     private static string SummarizeTrigger(ExtraTrigger trig) {
+        if (trig.ReduceFish)
+            return UIStrings.AetherialReduction_ReduceFish;
+
         if (trig.RemoveStatus && trig.StatusToRemove != 0)
             return $"Remove {MultiString.GetStatusName(trig.StatusToRemove)}";
 

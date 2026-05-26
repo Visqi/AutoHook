@@ -107,6 +107,11 @@ public partial class FishingManager {
             StartFishing();
         }
 
+        if (trig.ReduceFish && Svc.Automation.CurrentTask is not AetherialReductionTask) {
+            Svc.Automation.Start(new AetherialReductionTask(this));
+            Service.PrintChat(UIStrings.AetherialReduction_Started);
+        }
+
         Service.NotificationMaster.Notify(trig.NotifyOnSuccess, "Rule condition success");
     }
 }

@@ -24,8 +24,7 @@ public class SubTabFish {
             var count = FishingManager.FishingHelper.GetFishCount(fish.UniqueId);
             var fishCount = count > 0 ? $"({UIStrings.Caught_Counter} {count})" : "";
 
-            if (DrawUtil.Checkbox($"###checkbox{idx}", ref fish.Enabled))
-                Service.Save();
+            DrawUtil.Checkbox($"###checkbox{idx}", ref fish.Enabled);
 
             ImGui.SameLine(0, 6);
             var x = ImGui.GetCursorPosX();
@@ -155,10 +154,8 @@ public class SubTabFish {
             fishConfig.Mooch.HelpText = string.Empty; // hack
             fishConfig.Mooch.DrawConfig();
 
-            if (DrawUtil.Checkbox(UIStrings.Never_Mooch, ref fishConfig.NeverMooch, UIStrings.NeverMoochHelpText)) {
+            if (DrawUtil.Checkbox(UIStrings.Never_Mooch, ref fishConfig.NeverMooch, UIStrings.NeverMoochHelpText))
                 fishConfig.Mooch.Enabled = false;
-                Service.Save();
-            }
 
             ImGui.TreePop();
         }

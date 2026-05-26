@@ -21,7 +21,6 @@ namespace AutoHook;
  * show complex condition ui by default if there are multiple groups
  * stop movement while fishing
  * auto extract materia
- * auto reduce fish
  * move around to reduce fish weary
  * BUGS:
  * if you change preset and tell it to use swimbait it uses the normal baits timeout options for the first one. this seems to happen regardless if you have a timer on...
@@ -71,7 +70,7 @@ public class AutoHook : IDalamudPlugin {
 
     public AutoHook(IDalamudPluginInterface pluginInterface, IDtrBar dtrBar) {
         ECommonsMain.Init(pluginInterface, this, Module.DalamudReflector, Module.ObjectFunctions);
-        CLibMain.Init(pluginInterface, this);
+        CLibMain.Init(pluginInterface, this, CLibModule.Automation);
         Service.Initialize(pluginInterface);
         PunishLibMain.Init(pluginInterface, "AutoHook", new AboutPlugin() { Developer = "InitialDet", Sponsor = "https://ko-fi.com/initialdet" });
 
@@ -97,16 +96,16 @@ public class AutoHook : IDalamudPlugin {
 
         GameRes.Initialize();
 
-        Svc.PluginInterface.UiBuilder.Draw += Service.WindowSystem.Draw;
-        Svc.PluginInterface.UiBuilder.OpenConfigUi += _pluginUi.Toggle;
-        Svc.PluginInterface.UiBuilder.OpenMainUi += _pluginUi.Toggle;
+        Svc.Interface.UiBuilder.Draw += DrawUi;
+        Svc.Interface.UiBuilder.OpenConfigUi += _pluginUi.Toggle;
+        Svc.Interface.UiBuilder.OpenMainUi += _pluginUi.Toggle;
 
         _ = new EzDtr(() =>
             $"{((SeIconChar)0xE05E).ToIconString()} {(Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled)}",
             evt => {
                 if (evt.ClickType is MouseClickType.Left) {
                     Service.Configuration.PluginEnabled ^= true;
-                    Service.Configuration.Save();
+                    Service.Save();
                 }
                 else if (evt.ClickType is MouseClickType.Right)
                     _pluginUi.Toggle();
@@ -121,7 +120,7 @@ public class AutoHook : IDalamudPlugin {
                 var index = presets.IndexOf(Service.Configuration.HookPresets.SelectedPreset);
                 var direction = evt.ClickType == MouseClickType.Left ? 1 : -1;
                 Service.Configuration.HookPresets.SelectedPreset = presets[(index + direction + presets.Count) % presets.Count];
-                Service.Configuration.Save();
+                Service.Save();
             },
             $"{Name}Presets",
             () => Service.Configuration.DtrPresetBarEnabled && Player.Job is ECommons.ExcelServices.Job.FSH && Service.Configuration.HookPresets.SelectedPreset != null
@@ -183,10 +182,9 @@ public class AutoHook : IDalamudPlugin {
             return;
         }
 
-        Service.Save();
         Service.Configuration.HookPresets.SelectedPreset = preset;
         Svc.Chat.Print(@$"{UIStrings.Preset_set_to_} {preset.PresetName}");
-        Service.Save();
+        Service.SaveNow();
     }
 
     private static void SetGigPreset(string presetName) {
@@ -197,26 +195,30 @@ public class AutoHook : IDalamudPlugin {
                 return;
             }
 
-            Service.Save();
             Service.Configuration.AutoGigConfig.SelectedPreset = preset;
             Svc.Chat.Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
-            Service.Save();
+            Service.SaveNow();
         }
         catch (Exception e) {
             Svc.Log.Error(e.Message);
         }
     }
 
+    private static void DrawUi() {
+        Service.WindowSystem.Draw();
+        Service.FlushPendingSave();
+    }
+
     public void Dispose() {
         _pluginUi.Dispose();
         _autoGig.Dispose();
         HookManager.Dispose();
-        Service.Save();
+        Service.SaveNow();
         Service.WorldStateUpdater.Dispose();
         Service.AutoCollectables.Dispose();
-        Svc.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
-        Svc.PluginInterface.UiBuilder.OpenConfigUi -= _pluginUi.Toggle;
-        Svc.PluginInterface.UiBuilder.OpenMainUi -= _pluginUi.Toggle;
+        Svc.Interface.UiBuilder.Draw -= DrawUi;
+        Svc.Interface.UiBuilder.OpenConfigUi -= _pluginUi.Toggle;
+        Svc.Interface.UiBuilder.OpenMainUi -= _pluginUi.Toggle;
 
         foreach (var (command, _) in CommandHelp)
             Svc.Commands.RemoveHandler(command);

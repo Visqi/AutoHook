@@ -53,7 +53,7 @@ internal class AutoGig : Window, IDisposable {
     public void Dispose() {
         Service.WindowSystem.RemoveWindow(this);
         Svc.Condition.ConditionChange -= Condition_ConditionChange;
-        Service.Save();
+        Service.SaveNow();
     }
 
     public override void Draw() {
@@ -61,7 +61,7 @@ internal class AutoGig : Window, IDisposable {
             DrawFishOverlay();
     }
 
-    public unsafe void DrawSettings() {
+    public void DrawSettings() {
         if (ImGui.Checkbox(UIStrings.Enable_AutoGig, ref _gigCfg.AutoGigEnabled))
             Service.Save();
 
@@ -69,8 +69,7 @@ internal class AutoGig : Window, IDisposable {
 
         ImGui.SameLine();
 
-        if (DrawUtil.Checkbox(UIStrings.CatchEverything, ref _gigCfg.CatchAll, UIStrings.IgnoresPresets))
-            Service.Save();
+        DrawUtil.Checkbox(UIStrings.CatchEverything, ref _gigCfg.CatchAll, UIStrings.IgnoresPresets);
 
         PluginUi.ShowKofi();
 

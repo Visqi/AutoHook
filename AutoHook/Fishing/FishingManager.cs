@@ -153,7 +153,7 @@ public partial class FishingManager : IDisposable {
         return currentHook;
     }
 
-    private unsafe void OnFrameworkUpdate(IFramework _) {
+    private void OnFrameworkUpdate(IFramework _) {
         if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null)
             return;
 

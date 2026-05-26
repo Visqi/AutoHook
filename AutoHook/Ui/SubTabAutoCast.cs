@@ -50,8 +50,6 @@ public class SubTabAutoCast {
 
                 Service.PrintDebug($"{action.Name} DontCancelMooch: {action.DontCancelMooch}");
             }
-
-            Service.Save();
         }
 
         if (!_preset.IsGlobal) {

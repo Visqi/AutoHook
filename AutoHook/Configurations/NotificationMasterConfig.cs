@@ -22,7 +22,7 @@ public class NotificationMasterConfig {
     public bool BringGameForeground;
 
     public void DrawConfig(string fallbackText) {
-        var hasPlugin = Svc.PluginInterface.IsPluginLoaded("NotificationMaster");
+        var hasPlugin = Svc.Interface.IsPluginLoaded("NotificationMaster");
         DrawUtil.DrawCheckboxTree("Notify On Success", ref Enabled,
             () => {
                 using var disabled = ImRaii.Disabled(!hasPlugin);

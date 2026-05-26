@@ -1,7 +1,6 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System.Numerics;
 
@@ -156,10 +155,8 @@ public class SubTabBaitMooch {
             var helpText = isGlobal ? UIStrings.UseSwimbaitHelpTextGlobal : UIStrings.UseSwimbaitHelpText;
 
             var useSwimbait = config.UseSwimbait;
-            if (DrawUtil.Checkbox(enableText, ref useSwimbait, helpText)) {
+            if (DrawUtil.Checkbox(enableText, ref useSwimbait, helpText))
                 config.UseSwimbait = useSwimbait;
-                Service.Save();
-            }
 
             if (config.UseSwimbait) {
                 ImGui.Spacing();

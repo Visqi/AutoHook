@@ -17,11 +17,33 @@ public class TabDebug : BaseTab {
 
     public override void Draw() {
         try {
+            DrawAutomationTask();
             DrawWorldState();
             DrawWikiPresets();
         }
         catch (Exception e) {
             Svc.Log.Error(e.Message);
+        }
+    }
+
+    private static void DrawAutomationTask() {
+        if (!ImGui.CollapsingHeader("Aetherial reduction task", ImGuiTreeNodeFlags.DefaultOpen))
+            return;
+
+        using (ImRaii.PushIndent()) {
+            var automation = Svc.Automation;
+            ImGui.Text($"Automation running: {automation.Running}");
+            ImGui.Text($"Task name: {automation.Name}");
+            ImGui.Text($"Task status: {automation.Status}");
+
+            using (ImRaii.Disabled(!automation.Running)) {
+                if (ImGui.Button("Stop current task"))
+                    automation.Stop();
+            }
+
+            ImGui.Spacing();
+            if (Svc.Automation.CurrentTask is AetherialReductionTask reductionTask)
+                reductionTask.DrawDebug();
         }
     }
 

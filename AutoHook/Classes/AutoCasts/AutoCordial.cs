@@ -77,12 +77,10 @@ public class AutoCordial : BaseActionCast {
     }
 
     protected override DrawOptionsDelegate DrawOptions => () => {
-        if (DrawUtil.Checkbox(UIStrings.AutoCastCordialPriority, ref InvertCordialPriority))
-            Service.Save();
+        DrawUtil.Checkbox(UIStrings.AutoCastCordialPriority, ref InvertCordialPriority);
 
         if (!IsSpearFishing) {
-            if (DrawUtil.Checkbox(UIStrings.CordialOutsideTimeWindow, ref IgnoreTimeWindow, UIStrings.CordialOutsideTimeWindowHelpText))
-                Service.Save();
+            DrawUtil.Checkbox(UIStrings.CordialOutsideTimeWindow, ref IgnoreTimeWindow, UIStrings.CordialOutsideTimeWindowHelpText);
 
             OvercapConditionSet = Ui.ConditionUi.DrawConditionSetSlim(
                 "Overcap conditions",

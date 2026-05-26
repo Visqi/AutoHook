@@ -151,6 +151,78 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reduction complete. Resuming fishing.
+        /// </summary>
+        internal static string AetherialReduction_Complete {
+            get {
+                return ResourceManager.GetString("AetherialReduction_Complete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Aetherial reduction is not unlocked on this character.
+        /// </summary>
+        internal static string AetherialReduction_NotUnlocked {
+            get {
+                return ResourceManager.GetString("AetherialReduction_NotUnlocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reduce fish (aetherial reduction).
+        /// </summary>
+        internal static string AetherialReduction_ReduceFish {
+            get {
+                return ResourceManager.GetString("AetherialReduction_ReduceFish", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Will stop fishing to reduce all reducible fish in your inventory before resuming fishing..
+        /// </summary>
+        internal static string AetherialReduction_ReduceFishHelp {
+            get {
+                return ResourceManager.GetString("AetherialReduction_ReduceFishHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reducing fish....
+        /// </summary>
+        internal static string AetherialReduction_Started {
+            get {
+                return ResourceManager.GetString("AetherialReduction_Started", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Quitting fishing....
+        /// </summary>
+        internal static string AetherialReduction_Status_Quitting {
+            get {
+                return ResourceManager.GetString("AetherialReduction_Status_Quitting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reducing fish....
+        /// </summary>
+        internal static string AetherialReduction_Status_Reducing {
+            get {
+                return ResourceManager.GetString("AetherialReduction_Status_Reducing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Resuming fishing....
+        /// </summary>
+        internal static string AetherialReduction_Status_Resuming {
+            get {
+                return ResourceManager.GetString("AetherialReduction_Status_Resuming", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to After being caught....
         /// </summary>
         internal static string AfterBeingCaught {

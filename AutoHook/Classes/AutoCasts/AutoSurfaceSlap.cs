@@ -21,8 +21,7 @@ public class AutoSurfaceSlap : BaseActionCast {
             ConditionScope.AutoCast,
             showAdvanced: true,
             showSubPrefix: true);
-        if (DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref DontCancelMooch, UIStrings.IdenticalCast_HelpText, true))
-            Service.Save();
+        DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref DontCancelMooch, UIStrings.IdenticalCast_HelpText, true);
     };
 
     public override int Priority { get; set; } = 15;

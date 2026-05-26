@@ -42,7 +42,7 @@ public class PluginUi : Window, IDisposable {
     }
 
     public void Dispose() {
-        Service.Save();
+        Service.SaveNow();
 
         foreach (var tab in _tabs) {
             tab.Dispose();
@@ -212,7 +212,7 @@ public class PluginUi : Window, IDisposable {
         ImGui.Separator();
     }
 
-    public override void OnClose() => Service.Save();
+    public override void OnClose() => Service.SaveNow();
 
     public static void ShowKofi() {
         ImGui.SameLine();

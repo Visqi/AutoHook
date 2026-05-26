@@ -50,7 +50,7 @@ public partial class Configuration : IPluginConfiguration {
 
     private void WriteVersionBackup(int fromVersion) {
         try {
-            var dir = Svc.PluginInterface.GetPluginConfigDirectory();
+            var dir = Svc.Interface.GetPluginConfigDirectory();
             var fileName = $"autohook_v{fromVersion}_backup.json";
             var path = Path.Combine(dir, fileName);
 
@@ -74,7 +74,7 @@ public partial class Configuration : IPluginConfiguration {
         }
     }
 
-    public void Save() => Svc.PluginInterface.SavePluginConfig(this);
+    public void Save() => Svc.Interface.SavePluginConfig(this);
 
     public void Initiate() {
         if (HookPresets.DefaultPreset.ListOfBaits.Count != 0)
@@ -89,7 +89,7 @@ public partial class Configuration : IPluginConfiguration {
 
     public static Configuration Load() {
         try {
-            var file = Svc.PluginInterface.ConfigFile;
+            var file = Svc.Interface.ConfigFile;
 
             if (file.Exists) {
                 var json = File.ReadAllText(file.FullName, Encoding.UTF8);

@@ -30,8 +30,7 @@ public class AutoIdenticalCast : BaseActionCast {
 
         var stack = CaughtAmountLimit;
 
-        if (DrawUtil.Checkbox(UIStrings.Only_use_when_the_fish_is_caught, ref OnlyUseAfterXAmount))
-            Service.Save();
+        DrawUtil.Checkbox(UIStrings.Only_use_when_the_fish_is_caught, ref OnlyUseAfterXAmount);
 
         ImGui.SameLine();
 
@@ -41,8 +40,7 @@ public class AutoIdenticalCast : BaseActionCast {
             Service.Save();
         }
 
-        if (DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref DontCancelMooch, UIStrings.IdenticalCast_HelpText, true))
-            Service.Save();
+        DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref DontCancelMooch, UIStrings.IdenticalCast_HelpText, true);
     };
 
     public override int Priority { get; set; } = 8;

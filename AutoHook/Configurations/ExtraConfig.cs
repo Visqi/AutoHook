@@ -34,6 +34,8 @@ public class ExtraTrigger {
 
     public bool StartFishing { get; set; }
 
+    public bool ReduceFish { get; set; }
+
     public bool RemoveStatus { get; set; }
     public uint StatusToRemove { get; set; }
 

@@ -154,10 +154,8 @@ public static class ConditionUi {
                     toRemove.Add(ci);
                 ImGui.TooltipOnHover("Delete condition");
             }, forceOpen: forceOpen, highlightLabel: IsConditionCurrentlyTrue(cond));
-            if (enabled != cond.Enabled) {
+            if (enabled != cond.Enabled)
                 cond.Enabled = enabled;
-                Service.Save();
-            }
         }
         foreach (var idx in toRemove.OrderByDescending(x => x)) {
             group.Conditions.RemoveAt(idx);
@@ -195,10 +193,8 @@ public static class ConditionUi {
                 ImGui.Spacing();
                 DrawConditionsWithTypes(g, scope, [.. GetScopedTypes(scope)]);
             }, highlightLabel: IsGroupCurrentlyTrue(g));
-            if (gEnabled != g.Enabled) {
+            if (gEnabled != g.Enabled)
                 g.Enabled = gEnabled;
-                Service.Save();
-            }
             ImGui.SameLine(0, 6);
             ImGui.SmallButton($"::##slim_grp_drag{gi}");
             ImGui.DragDropSource(gi, "COND_GROUP"u8, $"Moving group {groupLetter}");

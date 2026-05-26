@@ -1627,6 +1627,30 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="SwapStopRules" xml:space="preserve">
     <value>Swap/Stop Rules:</value>
   </data>
+  <data name="AetherialReduction_ReduceFish" xml:space="preserve">
+    <value>Reduce fish (aetherial reduction)</value>
+  </data>
+  <data name="AetherialReduction_ReduceFishHelp" xml:space="preserve">
+    <value>Will stop fishing to reduce all reducible fish in your inventory before resuming fishing.</value>
+  </data>
+  <data name="AetherialReduction_NotUnlocked" xml:space="preserve">
+    <value>Aetherial reduction is not unlocked on this character</value>
+  </data>
+  <data name="AetherialReduction_Started" xml:space="preserve">
+    <value>Reducing fish...</value>
+  </data>
+  <data name="AetherialReduction_Complete" xml:space="preserve">
+    <value>Reduction complete. Resuming fishing</value>
+  </data>
+  <data name="AetherialReduction_Status_Quitting" xml:space="preserve">
+    <value>Quitting fishing...</value>
+  </data>
+  <data name="AetherialReduction_Status_Reducing" xml:space="preserve">
+    <value>Reducing fish...</value>
+  </data>
+  <data name="AetherialReduction_Status_Resuming" xml:space="preserve">
+    <value>Resuming fishing...</value>
+  </data>
   <data name="OnlyUseWhenMakeshiftBaitActive" xml:space="preserve">
     <value>Only use when Makeshift Bait active</value>
   </data>

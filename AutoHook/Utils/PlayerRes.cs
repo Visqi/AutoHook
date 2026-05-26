@@ -28,7 +28,7 @@ public static class PlayerRes {
     public static unsafe void UseItems(uint id)
         => AgentInventoryContext.Instance()->UseItem(id);
 
-    public static unsafe uint CastActionCost(uint id, ActionType actionType = ActionType.Action)
+    public static uint CastActionCost(uint id, ActionType actionType = ActionType.Action)
         => (uint)ActionManager.GetActionCost(actionType, id, 0, 0, 0, 0);
 
     public static unsafe bool ActionOnCoolDown(uint id, ActionType actionType = ActionType.Action) {

@@ -30,7 +30,23 @@ public class Service {
         DefaultConfiguration = { TimeLimitMS = 5000 }
     };
 
-    public static void Save() {
+    private static bool _savePending;
+
+    /// <summary>Queues a config write; at most one disk save runs per UI draw frame.</summary>
+    public static void Save() => _savePending = true;
+
+    /// <summary>Writes config immediately (plugin unload, window close, etc.).</summary>
+    public static void SaveNow() {
+        _savePending = false;
+        Configuration.Save();
+    }
+
+    /// <summary>Flushes a pending <see cref="Save"/> after UI input for this frame.</summary>
+    public static void FlushPendingSave() {
+        if (!_savePending)
+            return;
+
+        _savePending = false;
         Configuration.Save();
     }
 

@@ -1,4 +1,3 @@
-using AutoHook.Data;
 using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
 using System.IO;
@@ -38,7 +37,7 @@ public static class GameRes {
         MoochableFish = FindRows<FishingBaitParameter>(x => x.Item.Value.ItemUICategory.RowId != 33).Select(f => new BaitFishClass(f.Item.RowId)).ToList() ?? [];
 
         try {
-            var fishList = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName!, $"Data\\FishData\\fish_list.json");
+            var fishList = Path.Combine(Svc.Interface.AssemblyLocation.DirectoryName!, $"Data\\FishData\\fish_list.json");
 
             if (File.Exists(fishList)) {
                 ImportedFishes = JsonSerializer.Deserialize<List<ImportedFish>>(File.ReadAllText(fishList))!;
@@ -64,7 +63,7 @@ public static class GameRes {
 
             SpearfishFishes = list;
 
-            var biteTimers = Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName!, $"Data\\FishData\\bitetimers.json");
+            var biteTimers = Path.Combine(Svc.Interface.AssemblyLocation.DirectoryName!, $"Data\\FishData\\bitetimers.json");
             if (File.Exists(biteTimers)) {
                 BiteTimers = JsonSerializer.Deserialize<List<BiteTimers>>(File.ReadAllText(biteTimers))!;
             }

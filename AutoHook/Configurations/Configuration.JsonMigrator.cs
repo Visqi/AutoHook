@@ -1,7 +1,6 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
 using AutoHook.Configurations.Legacy;
-using AutoHook.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static AutoHook.Conditions.ConditionRegistry;

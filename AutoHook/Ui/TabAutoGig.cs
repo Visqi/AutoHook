@@ -23,32 +23,26 @@ internal class TabAutoGig : BaseTab {
                 Service.Save();
             }
 
-            if (DrawUtil.Checkbox(UIStrings.HideOverlayDuringSpearfishing, ref _gigCfg.AutoGigHideOverlay,
-                    UIStrings.AutoGigHideOverlayHelpMarker))
-                Service.Save();
+            DrawUtil.Checkbox(UIStrings.HideOverlayDuringSpearfishing, ref _gigCfg.AutoGigHideOverlay,
+                UIStrings.AutoGigHideOverlayHelpMarker);
 
-            if (DrawUtil.Checkbox(UIStrings.DrawFishHitbox, ref _gigCfg.AutoGigDrawFishHitbox))
-                Service.Save();
+            DrawUtil.Checkbox(UIStrings.DrawFishHitbox, ref _gigCfg.AutoGigDrawFishHitbox);
 
-            if (DrawUtil.Checkbox(UIStrings.DrawGigHitbox, ref _gigCfg.AutoGigDrawGigHitbox))
-                Service.Save();
+            DrawUtil.Checkbox(UIStrings.DrawGigHitbox, ref _gigCfg.AutoGigDrawGigHitbox);
 
             //_gigCfg.Cordial.DrawConfig();
             _gigCfg.ThaliaksFavor.DrawConfig();
 
-            if (DrawUtil.Checkbox(UIStrings.CatchEverything, ref _gigCfg.CatchAll, UIStrings.IgnoresPresets))
-                Service.Save();
+            DrawUtil.Checkbox(UIStrings.CatchEverything, ref _gigCfg.CatchAll, UIStrings.IgnoresPresets);
 
             if (_gigCfg.CatchAll) {
                 ImGui.Text($" └");
                 ImGui.SameLine();
-                if (DrawUtil.Checkbox(UIStrings.Use_Natures_Bounty, ref _gigCfg.CatchAllNaturesBounty,
-                        UIStrings.CatchAllNaturesBountyHelpText))
-                    Service.Save();
+                DrawUtil.Checkbox(UIStrings.Use_Natures_Bounty, ref _gigCfg.CatchAllNaturesBounty,
+                    UIStrings.CatchAllNaturesBountyHelpText);
             }
 
-            if (DrawUtil.Checkbox(UIStrings.NBBeforeFish, ref _gigCfg.NatureBountyBeforeFish, UIStrings.NBBeforeFishHelpText))
-                Service.Save();
+            DrawUtil.Checkbox(UIStrings.NBBeforeFish, ref _gigCfg.NatureBountyBeforeFish, UIStrings.NBBeforeFishHelpText);
 
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.AutoCordialPandoras);
         });
@@ -79,8 +73,7 @@ internal class TabAutoGig : BaseTab {
                 Service.Save();
             }
 
-            if (DrawUtil.Checkbox(UIStrings.Collect, ref selectedPreset.KeepCollectorsGloveOn, UIStrings.CollectHelpText))
-                Service.Save();
+            DrawUtil.Checkbox(UIStrings.Collect, ref selectedPreset.KeepCollectorsGloveOn, UIStrings.CollectHelpText);
 
             DrawUtil.SpacingSeparator();
 
