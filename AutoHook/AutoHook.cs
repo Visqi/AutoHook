@@ -24,12 +24,8 @@ namespace AutoHook;
  * move around to reduce fish weary
  * BUGS:
  * if you change preset and tell it to use swimbait it uses the normal baits timeout options for the first one. this seems to happen regardless if you have a timer on...
- * resolve collectables window under swap/stop rules doesn't seem to be doing anything when checked. If it's checked but force no isn't, we treat that as resolve as it would normally if the global option was checked
  * start fishing rule doesn't seem to work?
  * mutltihook is checking gp for triple hook/double hook? idk what this report was about
- *
- * the rule success (condition: fisher's int || status: surface slap) -> swap presets doesn't seem to work
- * force resolve collectables doesn't seem to do anything. The general one works but not the force setting
  */
 
 public class AutoHook : IDalamudPlugin {
@@ -72,7 +68,7 @@ public class AutoHook : IDalamudPlugin {
         ECommonsMain.Init(pluginInterface, this, Module.DalamudReflector, Module.ObjectFunctions);
         CLibMain.Init(pluginInterface, this, CLibModule.Automation);
         Service.Initialize(pluginInterface);
-        PunishLibMain.Init(pluginInterface, "AutoHook", new AboutPlugin() { Developer = "InitialDet", Sponsor = "https://ko-fi.com/initialdet" });
+        PunishLibMain.Init(pluginInterface, "AutoHook", new AboutPlugin() { Developer = "InitialDet & croizat", Sponsor = "https://ko-fi.com/initialdet" });
 
         Plugin = this;
 
