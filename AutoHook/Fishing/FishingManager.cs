@@ -246,6 +246,8 @@ public partial class FishingManager : IDisposable {
         if (!EzThrottler.Throttle(@"CheckPluginActions", 500))
             return;
 
+        QueueResolveCollectables(); // must run before anything that sets blockcasting
+
         if (!Ws.IsCastAvailable())
             return;
 

@@ -1,6 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using Dalamud.Game.Text;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -14,7 +13,7 @@ public class AutoCollectables : IDisposable {
     private bool _pendingForceNo;
 
     public AutoCollectables() {
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SelectYesno", HandleAddon);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SelectYesno", HandleAddon); // onupdate instead of setup since the pending can trigger before setup fires
     }
 
     public void Dispose() {
@@ -60,15 +59,11 @@ public class AutoCollectables : IDisposable {
         if (!text.ContainsAny(collectablePatterns))
             return false;
 
-        var name = Enum.GetValues<SeIconChar>().Cast<SeIconChar>().Aggregate(addon->AtkValues[15].String.AsDalamudSeString().GetText(), (current, enumValue) => current.Replace(enumValue.ToIconString(), "")).Trim();
-        if (FindRow<Item>(x => x.IsCollectable && !x.Singular.IsEmpty && name.Contains(x.Singular.GetText(), StringComparison.InvariantCultureIgnoreCase)) is not { RowId: > 0 } item)
+        if (Item.GetRow(ItemUtil.GetBaseId(addon->AtkValues[14].UInt).ItemId) is not { IsCollectable: true, RowId: > 0 } item)
             return false;
 
-        Svc.Log.Debug($"[AutoCollectables] Detected item [#{item.RowId}] {item.Name}");
-
         if (forceNo) {
-            Svc.Log.Debug($"[AutoCollectables] Force NO for [#{item.RowId}] {item.Name}");
-            No(addon);
+            Answer(addon, false);
             return true;
         }
 
@@ -76,45 +71,30 @@ public class AutoCollectables : IDisposable {
             return false;
 
         if (CollectablesShopItem.FirstOrNull(x => x.Item.Value.RowId == item.RowId) is { } collectability) {
-            var min = collectability.CollectablesShopRefine.Value.LowCollectability;
-            Svc.Log.Debug($"[AutoCollectables] Minimum collectability required is {min}, value detected is {value}");
-            if (value >= min) {
-                Svc.Log.Debug($"[AutoCollectables] Entry is [#{item.RowId}] {item.Name} with a sufficient collectability of {value}");
-                Yes(addon);
-            }
-            else {
-                Svc.Log.Debug($"[AutoCollectables] Entry is [#{item.RowId}] {item.Name} with an insufficient collectability of {value}");
-                No(addon);
-            }
+            if (value >= collectability.CollectablesShopRefine.Value.LowCollectability)
+                Answer(addon, true);
+            else
+                Answer(addon, false);
 
             return true;
         }
 
         if (item.AetherialReduce > 0) {
-            Svc.Log.Debug($"[AutoCollectables] Entry is [#{item.RowId}] {item.Name} and probably an aethersand fish. Skipping collectability check.");
-            Yes(addon);
+            Answer(addon, true);
             return true;
         }
 
-        if (TryGetRow<WKSItemInfo>(item.AdditionalData.RowId, out var wksItem)) {
-            Svc.Log.Debug($"[AutoCollectables] Entry is [#{item.RowId}] {item.Name} for {wksItem.WKSItemSubCategory.ValueNullable?.Name ?? "null"}. Skipping collectability check.");
-            Yes(addon);
+        if (TryGetRow<WKSItemInfo>(item.AdditionalData.RowId, out _)) {
+            Answer(addon, true);
             return true;
         }
 
-        Svc.Log.Debug($"[AutoCollectables] Failed to find matching CollectablesShopItem for [#{item.RowId}] {item.Name}. Not an aethersand fish or a CE fish.");
         return false;
     }
 
-    public static unsafe void Yes(AddonSelectYesno* addon) {
+    public static unsafe void Answer(AddonSelectYesno* addon, bool IsYes) {
         var evt = new AtkEvent() { Listener = &addon->AtkUnitBase.AtkEventListener, Target = &AtkStage.Instance()->AtkEventTarget };
         var data = new AtkEventData();
-        addon->ReceiveEvent(AtkEventType.ButtonClick, 0, &evt, &data);
-    }
-
-    public static unsafe void No(AddonSelectYesno* addon) {
-        var evt = new AtkEvent() { Listener = &addon->AtkUnitBase.AtkEventListener, Target = &AtkStage.Instance()->AtkEventTarget };
-        var data = new AtkEventData();
-        addon->ReceiveEvent(AtkEventType.ButtonClick, 1, &evt, &data);
+        addon->ReceiveEvent(AtkEventType.ButtonClick, IsYes ? 0 : 1, &evt, &data);
     }
 }

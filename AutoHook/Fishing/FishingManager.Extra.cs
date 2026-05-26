@@ -11,6 +11,20 @@ public partial class FishingManager {
             ? Presets.SelectedPreset.ExtraCfg
             : Presets.DefaultPreset.ExtraCfg;
 
+    private void QueueResolveCollectables() {
+        var extraCfg = GetExtraCfg();
+        foreach (var trig in extraCfg.Triggers) {
+            if (trig is not { Enabled: true, ResolveCollectablesWindow: true, ConditionSet: not null })
+                continue;
+
+            if (!trig.ConditionSet.Evaluate(Ws, ConditionRegistry.Registry))
+                continue;
+
+            Service.AutoCollectables.RequestResolve(trig.ResolveCollectablesForceNo);
+            return;
+        }
+    }
+
     private void CheckExtraActions() {
         var anyPresetSwapped = false;
 
@@ -91,10 +105,6 @@ public partial class FishingManager {
                 Service.PrintChat(@$"[Extra] Trigger: Swapping bait to {trig.BaitToSwap.Name}");
                 Service.Save();
             }
-        }
-
-        if (trig.ResolveCollectablesWindow) {
-            Service.AutoCollectables.RequestResolve(trig.ResolveCollectablesForceNo);
         }
 
         if (trig.RemoveStatus && trig.StatusToRemove != 0 && Ws.HasStatus(trig.StatusToRemove) && EzThrottler.Throttle("ExtraRemoveStatus", 500)) {
