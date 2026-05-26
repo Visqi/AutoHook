@@ -163,9 +163,8 @@ public partial class FishingManager {
         if (Ws.GetSwimbaitCount() is 0)
             return false;
 
-        var swimbaitIds = Ws.SwimbaitIds;
         var isIntuition = Ws.Fishing.Intuition.Status == IntuitionStatus.Active;
-        foreach (var (fishId, slotIndex) in swimbaitIds.ToArray().WithIndex()) {
+        foreach (var (fishId, slotIndex) in Ws.SwimbaitIds.ToArray().WithIndex()) {
             if (fishId == 0)
                 continue;
 

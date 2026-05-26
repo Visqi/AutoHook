@@ -651,6 +651,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Block movement while fishing.
+        /// </summary>
+        internal static string BlockMovementWhileFishingOption {
+            get {
+                return ResourceManager.GetString("BlockMovementWhileFishingOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel hooking attempt if stack limit is reached without success.
         /// </summary>
         internal static string CancelAttempt {

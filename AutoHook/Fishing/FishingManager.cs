@@ -3,6 +3,7 @@ using Dalamud.Plugin.Services;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using System.Diagnostics;
 
 namespace AutoHook.Fishing;
@@ -12,7 +13,6 @@ public partial class FishingManager : IDisposable {
 
     // todo: refactor this entire class
     private static readonly FishingPresets Presets = Service.Configuration.HookPresets;
-
     private double _timeout;
     private readonly Stopwatch _fishingTimer = new();
 
@@ -86,18 +86,13 @@ public partial class FishingManager : IDisposable {
     }
 
     // The current config is updates two times: When we began fishing (to get the config based on the mooch/bait) and when we hooked the fish (in case the user updated their configs).
-    private void UpdateStatusAndTimer() {
-        ResetAfkTimer();
+    private unsafe void UpdateStatusAndTimer() {
+        if (Service.Configuration.ResetAfkTimer)
+            InputTimerModule.Instance()->ResetAfkTimer();
 
         var selected = GetHookCfg();
         var hookset = selected.GetHookset();
-        if (selected.Enabled) {
-            _timeout = Ws.HasStatus(IDs.Status.Chum)
-                ? hookset.ChumTimeoutMax
-                : hookset.TimeoutMax;
-        }
-        else
-            _timeout = 0;
+        _timeout = selected.Enabled ? Ws.HasStatus(IDs.Status.Chum) ? hookset.ChumTimeoutMax : hookset.TimeoutMax : 0;
 
         if (Service.Configuration.ShowStatus) {
             var buffStatus = "";

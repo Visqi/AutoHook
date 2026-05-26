@@ -1642,4 +1642,7 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="IgnoreFishSettingWhen" xml:space="preserve">
     <value>Ignore fish setting when</value>
   </data>
+  <data name="BlockMovementWhileFishingOption" xml:space="preserve">
+    <value>Block movement while fishing</value>
+  </data>
 </root>

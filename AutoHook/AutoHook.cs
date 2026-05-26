@@ -20,6 +20,9 @@ namespace AutoHook;
  * under each swap/stop rule, add the ability to reset counters
  * show complex condition ui by default if there are multiple groups
  * stop movement while fishing
+ * auto extract materia
+ * auto reduce fish
+ * move around to reduce fish weary
  * BUGS:
  * if you change preset and tell it to use swimbait it uses the normal baits timeout options for the first one. this seems to happen regardless if you have a timer on...
  * resolve collectables window under swap/stop rules doesn't seem to be doing anything when checked. If it's checked but force no isn't, we treat that as resolve as it would normally if the global option was checked

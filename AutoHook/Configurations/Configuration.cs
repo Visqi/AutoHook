@@ -15,15 +15,10 @@ public partial class Configuration : IPluginConfiguration {
     public string CurrentLanguage { get; set; } = @"en";
 
     public bool HideLocButtonn = true;
-
     public bool PluginEnabled = true;
-
     public FishingPresets HookPresets = new();
-
     public SpearFishingPresets AutoGigConfig = new();
-
     public bool ShowDebugConsole = false;
-
     public bool ShowChatLogs = true;
 
     public int DelayBetweenCastsMin = 600;
@@ -45,6 +40,7 @@ public partial class Configuration : IPluginConfiguration {
 
     public bool DontHideOptionsDisabled = true;
     public bool ResetAfkTimer = true;
+    public bool BlockInputWhileFishing = false;
     public bool AutoStartFishing = false;
     public bool DtrBarEnabled = false;
     public bool DtrPresetBarEnabled = false;

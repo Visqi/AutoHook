@@ -5,18 +5,6 @@ using Lumina.Excel.Sheets;
 namespace AutoHook.Fishing;
 
 public partial class FishingManager {
-    // TODO: upgrade this
-    private static void ResetAfkTimer() {
-        if (!Service.Configuration.ResetAfkTimer)
-            return;
-
-        if (!InputUtil.TryFindGameWindow(out var windowHandle)) return;
-
-        // Virtual key for Right Winkey. Can't be used by FFXIV normally, and in tests did not seem to cause any
-        // unusual interference.
-        InputUtil.SendKeycode(windowHandle, 0x5C);
-    }
-
     private void AnimationCancel() {
         if (GetAutoCastCfg().RecastAnimationCancel)
             PlayerRes.CastAction(IDs.Actions.Collect);
