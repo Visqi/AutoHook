@@ -176,20 +176,22 @@ public partial class Configuration : IPluginConfiguration {
         return folderExport;
     }
 
-    private static T? DeserializePresetImport<T>(string json) where T : class {
+    private static T? DeserializePresetImport<T>(string json, bool applyLegacyDefaults = false) where T : class {
         var token = JToken.Parse(json);
         var result = token.ToObject<T>(JsonSerializer.Create(new() { ObjectCreationHandling = ObjectCreationHandling.Replace }));
-        if (result != null)
+        if (result != null && applyLegacyDefaults)
             LegacyDefaults.Apply(token, result);
         return result;
     }
 
     public static (PresetFolder Folder, List<PresetFolder> Folders, List<CustomPresetConfig> Presets)? ImportFolder(string import) {
+        import = import.Trim();
         if (!import.StartsWith(ExportPrefixFolder))
             return null;
 
         try {
-            var folderData = DeserializePresetImport<FolderExport>(DecompressString(import));
+            var json = ConfigurationJsonMigrator.MigrateImportedFolderExport(DecompressString(import));
+            var folderData = DeserializePresetImport<FolderExport>(json);
 
             if (folderData == null)
                 return null;
@@ -226,21 +228,23 @@ public partial class Configuration : IPluginConfiguration {
     }
 
     public static BasePresetConfig? ImportPreset(string import) {
+        import = import.Trim();
         var json = DecompressString(import);
 
         if (import.StartsWith(ExportPrefixV2)) {
-            var old = DeserializePresetImport<BaitPresetConfig>(json);
+            var old = DeserializePresetImport<BaitPresetConfig>(json, applyLegacyDefaults: true);
             return old == null ? null : LegacyPresetMapper.ConvertOldPreset(old);
         }
 
         if (import.StartsWith(ExportPrefixV3)) {
-            var old = DeserializePresetImport<OldPresetConfig>(json);
+            var old = DeserializePresetImport<OldPresetConfig>(json, applyLegacyDefaults: true);
             return old == null ? null : LegacyPresetMapper.ConvertOldPresetV3(old);
         }
 
         if (import.StartsWith(ExportPrefixSf))
             return DeserializePresetImport<AutoGigConfig>(json);
 
+        json = ConfigurationJsonMigrator.MigrateImportedPreset(json);
         return DeserializePresetImport<CustomPresetConfig>(json);
     }
 
@@ -272,22 +276,18 @@ public partial class Configuration : IPluginConfiguration {
     }
 
     public static string DecompressString(string s) {
+        s = s.Trim();
         if (!ExportPrefixes.Any(s.StartsWith))
             throw new ApplicationException(UIStrings.DecompressString_Invalid_Import);
 
         var prefix = ExportPrefixes.First(s.StartsWith);
-        var data = Convert.FromBase64String(s[prefix.Length..]);
-        var lengthBuffer = new byte[4];
-        Array.Copy(data, data.Length - 4, lengthBuffer, 0, 4);
-        var uncompressedSize = BitConverter.ToInt32(lengthBuffer, 0);
+        var data = Convert.FromBase64String(s[prefix.Length..].Trim());
 
-        var buffer = new byte[uncompressedSize];
-        using (var ms = new MemoryStream(data)) {
-            using var gzip = new GZipStream(ms, CompressionMode.Decompress);
-            gzip.ReadExactly(buffer, 0, uncompressedSize);
-        }
-
-        return Encoding.UTF8.GetString(buffer);
+        using var ms = new MemoryStream(data);
+        using var gzip = new GZipStream(ms, CompressionMode.Decompress);
+        using var result = new MemoryStream();
+        gzip.CopyTo(result);
+        return Encoding.UTF8.GetString(result.ToArray());
     }
 
     public static string DecompressBase64(string base64) {

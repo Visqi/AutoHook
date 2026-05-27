@@ -20,6 +20,11 @@ internal static class LegacyDefaults {
     }
 
     private static void ApplyObject(JObject jo, object target) {
+        // Empty objects come from Ignore exports where every value matched the serializer default.
+        // Those omitted keys must not be treated as explicit false for fields whose ctor default is true.
+        if (jo.Count == 0)
+            return;
+
         foreach (var member in GetBoolMembers(target.GetType())) {
             if (jo.ContainsKey(GetJsonName(member)) || !GetTrueDefault(member))
                 continue;

@@ -54,6 +54,54 @@ public static class ConfigurationJsonMigrator {
         return root.ToString(Formatting.None);
     }
 
+    /// <summary>
+    /// Migrates a single exported preset JSON (AH4/AH6/etc.) to the latest preset schema before deserialization.
+    /// </summary>
+    public static string MigrateImportedPreset(string json) {
+        try {
+            if (JToken.Parse(json) is not JObject preset)
+                return json;
+
+            MigrateImportedPresetObject(preset);
+            return preset.ToString(Formatting.None);
+        }
+        catch {
+            return json;
+        }
+    }
+
+    public static string MigrateImportedFolderExport(string json) {
+        try {
+            if (JToken.Parse(json) is not JObject root)
+                return json;
+
+            MigrateImportedFolderExportObject(root);
+            return root.ToString(Formatting.None);
+        }
+        catch {
+            return json;
+        }
+    }
+
+    private static void MigrateImportedFolderExportObject(JObject folderExport) {
+        foreach (var token in EnumerateArray(folderExport["Presets"])) {
+            if (token is JObject presetObj)
+                MigrateImportedPresetObject(presetObj);
+        }
+
+        foreach (var token in EnumerateArray(folderExport["ChildFolders"])) {
+            if (token is JObject childObj)
+                MigrateImportedFolderExportObject(childObj);
+        }
+    }
+
+    private static void MigrateImportedPresetObject(JObject preset) {
+        MigratePresetExtra(preset);
+        MigratePresetConditions(preset);
+        MigratePresetSwimbaitCountThreshold(preset);
+        MigratePresetSparefulHandSwimbaitLimits(preset);
+    }
+
     private static void MigrateV2ToV3Json(JObject root) {
         if (root["BaitPresetList"] is not JArray baitPresetList || baitPresetList.Count == 0) {
             root.Remove("BaitPresetList");
