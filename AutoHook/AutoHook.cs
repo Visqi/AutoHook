@@ -17,8 +17,6 @@ namespace AutoHook;
  * get rid of "don't cancel mooch" configs under per fish surface slap/IC
  * get rid of all other configs that could be conditions in auto casts et al. Migrate them to conditions.
  * adding/changing a condition should default the tree node to be uncollapsed e.g. open
- * under each swap/stop rule, add the ability to reset counters
- * show complex condition ui by default if there are multiple groups
  * stop movement while fishing
  * auto extract materia
  * move around to reduce fish weary

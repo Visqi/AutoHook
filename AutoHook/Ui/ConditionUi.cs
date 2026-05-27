@@ -50,33 +50,18 @@ public static class ConditionUi {
 
                 var deleteGroup = false;
                 using (IsGroupCurrentlyTrue(group) ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
-                if (ImGui.CollapsingHeader($"Group {groupLetter}###grp_header", ImGuiTreeNodeFlags.DefaultOpen)) {
-                    deleteGroup = DrawGroupHeader(set, group, gi, scope);
-                    ImGui.Spacing();
-
-                    // Presets apply to this specific group
-                    if (showPresets) {
-                        ConditionPresetsUi.DrawScopePresets(scope, set, group);
+                    if (ImGui.CollapsingHeader($"Group {groupLetter}###grp_header", ImGuiTreeNodeFlags.DefaultOpen)) {
+                        deleteGroup = DrawGroupHeader(set, group, gi, scope);
                         ImGui.Spacing();
+
+                        // Presets apply to this specific group
+                        if (showPresets) {
+                            ConditionPresetsUi.DrawScopePresets(scope, set, group);
+                            ImGui.Spacing();
+                        }
+
+                        DrawConditions(group, scope);
                     }
-
-                    DrawConditions(group, scope);
-                }
-
-                ImGui.SameLine(0, 6);
-                ImGui.SmallButton($"::##grp_drag{gi}");
-                ImGui.DragDropSource(gi, "COND_GROUP"u8, $"Moving group {groupLetter}");
-                ImGui.DragDropTarget(gi, "COND_GROUP"u8, set.Groups.Count, (sourceIndex, insertIndex) => {
-                    if (sourceIndex == insertIndex || sourceIndex < 0 || sourceIndex >= set.Groups.Count)
-                        return;
-
-                    var g = set.Groups[sourceIndex];
-                    set.Groups.RemoveAt(sourceIndex);
-
-                    // after removal, clamp insert index
-                    insertIndex = Math.Clamp(insertIndex, 0, set.Groups.Count);
-                    set.Groups.Insert(insertIndex, g);
-                });
 
                 if (deleteGroup) {
                     set.Groups.RemoveAt(gi);
@@ -89,13 +74,16 @@ public static class ConditionUi {
         return set;
     }
 
+    private static bool RequiresComplexConditionUi(ConditionSet set) => set.Groups.Count > 1;
+
     public static ConditionSet? DrawConditionSetSlim(string label, ConditionSet? set, ConditionScope scope, bool showAdvanced = true, IReadOnlyList<string>? allowedTypeIds = null, bool showSubPrefix = false, Action? drawHeaderExtras = null) {
         set ??= new ConditionSet();
         if (set.Groups.Count == 0)
             set.Groups.Add(new ConditionGroup());
 
         // Either slim view or advanced view, never both. Toggle via SlimAdvancedExpanded.
-        if (set.SlimAdvancedExpanded) {
+        // Multi-group sets always use the advanced editor so every group stays visible.
+        if (set.SlimAdvancedExpanded || RequiresComplexConditionUi(set)) {
             DrawSlimAdvancedEditor(set, scope, drawHeaderExtras);
             return set;
         }
@@ -168,12 +156,14 @@ public static class ConditionUi {
 
     private static void DrawSlimAdvancedEditor(ConditionSet set, ConditionScope scope, Action? drawHeaderExtras) {
         // Back icon inline with advanced editor controls (set header).
-        if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowLeft)) {
-            set.SlimAdvancedExpanded = false;
-            Service.Save();
+        if (!RequiresComplexConditionUi(set)) {
+            if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowLeft)) {
+                set.SlimAdvancedExpanded = false;
+                Service.Save();
+            }
+            ImGui.TooltipOnHover("Back to simple view");
+            ImGui.SameLine();
         }
-        ImGui.TooltipOnHover("Back to simple view");
-        ImGui.SameLine();
         DrawSetHeader(set);
         if (drawHeaderExtras != null) {
             ImGui.SameLine(0, 3);
@@ -195,16 +185,6 @@ public static class ConditionUi {
             }, highlightLabel: IsGroupCurrentlyTrue(g));
             if (gEnabled != g.Enabled)
                 g.Enabled = gEnabled;
-            ImGui.SameLine(0, 6);
-            ImGui.SmallButton($"::##slim_grp_drag{gi}");
-            ImGui.DragDropSource(gi, "COND_GROUP"u8, $"Moving group {groupLetter}");
-            ImGui.DragDropTarget(gi, "COND_GROUP"u8, set.Groups.Count, (sourceIndex, insertIndex) => {
-                if (sourceIndex == insertIndex || sourceIndex < 0 || sourceIndex >= set.Groups.Count) return;
-                var grp = set.Groups[sourceIndex];
-                set.Groups.RemoveAt(sourceIndex);
-                insertIndex = Math.Clamp(insertIndex, 0, set.Groups.Count);
-                set.Groups.Insert(insertIndex, grp);
-            });
         }
         foreach (var idx in toRemoveGroup.OrderByDescending(x => x)) {
             set.Groups.RemoveAt(idx);
