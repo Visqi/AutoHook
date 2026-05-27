@@ -1,4 +1,5 @@
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -18,6 +19,7 @@ public class TabDebug : BaseTab {
     public override void Draw() {
         try {
             DrawAutomationTask();
+            DrawNotificationMaster();
             DrawWorldState();
             DrawWikiPresets();
         }
@@ -207,6 +209,67 @@ public class TabDebug : BaseTab {
         (IDs.Item.WateredCordial, "WateredCordial"),
         (IDs.Item.HQWateredCordial, "HQWateredCordial"),
     ];
+
+    private static string _nmToastTitle = "AutoHook test";
+    private static string _nmToastText = "Debug notification";
+    private static string _nmLastResult = "";
+
+    private static readonly NotificationConfig _nmTestConfig = new() {
+        Enabled = true,
+        BeepOnSuccess = true,
+        DisplayToastNotification = true,
+    };
+
+    private static void DrawNotificationMaster() {
+        if (!ImGui.CollapsingHeader("NotificationMaster"))
+            return;
+
+        using (ImRaii.PushIndent()) {
+            var hasPlugin = Svc.Interface.IsPluginLoaded("NotificationMaster");
+            var ipcReady = Service.NotificationMaster.IsIPCReady();
+            ImGui.Text($"Plugin loaded: {hasPlugin}");
+            ImGui.Text($"IPC ready: {ipcReady}");
+            if (!hasPlugin)
+                ImGui.TextDisabled("Install NotificationMaster to test IPC calls.");
+
+            ImGui.Spacing();
+            ImGui.SetNextItemWidth(320 * ImGuiHelpers.GlobalScale);
+            ImGui.InputText("Toast title", ref _nmToastTitle, 128);
+            ImGui.SetNextItemWidth(320 * ImGuiHelpers.GlobalScale);
+            ImGui.InputText("Toast text", ref _nmToastText, 260);
+
+            ImGui.Spacing();
+            if (ImGui.Button("IsIPCReady"))
+                SetNmResult(Service.NotificationMaster.IsIPCReady());
+            ImGui.SameLine();
+            if (ImGui.Button("DisplayTrayNotification"))
+                SetNmResult(Service.NotificationMaster.DisplayTrayNotification(_nmToastTitle, _nmToastText));
+            ImGui.SameLine();
+            if (ImGui.Button("FlashTaskbarIcon"))
+                SetNmResult(Service.NotificationMaster.FlashTaskbarIcon());
+
+            if (ImGui.Button("TryBringGameForeground"))
+                SetNmResult(Service.NotificationMaster.TryBringGameForeground());
+
+            ImGui.Spacing();
+            ImGui.TextUnformatted("Notify() (config-driven):");
+            DrawUtil.Checkbox("Enabled", ref _nmTestConfig.Enabled);
+            DrawUtil.Checkbox("Display toast", ref _nmTestConfig.DisplayToastNotification);
+            DrawUtil.Checkbox("Flash taskbar", ref _nmTestConfig.FlashTaskbarIcon);
+            DrawUtil.Checkbox("Bring foreground", ref _nmTestConfig.BringGameForeground);
+            DrawUtil.Checkbox("Beep on success", ref _nmTestConfig.BeepOnSuccess);
+            _nmTestConfig.ToastText = _nmToastText;
+            if (ImGui.Button("Notify"))
+                SetNmResult(Service.NotificationMaster.TryNotify(_nmTestConfig));
+
+            if (!string.IsNullOrEmpty(_nmLastResult)) {
+                ImGui.Spacing();
+                ImGui.TextWrapped($"Last result: {_nmLastResult}");
+            }
+        }
+    }
+
+    private static void SetNmResult(bool success) => _nmLastResult = success ? "true" : "false";
 
     private static void DrawWikiPresets() {
         if (!ImGui.CollapsingHeader("Get Wiki presets", ImGuiTreeNodeFlags.DefaultOpen))

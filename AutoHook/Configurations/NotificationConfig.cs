@@ -4,27 +4,20 @@ using Dalamud.Interface.Utility.Raii;
 
 namespace AutoHook.Configurations;
 
-public class NotificationMasterConfig {
+public record class NotificationConfig {
     public bool Enabled;
-
-    public bool DisplayToastNotification = true;
+    public bool DisplayToastNotification;
     public string ToastText = "";
-
     public bool FlashTaskbarIcon;
-
-    public bool PlaySound;
-    public string SoundPath = "";
-    public float SoundVolume = 1f;
-    public bool SoundRepeat;
-    public bool StopSoundOnceFocused = true;
-
-    public bool StopSound;
     public bool BringGameForeground;
+    public bool BeepOnSuccess;
 
     public void DrawConfig(string fallbackText) {
         var hasPlugin = Svc.Interface.IsPluginLoaded("NotificationMaster");
         DrawUtil.DrawCheckboxTree("Notify On Success", ref Enabled,
             () => {
+                DrawUtil.Checkbox("Play a beep", ref BeepOnSuccess);
+
                 using var disabled = ImRaii.Disabled(!hasPlugin);
                 DrawUtil.Checkbox("Display toast notification", ref DisplayToastNotification);
                 if (DisplayToastNotification) {
@@ -40,33 +33,12 @@ public class NotificationMasterConfig {
                 }
 
                 DrawUtil.Checkbox("Flash taskbar icon", ref FlashTaskbarIcon);
-                DrawUtil.Checkbox("Bring game foreground", ref BringGameForeground);
-
-                DrawUtil.Checkbox("Play sound", ref PlaySound);
-                if (PlaySound) {
-                    using var indent = ImRaii.PushIndent();
-
-                    ImGui.SetNextItemWidth(360 * ImGuiHelpers.GlobalScale);
-                    if (ImGui.InputText("Sound path", ref SoundPath, 512))
-                        Service.Save();
-
-                    var volume = SoundVolume;
-                    ImGui.SetNextItemWidth(120 * ImGuiHelpers.GlobalScale);
-                    if (ImGui.SliderFloat("Volume", ref volume, 0f, 1f, "%.2f")) {
-                        SoundVolume = volume;
-                        Service.Save();
-                    }
-
-                    DrawUtil.Checkbox("Repeat sound", ref SoundRepeat);
-                    DrawUtil.Checkbox("Stop sound once focused", ref StopSoundOnceFocused);
-                }
-
-                DrawUtil.Checkbox("Stop sound", ref StopSound);
+                DrawUtil.Checkbox("Bring game to foreground", ref BringGameForeground);
             });
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && !hasPlugin) {
             using var tooltip = ImRaii.Tooltip();
             if (tooltip.Alive) {
-                ImGui.TextUnformatted("NotificationMaster not installed. Settings below will have no effect");
+                ImGui.TextUnformatted("NotificationMaster not installed. NotificationMaster-specific options below will have no effect");
             }
         }
     }

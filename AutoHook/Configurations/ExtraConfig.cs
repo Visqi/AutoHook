@@ -39,7 +39,7 @@ public class ExtraTrigger {
     public bool RemoveStatus { get; set; }
     public uint StatusToRemove { get; set; }
 
-    public NotificationMasterConfig NotifyOnSuccess { get; set; } = new();
+    public NotificationConfig NotifyOnSuccess { get; set; } = new();
 
     public void EnsureUiId() {
         if (UiId <= 0)

@@ -81,15 +81,44 @@ public class Service {
 
 public static class NotificationMasterApiExtensions {
     extension(NotificationMasterAPI.NotificationMasterApi api) {
-        public bool Notify(NotificationMasterConfig cfg, string toastTitle) {
-            if (!cfg.Enabled || !Service.NotificationMaster.IsIPCReady()) return false;
+        public bool TryNotify(NotificationConfig cfg) {
+            if (!cfg.Enabled)
+                return false;
 
-            if (cfg.DisplayToastNotification && Service.NotificationMaster.DisplayTrayNotification(toastTitle, cfg.ToastText)) return true;
-            if (cfg.FlashTaskbarIcon && Service.NotificationMaster.FlashTaskbarIcon()) return true;
-            if (cfg.BringGameForeground && Service.NotificationMaster.TryBringGameForeground()) return true;
-            if (cfg.PlaySound && Service.NotificationMaster.PlaySound(cfg.SoundPath, cfg.SoundVolume, cfg.SoundRepeat, cfg.StopSoundOnceFocused)) return true;
+            var success = false;
 
-            return false;
+            if (Service.NotificationMaster.IsIPCReady()) {
+                if (cfg.DisplayToastNotification && Service.NotificationMaster.DisplayTrayNotification("AutoHook", cfg.ToastText)) {
+                    success = true;
+                }
+
+                if (cfg.FlashTaskbarIcon && Service.NotificationMaster.FlashTaskbarIcon()) {
+                    success = true;
+                }
+
+                if (cfg.BringGameForeground && Service.NotificationMaster.TryBringGameForeground()) {
+                    success = true;
+                }
+            }
+
+            if (cfg.BeepOnSuccess) {
+                const int frequency = 900;
+                const int durationMs = 200;
+                const int count = 3;
+
+                for (var i = 0; i < count; i++) {
+                    try {
+                        Console.Beep(frequency, durationMs);
+                    }
+                    catch {
+                        break;
+                    }
+                }
+
+                success = true;
+            }
+
+            return success;
         }
     }
 }

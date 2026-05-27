@@ -122,6 +122,6 @@ public partial class FishingManager {
             Service.PrintChat(UIStrings.AetherialReduction_Started);
         }
 
-        Service.NotificationMaster.Notify(trig.NotifyOnSuccess, "Rule condition success");
+        Service.NotificationMaster.TryNotify(trig.NotifyOnSuccess with { ToastText = "Rule condition success" });
     }
 }

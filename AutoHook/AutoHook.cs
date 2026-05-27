@@ -23,7 +23,6 @@ namespace AutoHook;
  * auto extract materia
  * move around to reduce fish weary
  * BUGS:
- * if you change preset and tell it to use swimbait it uses the normal baits timeout options for the first one. this seems to happen regardless if you have a timer on...
  * start fishing rule doesn't seem to work?
  * mutltihook is checking gp for triple hook/double hook? idk what this report was about
  */
