@@ -17,7 +17,6 @@ public static class GameRes {
     public static List<BaitFishClass> MoochableFish { get; private set; } = [];
     public static List<ImportedFish> ImportedFishes { get; private set; } = [];
     public static List<ImportedFish> SpearfishFishes { get; private set; } = [];
-    public static List<BiteTimers> BiteTimers { get; private set; } = [];
     public static List<uint> FishingStatuses { get; private set; } = [];
 
     public static void Initialize() {
