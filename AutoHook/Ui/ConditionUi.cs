@@ -22,6 +22,7 @@ public enum ConditionScope {
 public static class ConditionUi {
     private static ConditionSet? _clipboard;
     private static string _exportBase64 = string.Empty;
+    private static int _forceOpenConditionUiId;
 
     public static bool IsConditionCurrentlyTrue(Condition cond)
         => cond.Enabled && cond.Evaluate(Service.WorldState, Registry);
@@ -133,15 +134,21 @@ public static class ConditionUi {
             var rowLabel = types.FirstOrDefault(d => d.Id == cond.TypeId)?.Name ?? cond.TypeId;
             var enabled = cond.Enabled;
 
-            var forceOpen = ci == newlyAddedIndex;
+            var forceOpen = ci == newlyAddedIndex || cond.UiId == _forceOpenConditionUiId;
 
             DrawUtil.DrawCheckboxTree(rowLabel, ref enabled, () => {
-                DrawConditionContent(cond, scope, types);
+                if (DrawConditionContent(cond, scope, types)) {
+                    _forceOpenConditionUiId = cond.UiId;
+                    Service.Save();
+                }
                 ImGui.SameLine();
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash))
                     toRemove.Add(ci);
                 ImGui.TooltipOnHover("Delete condition");
             }, forceOpen: forceOpen, highlightLabel: IsConditionCurrentlyTrue(cond));
+
+            if (cond.UiId == _forceOpenConditionUiId && forceOpen)
+                _forceOpenConditionUiId = 0;
             if (enabled != cond.Enabled)
                 cond.Enabled = enabled;
         }
@@ -311,7 +318,8 @@ public static class ConditionUi {
     private static void DrawConditions(ConditionGroup group, ConditionScope scope)
         => DrawConditionsWithTypes(group, scope, [.. GetScopedTypes(scope)]);
 
-    private static void DrawConditionContent(Condition cond, ConditionScope scope, List<ConditionTypeDef> defs) {
+    private static bool DrawConditionContent(Condition cond, ConditionScope scope, List<ConditionTypeDef> defs) {
+        var typeChanged = false;
         DrawInverseToggle(cond);
         ImGui.SameLine();
         ImGui.SetNextItemWidth(180 * ImGuiHelpers.GlobalScale);
@@ -324,12 +332,14 @@ public static class ConditionUi {
                     if (ImGui.Selectable($"{def.Name}##{def.Id}", sel)) {
                         cond.TypeId = def.Id;
                         cond.Params.Clear();
+                        typeChanged = true;
                     }
                 }
             }
         }
         ImGui.SameLine();
         ConditionParamUi.DrawParams(cond);
+        return typeChanged;
     }
 
     private static void DrawConditionsWithTypes(ConditionGroup group, ConditionScope scope, List<ConditionTypeDef> defs) {
@@ -338,7 +348,8 @@ public static class ConditionUi {
             cond.EnsureUiId();
             using var _ = ImRaii.PushId($"cond{cond.UiId}");
             using (IsConditionCurrentlyTrue(cond) ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
-                DrawConditionContent(cond, scope, defs);
+                if (DrawConditionContent(cond, scope, defs))
+                    Service.Save();
             ImGui.SameLine();
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
                 group.Conditions.RemoveAt(ci);
