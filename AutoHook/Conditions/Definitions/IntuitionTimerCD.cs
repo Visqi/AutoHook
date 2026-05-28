@@ -37,25 +37,25 @@ public sealed class IntuitionTimerCD : IConditionDefinition {
     public void DrawParams(Condition condition) {
         var args = GetParams(condition.Params);
         var sec = args.Seconds;
+        var label = args.Op is ">" or "<" or "<=" or "=" ? args.Op : ">=";
+        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
+        using var combo = ImRaii.Combo("##intu_op", label);
+        if (combo) {
+            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
+                var sel = choice == args.Op;
+                if (!ImGui.Selectable(choice, sel))
+                    continue;
+
+                args = args with { Op = choice };
+                condition.Params = args.ToParams();
+            }
+        }
+
+        ImGui.SameLine();
         ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
         if (ImGui.InputInt("Seconds", ref sec)) {
             sec = Math.Max(0, sec);
             args = args with { Seconds = sec };
-            condition.Params = args.ToParams();
-        }
-
-        ImGui.SameLine();
-        var label = args.Op is ">" or "<" or "<=" or "=" ? args.Op : ">=";
-        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
-        using var combo = ImRaii.Combo("##intu_op", label);
-        if (!combo) return;
-
-        foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
-            var sel = choice == args.Op;
-            if (!ImGui.Selectable(choice, sel))
-                continue;
-
-            args = args with { Op = choice };
             condition.Params = args.ToParams();
         }
     }

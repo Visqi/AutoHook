@@ -34,24 +34,24 @@ public sealed class GpCD : IConditionDefinition {
     public void DrawParams(Condition condition) {
         var args = GetParams(condition.Params);
         var val = args.Value;
-        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputInt("GP", ref val)) {
-            args = args with { Value = val };
-            condition.Params = args.ToParams();
-        }
-
-        ImGui.SameLine();
         var label = args.Op is ">" or "<" or "<=" or "=" ? args.Op : ">=";
         ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
         using var combo = ImRaii.Combo("##gp_op", label);
-        if (!combo) return;
+        if (combo) {
+            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
+                var sel = choice == args.Op;
+                if (!ImGui.Selectable(choice, sel))
+                    continue;
 
-        foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
-            var sel = choice == args.Op;
-            if (!ImGui.Selectable(choice, sel))
-                continue;
+                args = args with { Op = choice };
+                condition.Params = args.ToParams();
+            }
+        }
 
-            args = args with { Op = choice };
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
+        if (ImGui.InputInt("GP", ref val)) {
+            args = args with { Value = val };
             condition.Params = args.ToParams();
         }
     }

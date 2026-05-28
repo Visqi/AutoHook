@@ -50,25 +50,25 @@ public sealed class FishCaughtCountCD : IConditionDefinition, ISimpleConditionVa
         }
 
         ImGui.SameLine();
+        var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
+        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
+        using var combo = ImRaii.Combo("##fish_count_op", label);
+        if (combo) {
+            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
+                var sel = choice == op;
+                if (!ImGui.Selectable(choice, sel))
+                    continue;
+
+                args = args with { Op = choice };
+                condition.Params = args.ToParams();
+            }
+        }
+
+        ImGui.SameLine();
         ImGui.SetNextItemWidth(60 * ImGuiHelpers.GlobalScale);
         if (ImGui.InputInt("Count", ref value)) {
             value = Math.Max(1, value);
             args = args with { Value = value };
-            condition.Params = args.ToParams();
-        }
-
-        ImGui.SameLine();
-        var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
-        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
-        using var combo = ImRaii.Combo("##fish_count_op", label);
-        if (!combo) return;
-
-        foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
-            var sel = choice == op;
-            if (!ImGui.Selectable(choice, sel))
-                continue;
-
-            args = args with { Op = choice };
             condition.Params = args.ToParams();
         }
     }

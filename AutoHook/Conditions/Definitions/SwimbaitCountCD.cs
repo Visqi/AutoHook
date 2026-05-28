@@ -45,22 +45,22 @@ public sealed class SwimbaitCountCD : IConditionDefinition {
             fish => condition.Params["id"] = (long)fish.Id);
 
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputInt("Swimbaits", ref val))
-            condition.Params["val"] = (long)val;
-
-        ImGui.SameLine();
         var op = condition.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
         var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
         ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
         using var combo = ImRaii.Combo("##swimbait_op", label);
-        if (!combo) return;
-
-        foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
-            var sel = choice == op;
-            if (ImGui.Selectable(choice, sel))
-                condition.Params["op"] = choice;
+        if (combo) {
+            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
+                var sel = choice == op;
+                if (ImGui.Selectable(choice, sel))
+                    condition.Params["op"] = choice;
+            }
         }
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
+        if (ImGui.InputInt("Swimbaits", ref val))
+            condition.Params["val"] = (long)val;
     }
 
     private static string ResolveOp(IReadOnlyDictionary<string, object> parameters) {

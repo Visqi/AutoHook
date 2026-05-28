@@ -25,24 +25,24 @@ public sealed class StatusStacksCD : IConditionDefinition {
         new StatusActiveCD().DrawParams(condition);
 
         ImGui.SameLine();
+        var op = condition.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
+        var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
+        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
+        using var combo = ImRaii.Combo("##stacks_op", label);
+        if (combo) {
+            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
+                var sel = choice == op;
+                if (ImGui.Selectable(choice, sel))
+                    condition.Params["op"] = choice;
+            }
+        }
+
+        ImGui.SameLine();
         var minStacks = GetInt(condition.Params, "minStacks", 1);
         ImGui.SetNextItemWidth(60 * ImGuiHelpers.GlobalScale);
         if (ImGui.InputInt("Stacks", ref minStacks)) {
             minStacks = Math.Max(1, minStacks);
             condition.Params["minStacks"] = (long)minStacks;
-        }
-
-        ImGui.SameLine();
-        var op = condition.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
-        var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
-        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
-        using var combo = ImRaii.Combo("##stacks_op", label);
-        if (!combo) return;
-
-        foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
-            var sel = choice == op;
-            if (ImGui.Selectable(choice, sel))
-                condition.Params["op"] = choice;
         }
     }
 }

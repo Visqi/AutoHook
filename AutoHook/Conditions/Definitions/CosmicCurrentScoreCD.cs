@@ -22,21 +22,21 @@ public sealed class CosmicCurrentScoreCD : IConditionDefinition {
     public void DrawParams(Condition condition) {
         var val = GetInt(condition.Params, "val", 0);
 
-        ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputInt("Score", ref val))
-            condition.Params["val"] = (long)Math.Max(0, val);
-
-        ImGui.SameLine();
         var op = condition.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
         var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
         ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
         using var combo = ImRaii.Combo("##cosmic_score_op", label);
-        if (!combo) return;
-
-        foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
-            var sel = choice == op;
-            if (ImGui.Selectable(choice, sel))
-                condition.Params["op"] = choice;
+        if (combo) {
+            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
+                var sel = choice == op;
+                if (ImGui.Selectable(choice, sel))
+                    condition.Params["op"] = choice;
+            }
         }
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+        if (ImGui.InputInt("Score", ref val))
+            condition.Params["val"] = (long)Math.Max(0, val);
     }
 }
