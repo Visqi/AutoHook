@@ -11,6 +11,7 @@ public sealed class WorldState {
     public readonly PlayerInfo Player = new();
     public readonly FishingInfo Fishing = new();
     public readonly OceanFishInfo Ocean = new();
+    public readonly WKSInfo WKS = new();
 
     public byte CurrentWeatherId;
     public uint TerritoryId;
@@ -99,6 +100,8 @@ public sealed class WorldState {
         foreach (var o in Fishing.CompareToInitial())
             yield return o;
         foreach (var o in Ocean.CompareToInitial())
+            yield return o;
+        foreach (var o in WKS.CompareToInitial())
             yield return o;
     }
 

@@ -75,6 +75,7 @@ public sealed class WorldStateUpdater : IDisposable {
 
         ws.Execute(CollectSwimbaitIds());
         ws.Execute(CollectPotCooldown());
+        ws.Execute(CollectWKSInfo());
 
         ws.Execute(CollectZone());
 
@@ -279,6 +280,41 @@ public sealed class WorldStateUpdater : IDisposable {
         }
         catch { }
         return new PlayerInfo.OpPotCooldown(off);
+    }
+
+    private static unsafe WKSInfo.OpState CollectWKSInfo() {
+        ushort devGrade = 0;
+        ushort currentFateControlRowId = 0;
+        ushort currentFateId = 0;
+        ushort currentMissionUnitRowId = 0;
+        uint currentScore = 0;
+        WKSManager.MissionRank currentRank = WKSManager.MissionRank.None;
+        ushort collectedTotal = 0;
+        byte collectedIndividual = 0;
+
+        try {
+            if (Player.Territory is { Value.TerritoryIntendedUse.RowId: 60 } && WKSManager.Instance() is not null and var wks) {
+                devGrade = wks->DevGrade;
+                currentFateControlRowId = wks->CurrentFateControlRowId;
+                currentFateId = wks->CurrentFateId;
+                currentMissionUnitRowId = wks->CurrentMissionUnitRowId;
+                currentScore = wks->CurrentScore;
+                currentRank = wks->CurrentRank;
+                collectedTotal = wks->CollectedTotal;
+                collectedIndividual = wks->CollectedIndividual;
+            }
+        }
+        catch { }
+
+        return new WKSInfo.OpState(
+            devGrade,
+            currentFateControlRowId,
+            currentFateId,
+            currentMissionUnitRowId,
+            currentScore,
+            currentRank,
+            collectedTotal,
+            collectedIndividual);
     }
 
     private static unsafe WorldState.OpZone CollectZone()
