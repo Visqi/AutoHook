@@ -42,31 +42,6 @@ public static class GameRes {
             if (File.Exists(fishList)) {
                 ImportedFishes = JsonSerializer.Deserialize<List<ImportedFish>>(File.ReadAllText(fishList))!;
             }
-
-            var byId = ImportedFishes.ToDictionary(f => f.ItemId, f => f);
-            var list = new List<ImportedFish>();
-
-            foreach (var row in Svc.Data.GetExcelSheet<SpearfishingItem>()) {
-                // fish_list is wrong when it comes to most timeworn maps not being spearfish so build a list of actual spearfish and match fish_list to it
-                var itemId = (int)row.Item.RowId;
-                if (itemId == 0) continue;
-
-                if (byId.GetValueOrDefault(itemId) is { } match) {
-                    list.Add(new ImportedFish {
-                        ItemId = itemId,
-                        IsSpearFish = true,
-                        Size = match.Size,
-                        Speed = match.Speed,
-                    });
-                }
-            }
-
-            SpearfishFishes = list;
-
-            var biteTimers = Path.Combine(Svc.Interface.AssemblyLocation.DirectoryName!, $"Data\\FishData\\bitetimers.json");
-            if (File.Exists(biteTimers)) {
-                BiteTimers = JsonSerializer.Deserialize<List<BiteTimers>>(File.ReadAllText(biteTimers))!;
-            }
         }
         catch (Exception e) {
             ImGui.SetClipboardText(e.Message);

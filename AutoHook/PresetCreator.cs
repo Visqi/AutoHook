@@ -89,10 +89,10 @@ public class PresetCreator {
 
                 if (_presetPrepList.Count == 0) {
                     foreach (var predator in _selectedTargetFish.Predators) {
-                        var fish = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == predator.itemId);
+                        var fish = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == predator.ItemId);
 
                         if (fish != null)
-                            _presetPrepList.Add((fish, predator.qtd));
+                            _presetPrepList.Add((fish, predator.Quantity));
                     }
                 }
 
@@ -268,8 +268,7 @@ public class PresetCreator {
 
             }
             if (_includeTimers) {
-                var timer = GameRes.BiteTimers.FirstOrDefault(b => b.itemId == fishTarget.ItemId) ?? new BiteTimers();
-                initBaitCfg.SetHooksetTimer(fishTarget.BiteType, timer.min, timer.max, isIntuition);
+                initBaitCfg.SetHooksetTimer(fishTarget.BiteType, fishTarget.BiteTimeMin, fishTarget.BiteTimeMax, isIntuition);
             }
 
             newPreset.ReplaceBaitConfig(initBaitCfg);
@@ -314,8 +313,7 @@ public class PresetCreator {
             newMooch.SetBiteAndHookType(nextFish.BiteType, nextFish.HookType, isIntuition);
 
             if (_includeTimers) {
-                var timer = GameRes.BiteTimers.FirstOrDefault(b => b.itemId == nextFish.ItemId) ?? new BiteTimers();
-                newMooch.SetHooksetTimer(nextFish.BiteType, timer.min, timer.max, isIntuition);
+                newMooch.SetHooksetTimer(nextFish.BiteType, nextFish.BiteTimeMin, nextFish.BiteTimeMax, isIntuition);
             }
 
             newPreset.ReplaceMoochConfig(newMooch);
@@ -325,8 +323,7 @@ public class PresetCreator {
                 // that means we need to set up the bait to the this fish bite.
                 initBaitCfg.SetBiteAndHookType(mooch.BiteType, mooch.HookType, isIntuition);
                 if (_includeTimers) {
-                    var timer = GameRes.BiteTimers.FirstOrDefault(b => b.itemId == mooch.ItemId) ?? new BiteTimers();
-                    initBaitCfg.SetHooksetTimer(mooch.BiteType, timer.min, timer.max, isIntuition);
+                    initBaitCfg.SetHooksetTimer(mooch.BiteType, mooch.BiteTimeMin, mooch.BiteTimeMax, isIntuition);
                 }
 
                 newPreset.ReplaceBaitConfig(initBaitCfg);
@@ -376,8 +373,7 @@ public class PresetCreator {
         initBaitCfg.SetBiteAndHookType(_selectedTargetFish.BiteType, _selectedTargetFish.HookType, false);
 
         if (_includeTimers) {
-            var timer = GameRes.BiteTimers.FirstOrDefault(b => b.itemId == _selectedTargetFish.ItemId) ?? new BiteTimers();
-            initBaitCfg.SetHooksetTimer(_selectedTargetFish.BiteType, timer.min, timer.max, false);
+            initBaitCfg.SetHooksetTimer(_selectedTargetFish.BiteType, _selectedTargetFish.BiteTimeMin, _selectedTargetFish.BiteTimeMax, false);
         }
 
         newPreset.ReplaceBaitConfig(initBaitCfg);
