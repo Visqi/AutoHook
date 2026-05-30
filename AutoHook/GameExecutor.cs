@@ -13,8 +13,8 @@ public sealed class GameExecutor(WorldState ws) {
 
     public bool IsCastAvailable() => ws.IsCastAvailable();
 
-    public unsafe bool CastAction(uint id)
-        => ActionManager.Instance()->UseAction(ActionType.Action, id);
+    public unsafe bool CastAction(uint id, ActionType actionType = ActionType.Action)
+        => ActionManager.Instance()->UseAction(actionType, id);
 
     public unsafe void UseItems(uint id)
         => AgentInventoryContext.Instance()->UseItem(id);
@@ -26,7 +26,7 @@ public sealed class GameExecutor(WorldState ws) {
             if (!ws.ActionAvailable(actionId, actionType)) return;
             ws.Execute(new WorldState.OpSetBlockCasting(true));
             Service.PrintDebug($"[Executor] Casting Action: {actionName}, Id: {actionId}");
-            try { CastAction(actionId); }
+            try { CastAction(actionId, actionType); }
             catch (Exception e) { Service.PrintDebug($"[Executor] Error casting: {actionName}, Id: {actionId}, {e}"); }
             DelayNextCast(actionId);
         }
@@ -42,8 +42,8 @@ public sealed class GameExecutor(WorldState ws) {
     public void CastActionNoDelay(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
         if (_blockActionNoDelay) return;
         _blockActionNoDelay = true;
-        if (actionType == ActionType.Action && ws.ActionAvailable(actionId, actionType)) {
-            var casted = CastAction(actionId);
+        if (actionType is ActionType.Action or ActionType.EventAction && ws.ActionAvailable(actionId, actionType)) {
+            var casted = CastAction(actionId, actionType);
             if (casted) Service.PrintDebug($"[Executor] Casting Action: {actionName}, Id: {actionId}");
         }
         else if (actionType == ActionType.Item) {

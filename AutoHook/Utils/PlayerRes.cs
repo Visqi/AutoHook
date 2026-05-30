@@ -19,8 +19,8 @@ public static class PlayerRes {
     public static unsafe uint ActionStatus(uint id, ActionType actionType = ActionType.Action)
         => ActionManager.Instance()->GetActionStatus(actionType, id);
 
-    public static unsafe bool CastAction(uint id)
-        => ActionManager.Instance()->UseAction(ActionType.Action, id);
+    public static unsafe bool CastAction(uint id, ActionType actionType = ActionType.Action)
+        => ActionManager.Instance()->UseAction(actionType, id);
 
     public static unsafe int GetRecastGroups(uint id, ActionType actionType = ActionType.Action)
         => ActionManager.Instance()->GetRecastGroup((int)actionType, id);
@@ -52,7 +52,7 @@ public static class PlayerRes {
             if (!WS.ActionAvailable(actionId, actionType)) return;
             WS.Execute(new WorldState.OpSetBlockCasting(true));
             Service.PrintDebug(@$"[PlayerResources] Casting Action: {actionName}, Id: {actionId}");
-            try { CastAction(actionId); }
+            try { CastAction(actionId, actionType); }
             catch (Exception e) { Service.PrintDebug(@$"Error casting action: {actionName}, Id: {actionId}, {e}"); }
             DelayNextCast(actionId);
         }
@@ -70,8 +70,8 @@ public static class PlayerRes {
     public static void CastActionNoDelay(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
         if (_blockActionNoDelay) return;
         _blockActionNoDelay = true;
-        if (actionType == ActionType.Action && WS.ActionAvailable(actionId, actionType)) {
-            var casted = CastAction(actionId);
+        if (actionType is ActionType.Action or ActionType.EventAction && WS.ActionAvailable(actionId, actionType)) {
+            var casted = CastAction(actionId, actionType);
             if (casted) Service.PrintDebug(@$"[PlayerResources] Casting Action: {actionName}, Id: {actionId}");
         }
         else if (actionType == ActionType.Item) {
