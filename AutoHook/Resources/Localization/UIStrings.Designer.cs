@@ -3385,6 +3385,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select zone and time.
+        /// </summary>
+        internal static string SelectZoneAndTime {
+            get {
+                return ResourceManager.GetString("SelectZoneAndTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Set Autogig preset by chat command -&gt; /agpreset presetName.
         /// </summary>
         internal static string Set_agpreset_command {
@@ -4420,6 +4429,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use for all zones/times.
+        /// </summary>
+        internal static string UseForAllZoneTimes {
+            get {
+                return ResourceManager.GetString("UseForAllZoneTimes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Use when Identical Cast is active.
         /// </summary>
         internal static string UseIcActive {
@@ -4555,6 +4573,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use with ocean fishing.
+        /// </summary>
+        internal static string UseWithOceanFishing {
+            get {
+                return ResourceManager.GetString("UseWithOceanFishing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Using Chum timer.
         /// </summary>
         internal static string Using_Chum_Timer {
@@ -4569,6 +4596,15 @@ namespace AutoHook.Resources.Localization {
         internal static string Watered_Cordial {
             get {
                 return ResourceManager.GetString("Watered_Cordial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to When.
+        /// </summary>
+        internal static string When {
+            get {
+                return ResourceManager.GetString("When", resourceCulture);
             }
         }
         

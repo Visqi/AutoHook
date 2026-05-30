@@ -2,7 +2,7 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
     <PropertyGroup>
         <Authors>Det</Authors>
-        <Version>0.0.0.53</Version>
+        <Version>0.0.0.59</Version>
         <LangVersion>preview</LangVersion>
 		<GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
     </PropertyGroup>
@@ -20,7 +20,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="croizat.clib" Version="1.0.29" />
+        <PackageReference Include="croizat.clib" Version="1.0.30" />
         <PackageReference Include="ECommons" Version="3.2.0.16" />
         <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
         <PackageReference Include="NotificationMasterAPI" Version="1.0.0.1" />

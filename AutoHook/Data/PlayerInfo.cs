@@ -3,6 +3,7 @@ namespace AutoHook.Data;
 public sealed class PlayerInfo {
     public uint CurrentGp;
     public uint MaxGp;
+    public byte Level;
 
     public readonly Dictionary<uint, (float Time, int Stacks)> Statuses = [];
     public readonly Dictionary<uint, int> ItemCounts = [];
@@ -28,6 +29,8 @@ public sealed class PlayerInfo {
     public IEnumerable<WorldState.Operation> CompareToInitial() {
         if (CurrentGp != 0 || MaxGp != 0)
             yield return new OpGp(CurrentGp, MaxGp);
+        if (Level != 0)
+            yield return new OpLevel(Level);
         if (Statuses.Count != 0)
             yield return new OpStatuses(Statuses);
         if (ItemCounts.Count != 0)
@@ -43,6 +46,10 @@ public sealed class PlayerInfo {
             ws.Player.CurrentGp = Current;
             ws.Player.MaxGp = Max;
         }
+    }
+
+    public sealed record OpLevel(byte Level) : WorldState.Operation {
+        protected override void Exec(WorldState ws) => ws.Player.Level = Level;
     }
 
     public sealed record OpStatuses(IReadOnlyDictionary<uint, (float Time, int Stacks)> Statuses) : WorldState.Operation {

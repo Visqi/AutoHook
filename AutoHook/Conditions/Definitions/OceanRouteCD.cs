@@ -22,14 +22,8 @@ public sealed class OceanRouteCD : IConditionDefinition {
         var ids = GetIds(condition.Params);
         var currentId = ids.Count > 0 ? ids[0] : 0;
 
-        var sheet = Svc.Data.GetExcelSheet<IKDRoute>();
-        if (sheet == null) {
-            DrawIdsParams(condition, "Route IDs");
-            return;
-        }
-
         var unique = new Dictionary<string, uint>();
-        foreach (var row in sheet) {
+        foreach (var row in Svc.Data.GetExcelSheet<IKDRoute>()) {
             if (row.RowId == 0) continue;
             var name = row.Name.ToString();
             if (string.IsNullOrEmpty(name)) continue;
@@ -37,21 +31,11 @@ public sealed class OceanRouteCD : IConditionDefinition {
                 unique[name] = row.RowId;
         }
 
-        var routes = unique
-            .OrderBy(k => k.Key)
-            .Select(k => (Id: k.Value, Name: k.Key))
-            .ToList();
-
-        var label = currentId != 0 && sheet.TryGetRow(currentId, out var currentRow)
+        var routes = unique.OrderBy(k => k.Key).Select(k => (Id: k.Value, Name: k.Key)).ToList();
+        var label = currentId != 0 && Svc.Data.GetExcelSheet<IKDRoute>().TryGetRow(currentId, out var currentRow)
             ? $"{currentRow.RowId}: {currentRow.Name}"
             : "Select route";
 
-        DrawUtil.DrawComboSelector(
-            routes,
-            r => $"{r.Id}: {r.Name}",
-            label,
-            r => {
-                condition.Params["ids"] = new List<object> { (long)r.Id };
-            });
+        DrawUtil.DrawComboSelector(routes, r => $"{r.Id}: {r.Name}", label, r => { condition.Params["ids"] = new List<object> { (long)r.Id }; });
     }
 }

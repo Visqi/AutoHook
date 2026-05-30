@@ -1,4 +1,5 @@
 using AutoHook.Conditions;
+using AutoHook.Data;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -73,11 +74,53 @@ public class SubTabExtra {
 
             DrawUtil.SpacingSeparator();
 
+            DrawAutoOceanFish(config);
+
+            DrawUtil.SpacingSeparator();
+
             DrawTriggers(config);
 
             DrawUtil.SpacingSeparator();
 
             DrawUtil.Checkbox(UIStrings.Reset_counter_after_swapping_presets, ref config.ResetCounterPresetSwap);
+        }
+    }
+
+    private static void DrawAutoOceanFish(ExtraConfig config) {
+        if (!Service.Configuration.AutoOceanFish) {
+            ImGui.TextColored(ImGuiColors.ParsedGrey, "Enable Auto ocean fishing in Settings to use this.");
+            return;
+        }
+
+        var enabled = config.AutoOceanFishEnabled;
+        if (DrawUtil.DrawCheckboxHeader(UIStrings.UseWithOceanFishing, ref enabled, ImGuiTreeNodeFlags.DefaultOpen, () => {
+            if (DrawUtil.Checkbox(UIStrings.UseForAllZoneTimes, ref config.AutoOceanFishAllStops)) {
+                Service.Save();
+            }
+
+            if (!config.AutoOceanFishAllStops) {
+                ImGui.SetNextItemWidth(280 * ImGuiHelpers.GlobalScale);
+                var stopLabel = config.AutoOceanFishSpotId != 0 && config.AutoOceanFishTimeId != 0
+                    ? OceanStopUtil.FormatStopLabel(config.AutoOceanFishSpotId, config.AutoOceanFishTimeId)
+                    : UIStrings.SelectZoneAndTime;
+
+                var selected = new OceanStopKey(config.AutoOceanFishSpotId, config.AutoOceanFishTimeId);
+                using var combo = ImRaii.Combo($"##ZoneTimeSelector", stopLabel);
+                if (combo) {
+                    foreach (var stop in OceanStopUtil.GetUniqueStops().OrderBy(s => s.SpotId).ThenBy(s => s.TimeId)) {
+                        if (ImGui.Selectable(OceanStopUtil.FormatStopLabel(stop.SpotId, stop.TimeId), stop.SpotId == selected.SpotId && stop.TimeId == selected.TimeId)) {
+                            config.AutoOceanFishSpotId = stop.SpotId;
+                            config.AutoOceanFishTimeId = stop.TimeId;
+                            Service.Save();
+                        }
+                    }
+                }
+            }
+
+            config.AutoOceanFishConditionSet = ConditionUi.DrawConditionSetSlim(UIStrings.When, config.AutoOceanFishConditionSet, ConditionScope.Hook, showAdvanced: true);
+        })) {
+            config.AutoOceanFishEnabled = enabled;
+            Service.Save();
         }
     }
 
@@ -110,7 +153,7 @@ public class SubTabExtra {
 
             if (DrawUtil.DrawCheckboxHeader(headerLabel, ref enabled, ImGuiTreeNodeFlags.DefaultOpen, () => {
                 trig.ConditionSet = ConditionUi.DrawConditionSetSlim(
-                    "When",
+                    UIStrings.When,
                     trig.ConditionSet,
                     ConditionScope.Hook,
                     showAdvanced: true,
@@ -129,7 +172,6 @@ public class SubTabExtra {
 
                 ImGui.Separator();
                 ImGui.Indent(20 * ImGuiHelpers.GlobalScale);
-
                 var startFishing = trig.StartFishing;
                 DrawUtil.DrawCheckboxTree("Start fishing", ref startFishing, null);
                 trig.StartFishing = startFishing;

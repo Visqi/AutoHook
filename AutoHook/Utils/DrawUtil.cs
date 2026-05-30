@@ -411,23 +411,23 @@ public static class DrawUtil {
             if (forceOpen)
                 ImGui.SetNextItemOpen(true, ImGuiCond.Always);
             using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
-            if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding)) {
-                ImGui.SetCursorPosX(x);
-                TextV($" └");
-                ImGui.SameLine();
+                if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding)) {
+                    ImGui.SetCursorPosX(x);
+                    TextV($" └");
+                    ImGui.SameLine();
 
-                x = ImGui.GetCursorPosX();
-                if (helpText != string.Empty)
-                    ImGui.TooltipOnHover(helpText);
+                    x = ImGui.GetCursorPosX();
+                    if (helpText != string.Empty)
+                        ImGui.TooltipOnHover(helpText);
 
-                ImGui.SetCursorPosX(x);
-                using (ImRaii.Group()) {
-                    action();
-                    ImGui.Separator();
+                    ImGui.SetCursorPosX(x);
+                    using (ImRaii.Group()) {
+                        action();
+                        ImGui.Separator();
+                    }
+
+                    ImGui.TreePop();
                 }
-
-                ImGui.TreePop();
-            }
         }
     }
 
@@ -490,7 +490,7 @@ public static class DrawUtil {
         }
     }
 
-    public static void DrawButtonPopupType0(string popupName, Action action, string helpText = "", bool highlightLabel = false) {
+    public static void DrawButtonPopupType0(string popupName, Action? action, string helpText = "", bool highlightLabel = false) {
         using var id = ImRaii.PushId(popupName);
 
         var indexOfId = popupName.IndexOf('#');
@@ -512,19 +512,18 @@ public static class DrawUtil {
         if (popup.Success) {
             var windowPos = ImGui.GetWindowPos();
             var windowSize = ImGui.GetWindowSize();
-            ImGui.GetForegroundDrawList()
-                .AddRect(windowPos, windowPos + windowSize, ImGui.GetColorU32(ImGuiCol.Separator));
+            ImGui.GetForegroundDrawList().AddRect(windowPos, windowPos + windowSize, ImGui.GetColorU32(ImGuiCol.Separator));
 
-            action();
+            action?.Invoke();
         }
     }
 
-    public static void DrawButtonPopupType1(string popupName, Action action, string helpText = "", bool highlightLabel = false) {
+    public static void DrawButtonPopupType1(string popupName, Action? action, string helpText = "", bool highlightLabel = false) {
         using var id = ImRaii.PushId(popupName);
         using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
-        if (ImGui.Button(popupName)) {
-            ImGui.OpenPopup(popupName);
-        }
+            if (ImGui.Button(popupName)) {
+                ImGui.OpenPopup(popupName);
+            }
 
         if (helpText != string.Empty)
             ImGui.TooltipOnHover(helpText);
@@ -533,10 +532,9 @@ public static class DrawUtil {
         if (popup.Success) {
             var windowPos = ImGui.GetWindowPos();
             var windowSize = ImGui.GetWindowSize();
-            ImGui.GetForegroundDrawList()
-                .AddRect(windowPos, windowPos + windowSize, ImGui.GetColorU32(ImGuiCol.Separator));
+            ImGui.GetForegroundDrawList().AddRect(windowPos, windowPos + windowSize, ImGui.GetColorU32(ImGuiCol.Separator));
 
-            action();
+            action?.Invoke();
         }
     }
 

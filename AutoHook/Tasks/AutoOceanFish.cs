@@ -1,0 +1,47 @@
+using clib.TaskSystem;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using System.Numerics;
+
+namespace AutoHook.Tasks;
+
+/// <summary>
+/// Moves to a boat railing spot (first zone only) and starts AutoHook fishing actions for an ocean stop.
+/// </summary>
+public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex) : TaskBase {
+    public uint ZoneIndex { get; } = zoneIndex;
+    private static readonly MovementConfig RailingMovement = new(1.5f, MovementOptions.None, PathingStrategy.Direct);
+    private static readonly Random Rng = new();
+
+    protected override async Task Execute() {
+        Service.PrintDebug(
+            $"[AutoOceanFish] Task execute zone={ZoneIndex + 1}, walkToRailing={ZoneIndex == 0}");
+
+        if (ZoneIndex == 0) {
+            Status = "Walking to railing";
+            Service.PrintDebug("[AutoOceanFish] Walking to railing");
+            await WalkToRailing();
+        }
+
+        Status = "Starting fishing";
+        await WaitUntil(() => Svc.Objects.LocalPlayer?.IsTargetable ?? false, nameof(Execute));
+        Service.PrintDebug("[AutoOceanFish] Calling StartFishing");
+        fishingManager.StartFishing();
+        Service.PrintDebug("[AutoOceanFish] StartFishing returned");
+    }
+
+    /// <summary>Random railing position on the boat deck (from Henchman OnABoat).</summary>
+    internal static Vector3 GetFishingPosition() {
+        var left = new Vector3((float)(7 + Rng.NextDouble() * 0.25), 6.711f, Rng.Next(2) == 0 ? Rng.NextSingle() * 10f + -14f : Rng.NextSingle() * 7f + -2f);
+        var right = new Vector3((float)(-7 - Rng.NextDouble() * 0.25), 6.711f, Rng.NextSingle() * 15.5f + -10f);
+        return Rng.Next(2) == 0 ? left : right;
+    }
+
+    private async Task WalkToRailing() {
+        var position = GetFishingPosition();
+        var rotation = position.X > 0 ? 1.5f : -1.5f;
+        await MoveTo(position, RailingMovement, allowTeleportIfFaster: false, allowAethernet: false);
+        unsafe {
+            Svc.Objects.LocalPlayer?.Character()->SetRotation(rotation);
+        }
+    }
+}

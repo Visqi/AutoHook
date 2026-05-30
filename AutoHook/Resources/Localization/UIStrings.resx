@@ -1669,4 +1669,16 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="BlockMovementWhileFishingOption" xml:space="preserve">
     <value>Block movement while fishing</value>
   </data>
+  <data name="UseWithOceanFishing" xml:space="preserve">
+    <value>Use with ocean fishing</value>
+  </data>
+  <data name="UseForAllZoneTimes" xml:space="preserve">
+    <value>Use for all zones/times</value>
+  </data>
+  <data name="SelectZoneAndTime" xml:space="preserve">
+    <value>Select zone and time</value>
+  </data>
+  <data name="When" xml:space="preserve">
+    <value>When</value>
+  </data>
 </root>

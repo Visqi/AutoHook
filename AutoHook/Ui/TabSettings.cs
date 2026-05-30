@@ -45,6 +45,10 @@ public class TabSettings : BaseTab {
 
         DrawUtil.Checkbox(UIStrings.AutoStartFishing, ref Service.Configuration.AutoStartFishing, UIStrings.AutoStartFishingHelpText);
 
+        DrawUtil.Checkbox("Auto ocean fishing", ref Service.Configuration.AutoOceanFish,
+            "At each ocean fishing stop, walk to the railing (first zone only) and start fishing when the zone timer begins. "
+            + "On each preset's Extra tab, enable auto ocean fishing for the route and time of day that preset applies to.");
+
         DrawUtil.Checkbox("Enable auto-collectables", ref Service.Configuration.AutoCollectablesEnabled,
             "Auto accepts the prompt when a collectable appears. Can be overridden per preset in Extra options.");
 

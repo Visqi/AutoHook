@@ -10,9 +10,9 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using FFXIVClientStructs.Interop;
 using Lumina.Excel.Sheets;
 
-namespace AutoHook.Fishing;
+namespace AutoHook.Tasks;
 
-public sealed class AetherialReductionTask(FishingManager fishingManager) : AutoTask, IAutoTaskHooks {
+public sealed class AetherialReduction(FishingManager fishingManager) : AutoTask, IAutoTaskHooks {
     public void DrawDebug() {
         ImGui.Text($"Reduction unlocked: {IsUnlocked()}");
         ImGui.Text($"Reduceable fish (slots): {CountReduceableFish()}");

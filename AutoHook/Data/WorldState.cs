@@ -21,6 +21,7 @@ public sealed class WorldState {
 
     public uint CurrentGp => Player.CurrentGp;
     public uint MaxGp => Player.MaxGp;
+    public byte Level => Player.Level;
     public bool BlockCasting => Player.BlockCasting;
 
     public IReadOnlyDictionary<uint, (float Time, int Stacks)> Statuses => Player.Statuses;
@@ -74,6 +75,9 @@ public sealed class WorldState {
 
     public OceanFishingState OceanFishing => Ocean.OceanFishing;
     public SpectralCurrentStatus SpectralCurrentStatus => Ocean.SpectralCurrentStatus;
+    public OceanSpectralTimerInfo SpectralTimer => Ocean.SpectralTimer;
+    public float SpectralTimeRemaining => Ocean.SpectralTimer.TimeRemaining;
+    public IReadOnlyList<ZoneSpectralRecord> SpectralHistory => Ocean.SpectralHistory;
 
     public event Action<Operation>? Modified;
 
@@ -146,5 +150,10 @@ public sealed class WorldState {
         protected override void Exec(WorldState ws) {
             ws.EndedSession.Fire(this);
         }
+    }
+
+    public Event<OpOceanZoneStarted> OceanZoneStarted = new();
+    public sealed record OpOceanZoneStarted(uint ZoneIndex) : Operation {
+        protected override void Exec(WorldState ws) => ws.OceanZoneStarted.Fire(this);
     }
 }

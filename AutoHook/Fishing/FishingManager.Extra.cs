@@ -1,4 +1,7 @@
 using AutoHook.Conditions;
+using AutoHook.Configurations;
+using AutoHook.Data;
+using AutoHook.Tasks;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
@@ -10,6 +13,60 @@ public partial class FishingManager {
         => Presets.SelectedPreset?.ExtraCfg.Enabled ?? false
             ? Presets.SelectedPreset.ExtraCfg
             : Presets.DefaultPreset.ExtraCfg;
+
+    /// <summary>
+    /// When <see cref="Configuration.AutoOceanFish"/> is on, select the first preset whose Extra config
+    /// is enabled for auto ocean fishing and matches the current zone (spot) and time of day.
+    /// </summary>
+    private void TryApplyOceanFishingPreset() {
+        if (!Service.Configuration.AutoOceanFish)
+            return;
+
+        var ocean = Ws.OceanFishing;
+        if (ocean == OceanFishingState.Empty || ocean.TimeOfDay == TimeOfDay.None)
+            return;
+
+        CustomPresetConfig? match = null;
+        foreach (var preset in EnumerateHookPresets()) {
+            var extra = preset.ExtraCfg;
+            if (!extra.AutoOceanFishEnabled)
+                continue;
+            if (!extra.AutoOceanFishAllStops
+                && !OceanStopUtil.MatchesStop(extra.AutoOceanFishSpotId, extra.AutoOceanFishTimeId, ocean))
+                continue;
+            if (extra.AutoOceanFishConditionSet is { Groups.Count: > 0 } set
+                && set.Groups.Any(g => g.Conditions.Count > 0)
+                && !set.Evaluate(Ws, ConditionRegistry.Registry))
+                continue;
+            match = preset;
+            break;
+        }
+
+        if (match == null)
+            return;
+
+        if (match.IsGlobal) {
+            if (Presets.SelectedPreset == null)
+                return;
+            Presets.SelectedPreset = null;
+            Service.PrintDebug(
+                $"[AutoOceanFish] Preset set to global (zone {ocean.CurrentZone}, spot {ocean.CurrentSpotId}, time {ocean.CurrentTimeId})");
+            return;
+        }
+
+        if (Presets.SelectedPreset?.UniqueId == match.UniqueId)
+            return;
+
+        Presets.SelectedPreset = match;
+        Service.PrintDebug(
+            $"[AutoOceanFish] Preset set to {match.PresetName} (zone {ocean.CurrentZone}, spot {ocean.CurrentSpotId}, time {ocean.CurrentTimeId})");
+    }
+
+    private IEnumerable<CustomPresetConfig> EnumerateHookPresets() {
+        yield return Presets.DefaultPreset;
+        foreach (var preset in Presets.CustomPresets)
+            yield return preset;
+    }
 
     private void QueueResolveCollectables() {
         var extraCfg = GetExtraCfg();
@@ -117,8 +174,8 @@ public partial class FishingManager {
             StartFishing();
         }
 
-        if (trig.ReduceFish && Svc.Automation.CurrentTask is not AetherialReductionTask) {
-            Svc.Automation.Start(new AetherialReductionTask(this));
+        if (trig.ReduceFish && Svc.Automation.CurrentTask is not AetherialReduction) {
+            Svc.Automation.Start(new AetherialReduction(this));
             Service.PrintChat(UIStrings.AetherialReduction_Started);
         }
 

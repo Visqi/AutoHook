@@ -28,15 +28,7 @@ public sealed class WKSInfo {
         }
     }
 
-    public sealed record OpState(
-        ushort DevGrade,
-        ushort CurrentFateControlRowId,
-        ushort CurrentFateId,
-        ushort CurrentMissionUnitRowId,
-        uint CurrentScore,
-        WKSManager.MissionRank CurrentRank,
-        ushort CollectedTotal,
-        byte CollectedIndividual) : WorldState.Operation {
+    public sealed record OpState(ushort DevGrade, ushort CurrentFateControlRowId, ushort CurrentFateId, ushort CurrentMissionUnitRowId, uint CurrentScore, WKSManager.MissionRank CurrentRank, ushort CollectedTotal, byte CollectedIndividual) : WorldState.Operation {
         protected override void Exec(WorldState ws) {
             ws.WKS.DevGrade = DevGrade;
             ws.WKS.CurrentFateControlRowId = CurrentFateControlRowId;

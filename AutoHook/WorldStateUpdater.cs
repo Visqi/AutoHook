@@ -53,7 +53,8 @@ public sealed class WorldStateUpdater : IDisposable {
     public void Update() {
         if (Player.ClassJob.RowId is not 18 || Svc.Objects.LocalPlayer is null) return;
         var ws = Service.WorldState;
-        ws.Execute(CollectGp());
+        ws.Execute(new PlayerInfo.OpGp(Svc.Objects.LocalPlayer?.CurrentGp ?? 0, Svc.Objects.LocalPlayer?.MaxGp ?? 0));
+        ws.Execute(new PlayerInfo.OpLevel(Svc.Objects.LocalPlayer?.Level ?? 0));
         ws.Execute(CollectStatuses());
         ws.Execute(CollectOceanFishing());
 
@@ -127,14 +128,23 @@ public sealed class WorldStateUpdater : IDisposable {
             foreach (var f in ptr->ThirdZoneFishData)
                 fishData.Add(f);
 
+            var routeRow = IKDRoute.GetRow(ptr->CurrentRoute);
+            var zoneIndex = (int)ptr->CurrentZone;
+            var timeId = routeRow.Time[zoneIndex].RowId;
             var state = new OceanFishingState {
                 SpectralCurrentActive = ptr->SpectralCurrentActive,
                 CurrentRoute = ptr->CurrentRoute,
+                TimeOfDay = (TimeOfDay)timeId,
                 CurrentZone = ptr->CurrentZone,
+                CurrentSpotId = routeRow.Spot[zoneIndex].RowId,
+                CurrentTimeId = timeId,
+                TimeLeftInZone = Math.Max(0f, EventFramework.Instance()->GetInstanceContentDirector()->ContentTimeLeft - ptr->TimeOffset),
+                ZoneTimeMax = ptr->GetContentTimeMax(),
                 Mission1 = new OceanMission(ptr->Mission1Type, ptr->Mission1Progress),
                 Mission2 = new OceanMission(ptr->Mission2Type, ptr->Mission2Progress),
                 Mission3 = new OceanMission(ptr->Mission3Type, ptr->Mission3Progress),
                 FishData = fishData,
+                Status = ptr->Status,
             };
             return new OceanFishInfo.OpOceanFishing(state);
         }
@@ -184,9 +194,6 @@ public sealed class WorldStateUpdater : IDisposable {
         return (int)currentId;
     }
 
-    private static PlayerInfo.OpGp CollectGp()
-        => new(Svc.Objects.LocalPlayer?.CurrentGp ?? 0, Svc.Objects.LocalPlayer?.MaxGp ?? 0);
-
     private static PlayerInfo.OpStatuses CollectStatuses() {
         var dict = new Dictionary<uint, (float Time, int Stacks)>();
         if (Svc.Objects.LocalPlayer is { StatusList: var statuses })
@@ -205,7 +212,7 @@ public sealed class WorldStateUpdater : IDisposable {
         try {
             if (Player.Territory is { Value.TerritoryIntendedUse.RowId: 60 }) {
                 if (WKSManager.Instance() is not null and var cosmic)
-                    baitId = cosmic->FishingBait;
+                    baitId = cosmic->State.FishingBait;
             }
             else
                 baitId = FFXIVClientStructs.FFXIV.Client.Game.UI.PlayerState.Instance()->FishingBait;
@@ -288,20 +295,20 @@ public sealed class WorldStateUpdater : IDisposable {
         ushort currentFateId = 0;
         ushort currentMissionUnitRowId = 0;
         uint currentScore = 0;
-        WKSManager.MissionRank currentRank = WKSManager.MissionRank.None;
+        var currentRank = WKSManager.MissionRank.None;
         ushort collectedTotal = 0;
         byte collectedIndividual = 0;
 
         try {
             if (Player.Territory is { Value.TerritoryIntendedUse.RowId: 60 } && WKSManager.Instance() is not null and var wks) {
-                devGrade = wks->DevGrade;
-                currentFateControlRowId = wks->CurrentFateControlRowId;
-                currentFateId = wks->CurrentFateId;
-                currentMissionUnitRowId = wks->CurrentMissionUnitRowId;
-                currentScore = wks->CurrentScore;
-                currentRank = wks->CurrentRank;
-                collectedTotal = wks->CollectedTotal;
-                collectedIndividual = wks->CollectedIndividual;
+                devGrade = wks->State.DevGrade;
+                currentFateControlRowId = wks->State.CurrentFateControlRowId;
+                currentFateId = wks->State.CurrentFateId;
+                currentMissionUnitRowId = wks->State.CurrentMissionUnitRowId;
+                currentScore = wks->State.CurrentScore;
+                currentRank = wks->State.CurrentRank;
+                collectedTotal = wks->State.CollectedTotal;
+                collectedIndividual = wks->State.CollectedIndividual;
             }
         }
         catch { }

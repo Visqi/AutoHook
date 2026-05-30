@@ -42,6 +42,7 @@ public partial class Configuration : IPluginConfiguration {
     public bool ResetAfkTimer = true;
     public bool BlockInputWhileFishing = false;
     public bool AutoStartFishing = false;
+    public bool AutoOceanFish = false;
     public bool DtrBarEnabled = false;
     public bool DtrPresetBarEnabled = false;
 

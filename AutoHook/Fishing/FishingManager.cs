@@ -1,4 +1,6 @@
 using AutoHook.Conditions;
+using AutoHook.Data;
+using AutoHook.Tasks;
 using Dalamud.Plugin.Services;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -15,10 +17,12 @@ public partial class FishingManager : IDisposable {
     private static readonly FishingPresets Presets = Service.Configuration.HookPresets;
     private double _timeout;
     private readonly Stopwatch _fishingTimer = new();
+    private readonly EventSubscriptions _oceanEventSubs;
 
     private static WorldState Ws => Service.WorldState;
 
     public FishingManager() {
+        _oceanEventSubs = new(Ws.OceanZoneStarted.Subscribe(OnOceanZoneStarted));
         try {
             Svc.Framework.Update += OnFrameworkUpdate;
             Svc.Chat.ChatMessage += OnMessageDelegate;
@@ -30,9 +34,35 @@ public partial class FishingManager : IDisposable {
     }
 
     public void Dispose() {
+        _oceanEventSubs.Dispose();
         Svc.Framework.Update -= OnFrameworkUpdate;
         Svc.Chat.ChatMessage -= OnMessageDelegate;
         Ws.Modified -= OnWorldStateModified;
+    }
+
+    private void OnOceanZoneStarted(WorldState.OpOceanZoneStarted op) {
+        var ocean = Ws.OceanFishing;
+        Service.PrintDebug(
+            $"[AutoOceanFish] OnZoneStarted zone={op.ZoneIndex + 1}, {OceanStopUtil.FormatStateLog(ocean)}");
+
+        if (!Service.Configuration.PluginEnabled) {
+            Service.PrintDebug("[AutoOceanFish] Task not started: plugin disabled");
+            return;
+        }
+
+        if (!Service.Configuration.AutoOceanFish) {
+            Service.PrintDebug("[AutoOceanFish] Task not started: Auto ocean fishing disabled in Settings");
+            return;
+        }
+
+        if (Svc.Automation.CurrentTask is AutoOceanFish existing) {
+            Service.PrintDebug(
+                $"[AutoOceanFish] Task not started: AutoOceanFish already running (zone {existing.ZoneIndex + 1})");
+            return;
+        }
+
+        Svc.Automation.Start(new AutoOceanFish(this, op.ZoneIndex));
+        Service.PrintDebug($"[AutoOceanFish] Task started for zone {op.ZoneIndex + 1}");
     }
 
     private void OnWorldStateModified(WorldState.Operation op) {
@@ -69,6 +99,8 @@ public partial class FishingManager : IDisposable {
             Service.PrintChat(@"[AutoHook] You can't cast right now.");
             return;
         }
+
+        TryApplyOceanFishingPreset();
 
         var extraCfg = GetExtraCfg();
         if (extraCfg is { ForceBaitSwap: true, Enabled: true }) {

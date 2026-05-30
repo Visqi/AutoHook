@@ -1,3 +1,4 @@
+using AutoHook.Tasks;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -44,7 +45,7 @@ public class TabDebug : BaseTab {
             }
 
             ImGui.Spacing();
-            if (Svc.Automation.CurrentTask is AetherialReductionTask reductionTask)
+            if (Svc.Automation.CurrentTask is AetherialReduction reductionTask)
                 reductionTask.DrawDebug();
         }
     }
@@ -89,13 +90,29 @@ public class TabDebug : BaseTab {
             // Ocean fishing
             if (ImGui.CollapsingHeader("Ocean fishing")) {
                 var of = ws.OceanFishing;
+                var st = ws.SpectralTimer;
                 ImGui.Text($"SpectralCurrentActive: {of.SpectralCurrentActive}");
+                ImGui.Text($"SpectralTimeRemaining: {st.TimeRemaining:F1}s (active={st.IsActive})");
+                ImGui.Text($"NextSpectralDuration: {st.NextSpectralDuration:F1}s");
+                ImGui.Text($"TimeLeftInZone: {of.TimeLeftInZone:F1}s");
+                ImGui.Text($"AutoOceanFish: {Service.Configuration.AutoOceanFish}");
+                if (Svc.Automation.CurrentTask is AutoOceanFish oceanTask)
+                    ImGui.Text($"OceanAutoFishTask: zone {oceanTask.ZoneIndex + 1}, status={oceanTask.Status}");
                 ImGui.Text($"CurrentRoute: {of.CurrentRoute}");
                 ImGui.Text($"CurrentZone: {of.CurrentZone}");
                 ImGui.Text($"Mission1: type={of.Mission1.Type} progress={of.Mission1.Progress}");
                 ImGui.Text($"Mission2: type={of.Mission2.Type} progress={of.Mission2.Progress}");
                 ImGui.Text($"Mission3: type={of.Mission3.Type} progress={of.Mission3.Progress}");
                 ImGui.Text($"FishData count: {of.FishData?.Count ?? 0}");
+                if (ws.SpectralHistory.Count > 0) {
+                    ImGui.Separator();
+                    ImGui.Text("Spectral history (this voyage):");
+                    foreach (var rec in ws.SpectralHistory) {
+                        var dur = rec.ActualDurationSeconds is { } d ? $"{d:F0}s" : "active";
+                        ImGui.BulletText(
+                            $"zone {rec.ZoneIndex + 1}: planned {rec.PlannedDurationSeconds:F0}s, carried {rec.CarriedExtraSeconds:F0}s, {dur}");
+                    }
+                }
             }
 
             // Last catch
