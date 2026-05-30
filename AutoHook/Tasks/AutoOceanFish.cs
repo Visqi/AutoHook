@@ -23,7 +23,11 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
         }
 
         Status = "Starting fishing";
-        await WaitUntil(() => Svc.Objects.LocalPlayer?.IsTargetable ?? false, nameof(Execute));
+        var ws = Service.WorldState;
+        await WaitUntil(
+            () => (Svc.Objects.LocalPlayer?.IsTargetable ?? false) && ws.IsCastAvailable(),
+            nameof(Execute),
+            checkFrequency: 5);
         Service.PrintDebug("[AutoOceanFish] Calling StartFishing");
         fishingManager.StartFishing();
         Service.PrintDebug("[AutoOceanFish] StartFishing returned");

@@ -198,7 +198,7 @@ public partial class FishingManager : IDisposable {
 
         var currentState = Service.WorldState.Fishing.FishingState;
         if (currentState == FishingState.None) {
-            if (Service.Configuration.AutoStartFishing && EzThrottler.Throttle("AutoStartFishing", 1000)) {
+            if (Service.Configuration.AutoStartFishing && !ShouldSuppressAutoStartFishing() && EzThrottler.Throttle("AutoStartFishing", 1000)) {
                 var autoCastCfg = GetAutoCastCfg();
                 if (autoCastCfg.EnableAll && autoCastCfg.CastLine.IsAvailableToCast() && Ws.IsCastAvailable()) {
                     StartFishing();
@@ -248,6 +248,9 @@ public partial class FishingManager : IDisposable {
                 break;
         }
     }
+
+    // ocean fishing handles it on its own
+    private bool ShouldSuppressAutoStartFishing() => Service.Configuration.AutoOceanFish && (Svc.Automation.CurrentTask is AutoOceanFish || Ws.OceanFishing != OceanFishingState.Empty);
 
     /// <summary>
     /// When not on Fisher, <see cref="WorldStateUpdater"/> does not refresh fishing fields; clear stale automation state
