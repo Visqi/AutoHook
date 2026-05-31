@@ -2,22 +2,20 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class SpectralTimerCD : IConditionDefinition {
-    public string Id => nameof(SpectralTimerCD);
-    public string Name => "Spectral time";
-    public string Category => "Fishing";
-    public string Description => "Compares remaining ocean spectral current time against a value.";
-    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
+public sealed class SpectralTimerCD : IntCompareConditionDefinition {
+    public override string Id => nameof(SpectralTimerCD);
+    public override string Name => "Spectral time";
+    public override ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
+    protected override string ValueKey => "sec";
+    protected override string ComboId => "##spectral_op";
+    protected override string ValueLabel => "Seconds";
+    protected override Func<int, int>? Clamp => static v => Math.Max(0, v);
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
-        var args = GetIntCompareParams(parameters, "sec");
-        if (!world.SpectralTimer.IsActive)
-            return args.Invert;
-        var lhs = (int)Math.Floor(world.SpectralTimeRemaining);
-        var result = CompareInt(lhs, args.Value, args.Op);
-        return args.Apply(result);
+    protected override bool? InactiveResult(WorldState world, IReadOnlyDictionary<string, object> parameters) {
+        var args = GetIntCompareParams(parameters, valueKey: ValueKey);
+        return !world.SpectralTimer.IsActive ? args.Invert : null;
     }
 
-    public void DrawParams(Condition condition)
-        => DrawIntCompareParams(condition, "##spectral_op", "Seconds", valueKey: "sec", clamp: v => Math.Max(0, v));
+    protected override int ReadValue(WorldState world, IReadOnlyDictionary<string, object> parameters)
+        => (int)Math.Floor(world.SpectralTimeRemaining);
 }

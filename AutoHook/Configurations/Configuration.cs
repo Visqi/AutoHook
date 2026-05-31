@@ -14,7 +14,7 @@ public partial class Configuration : IPluginConfiguration {
     public int Version { get; set; } = 6;
     public string CurrentLanguage { get; set; } = @"en";
 
-    public bool HideLocButtonn = true;
+    public bool HideLocButton = true;
     public bool PluginEnabled = true;
     public FishingPresets HookPresets = new();
     public SpearFishingPresets AutoGigConfig = new();
@@ -127,9 +127,6 @@ public partial class Configuration : IPluginConfiguration {
             Svc.Log.Error(@$"[Configuration] {e.Message}");
             throw;
         }
-    }
-
-    public static void ResetConfig() {
     }
 
     // Got the export/import function from the UnknownX7's ReAction repo

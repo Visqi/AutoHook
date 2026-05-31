@@ -50,7 +50,7 @@ public class BaseBiteConfig(HookType type) {
     private void DrawBite() {
         using var indent = ImRaii.PushIndent();
 
-        DrawUtil.Checkbox(UIStrings.UseMutlipleHooksByTimer, ref UseMultipleHookTypesByTimer);
+        DrawUtil.Checkbox(UIStrings.UseMultipleHooksByTimer, ref UseMultipleHookTypesByTimer);
 
         if (!UseMultipleHookTypesByTimer) {
             if (ImGui.RadioButton(UIStrings.Normal_Hook, HooksetType == HookType.Normal)) {

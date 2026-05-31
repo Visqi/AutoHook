@@ -40,7 +40,9 @@ public abstract class BaseActionCast {
 
     public bool DontCancelMooch = true;
 
-    public virtual bool RequiresAutoCastAvailabl() => false;
+    public bool ConditionsOnly;
+
+    public virtual bool RequiresAutoCastAvailable() => false;
 
     public virtual bool RequiresTimeWindow() => false;
 
@@ -57,6 +59,9 @@ public abstract class BaseActionCast {
     protected void DrawAutoCastConditions(bool showSubPrefix = true)
         => ConditionSet = ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showAdvanced: true, showSubPrefix: showSubPrefix);
 
+    public void DrawFishCaughtActionOptions()
+        => DrawAutoCastConditions(showSubPrefix: false);
+
     public virtual void SetThreshold(int newCost) {
         var actionCost = Id == IDs.Actions.ThaliaksFavor ? 0 : (int)PlayerRes.CastActionCost(Id, ActionType);
         GpThreshold = (newCost < 0) ? 0 : Math.Max(newCost, actionCost);
@@ -64,8 +69,15 @@ public abstract class BaseActionCast {
     }
 
     public bool IsAvailableToCast(bool ignoreCurrentMooch = false) {
-        if (!Enabled)
+        if (ConditionsOnly) {
+            if (!Enabled)
+                return false;
+            if (ConditionSet is not { Groups.Count: > 0 } || !ConditionSet.Groups.Any(g => g.Conditions.Count > 0))
+                return false;
+        }
+        else if (!Enabled) {
             return false;
+        }
 
         if (DoesCancelMooch() && Service.WorldState.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch) {
             return false;
@@ -84,7 +96,7 @@ public abstract class BaseActionCast {
 
     public abstract bool CastCondition();
 
-    public virtual string GetName() => "";
+    public virtual string GetName() => Name;
 
     public virtual int GetPriority() => Priority;
 

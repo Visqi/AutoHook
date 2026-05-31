@@ -3,7 +3,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoMakeShiftBait : BaseActionCast {
+public sealed class AutoMakeShiftBait : BaseActionCast {
     public int MakeshiftBaitStacks = 5;
 
     public override bool RequiresTimeWindow() => true;
@@ -11,20 +11,11 @@ public class AutoMakeShiftBait : BaseActionCast {
     public AutoMakeShiftBait() : base(UIStrings.MakeShift_Bait, IDs.Actions.MakeshiftBait, ActionType.Action)
         => HelpText = UIStrings.TabAutoCasts_DrawMakeShiftBait_HelpText;
 
-    public override string GetName()
-        => Name = UIStrings.MakeShift_Bait;
-
     public override bool CastCondition() {
         if (!EvaluateConditionSet())
             return false;
 
-        if (Service.WorldState.HasStatus(IDs.Status.MakeshiftBait))
-            return false;
-
-        if (Service.WorldState.HasStatus(IDs.Status.PrizeCatch))
-            return false;
-
-        if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune))
+        if (Service.WorldState.BlocksFortune())
             return false;
 
         var available = Service.WorldState.ActionAvailable(IDs.Actions.MakeshiftBait);
@@ -36,7 +27,6 @@ public class AutoMakeShiftBait : BaseActionCast {
     protected override DrawOptionsDelegate DrawOptions => () => {
         var stack = MakeshiftBaitStacks;
         if (DrawUtil.EditNumberField(UIStrings.TabAutoCasts_When_Stack_Equals, ref stack)) {
-            // value has to be between 5 and 10
             MakeshiftBaitStacks = Math.Max(5, Math.Min(stack, 10));
             Service.Save();
         }

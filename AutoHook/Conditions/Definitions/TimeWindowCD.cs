@@ -1,14 +1,13 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
 public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(bool Enabled, TimeOnly Start, TimeOnly End)> {
     public string Id => nameof(TimeWindowCD);
     public string Name => "Time window";
-    public string Category => "Time";
-    public string Description => "Checks current Eorzea time between start and end.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.All;
 
     public readonly record struct TimeWindowParams(TimeOnly Start, TimeOnly End, bool Invert) {
@@ -82,13 +81,13 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
 
     private static TimeWindowParams GetParams(IReadOnlyDictionary<string, object> p) {
         var (start, end) = GetTimeWindowFromParams(p);
-        var invert = IConditionDefinition.GetBool(p, "inv", false);
+        var invert = GetBool(p, "inv", false);
         return new TimeWindowParams(start, end, invert);
     }
 
     public static (TimeOnly Start, TimeOnly End) GetTimeWindowFromParams(IReadOnlyDictionary<string, object> p) {
-        var startMinutes = IConditionDefinition.GetInt(p, "start", 0);
-        var endMinutes = IConditionDefinition.GetInt(p, "end", 0);
+        var startMinutes = GetInt(p, "start", 0);
+        var endMinutes = GetInt(p, "end", 0);
         startMinutes = Math.Clamp(startMinutes, 0, 24 * 60 - 1);
         endMinutes = Math.Clamp(endMinutes, 0, 24 * 60 - 1);
         var start = new TimeOnly(startMinutes / 60, startMinutes % 60);

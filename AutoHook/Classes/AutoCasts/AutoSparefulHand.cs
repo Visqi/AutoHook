@@ -2,11 +2,8 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoSparefulHand : BaseActionCast {
+public sealed class AutoSparefulHand : BaseActionCast {
     public AutoSparefulHand() : base(UIStrings.SparefulHand, IDs.Actions.SparefulHand, ActionType.Action) => HelpText = UIStrings.SparefulHand_HelpText;
-
-    public override string GetName()
-        => Name = UIStrings.SparefulHand;
 
     public uint? FishIdToCheck { get; set; }
 
@@ -22,9 +19,7 @@ public class AutoSparefulHand : BaseActionCast {
         }
     }
 
-    protected override DrawOptionsDelegate? DrawOptions => () => {
-        DrawAutoCastConditions(showSubPrefix: false);
-    };
+    protected override DrawOptionsDelegate? DrawOptions => () => DrawAutoCastConditions(showSubPrefix: false);
 
     public override int Priority { get; set; } = 20;
     public override bool IsExcludedPriority { get; set; } = false;

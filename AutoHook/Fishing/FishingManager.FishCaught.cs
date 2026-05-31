@@ -86,7 +86,7 @@ public partial class FishingManager {
                 var preset = Presets.CustomPresets.FirstOrDefault(preset => preset.PresetName == lastCatchCfg.PresetToSwap);
 
                 FishingHelper.AddPresetSwap(guid);
-                Ws.Execute(new WorldState.OpOrFishingStep(FishingSteps.PresetSwapped));
+                Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
 
                 if (preset == null)
                     Service.PrintChat(@$"Preset {lastCatchCfg.PresetToSwap} not found.");
@@ -107,7 +107,7 @@ public partial class FishingManager {
                 var result = ChangeBait(lastCatchCfg.BaitToSwap);
 
                 FishingHelper.AddBaitSwap(guid);
-                Ws.Execute(new WorldState.OpOrFishingStep(FishingSteps.BaitSwapped));
+                Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.BaitSwapped, Or: true));
                 if (result == ChangeBaitReturn.Success) {
                     Service.PrintChat(@$"[Fish Caught] Swapping bait to {lastCatchCfg.BaitToSwap.Name}");
                     Service.Save();

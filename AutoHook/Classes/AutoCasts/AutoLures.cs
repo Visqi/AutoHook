@@ -1,20 +1,17 @@
+using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
-using AutoHook.Ui;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoLures : BaseActionCast {
+public sealed class AutoLures : BaseActionCast {
     public int LureStacks = 3;
     public bool CancelAttempt;
 
     public LureTarget LureTarget;
 
     public AutoLures() : base(UIStrings.UseLures, IDs.Actions.AmbitiousLure) { }
-
-    public override string GetName()
-        => Name = UIStrings.UseLures;
 
     private uint StatusId => Id == IDs.Actions.AmbitiousLure ? IDs.Status.AmbitiousLure : IDs.Status.ModestLure;
 
@@ -69,7 +66,6 @@ public class AutoLures : BaseActionCast {
         }
 
         if (DrawUtil.EditNumberField(UIStrings.MaxAttempts, ref stack, "", 1)) {
-            // value has to be between 3 and 10
             LureStacks = Math.Clamp(stack, 1, 3);
             Service.Save();
         }

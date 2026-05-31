@@ -1,11 +1,13 @@
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
-public class AutoMultiHook : BaseActionCast {
+
+public sealed class AutoMultiHook : BaseActionCast {
     public AutoMultiHook() : base(UIStrings.Multihook, IDs.Actions.MultiHook, ActionType.EventAction) { }
 
     public override int Priority { get; set; } = 0;
     public override bool IsExcludedPriority { get; set; } = true;
+
     public override unsafe bool CastCondition() {
         if (!EvaluateConditionSet())
             return false;
@@ -17,9 +19,5 @@ public class AutoMultiHook : BaseActionCast {
         return false;
     }
 
-    public override string GetName() => Name = UIStrings.Multihook;
-
-    protected override DrawOptionsDelegate DrawOptions => () => {
-        DrawAutoCastConditions();
-    };
+    protected override DrawOptionsDelegate DrawOptions => () => DrawAutoCastConditions();
 }

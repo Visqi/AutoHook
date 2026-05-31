@@ -1,6 +1,7 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using Newtonsoft.Json;
 
 namespace AutoHook.Configurations;
 
@@ -20,6 +21,13 @@ public class HookConfig : BaseOption {
     public SwimbaitConfig SwimbaitNormal { get; set; } = new();
     public SwimbaitConfig SwimbaitIntuition { get; set; } = new();
     public NotificationConfig NotifyOnSuccess { get; set; } = new();
+
+    public bool StopAfterResetCount;
+    public FishingSteps StopFishingStep = FishingSteps.None;
+
+    [JsonProperty("StopConditionSet")]
+    [JsonConverter(typeof(SingleConditionConverter))]
+    public SingleCondition<HookCountCD, (bool Enabled, int Limit)> StopAfterCaughtLimit { get => field ??= new SingleCondition<HookCountCD, (bool Enabled, int Limit)>(() => UniqueId); set; }
 
     //todo enable more hook settings based on the current status
     //List<BaseHookset> CustomHooksets = new();
@@ -109,17 +117,6 @@ public class HookConfig : BaseOption {
     }
 
     public BaseHookset GetHookset() {
-        /*
-            var requiredStatusPreset = new List<BaseHookset> { IntuitionHook };
-
-            foreach (var preset in requiredStatusPreset)
-            {
-                if (Service.WorldState.Player.HasStatus(preset.RequiredStatus) && preset.UseCustomStatusHook)
-                {
-                    return preset;
-                }
-            }*/
-
         return UsesIntuitionHookConfig() ? IntuitionHook : NormalHook;
     }
 

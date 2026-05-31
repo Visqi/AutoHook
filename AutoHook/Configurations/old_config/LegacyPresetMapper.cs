@@ -64,8 +64,12 @@ internal static class LegacyPresetMapper {
             var newBait = new HookConfig(bait.BaitFish) {
                 Enabled = bait.Enabled,
                 NormalHook = bait.NormalHook,
-                IntuitionHook = bait.IntuitionHook
+                IntuitionHook = bait.IntuitionHook,
+                StopAfterResetCount = bait.StopAfterResetCount,
+                StopFishingStep = bait.StopFishingStep,
             };
+            if (bait.StopAfterCaught)
+                newBait.StopAfterCaughtLimit.Value = (true, bait.StopAfterCaughtLimit);
             newBait.IntuitionHook.UseCustomStatusHook = bait.UseCustomIntuitionHook;
 
             newPreset.AddItem(newBait);
@@ -76,8 +80,12 @@ internal static class LegacyPresetMapper {
             var newMooch = new HookConfig(mooch.BaitFish) {
                 Enabled = mooch.Enabled,
                 NormalHook = mooch.NormalHook,
-                IntuitionHook = mooch.IntuitionHook
+                IntuitionHook = mooch.IntuitionHook,
+                StopAfterResetCount = mooch.StopAfterResetCount,
+                StopFishingStep = mooch.StopFishingStep,
             };
+            if (mooch.StopAfterCaught)
+                newMooch.StopAfterCaughtLimit.Value = (true, mooch.StopAfterCaughtLimit);
             newMooch.IntuitionHook.UseCustomStatusHook = mooch.UseCustomIntuitionHook;
 
             newPreset.AddItem(newMooch);

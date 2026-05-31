@@ -6,8 +6,6 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class OceanMissionTypeCD : IConditionDefinition {
     public string Id => nameof(OceanMissionTypeCD);
     public string Name => "Ocean mission type";
-    public string Category => "Fishing";
-    public string Description => "Matches current ocean fishing mission types (slots 1–3) against selected entries.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {

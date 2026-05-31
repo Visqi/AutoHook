@@ -9,8 +9,6 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class OceanTimeOfDayCD : IConditionDefinition {
     public string Id => nameof(OceanTimeOfDayCD);
     public string Name => "Ocean time of day";
-    public string Category => "Fishing";
-    public string Description => "Matches the current ocean fishing time of day for this stop (day, sunset, or night).";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {

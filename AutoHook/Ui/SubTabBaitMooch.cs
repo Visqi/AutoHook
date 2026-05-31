@@ -94,6 +94,9 @@ public class SubTabBaitMooch {
 
                 ImGui.Spacing();
                 hook.NotifyOnSuccess.DrawConfig($"Hook success: {hook.BaitFish.Name}");
+
+                ImGui.Spacing();
+                DrawStopAfterHooking(hook);
             }, UIStrings.EnabledConfigArrowhelpMarker)) {
                 Service.Save();
             }
@@ -141,6 +144,28 @@ public class SubTabBaitMooch {
 
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
             ImGui.SetTooltip(UIStrings.HoldShiftToDelete);
+    }
+
+    private static void DrawStopAfterHooking(HookConfig hookConfig) {
+        using var _ = ImRaii.PushId("DrawStopAfterHooking");
+
+        DrawUtil.DrawCaughtCountLimitTree(UIStrings.StopAfterHooking, hookConfig.StopAfterCaughtLimit,
+            () => {
+                if (ImGui.RadioButton(UIStrings.Stop_Casting, hookConfig.StopFishingStep == FishingSteps.None)) {
+                    hookConfig.StopFishingStep = FishingSteps.None;
+                    Service.Save();
+                }
+
+                ImGui.SameLine();
+                ImGuiComponents.HelpMarker(UIStrings.Auto_Cast_Stopped);
+
+                if (ImGui.RadioButton(UIStrings.Quit_Fishing, hookConfig.StopFishingStep == FishingSteps.Quitting)) {
+                    hookConfig.StopFishingStep = FishingSteps.Quitting;
+                    Service.Save();
+                }
+
+                DrawUtil.Checkbox(UIStrings.Reset_the_counter, ref hookConfig.StopAfterResetCount);
+            });
     }
 
     private static void DrawSwimbaitUsage(SwimbaitConfig config, bool isGlobal, bool isIntuition) {

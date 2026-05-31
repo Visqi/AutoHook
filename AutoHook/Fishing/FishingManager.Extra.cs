@@ -100,7 +100,7 @@ public partial class FishingManager {
         }
 
         if (anyPresetSwapped)
-            Ws.Execute(new WorldState.OpOrFishingStep(FishingSteps.PresetSwapped));
+                    Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
     }
 
     private void RunExtraTriggers(ExtraConfig extraCfg) {
@@ -137,7 +137,7 @@ public partial class FishingManager {
             var preset = Presets.CustomPresets
                 .FirstOrDefault(p => p.PresetName == trig.PresetToSwap);
 
-            Ws.Execute(new WorldState.OpOrFishingStep(FishingSteps.PresetSwapped));
+                    Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
 
             if (preset != null) {
                 Service.Save();
@@ -154,7 +154,7 @@ public partial class FishingManager {
         // Swap bait
         if (trig.SwapBait && !Ws.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
             var result = ChangeBait(trig.BaitToSwap);
-            Ws.Execute(new WorldState.OpOrFishingStep(FishingSteps.BaitSwapped));
+            Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.BaitSwapped, Or: true));
 
             if (result == ChangeBaitReturn.Success) {
                 Service.PrintChat(@$"[Extra] Trigger: Swapping bait to {trig.BaitToSwap.Name}");

@@ -2,12 +2,10 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoChum : BaseActionCast {
+public sealed class AutoChum : BaseActionCast {
     public override bool DoesCancelMooch() => true;
 
     public AutoChum() : base(UIStrings.Chum, IDs.Actions.Chum) => HelpText = UIStrings.CancelsCurrentMooch;
-
-    public override string GetName() => Name = UIStrings.Chum;
 
     public override bool CastCondition() => EvaluateConditionSet();
 

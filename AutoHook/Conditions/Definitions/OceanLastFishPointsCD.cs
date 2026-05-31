@@ -5,8 +5,6 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class OceanLastFishPointsCD : IConditionDefinition {
     public string Id => nameof(OceanLastFishPointsCD);
     public string Name => "Last ocean fish points";
-    public string Category => "Fishing";
-    public string Description => "Compares the points value of the last caught ocean fish in the current zone against a value.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {

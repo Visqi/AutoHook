@@ -41,8 +41,6 @@ public class ConditionRegistry {
 public class ConditionTypeDef {
     public string Id { get; init; } = "";
     public string Name { get; init; } = "";
-    public string Category { get; init; } = "";
-    public string Description { get; init; } = "";
     public ConditionScopeFlags AllowedScopes { get; init; } = ConditionScopeFlags.All;
     public Action<Condition>? DrawParams { get; init; }
     public Func<WorldState, IReadOnlyDictionary<string, object>, bool> Evaluate { get; init; } = (_, _) => false;

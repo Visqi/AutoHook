@@ -1,10 +1,10 @@
+using static AutoHook.Conditions.IConditionDefinition;
+
 namespace AutoHook.Conditions.Definitions;
 
 public sealed class StatusActiveCD : IConditionDefinition {
     public string Id => nameof(StatusActiveCD);
     public string Name => "Status";
-    public string Category => "Status";
-    public string Description => "Checks whether any of the selected statuses are currently active.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.All;
 
     private readonly record struct StatusActiveParams(IReadOnlyList<uint> Ids, bool Invert) {
@@ -55,8 +55,8 @@ public sealed class StatusActiveCD : IConditionDefinition {
     }
 
     private static StatusActiveParams GetParams(IReadOnlyDictionary<string, object> p) {
-        var ids = IConditionDefinition.GetStatusIds(p);
-        var inv = IConditionDefinition.GetBool(p, "inv", false);
+        var ids = GetStatusIds(p);
+        var inv = GetBool(p, "inv", false);
         return new StatusActiveParams(ids, inv);
     }
 }

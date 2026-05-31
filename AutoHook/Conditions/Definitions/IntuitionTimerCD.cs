@@ -2,21 +2,20 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class IntuitionTimerCD : IConditionDefinition {
-    public string Id => nameof(IntuitionTimerCD);
-    public string Name => "Intuition time";
-    public string Category => "Fishing";
-    public string Description => "Compares remaining Fisher's Intuition time against a value.";
-    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
+public sealed class IntuitionTimerCD : IntCompareConditionDefinition {
+    public override string Id => nameof(IntuitionTimerCD);
+    public override string Name => "Intuition time";
+    public override ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
+    protected override string ValueKey => "sec";
+    protected override string ComboId => "##intu_op";
+    protected override string ValueLabel => "Seconds";
+    protected override Func<int, int>? Clamp => static v => Math.Max(0, v);
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
-        var args = GetIntCompareParams(parameters, "sec");
-        if (world.Fishing.Intuition.Status != IntuitionStatus.Active) return args.Invert;
-        var lhs = (int)Math.Floor(world.Fishing.Intuition.TimeRemaining);
-        var result = CompareInt(lhs, args.Value, args.Op);
-        return args.Apply(result);
+    protected override bool? InactiveResult(WorldState world, IReadOnlyDictionary<string, object> parameters) {
+        var args = GetIntCompareParams(parameters, valueKey: ValueKey);
+        return world.Fishing.Intuition.Status != IntuitionStatus.Active ? args.Invert : null;
     }
 
-    public void DrawParams(Condition condition)
-        => DrawIntCompareParams(condition, "##intu_op", "Seconds", valueKey: "sec", clamp: v => Math.Max(0, v));
+    protected override int ReadValue(WorldState world, IReadOnlyDictionary<string, object> parameters)
+        => (int)Math.Floor(world.Fishing.Intuition.TimeRemaining);
 }

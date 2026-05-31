@@ -2,7 +2,7 @@ using AutoHook.Ui;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoCastLine : BaseActionCast {
+public sealed class AutoCastLine : BaseActionCast {
     public bool IgnoreMooch = true;
 
     public override bool DoesCancelMooch() => !IgnoreMooch;
@@ -19,8 +19,6 @@ public class AutoCastLine : BaseActionCast {
     public override bool IsExcludedPriority { get; set; } = true;
 
     public override bool CastCondition() => EvaluateConditionSet();
-
-    public override string GetName() => Name = UIStrings.AutoCastLine_Auto_Cast_Line;
 
     protected override DrawOptionsDelegate DrawOptions => () => {
         DrawAutoCastConditions();

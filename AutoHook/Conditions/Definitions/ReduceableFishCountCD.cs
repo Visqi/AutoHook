@@ -5,21 +5,16 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class ReduceableFishCountCD : IConditionDefinition {
-    public string Id => nameof(ReduceableFishCountCD);
-    public string Name => "Reduceable fish count";
-    public string Category => "Inventory";
-    public string Description => "Compares the number of collectable fish in main inventory that can be aetherially reduced.";
-    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
+public sealed class ReduceableFishCountCD : IntCompareConditionDefinition {
+    public override string Id => nameof(ReduceableFishCountCD);
+    public override string Name => "Reduceable fish count";
+    public override ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
+    protected override string ComboId => "##reduceablefish_op";
+    protected override string ValueLabel => "Fish";
+    protected override Func<int, int>? Clamp => static v => Math.Max(0, v);
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
-        var args = GetIntCompareParams(parameters);
-        var result = CompareInt(CountReduceableFish(), args.Value, args.Op);
-        return args.Apply(result);
-    }
-
-    public void DrawParams(Condition condition)
-        => DrawIntCompareParams(condition, "##reduceablefish_op", "Fish", clamp: v => Math.Max(0, v));
+    protected override int ReadValue(WorldState world, IReadOnlyDictionary<string, object> parameters)
+        => CountReduceableFish();
 
     private static unsafe int CountReduceableFish() {
         var inv = InventoryManager.Instance();

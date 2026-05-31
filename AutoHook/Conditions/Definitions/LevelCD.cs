@@ -2,19 +2,14 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class LevelCD : IConditionDefinition {
-    public string Id => nameof(LevelCD);
-    public string Name => "Level";
-    public string Category => "Player";
-    public string Description => "Compares current class level against a value.";
-    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCordial | ConditionScopeFlags.AutoCast;
+public sealed class LevelCD : IntCompareConditionDefinition {
+    public override string Id => nameof(LevelCD);
+    public override string Name => "Level";
+    public override ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCordial | ConditionScopeFlags.AutoCast;
+    protected override string ComboId => "##level_op";
+    protected override string ValueLabel => "Level";
+    protected override Func<int, int>? Clamp => static v => Math.Clamp(v, 1, 100);
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
-        var args = GetIntCompareParams(parameters);
-        var result = CompareInt(world.Level, args.Value, args.Op);
-        return args.Apply(result);
-    }
-
-    public void DrawParams(Condition condition)
-        => DrawIntCompareParams(condition, "##level_op", "Level", clamp: v => Math.Clamp(v, 1, 100));
+    protected override int ReadValue(WorldState world, IReadOnlyDictionary<string, object> parameters)
+        => world.Level;
 }

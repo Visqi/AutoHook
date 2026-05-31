@@ -9,8 +9,6 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class WeatherCD : IConditionDefinition {
     public string Id => nameof(WeatherCD);
     public string Name => "Weather";
-    public string Category => "World";
-    public string Description => "Checks previous, current, or next weather (by name) against one or more weather entries.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {

@@ -32,6 +32,11 @@ public sealed class WorldState {
 
     public bool HasAnglersArtStacks(int amount) => GetStatusStacks(IDs.Status.AnglersArt) >= amount;
 
+    public bool BlocksFortune()
+        => HasStatus(IDs.Status.MakeshiftBait)
+           || HasStatus(IDs.Status.PrizeCatch)
+           || HasStatus(IDs.Status.AnglersFortune);
+
     public unsafe bool ActionAvailable(uint actionId, ActionType actionType = ActionType.Action) {
         if (ActionManager.Instance()->GetActionStatus(actionType, actionId) != 0)
             return false;
@@ -126,12 +131,9 @@ public sealed class WorldState {
         protected override void Exec(WorldState ws) => ws.Player.BlockCasting = Block;
     }
 
-    public sealed record OpSetFishingStep(FishingSteps Step) : Operation {
-        protected override void Exec(WorldState ws) => ws.Fishing.FishingStep = Step;
-    }
-
-    public sealed record OpOrFishingStep(FishingSteps Flag) : Operation {
-        protected override void Exec(WorldState ws) => ws.Fishing.FishingStep |= Flag;
+    public sealed record OpSetFishingStep(FishingSteps Step, bool Or = false) : Operation {
+        protected override void Exec(WorldState ws)
+            => ws.Fishing.FishingStep = Or ? ws.Fishing.FishingStep | Step : Step;
     }
 
     public sealed record OpClearFishingStepFlag(FishingSteps Flag) : Operation {

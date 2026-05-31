@@ -183,10 +183,5 @@ public class OldHookConfig {
 
         hookset.UseTripleHook = UseTripleHook;
         hookset.LetFishEscapeTripleHook = LetFishEscape;
-
-        hookset.StopAfterCaught = StopAfterCaught;
-        hookset.StopAfterCaughtLimit = StopAfterCaughtLimit;
-        hookset.StopAfterResetCount = StopAfterResetCount;
-        hookset.StopFishingStep = StopFishingStep;
     }
 }

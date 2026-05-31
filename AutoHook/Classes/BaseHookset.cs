@@ -39,13 +39,6 @@ public class BaseHookset(uint requiredStatus) {
     public double TimeoutMax = 0;
     public double ChumTimeoutMax = 0;
 
-    // Stop condition
-    public bool StopAfterCaught;
-    public bool StopAfterResetCount;
-    public int StopAfterCaughtLimit = 1;
-
-    public FishingSteps StopFishingStep = FishingSteps.None;
-
     public bool UseCustomStatusHook;
 
     public AutoLures CastLures = new();
@@ -79,9 +72,6 @@ public class BaseHookset(uint requiredStatus) {
         ImGui.Spacing();
 
         DrawLures();
-        ImGui.Spacing();
-
-        DrawStopCondition();
     }
 
     private void DrawPatience() {
@@ -170,36 +160,8 @@ public class BaseHookset(uint requiredStatus) {
     }
 
     private void DrawLures() {
-        using var id = ImRaii.PushId($"Lures");
+        using var id = ImRaii.PushId("Lures");
 
         CastLures.DrawConfig();
-    }
-
-    private void DrawStopCondition() {
-        DrawUtil.DrawCheckboxTree(UIStrings.StopAfterHooking, ref StopAfterCaught,
-            () => {
-                ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
-                if (ImGui.InputInt(UIStrings.TimeS, ref StopAfterCaughtLimit)) {
-                    if (StopAfterCaughtLimit < 1)
-                        StopAfterCaughtLimit = 1;
-                    Service.Save();
-                }
-
-                ImGui.Spacing();
-                if (ImGui.RadioButton(UIStrings.Stop_Casting, StopFishingStep == FishingSteps.None)) {
-                    StopFishingStep = FishingSteps.None;
-                    Service.Save();
-                }
-
-                ImGui.SameLine();
-                ImGuiComponents.HelpMarker(UIStrings.Auto_Cast_Stopped);
-
-                if (ImGui.RadioButton(UIStrings.Quit_Fishing, StopFishingStep == FishingSteps.Quitting)) {
-                    StopFishingStep = FishingSteps.Quitting;
-                    Service.Save();
-                }
-
-                DrawUtil.Checkbox(UIStrings.Reset_the_counter, ref StopAfterResetCount);
-            });
     }
 }

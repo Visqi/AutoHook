@@ -7,8 +7,6 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class FishCaughtCountCD : IConditionDefinition, ISimpleConditionValue<(bool Enabled, int Limit)> {
     public string Id => nameof(FishCaughtCountCD);
     public string Name => "Fish caught count";
-    public string Category => "Counters";
-    public string Description => "Compares how many times a fish has been caught this session against a threshold.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.FishIgnore | ConditionScopeFlags.Hook;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {

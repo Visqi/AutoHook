@@ -1,16 +1,14 @@
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
-public class AutoMooch : BaseActionCast {
+
+public sealed class AutoMooch : BaseActionCast {
     public AutoMooch2 Mooch2 = new();
 
     public override bool RequiresTimeWindow() => true;
 
     public AutoMooch() : base(UIStrings.AutoMooch, IDs.Actions.Mooch, ActionType.Action)
         => HelpText = UIStrings.AutoMooch_HelpText;
-
-    public override string GetName()
-        => Name = UIStrings.AutoMooch;
 
     public override bool CastCondition() {
         if (!EvaluateConditionSet())

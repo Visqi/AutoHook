@@ -6,8 +6,6 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class SwimbaitCountCD : IConditionDefinition {
     public string Id => nameof(SwimbaitCountCD);
     public string Name => "Swimbait count";
-    public string Category => "Fishing";
-    public string Description => "Compares swimbait count (total or for a fish) against a value.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {

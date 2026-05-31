@@ -5,7 +5,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoIdenticalCast : BaseActionCast {
+public sealed class AutoIdenticalCast : BaseActionCast {
     public bool OnlyUseAfterXAmount;
     public int CaughtAmountLimit = 1;
 
@@ -14,12 +14,27 @@ public class AutoIdenticalCast : BaseActionCast {
     public AutoIdenticalCast() : base(UIStrings.Identical_Cast, IDs.Actions.IdenticalCast, ActionType.Action)
         => HelpText = UIStrings.OverridesSurfaceSlap;
 
-    public override string GetName()
-        => Name = UIStrings.Identical_Cast;
-
-    public override bool CastCondition() => EvaluateConditionSet() && !Service.WorldState.HasStatus(IDs.Status.IdenticalCast) && !Service.WorldState.HasStatus(IDs.Status.SurfaceSlap);
+    public override bool CastCondition() => EvaluateConditionSet()
+        && !Service.WorldState.HasStatus(IDs.Status.IdenticalCast)
+        && !Service.WorldState.HasStatus(IDs.Status.SurfaceSlap);
 
     public bool IsAvailableToCast(int caughtAmount) => (!OnlyUseAfterXAmount || caughtAmount >= CaughtAmountLimit) && IsAvailableToCast();
+
+    public void DrawFishTabOptions() {
+        DrawFishCaughtActionOptions();
+
+        var stack = CaughtAmountLimit;
+
+        DrawUtil.Checkbox(UIStrings.Only_use_when_the_fish_is_caught, ref OnlyUseAfterXAmount);
+
+        ImGui.SameLine();
+
+        ImGui.SetNextItemWidth(30 * ImGuiHelpers.GlobalScale);
+        if (ImGui.InputInt(UIStrings.TimeS, ref stack, 0, 0)) {
+            CaughtAmountLimit = Math.Max(1, Math.Min(stack, 999));
+            Service.Save();
+        }
+    }
 
     protected override DrawOptionsDelegate DrawOptions => () => {
         DrawAutoCastConditions();

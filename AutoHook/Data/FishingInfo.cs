@@ -137,12 +137,9 @@ public sealed class FishingInfo {
         }
     }
 
-    public sealed record OpSetFishingStep(FishingSteps Step) : WorldState.Operation {
-        protected override void Exec(WorldState ws) => ws.Fishing.FishingStep = Step;
-    }
-
-    public sealed record OpOrFishingStep(FishingSteps Flag) : WorldState.Operation {
-        protected override void Exec(WorldState ws) => ws.Fishing.FishingStep |= Flag;
+    public sealed record OpSetFishingStep(FishingSteps Step, bool Or = false) : WorldState.Operation {
+        protected override void Exec(WorldState ws)
+            => ws.Fishing.FishingStep = Or ? ws.Fishing.FishingStep | Step : Step;
     }
 
     public sealed record OpClearFishingStepFlag(FishingSteps Flag) : WorldState.Operation {

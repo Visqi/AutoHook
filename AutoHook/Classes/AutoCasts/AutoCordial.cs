@@ -3,7 +3,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoCordial : BaseActionCast {
+public sealed class AutoCordial : BaseActionCast {
     private const uint CordialHiRecovery = 400;
     private const uint CordialHqRecovery = 350;
     private const uint CordialRecovery = 300;
@@ -42,8 +42,6 @@ public class AutoCordial : BaseActionCast {
         IsSpearFishing = isSpearFishing;
     }
 
-    public override string GetName()
-        => Name = UIStrings.Cordial;
     public override bool CastCondition() {
         var cordialList = _cordialList;
 

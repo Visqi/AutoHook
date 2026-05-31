@@ -1,11 +1,11 @@
+using static AutoHook.Conditions.IConditionDefinition;
+
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class MoochAvailableCD : IConditionDefinition, ISimpleConditionValue<bool> {
-    public string Id => nameof(MoochAvailableCD);
-    public string Name => "Mooch available";
-    public string Category => "Actions";
-    public string Description => "Checks whether Mooch or Mooch II is currently available.";
-    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast;
+public sealed class MoochAvailableCD : BoolInvertConditionDefinition, ISimpleConditionValue<bool> {
+    public override string Id => nameof(MoochAvailableCD);
+    public override string Name => "Mooch available";
+    public override ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast;
 
     public readonly record struct MoochAvailableParams(bool Invert) {
         public Dictionary<string, object> ToParams() {
@@ -16,18 +16,12 @@ public sealed class MoochAvailableCD : IConditionDefinition, ISimpleConditionVal
         }
     }
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
-        var invert = IConditionDefinition.GetBool(parameters, "inv", false);
-        var available = world.IsMoochAvailable();
-        return invert ? !available : available;
-    }
-
-    public void DrawParams(Condition condition) { }
+    protected override bool ReadValue(WorldState world)
+        => world.IsMoochAvailable();
 
     bool ISimpleConditionValue<bool>.FromParams(IReadOnlyDictionary<string, object> p)
-        => IConditionDefinition.GetBool(p, "inv", false);
+        => GetBool(p, "inv", false);
 
     IReadOnlyDictionary<string, object>? ISimpleConditionValue<bool>.ToParams(bool value, object? context)
         => value ? new MoochAvailableParams(true).ToParams() : null;
 }
-

@@ -1,3 +1,5 @@
+using AutoHook.Conditions;
+using AutoHook.Conditions.Definitions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -542,5 +544,38 @@ public static class DrawUtil {
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
+    }
+
+    public static void DrawCaughtCountLimitTree<TCD>(
+        string label,
+        SingleCondition<TCD, (bool Enabled, int Limit)> condition,
+        Action drawBody)
+        where TCD : class, IConditionDefinition, ISimpleConditionValue<(bool Enabled, int Limit)> {
+        DrawEnabledLimitTree(label, condition, (ref int limitLocal) => {
+            ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+            if (ImGui.InputInt(UIStrings.TimeS, ref limitLocal)) {
+                limitLocal = Math.Max(1, limitLocal);
+                Service.Save();
+            }
+
+            drawBody();
+        });
+    }
+
+    public delegate void DrawLimitBodyDelegate(ref int limitLocal);
+
+    public static void DrawEnabledLimitTree<TCD>(
+        string label,
+        SingleCondition<TCD, (bool Enabled, int Limit)> condition,
+        DrawLimitBodyDelegate drawBody)
+        where TCD : class, IConditionDefinition, ISimpleConditionValue<(bool Enabled, int Limit)> {
+        var (enabled, limit) = condition.Value;
+        var enabledLocal = enabled;
+        var limitLocal = limit;
+        DrawCheckboxTree(label, ref enabledLocal, () => drawBody(ref limitLocal));
+        if (enabledLocal != enabled || limitLocal != limit) {
+            condition.Value = (enabledLocal, limitLocal);
+            Service.Save();
+        }
     }
 }

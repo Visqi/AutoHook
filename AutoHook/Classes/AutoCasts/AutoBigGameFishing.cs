@@ -2,13 +2,10 @@ using AutoHook.Ui;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoBigGameFishing : BaseActionCast {
+public sealed class AutoBigGameFishing : BaseActionCast {
     public int AnglersStacks = 2;
 
     public AutoBigGameFishing() : base(UIStrings.BigGameFishing, IDs.Actions.BigGameFishing) { }
-
-    public override string GetName()
-        => Name = UIStrings.BigGameFishing;
 
     public override bool CastCondition() {
         if (!EvaluateConditionSet())
@@ -17,9 +14,7 @@ public class AutoBigGameFishing : BaseActionCast {
         if (Service.WorldState.HasStatus(IDs.Status.BigGameFishing))
             return false;
 
-        var hasStacks = Service.WorldState.HasAnglersArtStacks(AnglersStacks);
-
-        return hasStacks;
+        return Service.WorldState.HasAnglersArtStacks(AnglersStacks);
     }
 
     protected override DrawOptionsDelegate DrawOptions => () => {

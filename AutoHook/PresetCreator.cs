@@ -263,8 +263,8 @@ public class PresetCreator {
                 cl.Id = fishTarget!.HookType == HookType.Powerful
                     ? IDs.Actions.AmbitiousLure
                     : IDs.Actions.ModestLure;
-
             }
+
             if (_includeTimers) {
                 initBaitCfg.SetHooksetTimer(fishTarget.BiteType, fishTarget.BiteTimeMin, fishTarget.BiteTimeMax, isIntuition);
             }

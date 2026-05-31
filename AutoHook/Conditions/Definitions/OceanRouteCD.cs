@@ -6,8 +6,6 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class OceanRouteCD : IConditionDefinition {
     public string Id => nameof(OceanRouteCD);
     public string Name => "Ocean route";
-    public string Category => "Fishing";
-    public string Description => "Matches the current ocean fishing route against selected routes.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {

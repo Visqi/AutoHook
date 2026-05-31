@@ -50,6 +50,7 @@ public static class ConfigurationJsonMigrator {
 
         MigrateSwimbaitCountThresholdToConditions(root);
         MigrateSparefulHandSwimbaitLimits(root);
+        MigrateFishCaughtActionEnabledPresets(root);
 
         return root.ToString(Formatting.None);
     }
@@ -100,6 +101,7 @@ public static class ConfigurationJsonMigrator {
         MigratePresetConditions(preset);
         MigratePresetSwimbaitCountThreshold(preset);
         MigratePresetSparefulHandSwimbaitLimits(preset);
+        MigratePresetFishCaughtActionEnabled(preset);
     }
 
     private static void MigrateV2ToV3Json(JObject root) {
@@ -322,8 +324,35 @@ public static class ConfigurationJsonMigrator {
     ];
 
     private static void MigrateHookConfigJson(JObject hook) {
+        MigrateHookStopJson(hook);
         MigrateHooksetJson(hook["NormalHook"] as JObject);
         MigrateHooksetJson(hook["IntuitionHook"] as JObject);
+    }
+
+    private static void MigrateHookStopJson(JObject hook) {
+        if (hook["StopConditionSet"] is JObject existing && existing["g"] is JArray groups && groups.Count > 0)
+            return;
+
+        foreach (var key in new[] { "NormalHook", "IntuitionHook" }) {
+            if (hook[key] is not JObject hookset || (bool?)hookset["StopAfterCaught"] != true)
+                continue;
+
+            var limit = (int?)(hookset["StopAfterCaughtLimit"] ?? 1) ?? 1;
+            if (limit < 1) limit = 1;
+
+            if (hookset["StopFishingStep"] != null)
+                hook["StopFishingStep"] = hookset["StopFishingStep"];
+            if (hookset["StopAfterResetCount"] != null)
+                hook["StopAfterResetCount"] = hookset["StopAfterResetCount"];
+
+            var hookGuid = hook["UniqueId"]?.ToString();
+            Guid guid = Guid.Empty;
+            if (!string.IsNullOrEmpty(hookGuid))
+                Guid.TryParse(hookGuid, out guid);
+
+            hook["StopConditionSet"] = JToken.FromObject(Configuration.ConditionSetBuilder.SingleHookCount(guid, limit));
+            return;
+        }
     }
 
     private static void MigrateHooksetJson(JObject? hookset) {
@@ -611,6 +640,43 @@ public static class ConfigurationJsonMigrator {
         if (existing?["g"] is JArray groups && groups.Count > 0) return;
         var set = Configuration.ConditionSetBuilder.SingleFlag<IntuitionActiveCD>();
         fish["IgnoreConditionSet"] = JToken.FromObject(set);
+    }
+
+    private static void MigrateFishCaughtActionEnabledPresets(JObject root) {
+        if (root["HookPresets"] is not JObject hookPresets)
+            return;
+
+        MigratePresetFishCaughtActionEnabled(hookPresets["DefaultPreset"] as JObject);
+        foreach (var token in EnumerateArray(hookPresets["CustomPresets"])) {
+            if (token is JObject presetObj)
+                MigratePresetFishCaughtActionEnabled(presetObj);
+        }
+    }
+
+    private static void MigratePresetFishCaughtActionEnabled(JObject? preset) {
+        if (preset == null) return;
+        foreach (var token in EnumerateArray(preset["ListOfFish"])) {
+            if (token is not JObject fishObj) continue;
+            MigrateFishCaughtActionEnabled(fishObj, "SurfaceSlap", "UseSurfaceSlap");
+            MigrateFishCaughtActionEnabled(fishObj, "IdenticalCast", "UseIdenticalCast");
+        }
+    }
+
+    private static void MigrateFishCaughtActionEnabled(JObject fish, string actionProperty, string legacyProperty) {
+        if (fish[actionProperty] is not JObject action)
+            return;
+
+        if ((bool?)fish[legacyProperty] == true)
+            action["Enabled"] = true;
+
+        if ((bool?)action["Enabled"] == true)
+            return;
+
+        if (action["ConditionSet"]?["g"] is not JArray groups)
+            return;
+
+        if (groups.Any(g => g["c"] is JArray conditions && conditions.Count > 0))
+            action["Enabled"] = true;
     }
 
     private static void MigrateFishConfigStopSwapJson(JObject fish) {

@@ -29,7 +29,6 @@ public class AutoCastsConfig {
     public AutoSurfaceSlap CastSurfaceSlap = new();
     public AutoMultiHook CastMultihook = new();
     public AutoIdenticalCast CastIdenticalCast = new();
-    //public AutoLures CastLures = new();
 
     private List<BaseActionCast> GetAutoCastOrder() {
         var output = new List<BaseActionCast>

@@ -3,7 +3,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoThaliaksFavor : BaseActionCast {
+public sealed class AutoThaliaksFavor : BaseActionCast {
     public int ThaliaksFavorStacks = 3;
     public int ThaliaksFavorRecover = 150;
 
@@ -11,9 +11,6 @@ public class AutoThaliaksFavor : BaseActionCast {
         HelpText = UIStrings.TabAutoCasts_DrawThaliaksFavor_HelpText;
         IsSpearFishing = isSpearfishing;
     }
-
-    public override string GetName()
-        => Name = UIStrings.Thaliaks_Favor;
 
     public override bool CastCondition() {
         if (!EvaluateConditionSet())
@@ -25,13 +22,12 @@ public class AutoThaliaksFavor : BaseActionCast {
         var projectedGp = Service.WorldState.CurrentGp + ThaliaksFavorRecover;
         var notOvercaped = projectedGp < Service.WorldState.MaxGp;
 
-        return hasStacks && notOvercaped; // dont use if its going to overcap gp
+        return hasStacks && notOvercaped;
     }
 
     protected override DrawOptionsDelegate DrawOptions => () => {
         var stack = ThaliaksFavorStacks;
         if (DrawUtil.EditNumberField(UIStrings.TabAutoCasts_DrawExtraOptionsThaliaksFavor_, ref stack)) {
-            // value has to be between 3 and 10
             ThaliaksFavorStacks = Math.Max(3, Math.Min(stack, 10));
             Service.Save();
         }

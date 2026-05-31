@@ -8,8 +8,6 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class OceanZoneCD : IConditionDefinition {
     public string Id => nameof(OceanZoneCD);
     public string Name => "Ocean zone";
-    public string Category => "Fishing";
-    public string Description => "Matches the current ocean fishing zone index (1–3).";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {

@@ -3,21 +3,16 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class FreeInventorySlotsCD : IConditionDefinition {
-    public string Id => nameof(FreeInventorySlotsCD);
-    public string Name => "Free inventory slots";
-    public string Category => "Inventory";
-    public string Description => "Compares the number of empty slots in main inventory (bags 1–4).";
-    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
+public sealed class FreeInventorySlotsCD : IntCompareConditionDefinition {
+    public override string Id => nameof(FreeInventorySlotsCD);
+    public override string Name => "Free inventory slots";
+    public override ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
+    protected override string ComboId => "##freeinventory_op";
+    protected override string ValueLabel => "Slots";
+    protected override Func<int, int>? Clamp => static v => Math.Max(0, v);
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
-        var args = GetIntCompareParams(parameters);
-        var result = CompareInt(CountFreeInventorySlots(), args.Value, args.Op);
-        return args.Apply(result);
-    }
-
-    public void DrawParams(Condition condition)
-        => DrawIntCompareParams(condition, "##freeinventory_op", "Slots", clamp: v => Math.Max(0, v));
+    protected override int ReadValue(WorldState world, IReadOnlyDictionary<string, object> parameters)
+        => CountFreeInventorySlots();
 
     private static unsafe int CountFreeInventorySlots() {
         var inv = InventoryManager.Instance();

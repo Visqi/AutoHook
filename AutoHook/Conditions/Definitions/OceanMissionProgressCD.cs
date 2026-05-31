@@ -8,8 +8,6 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class OceanMissionProgressCD : IConditionDefinition {
     public string Id => nameof(OceanMissionProgressCD);
     public string Name => "Ocean mission progress";
-    public string Category => "Fishing";
-    public string Description => "Compares progress of a selected ocean fishing mission (1–3) against a value.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {

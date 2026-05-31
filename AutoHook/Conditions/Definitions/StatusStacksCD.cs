@@ -6,8 +6,6 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class StatusStacksCD : IConditionDefinition {
     public string Id => nameof(StatusStacksCD);
     public string Name => "Status stacks";
-    public string Category => "Status";
-    public string Description => "Checks stacks for selected statuses against a threshold.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {

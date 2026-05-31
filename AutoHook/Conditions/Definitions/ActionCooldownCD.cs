@@ -11,8 +11,6 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class ActionCooldownCD : IConditionDefinition {
     public string Id => nameof(ActionCooldownCD);
     public string Name => "Action";
-    public string Category => "Player";
-    public string Description => "Compares the cooldown (seconds remaining) of an action or item against a value.";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast;
 
     public readonly record struct ActionCooldownParams(uint Id, int Type, int Seconds, string Op, bool Invert) {

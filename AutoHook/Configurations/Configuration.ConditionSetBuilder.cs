@@ -69,6 +69,18 @@ public partial class Configuration {
             return Single(cond);
         }
 
+        public static ConditionSet SingleHookCount(Guid hookGuid, int limit) {
+            var dict = new IConditionDefinition.IntCompareParams(limit, ">=", false).ToParams();
+            if (hookGuid != Guid.Empty)
+                dict["guid"] = hookGuid.ToString();
+            var cond = new Condition {
+                TypeId = Registry.GetId<HookCountCD>(),
+                Params = dict,
+            };
+
+            return Single(cond);
+        }
+
         public static ConditionSet SingleTimeWindow(TimeOnly start, TimeOnly end, bool invert = false) {
             var cond = new Condition {
                 TypeId = Registry.GetId<TimeWindowCD>(),

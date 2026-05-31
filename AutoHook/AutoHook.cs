@@ -16,13 +16,11 @@ namespace AutoHook;
  * TODO: 
  * get rid of "don't cancel mooch" configs under per fish surface slap/IC
  * get rid of all other configs that could be conditions in auto casts et al. Migrate them to conditions.
- * adding/changing a condition should default the tree node to be uncollapsed e.g. open
  * stop movement while fishing
  * auto extract materia
  * move around to reduce fish weary
  * BUGS:
  * start fishing rule doesn't seem to work?
- * mutltihook is checking gp for triple hook/double hook? idk what this report was about
  */
 
 public class AutoHook : IDalamudPlugin {

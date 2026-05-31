@@ -7,8 +7,6 @@ namespace AutoHook.Conditions;
 public interface IConditionDefinition {
     string Id { get; }
     string Name { get; }
-    string Category { get; }
-    string Description { get; }
     ConditionScopeFlags AllowedScopes { get; }
 
     bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters);
@@ -191,6 +189,36 @@ public interface IConditionDefinition {
         else
             condition.Params.Remove("inv");
     }
+
+    public static void DrawSingleRangeParams(Condition condition) {
+        var args = GetRangeParams(condition.Params);
+        var ranges = args.Ranges;
+        var min = ranges.Count > 0 ? ranges[0].Min : 0;
+        var max = ranges.Count > 0 ? ranges[0].Max : 0;
+
+        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
+        if (ImGui.InputDouble("Min", ref min, 0.1, 1, "%.1f")) {
+            var list = ranges.Count == 0 ? new List<(double, double)>() : [.. ranges];
+            if (list.Count == 0)
+                list.Add((min, max));
+            else
+                list[0] = (min, max);
+            args = args with { Ranges = list };
+            condition.Params = args.ToParams();
+        }
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
+        if (ImGui.InputDouble("Max (0 = no cap)", ref max, 0.1, 1, "%.1f")) {
+            var list = ranges.Count == 0 ? new List<(double, double)>() : [.. ranges];
+            if (list.Count == 0)
+                list.Add((min, max));
+            else
+                list[0] = (min, max);
+            args = args with { Ranges = list };
+            condition.Params = args.ToParams();
+        }
+    }
 }
 
 public static class ConditionDefinitionExtensions {
@@ -198,8 +226,6 @@ public static class ConditionDefinitionExtensions {
         => new() {
             Id = def.Id,
             Name = def.Name,
-            Category = def.Category,
-            Description = def.Description,
             AllowedScopes = def.AllowedScopes,
             Evaluate = def.Evaluate,
             DrawParams = def.DrawParams,
