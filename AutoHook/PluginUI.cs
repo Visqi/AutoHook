@@ -106,7 +106,7 @@ public class PluginUi : Window, IDisposable {
             ImGui.PushStyleVar(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
 
             using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight }, false, ImGuiWindowFlags.NoDecoration)) {
-                if (ImGui.Selectable($"Start Actions"))
+                if (ImGui.Selectable(UIStrings.StartActions))
                     AutoHook.Plugin.HookManager.StartFishing();
 
                 using (var c = ImRaii.Child("logo", new(0, 125 * ImGuiHelpers.GlobalScale))) {

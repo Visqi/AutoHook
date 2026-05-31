@@ -42,28 +42,15 @@ public class TabSettings : BaseTab {
         ImGui.Separator();
 
         DrawUtil.Checkbox(UIStrings.AntiAfkOption, ref Service.Configuration.ResetAfkTimer);
-
         DrawUtil.Checkbox(UIStrings.AutoStartFishing, ref Service.Configuration.AutoStartFishing, UIStrings.AutoStartFishingHelpText);
-
-        DrawUtil.Checkbox("Auto ocean fishing", ref Service.Configuration.AutoOceanFish,
-            "At each ocean fishing stop, walk to the railing (first zone only) and start fishing when the zone timer begins. "
-            + "On each preset's Extra tab, enable auto ocean fishing for the route and time of day that preset applies to.");
-
-        DrawUtil.Checkbox("Enable auto-collectables", ref Service.Configuration.AutoCollectablesEnabled,
-            "Auto accepts the prompt when a collectable appears. Can be overridden per preset in Extra options.");
-
+        DrawUtil.Checkbox(UIStrings.AutoOceanFish, ref Service.Configuration.AutoOceanFish, UIStrings.AutoOceanFishHelpText);
+        DrawUtil.Checkbox(UIStrings.AutoHandleCollectables, ref Service.Configuration.AutoCollectablesEnabled, UIStrings.AutoHandleCollectablesHelpText);
         DrawUtil.Checkbox(UIStrings.DontHideExtraAutoCast, ref Service.Configuration.DontHideOptionsDisabled);
-
         DrawUtil.Checkbox(UIStrings.Hide_Tab_Description, ref Service.Configuration.HideTabDescription);
-
         DrawUtil.Checkbox(UIStrings.Show_Current_Status_Header, ref Service.Configuration.ShowStatus);
-
         DrawUtil.Checkbox(UIStrings.Show_Chat_Logs, ref Service.Configuration.ShowChatLogs, UIStrings.Show_Chat_Logs_HelpText);
-
         //DrawUtil.Checkbox(UIStrings.Show_Debug_Console, ref Service.Configuration.ShowDebugConsole);
-
         //DrawUtil.Checkbox(UIStrings.Show_Presets_As_Sidebar, ref Service.Configuration.ShowPresetsAsSidebar);
-
         DrawUtil.DrawCheckboxTree(UIStrings.SwapTreeNodeButtons, ref Service.Configuration.SwapToButtons, () => {
             if (ImGui.RadioButton(UIStrings.Type_1, Service.Configuration.SwapType == 0)) {
                 Service.Configuration.SwapType = 0;

@@ -548,6 +548,24 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Auto handle collectables.
+        /// </summary>
+        internal static string AutoHandleCollectables {
+            get {
+                return ResourceManager.GetString("AutoHandleCollectables", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto accepts the prompt when a collectable appears. Can be overridden per preset in Extra options..
+        /// </summary>
+        internal static string AutoHandleCollectablesHelpText {
+            get {
+                return ResourceManager.GetString("AutoHandleCollectablesHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AutoHook.
         /// </summary>
         internal static string AutoHook {
@@ -629,6 +647,24 @@ namespace AutoHook.Resources.Localization {
         internal static string AutoMoochPresetHelpMarker {
             get {
                 return ResourceManager.GetString("AutoMoochPresetHelpMarker", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AutoOceanFish.
+        /// </summary>
+        internal static string AutoOceanFish {
+            get {
+                return ResourceManager.GetString("AutoOceanFish", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles everything on the boat itself: moving into position, casting, preset management..
+        /// </summary>
+        internal static string AutoOceanFishHelpText {
+            get {
+                return ResourceManager.GetString("AutoOceanFishHelpText", resourceCulture);
             }
         }
         
