@@ -15,7 +15,7 @@ public sealed class ReduceableFishCountCD : IConditionDefinition {
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var args = GetIntCompareParams(parameters);
         var result = CompareInt(CountReduceableFish(), args.Value, args.Op);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition)

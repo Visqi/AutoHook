@@ -1,4 +1,4 @@
-using AutoHook.Ui;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
@@ -11,14 +11,7 @@ public class AutoChum : BaseActionCast {
 
     public override bool CastCondition() => EvaluateConditionSet();
 
-    protected override DrawOptionsDelegate DrawOptions => () => {
-        ConditionSet = ConditionUi.DrawConditionSetSlim(
-            UIStrings.Conditions,
-            ConditionSet,
-            ConditionScope.AutoCast,
-            showAdvanced: true,
-            showSubPrefix: true);
-    };
+    protected override DrawOptionsDelegate DrawOptions => () => DrawAutoCastConditions();
 
     public override int Priority { get; set; } = 1;
     public override bool IsExcludedPriority { get; set; } = false;

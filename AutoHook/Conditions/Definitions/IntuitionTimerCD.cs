@@ -14,7 +14,7 @@ public sealed class IntuitionTimerCD : IConditionDefinition {
         if (world.Fishing.Intuition.Status != IntuitionStatus.Active) return args.Invert;
         var lhs = (int)Math.Floor(world.Fishing.Intuition.TimeRemaining);
         var result = CompareInt(lhs, args.Value, args.Op);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition)

@@ -18,7 +18,7 @@ public sealed class BiteTimerCD : IConditionDefinition {
         var result = false;
         foreach (var (min, max) in ranges)
             if (t >= min && (max <= 0 || t <= max)) { result = true; break; }
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition) {

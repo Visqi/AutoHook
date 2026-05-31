@@ -46,12 +46,7 @@ public class AutoPatience : BaseActionCast {
             Service.Save();
         }
 
-        ConditionSet = ConditionUi.DrawConditionSetSlim(
-            UIStrings.Conditions,
-            ConditionSet,
-            ConditionScope.AutoCast,
-            showAdvanced: true,
-            showSubPrefix: true);
+        DrawAutoCastConditions();
     };
 
     public override int Priority { get; set; } = 12;

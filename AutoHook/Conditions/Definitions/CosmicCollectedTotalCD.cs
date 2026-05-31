@@ -12,7 +12,7 @@ public sealed class CosmicCollectedTotalCD : IConditionDefinition {
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var args = GetIntCompareParams(parameters);
         var result = CompareInt(world.WKS.CollectedTotal, args.Value, args.Op);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition)

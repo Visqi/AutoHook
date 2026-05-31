@@ -23,13 +23,7 @@ public interface IConditionDefinition {
         return [];
     }
 
-    public static List<uint> GetStatusIds(IReadOnlyDictionary<string, object> p) {
-        if (!p.TryGetValue("ids", out var o)) return [];
-        if (o is List<object> list)
-            return [.. list.Select(x => Convert.ToUInt32(x))];
-        if (o is long single) return [(uint)single];
-        return [];
-    }
+    public static List<uint> GetStatusIds(IReadOnlyDictionary<string, object> p) => GetIds(p);
 
     public static List<byte> GetWeatherIds(IReadOnlyDictionary<string, object> p) {
         if (!p.TryGetValue("ids", out var o)) return [];
@@ -98,6 +92,8 @@ public interface IConditionDefinition {
     }
 
     public readonly record struct RangeParams(IReadOnlyList<(double Min, double Max)> Ranges, bool Invert) {
+        public bool Apply(bool result) => Invert ? !result : result;
+
         public Dictionary<string, object> ToParams() {
             var dict = new Dictionary<string, object>();
             if (Ranges.Count > 0) {
@@ -121,6 +117,8 @@ public interface IConditionDefinition {
     }
 
     public readonly record struct IntCompareParams(int Value, string Op, bool Invert) {
+        public bool Apply(bool result) => Invert ? !result : result;
+
         public Dictionary<string, object> ToParams(string valueKey = "val", string defaultOp = ">=") {
             var dict = new Dictionary<string, object> {
                 [valueKey] = (long)Value,

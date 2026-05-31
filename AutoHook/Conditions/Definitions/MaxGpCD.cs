@@ -12,7 +12,7 @@ public sealed class MaxGpCD : IConditionDefinition {
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var args = GetIntCompareParams(parameters);
         var result = CompareInt((int)world.MaxGp, args.Value, args.Op);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition)

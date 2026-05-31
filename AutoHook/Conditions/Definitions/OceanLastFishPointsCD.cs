@@ -16,7 +16,7 @@ public sealed class OceanLastFishPointsCD : IConditionDefinition {
 
         var args = GetIntCompareParams(parameters);
         var result = CompareInt(points.Value, args.Value, args.Op);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition)

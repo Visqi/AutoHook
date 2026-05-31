@@ -40,12 +40,7 @@ public class BaseBiteConfig(HookType type) {
 
         DrawUtil.DrawCheckboxTree(biteName, ref HooksetEnabled,
             () => {
-                ConditionSet = Ui.ConditionUi.DrawConditionSetSlim(
-                    UIStrings.Conditions,
-                    ConditionSet,
-                    Ui.ConditionScope.Hook,
-                    showAdvanced: true,
-                    showSubPrefix: false);
+                ConditionSet = Ui.ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, ConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: false);
 
                 if (EnableHooksetSwap)
                     DrawUtil.DrawTreeNodeEx(UIStrings.HookType, DrawBite, UIStrings.HookWillBeUsedIfPatienceIsNotUp);

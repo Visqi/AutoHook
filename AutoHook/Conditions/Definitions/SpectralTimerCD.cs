@@ -15,7 +15,7 @@ public sealed class SpectralTimerCD : IConditionDefinition {
             return args.Invert;
         var lhs = (int)Math.Floor(world.SpectralTimeRemaining);
         var result = CompareInt(lhs, args.Value, args.Op);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition)

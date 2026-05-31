@@ -13,7 +13,7 @@ public sealed class FreeInventorySlotsCD : IConditionDefinition {
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var args = GetIntCompareParams(parameters);
         var result = CompareInt(CountFreeInventorySlots(), args.Value, args.Op);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition)

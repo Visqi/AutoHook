@@ -22,7 +22,7 @@ public sealed class OceanMissionProgressCD : IConditionDefinition {
             _ => of.Mission1.Progress,
         };
         var result = CompareInt(progress, args.Value, args.Op);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition) {

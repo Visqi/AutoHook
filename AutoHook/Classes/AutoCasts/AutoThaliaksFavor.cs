@@ -35,12 +35,7 @@ public class AutoThaliaksFavor : BaseActionCast {
             ThaliaksFavorStacks = Math.Max(3, Math.Min(stack, 10));
             Service.Save();
         }
-        ConditionSet = ConditionUi.DrawConditionSetSlim(
-            UIStrings.Conditions,
-            ConditionSet,
-            ConditionScope.AutoCast,
-            showAdvanced: true,
-            showSubPrefix: true);
+        DrawAutoCastConditions();
     };
 
     public override int Priority { get; set; } = 16;

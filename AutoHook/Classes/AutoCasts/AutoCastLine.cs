@@ -23,12 +23,7 @@ public class AutoCastLine : BaseActionCast {
     public override string GetName() => Name = UIStrings.AutoCastLine_Auto_Cast_Line;
 
     protected override DrawOptionsDelegate DrawOptions => () => {
-        ConditionSet = ConditionUi.DrawConditionSetSlim(
-            UIStrings.Conditions,
-            ConditionSet,
-            ConditionScope.AutoCast,
-            showAdvanced: true,
-            showSubPrefix: true);
+        DrawAutoCastConditions();
 
         DrawUtil.Checkbox(UIStrings.IgnoreMooch, ref IgnoreMooch,
             UIStrings.IgnoreMoochHelpText);

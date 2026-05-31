@@ -1,4 +1,5 @@
 using AutoHook.Conditions;
+using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
@@ -52,6 +53,9 @@ public abstract class BaseActionCast {
     protected bool EvaluateConditionSet()
         => ConditionSet is not { Groups.Count: > 0 }
            || ConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry);
+
+    protected void DrawAutoCastConditions(bool showSubPrefix = true)
+        => ConditionSet = ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showAdvanced: true, showSubPrefix: showSubPrefix);
 
     public virtual void SetThreshold(int newCost) {
         var actionCost = Id == IDs.Actions.ThaliaksFavor ? 0 : (int)PlayerRes.CastActionCost(Id, ActionType);

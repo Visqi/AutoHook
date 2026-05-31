@@ -15,7 +15,7 @@ public sealed class StatusStacksCD : IConditionDefinition {
         var args = GetIntCompareParams(parameters, "minStacks", 1);
         if (ids.Count == 0) return false;
         var result = ids.Any(id => CompareInt(world.GetStatusStacks(id), args.Value, args.Op));
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition) {

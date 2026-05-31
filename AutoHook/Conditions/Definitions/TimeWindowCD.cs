@@ -12,6 +12,8 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.All;
 
     public readonly record struct TimeWindowParams(TimeOnly Start, TimeOnly End, bool Invert) {
+        public bool Apply(bool result) => Invert ? !result : result;
+
         public Dictionary<string, object> ToParams() {
             var dict = new Dictionary<string, object>();
 
@@ -49,7 +51,7 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
             : eorzeaTime >= args.Start || eorzeaTime <= args.End;
 
         var result = inWindow;
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition) {

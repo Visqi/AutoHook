@@ -76,12 +76,7 @@ public class AutoLures : BaseActionCast {
 
         DrawUtil.Checkbox(UIStrings.CancelAttempt, ref CancelAttempt);
 
-        ConditionSet = ConditionUi.DrawConditionSetSlim(
-            UIStrings.Conditions,
-            ConditionSet,
-            ConditionScope.AutoCast,
-            showAdvanced: true,
-            showSubPrefix: true);
+        DrawAutoCastConditions();
     };
 
     public void TryCasting(bool lureSuccess) {

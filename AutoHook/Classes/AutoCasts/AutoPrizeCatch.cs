@@ -1,8 +1,6 @@
-using AutoHook.Ui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
-
 public class AutoPrizeCatch : BaseActionCast {
     public override bool DoesCancelMooch() => true;
 
@@ -33,12 +31,7 @@ public class AutoPrizeCatch : BaseActionCast {
     }
 
     protected override DrawOptionsDelegate DrawOptions => () => {
-        ConditionSet = ConditionUi.DrawConditionSetSlim(
-            UIStrings.Conditions,
-            ConditionSet,
-            ConditionScope.AutoCast,
-            showAdvanced: true,
-            showSubPrefix: true);
+        DrawAutoCastConditions();
     };
 
     public override int Priority { get; set; } = 13;

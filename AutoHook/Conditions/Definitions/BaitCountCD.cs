@@ -17,7 +17,7 @@ public sealed class BaitCountCD : IConditionDefinition {
             return args.Invert;
 
         var result = CompareInt(world.GetItemCount((uint)baitId), args.Value, args.Op);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition) {
@@ -27,11 +27,7 @@ public sealed class BaitCountCD : IConditionDefinition {
             ? $"[#{currentBait.Id}] {currentBait.Name}"
             : "-";
 
-        DrawUtil.DrawComboSelector(
-            GameRes.Baits,
-            bait => $"[#{bait.Id}] {bait.Name}",
-            selectedName,
-            bait => condition.Params["id"] = (long)bait.Id);
+        DrawUtil.DrawComboSelector(GameRes.Baits, bait => $"[#{bait.Id}] {bait.Name}", selectedName, bait => condition.Params["id"] = (long)bait.Id);
 
         ImGui.SameLine();
         DrawIntCompareParams(condition, "##baitcount_op", "Count", clamp: v => Math.Max(0, v));

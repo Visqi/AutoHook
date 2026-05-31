@@ -8,6 +8,8 @@ public sealed class StatusActiveCD : IConditionDefinition {
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.All;
 
     private readonly record struct StatusActiveParams(IReadOnlyList<uint> Ids, bool Invert) {
+        public bool Apply(bool result) => Invert ? !result : result;
+
         public Dictionary<string, object> ToParams() {
             var dict = new Dictionary<string, object>();
             if (Ids.Count > 0)
@@ -22,7 +24,7 @@ public sealed class StatusActiveCD : IConditionDefinition {
         var args = GetParams(parameters);
         if (args.Ids.Count == 0) return args.Invert;
         var result = args.Ids.Any(world.HasStatus);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition) {

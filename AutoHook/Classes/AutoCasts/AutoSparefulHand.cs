@@ -1,4 +1,3 @@
-using AutoHook.Ui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
@@ -24,12 +23,7 @@ public class AutoSparefulHand : BaseActionCast {
     }
 
     protected override DrawOptionsDelegate? DrawOptions => () => {
-        ConditionSet = ConditionUi.DrawConditionSetSlim(
-            UIStrings.Conditions,
-            ConditionSet,
-            ConditionScope.AutoCast,
-            showAdvanced: true,
-            showSubPrefix: false);
+        DrawAutoCastConditions(showSubPrefix: false);
     };
 
     public override int Priority { get; set; } = 20;

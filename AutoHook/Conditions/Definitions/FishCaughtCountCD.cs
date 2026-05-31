@@ -18,7 +18,7 @@ public sealed class FishCaughtCountCD : IConditionDefinition, ISimpleConditionVa
             return args.Invert;
 
         var result = CompareInt(world.GetFishCaughtCount(fishId), args.Value, args.Op);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition) {

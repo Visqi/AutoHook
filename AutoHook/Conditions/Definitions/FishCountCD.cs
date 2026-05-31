@@ -23,7 +23,7 @@ public sealed class FishCountCD : IConditionDefinition {
             .Sum(f => FishingManager.FishingHelper.GetFishCount(f.UniqueId));
 
         var result = CompareInt(total, args.Value, args.Op);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition) {
@@ -33,11 +33,7 @@ public sealed class FishCountCD : IConditionDefinition {
             ? $"[#{currentFish.Id}] {currentFish.Name}"
             : "-";
 
-        DrawUtil.DrawComboSelector(
-            GameRes.Fishes,
-            fish => $"[#{fish.Id}] {fish.Name}",
-            selectedName,
-            fish => condition.Params["id"] = (long)fish.Id);
+        DrawUtil.DrawComboSelector(GameRes.Fishes, fish => $"[#{fish.Id}] {fish.Name}", selectedName, fish => condition.Params["id"] = (long)fish.Id);
 
         ImGui.SameLine();
         DrawIntCompareParams(condition, "##fishcount_op", "Count", clamp: v => Math.Max(0, v));

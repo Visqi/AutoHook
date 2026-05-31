@@ -1,8 +1,6 @@
-using AutoHook.Ui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
-
 public class AutoMooch : BaseActionCast {
     public AutoMooch2 Mooch2 = new();
 
@@ -35,12 +33,7 @@ public class AutoMooch : BaseActionCast {
 
     protected override DrawOptionsDelegate DrawOptions => () => {
         Mooch2.DrawConfig(null);
-        ConditionSet = ConditionUi.DrawConditionSetSlim(
-            UIStrings.Conditions,
-            ConditionSet,
-            ConditionScope.AutoCast,
-            showAdvanced: true,
-            showSubPrefix: true);
+        DrawAutoCastConditions();
     };
 
     public override int Priority { get; set; } = 10;

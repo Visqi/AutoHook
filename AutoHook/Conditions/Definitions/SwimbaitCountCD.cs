@@ -20,7 +20,7 @@ public sealed class SwimbaitCountCD : IConditionDefinition {
             ? world.GetSwimbaitCountForFish((uint)fishId)
             : world.GetSwimbaitCount();
         var result = CompareInt(count, args.Value, ResolveOp(parameters));
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition) {
@@ -33,11 +33,7 @@ public sealed class SwimbaitCountCD : IConditionDefinition {
 
         var fishOptions = new List<BaitFishClass> { new("Current slot fish", 0) };
         fishOptions.AddRange(GameRes.Fishes);
-        DrawUtil.DrawComboSelector(
-            fishOptions,
-            fish => fish.Id == 0 ? fish.Name : $"[#{fish.Id}] {fish.Name}",
-            selectedName,
-            fish => condition.Params["id"] = (long)fish.Id);
+        DrawUtil.DrawComboSelector(fishOptions, fish => fish.Id == 0 ? fish.Name : $"[#{fish.Id}] {fish.Name}", selectedName, fish => condition.Params["id"] = (long)fish.Id);
 
         ImGui.SameLine();
         DrawIntCompareParams(condition, "##swimbait_op", "Swimbaits");

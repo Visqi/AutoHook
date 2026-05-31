@@ -16,6 +16,8 @@ public sealed class ActionCooldownCD : IConditionDefinition {
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast;
 
     public readonly record struct ActionCooldownParams(uint Id, int Type, int Seconds, string Op, bool Invert) {
+        public bool Apply(bool result) => Invert ? !result : result;
+
         public Dictionary<string, object> ToParams() {
             var dict = new Dictionary<string, object>();
 
@@ -48,7 +50,7 @@ public sealed class ActionCooldownCD : IConditionDefinition {
         var lhs = (int)Math.Floor(cd);
         var rhs = args.Seconds;
         var result = CompareInt(lhs, rhs, args.Op);
-        return args.Invert ? !result : result;
+        return args.Apply(result);
     }
 
     public void DrawParams(Condition condition) {

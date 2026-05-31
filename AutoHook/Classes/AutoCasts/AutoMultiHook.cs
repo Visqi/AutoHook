@@ -1,8 +1,6 @@
-using AutoHook.Ui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
-
 public class AutoMultiHook : BaseActionCast {
     public AutoMultiHook() : base(UIStrings.Multihook, IDs.Actions.MultiHook, ActionType.EventAction) { }
 
@@ -22,11 +20,6 @@ public class AutoMultiHook : BaseActionCast {
     public override string GetName() => Name = UIStrings.Multihook;
 
     protected override DrawOptionsDelegate DrawOptions => () => {
-        ConditionSet = ConditionUi.DrawConditionSetSlim(
-            UIStrings.Conditions,
-            ConditionSet,
-            ConditionScope.AutoCast,
-            showAdvanced: true,
-            showSubPrefix: true);
+        DrawAutoCastConditions();
     };
 }

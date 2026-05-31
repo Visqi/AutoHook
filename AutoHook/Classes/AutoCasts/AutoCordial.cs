@@ -82,12 +82,7 @@ public class AutoCordial : BaseActionCast {
         if (!IsSpearFishing) {
             DrawUtil.Checkbox(UIStrings.CordialOutsideTimeWindow, ref IgnoreTimeWindow, UIStrings.CordialOutsideTimeWindowHelpText);
 
-            OvercapConditionSet = Ui.ConditionUi.DrawConditionSetSlim(
-                "Overcap conditions",
-                OvercapConditionSet,
-                Ui.ConditionScope.AutoCordial,
-                showAdvanced: true,
-                showSubPrefix: true);
+            OvercapConditionSet = Ui.ConditionUi.DrawConditionSetSlim("Overcap conditions", OvercapConditionSet, Ui.ConditionScope.AutoCordial, showAdvanced: true, showSubPrefix: true);
         }
     };
 
