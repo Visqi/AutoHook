@@ -1,6 +1,3 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
 using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
@@ -14,32 +11,16 @@ public sealed class OceanLastFishPointsCD : IConditionDefinition {
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var points = GetLastOceanFishPointsValue(world);
-        if (points == null) return GetBool(parameters, "inv", false);
-        var val = GetInt(parameters, "val", 0);
-        var op = GetOp(parameters, "op", ">=");
-        var result = CompareInt(points.Value, val, op);
-        return GetBool(parameters, "inv", false) ? !result : result;
+        if (points == null)
+            return GetBool(parameters, "inv", false);
+
+        var args = GetIntCompareParams(parameters);
+        var result = CompareInt(points.Value, args.Value, args.Op);
+        return args.Invert ? !result : result;
     }
 
-    public void DrawParams(Condition condition) {
-        var val = GetInt(condition.Params, "val", 300);
-        var op = condition.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
-        var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
-        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
-        using var combo = ImRaii.Combo("##ocean_points_op", label);
-        if (combo) {
-            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
-                var sel = choice == op;
-                if (ImGui.Selectable(choice, sel))
-                    condition.Params["op"] = choice;
-            }
-        }
-
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputInt("Points", ref val))
-            condition.Params["val"] = (long)Math.Max(0, val);
-    }
+    public void DrawParams(Condition condition)
+        => DrawIntCompareParams(condition, "##ocean_points_op", "Points", defaultValue: 300, clamp: v => Math.Max(0, v));
 
     private static int? GetLastOceanFishPointsValue(WorldState w) {
         var of = w.OceanFishing;

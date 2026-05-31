@@ -58,9 +58,12 @@ public partial class Configuration {
         }
 
         public static ConditionSet SingleFishCaughtCount(int fishId, int limit) {
+            var dict = new IConditionDefinition.IntCompareParams(limit, ">=", false).ToParams();
+            if (fishId > 0)
+                dict["id"] = (long)fishId;
             var cond = new Condition {
                 TypeId = Registry.GetId<FishCaughtCountCD>(),
-                Params = new FishCaughtCountCD.FishCaughtParams(fishId, limit, ">=", false).ToParams(),
+                Params = dict,
             };
 
             return Single(cond);

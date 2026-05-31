@@ -1,6 +1,4 @@
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
 using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
@@ -13,8 +11,7 @@ public sealed class SwimbaitCountCD : IConditionDefinition {
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
-        var val = GetInt(parameters, "val", 0);
-        var op = ResolveOp(parameters);
+        var args = GetIntCompareParams(parameters);
         var fishId = GetInt(parameters, "id", 0);
         if (fishId == 0 && world.SwimbaitEvaluationFishId != 0)
             fishId = (int)world.SwimbaitEvaluationFishId;
@@ -22,14 +19,12 @@ public sealed class SwimbaitCountCD : IConditionDefinition {
         var count = fishId > 0
             ? world.GetSwimbaitCountForFish((uint)fishId)
             : world.GetSwimbaitCount();
-        var result = CompareInt(count, val, op);
-        return GetBool(parameters, "inv", false) ? !result : result;
+        var result = CompareInt(count, args.Value, ResolveOp(parameters));
+        return args.Invert ? !result : result;
     }
 
     public void DrawParams(Condition condition) {
         var fishId = GetInt(condition.Params, "id", 0);
-        var val = GetInt(condition.Params, "val", 0);
-
         var selectedName = fishId switch {
             0 => "Current slot fish",
             > 0 when GameRes.Fishes.FirstOrDefault(f => f.Id == fishId) is { } fish => $"[#{fish.Id}] {fish.Name}",
@@ -45,22 +40,7 @@ public sealed class SwimbaitCountCD : IConditionDefinition {
             fish => condition.Params["id"] = (long)fish.Id);
 
         ImGui.SameLine();
-        var op = condition.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
-        var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
-        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
-        using var combo = ImRaii.Combo("##swimbait_op", label);
-        if (combo) {
-            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
-                var sel = choice == op;
-                if (ImGui.Selectable(choice, sel))
-                    condition.Params["op"] = choice;
-            }
-        }
-
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputInt("Swimbaits", ref val))
-            condition.Params["val"] = (long)val;
+        DrawIntCompareParams(condition, "##swimbait_op", "Swimbaits");
     }
 
     private static string ResolveOp(IReadOnlyDictionary<string, object> parameters) {

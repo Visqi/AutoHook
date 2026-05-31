@@ -1,6 +1,3 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using static AutoHook.Conditions.IConditionDefinition;
 
@@ -14,35 +11,13 @@ public sealed class FreeInventorySlotsCD : IConditionDefinition {
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
-        var val = GetInt(parameters, "val", 0);
-        var op = GetOp(parameters, "op", ">=");
-        var invert = GetBool(parameters, "inv", false);
-
-        var count = CountFreeInventorySlots();
-        var result = CompareInt(count, val, op);
-        return invert ? !result : result;
+        var args = GetIntCompareParams(parameters);
+        var result = CompareInt(CountFreeInventorySlots(), args.Value, args.Op);
+        return args.Invert ? !result : result;
     }
 
-    public void DrawParams(Condition condition) {
-        var val = GetInt(condition.Params, "val", 0);
-
-        var op = condition.Params.TryGetValue("op", out var o) ? o?.ToString() ?? ">=" : ">=";
-        var label = op is ">" or "<" or "<=" or "=" ? op : ">=";
-        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
-        using var combo = ImRaii.Combo("##freeinventory_op", label);
-        if (combo) {
-            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
-                var sel = choice == op;
-                if (ImGui.Selectable(choice, sel))
-                    condition.Params["op"] = choice;
-            }
-        }
-
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputInt("Slots", ref val))
-            condition.Params["val"] = (long)Math.Max(0, val);
-    }
+    public void DrawParams(Condition condition)
+        => DrawIntCompareParams(condition, "##freeinventory_op", "Slots", clamp: v => Math.Max(0, v));
 
     private static unsafe int CountFreeInventorySlots() {
         var inv = InventoryManager.Instance();

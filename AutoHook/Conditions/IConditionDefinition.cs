@@ -1,5 +1,6 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility.Raii;
 
 namespace AutoHook.Conditions;
 
@@ -117,6 +118,80 @@ public interface IConditionDefinition {
         var ranges = GetRanges(p);
         var inv = GetBool(p, "inv", false);
         return new RangeParams(ranges, inv);
+    }
+
+    public readonly record struct IntCompareParams(int Value, string Op, bool Invert) {
+        public Dictionary<string, object> ToParams(string valueKey = "val", string defaultOp = ">=") {
+            var dict = new Dictionary<string, object> {
+                [valueKey] = (long)Value,
+            };
+            if (!string.IsNullOrEmpty(Op) && Op != defaultOp)
+                dict["op"] = Op;
+            if (Invert)
+                dict["inv"] = true;
+            return dict;
+        }
+    }
+
+    public static IntCompareParams GetIntCompareParams(
+        IReadOnlyDictionary<string, object> p,
+        string valueKey = "val",
+        int defaultValue = 0,
+        string defaultOp = ">=") {
+        var value = GetInt(p, valueKey, defaultValue);
+        var op = GetOp(p, "op", defaultOp);
+        var inv = GetBool(p, "inv", false);
+        return new IntCompareParams(value, op, inv);
+    }
+
+    public static void DrawIntCompareParams(
+        Condition condition,
+        string comboId,
+        string valueLabel,
+        string valueKey = "val",
+        int defaultValue = 0,
+        string defaultOp = ">=",
+        float valueWidth = 80f,
+        Func<int, int>? clamp = null) {
+        clamp ??= static v => v;
+        var args = GetIntCompareParams(condition.Params, valueKey, defaultValue, defaultOp);
+        var val = args.Value;
+        var label = args.Op is ">" or ">=" or "<" or "<=" or "=" ? args.Op : defaultOp;
+
+        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
+        using var combo = ImRaii.Combo(comboId, label);
+        if (combo) {
+            foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
+                if (!ImGui.Selectable(choice, choice == args.Op))
+                    continue;
+
+                ApplyIntCompareParams(condition, args with { Op = choice }, valueKey, defaultOp);
+            }
+        }
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(valueWidth * ImGuiHelpers.GlobalScale);
+        if (ImGui.InputInt(valueLabel, ref val)) {
+            val = clamp(val);
+            ApplyIntCompareParams(condition, args with { Value = val }, valueKey, defaultOp);
+        }
+    }
+
+    private static void ApplyIntCompareParams(
+        Condition condition,
+        IntCompareParams args,
+        string valueKey,
+        string defaultOp) {
+        condition.Params[valueKey] = (long)args.Value;
+        if (args.Op != defaultOp)
+            condition.Params["op"] = args.Op;
+        else
+            condition.Params.Remove("op");
+
+        if (args.Invert)
+            condition.Params["inv"] = true;
+        else
+            condition.Params.Remove("inv");
     }
 }
 
