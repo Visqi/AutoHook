@@ -67,8 +67,7 @@ public class PresetCreator {
                 return;
 
             DrawUtil.SpacingSeparator();
-            ImGui.TextWrapped(
-                $"Initial Bait: {MultiString.GetItemName(_selectedTargetFish.InitialBait)}");
+            ImGui.TextWrapped($"Initial Bait: {MultiString.GetItemName(_selectedTargetFish.InitialBait)}");
 
             if (_selectedTargetFish.Mooches.Count > 0) {
                 if (_presetMoochList.Count == 0) {
@@ -76,8 +75,7 @@ public class PresetCreator {
                         .Select(mooch => GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == mooch)).OfType<ImportedFish>()];
                 }
 
-                DrawUtil.TextV(
-                    $"Mooch order: {string.Join(" > ", _presetMoochList.Select(fish => $"{fish.Name} {GetBiteType(fish.BiteType)}"))}");
+                DrawUtil.TextV($"Mooch order: {string.Join(" > ", _presetMoochList.Select(fish => $"{fish.Name} {GetBiteType(fish.BiteType)}"))}");
             }
 
             DrawUtil.Checkbox("Include fish hooking timers", ref _includeTimers,

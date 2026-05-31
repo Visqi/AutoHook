@@ -153,7 +153,7 @@ public class TabSettings : BaseTab {
     }
 
     private void DrawLanguageSelector() {
-        ImGui.SetNextItemWidth(55);
+        ImGui.SetNextItemWidth(55 * ImGuiHelpers.GlobalScale);
         var languages = new List<string>
         {
             @"en",

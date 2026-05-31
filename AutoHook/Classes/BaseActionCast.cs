@@ -73,8 +73,7 @@ public abstract class BaseActionCast {
         var actionAvailable = Service.WorldState.ActionAvailable(Id, ActionType);
 
         if (EzThrottler.Throttle("LogActions", 1000))
-            Service.PrintVerbose(
-                @$"[BaseAction] {Name} - GpCheck:{hasGp}, ActionAvailable: {actionAvailable}, OtherConditions: {condition}");
+            Service.PrintVerbose(@$"[BaseAction] {Name} - GpCheck:{hasGp}, ActionAvailable: {actionAvailable}, OtherConditions: {condition}");
 
         return hasGp && actionAvailable && condition;
     }
@@ -101,11 +100,11 @@ public abstract class BaseActionCast {
             if (DrawUtil.Checkbox(@$"###{label}", ref Enabled, HelpText, true))
                 Service.PrintDebug(@$"[BaseAction] {Name} - {(Enabled ? @"Enabled" : @"Disabled")}");
 
-            ImGui.SameLine(0, 3);
+            ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
 
             var x = ImGui.GetCursorPosX();
             if (ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.FramePadding)) {
-                ImGui.SameLine(200 * ImGui.GetIO().FontGlobalScale * (ImGui.GetFontSize() / 12f));
+                ImGui.SameLine(200 * ImGuiHelpers.GlobalScale);
                 DrawGpThreshold();
                 DrawUpDownArrows(availableActs);
                 ImGui.SetCursorPosX(x);
@@ -116,7 +115,7 @@ public abstract class BaseActionCast {
                 ImGui.TreePop();
             }
             else {
-                ImGui.SameLine(200 * ImGui.GetIO().FontGlobalScale * (ImGui.GetFontSize() / 12f));
+                ImGui.SameLine(200 * ImGuiHelpers.GlobalScale);
                 DrawGpThreshold();
                 DrawUpDownArrows(availableActs);
             }
@@ -125,9 +124,9 @@ public abstract class BaseActionCast {
             if (DrawUtil.Checkbox(@$"###{label}", ref Enabled, HelpText, true))
                 Service.PrintDebug(@$"[BaseAction] {Name} - {(Enabled ? @"Enabled" : @"Disabled")}");
 
-            ImGui.SameLine(0, 28);
+            ImGui.SameLine(0, 28 * ImGuiHelpers.GlobalScale);
             ImGui.Text(label);
-            ImGui.SameLine(200 * ImGui.GetIO().FontGlobalScale * (ImGui.GetFontSize() / 12f));
+            ImGui.SameLine(200 * ImGuiHelpers.GlobalScale);
             DrawGpThreshold();
             DrawUpDownArrows(availableActs);
         }
@@ -189,7 +188,7 @@ public abstract class BaseActionCast {
         using var popup = ImRaii.Popup(@"gp_cfg");
         if (!popup.Success) return;
 
-        using var item = ImRaii.Child("###gp_cfg2", new Vector2(175, 125), true);
+        using var item = ImRaii.Child("###gp_cfg2", new Vector2(175 * ImGuiHelpers.GlobalScale, 125 * ImGuiHelpers.GlobalScale), true);
         if (ImGui.Button(@" X "))
             ImGui.CloseCurrentPopup();
         ImGui.SameLine();

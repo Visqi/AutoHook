@@ -2,6 +2,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.ImGuiMethods;
 using Newtonsoft.Json;
@@ -47,7 +48,7 @@ public class TabFishingPresets : BaseTab {
 
     private void DrawPresetGenTab() {
         using var id = ImRaii.PushId(@"PresetGen");
-        ImGui.SetNextItemWidth(500);
+        ImGui.SetNextItemWidth(500 * ImGuiHelpers.GlobalScale);
         if (ImGui.Begin(UIStrings.PresetGen, ref OpenPresetGen, ImGuiWindowFlags.AlwaysUseWindowPadding))
             PresetCreator.DrawPresetGenerator();
 
@@ -99,7 +100,7 @@ public class TabFishingPresets : BaseTab {
         bool MatchesSearch(string name) => !searchActive || name.Contains(_searchFilter.Trim().ToLowerInvariant(), StringComparison.InvariantCultureIgnoreCase);
 
         DrawUtil.Info(UIStrings.GlobalPresetHelpText);
-        ImGui.SameLine(0, 4);
+        ImGui.SameLine(0, 4 * ImGuiHelpers.GlobalScale);
         if ((!searchActive || MatchesSearch(UIStrings.GlobalPreset)) && ImGui.Selectable(UIStrings.GlobalPreset, displayed?.PresetName == _basePreset.DefaultPreset.PresetName, ImGuiSelectableFlags.AllowDoubleClick))
             displayed = _basePreset.DefaultPreset;
 
@@ -376,7 +377,7 @@ public class TabFishingPresets : BaseTab {
         var color = selected ? ImGuiColors.DalamudOrange : ImGuiColors.DalamudWhite;
 
         // Indent to show hierarchy
-        ImGui.Indent(10);
+        ImGui.Indent(10 * ImGuiHelpers.GlobalScale);
 
         using (var a = ImRaii.PushColor(ImGuiCol.Text, color)) {
             if (ImGui.Selectable((selected ? "> " : "") + preset.PresetName,
@@ -391,7 +392,7 @@ public class TabFishingPresets : BaseTab {
             }
         }
 
-        ImGui.Unindent(10);
+        ImGui.Unindent(10 * ImGuiHelpers.GlobalScale);
 
         if (ImGui.BeginDragDropSource()) {
             // Use a different drag type to identify presets from folders
@@ -557,16 +558,16 @@ public class TabFishingPresets : BaseTab {
             OpenPresetGen = !OpenPresetGen;
         ImGui.TooltipOnHover(UIStrings.PresetGenerator);
 
-        ImGui.SameLine(0, 3);
+        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
         if (ImGuiComponents.IconButton(FontAwesomeIcon.FolderPlus)) {
             promptingForFolderName = true;
             _parentFolderForNewFolder = null;
         }
         ImGui.TooltipOnHover(UIStrings.CreateFolder);
 
-        ImGui.SameLine(0, 3);
+        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
         DrawUtil.DrawAddNewPresetButton(_basePreset);
-        ImGui.SameLine(0, 3);
+        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
         DrawCombinedImport();
     }
 
@@ -622,7 +623,7 @@ public class TabFishingPresets : BaseTab {
                             }
                         }
 
-                        ImGui.Indent(10);
+                        ImGui.Indent(10 * ImGuiHelpers.GlobalScale);
 
                         foreach (var preset in _tempImportFolder.Value.Presets) {
                             using var presetId = ImRaii.PushId(preset.UniqueId.ToString());
@@ -638,7 +639,7 @@ public class TabFishingPresets : BaseTab {
                             // Check if this preset is being renamed
                             if (_renamePresetId == preset.UniqueId) {
                                 // Show input field for renaming
-                                ImGui.SetNextItemWidth(200);
+                                ImGui.SetNextItemWidth(200 * ImGuiHelpers.GlobalScale);
                                 if (ImGui.InputText("##renameField", ref _tempImportName, 100,
                                     ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll)) {
                                     // Apply rename on Enter
@@ -669,13 +670,13 @@ public class TabFishingPresets : BaseTab {
                             }
                         }
 
-                        ImGui.Unindent(10);
+                        ImGui.Unindent(10 * ImGuiHelpers.GlobalScale);
                         ImGui.TreePop();
                     }
 
                     ImGui.Separator();
 
-                    if (ImGui.Button(UIStrings.Import, new Vector2(120, 0))) {
+                    if (ImGui.Button(UIStrings.Import, new Vector2(120 * ImGuiHelpers.GlobalScale, 0))) {
                         // Count how many presets are actually selected for import
                         var selectedCount = _tempImportFolder.Value.Presets.Count(p => _selectedPresetsForImport[p.UniqueId]);
 
@@ -723,7 +724,7 @@ public class TabFishingPresets : BaseTab {
 
                     ImGui.SameLine();
 
-                    if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0))) {
+                    if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120 * ImGuiHelpers.GlobalScale, 0))) {
                         _tempImportFolder = null;
                         _selectedPresetsForImport.Clear();
                         _presetImportNames.Clear();
@@ -743,7 +744,7 @@ public class TabFishingPresets : BaseTab {
                     if (ImGui.InputText(UIStrings.PresetName, ref name, 64, ImGuiInputTextFlags.AutoSelectAll))
                         _tempImportPreset.RenamePreset(name);
 
-                    if (ImGui.Button(UIStrings.Import, new Vector2(120, 0))) {
+                    if (ImGui.Button(UIStrings.Import, new Vector2(120 * ImGuiHelpers.GlobalScale, 0))) {
                         Service.Save();
                         _basePreset.AddNewPreset(_tempImportPreset);
                         _basePreset.SelectedPreset = (CustomPresetConfig)_tempImportPreset;
@@ -754,7 +755,7 @@ public class TabFishingPresets : BaseTab {
 
                     ImGui.SameLine();
 
-                    if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0))) {
+                    if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120 * ImGuiHelpers.GlobalScale, 0))) {
                         ImGui.CloseCurrentPopup();
                     }
                 }
@@ -769,7 +770,7 @@ public class TabFishingPresets : BaseTab {
     private void DrawCreateFolderPopup() {
         ImGui.OpenPopup(UIStrings.CreateNewFolder);
 
-        ImGui.SetNextWindowSize(new Vector2(300, 120));
+        ImGui.SetNextWindowSize(new Vector2(300 * ImGuiHelpers.GlobalScale, 120 * ImGuiHelpers.GlobalScale));
         using var modal = ImRaii.PopupModal(UIStrings.CreateNewFolder, ref promptingForFolderName, ImGuiWindowFlags.NoResize);
         if (modal.Success) {
             ImGui.Text(UIStrings.FolderNameHint);
@@ -780,7 +781,7 @@ public class TabFishingPresets : BaseTab {
 
             ImGui.Spacing();
 
-            if (ImGui.Button(UIStrings.Create, new Vector2(120, 0))) {
+            if (ImGui.Button(UIStrings.Create, new Vector2(120 * ImGuiHelpers.GlobalScale, 0))) {
                 if (!string.IsNullOrWhiteSpace(newFolderName)) {
                     if (_parentFolderForNewFolder.HasValue)
                         _basePreset.AddNewFolder(newFolderName, _parentFolderForNewFolder.Value);
@@ -794,7 +795,7 @@ public class TabFishingPresets : BaseTab {
 
             ImGui.SameLine();
 
-            if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0))) {
+            if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120 * ImGuiHelpers.GlobalScale, 0))) {
                 newFolderName = string.Empty;
                 promptingForFolderName = false;
                 _parentFolderForNewFolder = null;
@@ -805,7 +806,7 @@ public class TabFishingPresets : BaseTab {
     private void DrawRenameFolderPopup() {
         ImGui.OpenPopup(UIStrings.RenameFolder);
 
-        ImGui.SetNextWindowSize(new Vector2(300, 120));
+        ImGui.SetNextWindowSize(new Vector2(300 * ImGuiHelpers.GlobalScale, 120 * ImGuiHelpers.GlobalScale));
         var isOpen = true;
         using var modal = ImRaii.PopupModal(UIStrings.RenameFolder, ref isOpen, ImGuiWindowFlags.NoResize);
         if (modal.Success) {
@@ -817,7 +818,7 @@ public class TabFishingPresets : BaseTab {
 
             ImGui.Spacing();
 
-            if (ImGui.Button(UIStrings.Rename, new Vector2(120, 0))) {
+            if (ImGui.Button(UIStrings.Rename, new Vector2(120 * ImGuiHelpers.GlobalScale, 0))) {
                 if (!string.IsNullOrWhiteSpace(renameFolderName) && renameFolderId.HasValue) {
                     var folder = _basePreset.Folders.FirstOrDefault(f => f.UniqueId == renameFolderId.Value);
                     if (folder != null) {
@@ -831,7 +832,7 @@ public class TabFishingPresets : BaseTab {
 
             ImGui.SameLine();
 
-            if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120, 0))) {
+            if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120 * ImGuiHelpers.GlobalScale, 0))) {
                 renameFolderName = string.Empty;
                 renameFolderId = null;
             }

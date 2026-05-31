@@ -79,10 +79,10 @@ internal class AutoGig : Window, IDisposable {
             _gigCfg.SelectedPreset?.PresetName ?? UIStrings.None,
             gig => _gigCfg.SelectedPreset = gig);
 
-        ImGui.SetNextItemWidth(90);
+        ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
         if (selectedPreset != null) {
             ImGui.SameLine();
-            ImGui.SetNextItemWidth(90);
+            ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
             if (ImGui.InputInt(UIStrings.Hitbox + @" ", ref selectedPreset.HitboxSize)) {
                 selectedPreset.HitboxSize = Math.Max(0, Math.Min(selectedPreset.HitboxSize, 300));
                 Service.Save();

@@ -49,8 +49,7 @@ public partial class FishingManager {
             if (Presets.SelectedPreset == null)
                 return;
             Presets.SelectedPreset = null;
-            Service.PrintDebug(
-                $"[AutoOceanFish] Preset set to global (zone {ocean.CurrentZone}, spot {ocean.CurrentSpotId}, time {ocean.CurrentTimeId})");
+            Service.PrintDebug($"[AutoOceanFish] Preset set to global (zone {ocean.CurrentZone}, spot {ocean.CurrentSpotId}, time {ocean.CurrentTimeId})");
             return;
         }
 
@@ -58,8 +57,7 @@ public partial class FishingManager {
             return;
 
         Presets.SelectedPreset = match;
-        Service.PrintDebug(
-            $"[AutoOceanFish] Preset set to {match.PresetName} (zone {ocean.CurrentZone}, spot {ocean.CurrentSpotId}, time {ocean.CurrentTimeId})");
+        Service.PrintDebug($"[AutoOceanFish] Preset set to {match.PresetName} (zone {ocean.CurrentZone}, spot {ocean.CurrentSpotId}, time {ocean.CurrentTimeId})");
     }
 
     private IEnumerable<CustomPresetConfig> EnumerateHookPresets() {

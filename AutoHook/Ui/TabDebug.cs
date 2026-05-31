@@ -109,8 +109,7 @@ public class TabDebug : BaseTab {
                     ImGui.Text("Spectral history (this voyage):");
                     foreach (var rec in ws.SpectralHistory) {
                         var dur = rec.ActualDurationSeconds is { } d ? $"{d:F0}s" : "active";
-                        ImGui.BulletText(
-                            $"zone {rec.ZoneIndex + 1}: planned {rec.PlannedDurationSeconds:F0}s, carried {rec.CarriedExtraSeconds:F0}s, {dur}");
+                        ImGui.BulletText($"zone {rec.ZoneIndex + 1}: planned {rec.PlannedDurationSeconds:F0}s, carried {rec.CarriedExtraSeconds:F0}s, {dur}");
                     }
                 }
             }

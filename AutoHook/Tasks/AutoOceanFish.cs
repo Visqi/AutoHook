@@ -1,5 +1,4 @@
 using clib.TaskSystem;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using System.Numerics;
 
 namespace AutoHook.Tasks;
@@ -12,8 +11,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
     private static readonly Random Rng = new();
 
     protected override async Task Execute() {
-        Service.PrintDebug(
-            $"[AutoOceanFish] Task execute zone={ZoneIndex + 1}, walkToRailing={ZoneIndex == 0}");
+        Service.PrintDebug($"[AutoOceanFish] Task execute zone={ZoneIndex + 1}, walkToRailing={ZoneIndex == 0}");
 
         if (ZoneIndex == 0) {
             Status = "Walking to railing";

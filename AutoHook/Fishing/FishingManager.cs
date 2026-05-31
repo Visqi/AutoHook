@@ -42,8 +42,7 @@ public partial class FishingManager : IDisposable {
 
     private void OnOceanZoneStarted(WorldState.OpOceanZoneStarted op) {
         var ocean = Ws.OceanFishing;
-        Service.PrintDebug(
-            $"[AutoOceanFish] OnZoneStarted zone={op.ZoneIndex + 1}, {OceanStopUtil.FormatStateLog(ocean)}");
+        Service.PrintDebug($"[AutoOceanFish] OnZoneStarted zone={op.ZoneIndex + 1}, {OceanStopUtil.FormatStateLog(ocean)}");
 
         if (!Service.Configuration.PluginEnabled) {
             Service.PrintDebug("[AutoOceanFish] Task not started: plugin disabled");
@@ -56,8 +55,7 @@ public partial class FishingManager : IDisposable {
         }
 
         if (Svc.Automation.CurrentTask is AutoOceanFish existing) {
-            Service.PrintDebug(
-                $"[AutoOceanFish] Task not started: AutoOceanFish already running (zone {existing.ZoneIndex + 1})");
+            Service.PrintDebug($"[AutoOceanFish] Task not started: AutoOceanFish already running (zone {existing.ZoneIndex + 1})");
             return;
         }
 
@@ -107,8 +105,7 @@ public partial class FishingManager : IDisposable {
             var result = ChangeBait((uint)extraCfg.ForcedBaitId);
 
             if (result == ChangeBaitReturn.Success) {
-                Service.PrintChat(
-                    @$"[AutoHook] Starting with bait: {MultiString.GetItemName(extraCfg.ForcedBaitId)}");
+                Service.PrintChat(@$"[AutoHook] Starting with bait: {MultiString.GetItemName(extraCfg.ForcedBaitId)}");
                 Service.Save();
             }
         }

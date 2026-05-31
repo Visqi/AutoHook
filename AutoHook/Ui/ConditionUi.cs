@@ -114,7 +114,7 @@ public static class ConditionUi {
         }
         ImGui.TooltipOnHover("Add condition");
 
-        ImGui.SameLine(0, 3);
+        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
         if (showAdvanced && ImGuiComponents.IconButton(FontAwesomeIcon.Code)) {
             set.SlimAdvancedExpanded = true;
             Service.Save();
@@ -122,7 +122,7 @@ public static class ConditionUi {
         ImGui.TooltipOnHover("Advanced (groups, expression)");
 
         if (drawHeaderExtras != null) {
-            ImGui.SameLine(0, 3);
+            ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
             drawHeaderExtras();
         }
 
@@ -173,7 +173,7 @@ public static class ConditionUi {
         }
         DrawSetHeader(set);
         if (drawHeaderExtras != null) {
-            ImGui.SameLine(0, 3);
+            ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
             drawHeaderExtras();
         }
         ImGui.Spacing();

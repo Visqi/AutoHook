@@ -1,6 +1,7 @@
 using AutoHook.Spearfishing;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
 
@@ -67,7 +68,7 @@ internal class TabAutoGig : BaseTab {
 
             ImGui.SameLine();
 
-            ImGui.SetNextItemWidth(90);
+            ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
             if (ImGui.InputInt(UIStrings.GigHitbox, ref selectedPreset.HitboxSize)) {
                 selectedPreset.HitboxSize = Math.Max(0, Math.Min(selectedPreset.HitboxSize, 300));
                 Service.Save();

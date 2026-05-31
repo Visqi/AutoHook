@@ -1,5 +1,6 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 
 namespace AutoHook.Configurations;
@@ -59,11 +60,11 @@ public class AutoGigConfig : BasePresetConfig {
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(UIStrings.HoldShiftToDelete);
 
-            ImGui.SameLine(0, 3);
+            ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
 
             DrawUtil.Checkbox(@$"", ref gig.Enabled);
 
-            ImGui.SameLine(0, 3);
+            ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
 
             var x = ImGui.GetCursorPosX();
             if (ImGui.TreeNodeEx($"{gig.Fish?.Name ?? UIStrings.None}", ImGuiTreeNodeFlags.FramePadding)) {

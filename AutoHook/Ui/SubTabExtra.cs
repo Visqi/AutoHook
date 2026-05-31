@@ -158,7 +158,7 @@ public class SubTabExtra {
                     ConditionScope.Hook,
                     showAdvanced: true,
                     drawHeaderExtras: () => {
-                        ImGui.SameLine(0, 3);
+                        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
                         if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
                             config.Triggers.RemoveAt(i);
                             Service.Save();

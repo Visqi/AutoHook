@@ -1,5 +1,6 @@
 using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
@@ -34,7 +35,7 @@ public class AutoIdenticalCast : BaseActionCast {
 
         ImGui.SameLine();
 
-        ImGui.SetNextItemWidth(30);
+        ImGui.SetNextItemWidth(30 * ImGuiHelpers.GlobalScale);
         if (ImGui.InputInt(UIStrings.TimeS, ref stack, 0, 0)) {
             CaughtAmountLimit = Math.Max(1, Math.Min(stack, 999));
             Service.Save();

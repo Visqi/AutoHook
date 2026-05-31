@@ -125,7 +125,7 @@ public static class DrawUtil {
         var cumulativeSize = 0.0f;
         var padding = 2.0f;
 
-        using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(2.0f, 0.0f))) {
+        using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(2.0f * ImGuiHelpers.GlobalScale, 0.0f))) {
             foreach (var word in words) {
                 var wordWidth = ImGui.CalcTextSize(word).X;
 
@@ -384,7 +384,7 @@ public static class DrawUtil {
         if (helpText != string.Empty)
             ImGui.TooltipOnHover(helpText);
 
-        ImGui.SameLine(0, 3);
+        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
 
         if (Service.Configuration.SwapToButtons) {
             switch (Service.Configuration.SwapType) {
@@ -443,7 +443,7 @@ public static class DrawUtil {
         if (!string.IsNullOrEmpty(helpText))
             ImGui.TooltipOnHover(helpText);
 
-        ImGui.SameLine(0, 6);
+        ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
         var x = ImGui.GetCursorPosX();
         if (forceOpen)
             ImGui.SetNextItemOpen(true, ImGuiCond.Always);

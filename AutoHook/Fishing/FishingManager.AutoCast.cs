@@ -182,14 +182,12 @@ public partial class FishingManager {
                 var useIntuitionTab = swimbaitMoochConfig.UsesIntuitionHookConfig();
                 activeSwimbaitCfg = swimbaitMoochConfig.GetSwimbaitConfig();
                 configSource = $"preset ({swimbaitMoochConfig.BaitFish.Name}, {(useIntuitionTab ? "intuition" : "normal")} tab)";
-                Service.PrintDebug(
-                    $"[Swimbait] Fish {fishId}: preset entry found, enabled=true, useIntuitionTab={useIntuitionTab}, " +
+                Service.PrintDebug($"[Swimbait] Fish {fishId}: preset entry found, enabled=true, useIntuitionTab={useIntuitionTab}, " +
                     $"normalUseSwimbait={swimbaitMoochConfig.SwimbaitNormal.UseSwimbait}, intuitionUseSwimbait={swimbaitMoochConfig.SwimbaitIntuition.UseSwimbait}, " +
                     $"activeUseSwimbait={activeSwimbaitCfg.UseSwimbait}");
             }
             else {
-                Service.PrintDebug(
-                    $"[Swimbait] Fish {fishId}: no enabled preset entry (found={swimbaitMoochConfig != null}, enabled={swimbaitMoochConfig?.Enabled ?? false})");
+                Service.PrintDebug($"[Swimbait] Fish {fishId}: no enabled preset entry (found={swimbaitMoochConfig != null}, enabled={swimbaitMoochConfig?.Enabled ?? false})");
             }
 
             // If no config found in selected preset, or swimbait not enabled for this window, check global preset config.
@@ -206,8 +204,7 @@ public partial class FishingManager {
                 }
 
                 if (activeSwimbaitCfg == null || !activeSwimbaitCfg.UseSwimbait) {
-                    Service.PrintDebug(
-                        $"[Swimbait] Fish {fishId}: no usable config (source={configSource}), trying next slot");
+                    Service.PrintDebug($"[Swimbait] Fish {fishId}: no usable config (source={configSource}), trying next slot");
                     continue;
                 }
             }
