@@ -40,8 +40,6 @@ public abstract class BaseActionCast {
 
     public bool DontCancelMooch = true;
 
-    public bool ConditionsOnly;
-
     public virtual bool RequiresAutoCastAvailable() => false;
 
     public virtual bool RequiresTimeWindow() => false;
@@ -69,15 +67,8 @@ public abstract class BaseActionCast {
     }
 
     public bool IsAvailableToCast(bool ignoreCurrentMooch = false) {
-        if (ConditionsOnly) {
-            if (!Enabled)
-                return false;
-            if (ConditionSet is not { Groups.Count: > 0 } || !ConditionSet.Groups.Any(g => g.Conditions.Count > 0))
-                return false;
-        }
-        else if (!Enabled) {
+        if (!Enabled)
             return false;
-        }
 
         if (DoesCancelMooch() && Service.WorldState.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch) {
             return false;

@@ -660,6 +660,13 @@ public static class ConfigurationJsonMigrator {
             MigrateFishCaughtActionEnabled(fishObj, "SurfaceSlap", "UseSurfaceSlap");
             MigrateFishCaughtActionEnabled(fishObj, "IdenticalCast", "UseIdenticalCast");
         }
+
+        if (preset["AutoCastsCfg"] is JObject autoCasts) {
+            if (autoCasts["CastSurfaceSlap"] is JObject castSurfaceSlap)
+                MigrateActionEnabledFromConditions(castSurfaceSlap);
+            if (autoCasts["CastIdenticalCast"] is JObject castIdenticalCast)
+                MigrateActionEnabledFromConditions(castIdenticalCast);
+        }
     }
 
     private static void MigrateFishCaughtActionEnabled(JObject fish, string actionProperty, string legacyProperty) {
@@ -669,13 +676,17 @@ public static class ConfigurationJsonMigrator {
         if ((bool?)fish[legacyProperty] == true)
             action["Enabled"] = true;
 
-        if ((bool?)action["Enabled"] == true)
+        MigrateActionEnabledFromConditions(action);
+    }
+
+    private static void MigrateActionEnabledFromConditions(JObject? action) {
+        if (action == null || (bool?)action["Enabled"] == true)
             return;
 
-        if (action["ConditionSet"]?["g"] is not JArray groups)
+        if (action["ConditionSet"] is not JObject conditionSet || conditionSet["g"] is not JArray groups)
             return;
 
-        if (groups.Any(g => g["c"] is JArray conditions && conditions.Count > 0))
+        if (groups.Any(g => g is JObject group && group["c"] is JArray conditions && conditions.Count > 0))
             action["Enabled"] = true;
     }
 

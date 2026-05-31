@@ -131,12 +131,7 @@ public class SubTabFish {
         using var _ = ImRaii.PushId($"{UIStrings.SurfaceSlapIdenticalCast}");
 
         if (ImGui.TreeNodeEx(UIStrings.SurfaceSlapIdenticalCast, ImGuiTreeNodeFlags.FramePadding)) {
-            DrawUtil.DrawCheckboxTree(UIStrings.UseSurfaceSlap, ref fishConfig.SurfaceSlap.Enabled,
-                () => fishConfig.SurfaceSlap.DrawFishCaughtActionOptions(), fishConfig.SurfaceSlap.HelpText);
-
-            DrawUtil.DrawCheckboxTree(UIStrings.UseIdenticalCast, ref fishConfig.IdenticalCast.Enabled,
-                () => fishConfig.IdenticalCast.DrawFishTabOptions(), fishConfig.IdenticalCast.HelpText);
-
+            DrawUtil.DrawSurfaceSlapAndIdenticalCast(fishConfig.SurfaceSlap, fishConfig.IdenticalCast);
             ImGui.TreePop();
         }
     }
@@ -204,12 +199,7 @@ public class SubTabFish {
 
         DrawUtil.DrawCaughtCountLimitTree($"{UIStrings.Swap_Bait} {alreadySwapped}", fishConfig.SwapBaitLimit,
             () => {
-                DrawUtil.DrawComboSelector(
-                    GameRes.Baits,
-                    bait => $"[#{bait.Id}] {bait.Name}",
-                    fishConfig.BaitToSwap.Name,
-                    bait => fishConfig.BaitToSwap = bait);
-
+                DrawUtil.DrawBaitSwapSelector(fishConfig.BaitToSwap, bait => fishConfig.BaitToSwap = bait);
                 DrawUtil.Checkbox(UIStrings.Reset_the_counter, ref fishConfig.SwapBaitResetCount);
             });
     }
@@ -222,12 +212,6 @@ public class SubTabFish {
             alreadySwapped = UIStrings.AlreadySwapped;
 
         DrawUtil.DrawCaughtCountLimitTree($"{UIStrings.Swap_Preset} {alreadySwapped}", fishConfig.SwapPresetLimit,
-            () => {
-                DrawUtil.DrawComboSelector(
-                    Service.Configuration.HookPresets.CustomPresets,
-                    preset => preset.PresetName,
-                    fishConfig.PresetToSwap,
-                    preset => fishConfig.PresetToSwap = preset.PresetName);
-            });
+            () => DrawUtil.DrawPresetSwapSelector(fishConfig.PresetToSwap, preset => fishConfig.PresetToSwap = preset));
     }
 }

@@ -29,23 +29,16 @@ public class FishConfig : BaseOption {
 
     public FishingSteps StopFishingStep = FishingSteps.None;
 
-    public FishConfig() => ConfigureFishCaughtActions();
+    public FishConfig() { }
 
     public FishConfig(BaitFishClass fish) {
         Fish = fish;
         Mooch.Name = UIStrings.Always_Mooch;
         Mooch.HelpText = string.Empty;
-        ConfigureFishCaughtActions();
     }
 
     public FishConfig(int fishId) {
         Fish = new BaitFishClass(fishId);
-        ConfigureFishCaughtActions();
-    }
-
-    private void ConfigureFishCaughtActions() {
-        IdenticalCast.ConditionsOnly = true;
-        SurfaceSlap.ConditionsOnly = true;
     }
 
     [JsonProperty("StopConditionSet")]

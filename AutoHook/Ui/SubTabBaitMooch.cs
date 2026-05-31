@@ -174,25 +174,13 @@ public class SubTabBaitMooch {
         var headerLabel = isIntuition
             ? $"{UIStrings.UseSwimbait} ({UIStrings.Intuition})"
             : UIStrings.UseSwimbait;
+        var helpText = isGlobal ? UIStrings.UseSwimbaitHelpTextGlobal : UIStrings.UseSwimbaitHelpText;
 
-        if (ImGui.TreeNodeEx(headerLabel, ImGuiTreeNodeFlags.FramePadding)) {
-            var enableText = isGlobal ? UIStrings.EnableUsingSwimbaitGlobal : UIStrings.EnableUsingSwimbait;
-            var helpText = isGlobal ? UIStrings.UseSwimbaitHelpTextGlobal : UIStrings.UseSwimbaitHelpText;
-
-            var useSwimbait = config.UseSwimbait;
-            if (DrawUtil.Checkbox(enableText, ref useSwimbait, helpText))
-                config.UseSwimbait = useSwimbait;
-
-            if (config.UseSwimbait) {
-                ImGui.Spacing();
-                config.ConditionSet =
-                    ConditionUi.DrawConditionSet(
-                        UIStrings.Conditions,
-                        config.ConditionSet,
-                        ConditionScope.Hook);
-            }
-
-            ImGui.TreePop();
-        }
+        var useSwimbait = config.UseSwimbait;
+        DrawUtil.DrawCheckboxTree(headerLabel, ref useSwimbait, () => {
+            config.ConditionSet = ConditionUi.DrawConditionSetSlim(
+                UIStrings.Conditions, config.ConditionSet, ConditionScope.Hook, showAdvanced: true);
+        }, helpText);
+        config.UseSwimbait = useSwimbait;
     }
 }

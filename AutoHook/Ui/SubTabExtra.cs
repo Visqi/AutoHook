@@ -335,14 +335,7 @@ public class SubTabExtra {
 
         var text = presetName;
         DrawUtil.DrawCheckboxTree(UIStrings.Swap_Preset, ref enable,
-            () => {
-                DrawUtil.DrawComboSelector(
-                    Service.Configuration.HookPresets.CustomPresets,
-                    preset => preset.PresetName,
-                    text,
-                    preset => text = preset.PresetName);
-            }
-        );
+            () => DrawUtil.DrawPresetSwapSelector(text, preset => text = preset));
 
         presetName = text;
     }
@@ -371,14 +364,7 @@ public class SubTabExtra {
 
         var newBait = baitSwap;
         DrawUtil.DrawCheckboxTree(UIStrings.Swap_Bait, ref enable,
-            () => {
-                DrawUtil.DrawComboSelector(
-                    GameRes.Baits,
-                    bait => $"[#{bait.Id}] {bait.Name}",
-                    newBait.Name,
-                    bait => newBait = bait);
-            }
-        );
+            () => DrawUtil.DrawBaitSwapSelector(newBait, bait => newBait = bait));
 
         baitSwap = newBait;
     }

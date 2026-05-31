@@ -41,6 +41,12 @@ public partial class FishingManager {
         if (lastFishCatchCfg.SurfaceSlap.IsAvailableToCast())
             cast = lastFishCatchCfg.SurfaceSlap;
 
+        if (cast == null) {
+            var autoCastCfg = GetAutoCastCfg();
+            if (autoCastCfg.CastSurfaceSlap.IsAvailableToCast())
+                cast = autoCastCfg.CastSurfaceSlap;
+        }
+
         if (lastFishCatchCfg.SparefulHand.IsAvailableToCast())
             cast = lastFishCatchCfg.SparefulHand;
 

@@ -1,5 +1,6 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
@@ -33,7 +34,19 @@ public class SubTabAutoCast {
         ];
 
         DrawHeader(acCfg);
+        DrawGlobalFishCaughtActions(acCfg);
         DrawBody(acCfg);
+    }
+
+    private static void DrawGlobalFishCaughtActions(AutoCastsConfig acCfg) {
+        if (ImGui.TreeNodeEx(UIStrings.FishCaught, ImGuiTreeNodeFlags.FramePadding)) {
+            ImGui.SameLine();
+            ImGuiComponents.HelpMarker(UIStrings.FishCaughtHelp);
+            DrawUtil.DrawSurfaceSlapAndIdenticalCast(acCfg.CastSurfaceSlap, acCfg.CastIdenticalCast);
+            ImGui.TreePop();
+        }
+
+        DrawUtil.SpacingSeparator();
     }
 
     private static void DrawHeader(AutoCastsConfig acCfg) {

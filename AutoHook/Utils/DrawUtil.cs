@@ -578,4 +578,22 @@ public static class DrawUtil {
             Service.Save();
         }
     }
+
+    public static void DrawBaitSwapSelector(BaitFishClass bait, Action<BaitFishClass> onSelect)
+        => DrawComboSelector(GameRes.Baits, b => $"[#{b.Id}] {b.Name}", bait.Name, onSelect);
+
+    public static void DrawPresetSwapSelector(string presetName, Action<string> onSelect)
+        => DrawComboSelector(
+            Service.Configuration.HookPresets.CustomPresets,
+            preset => preset.PresetName,
+            presetName,
+            preset => onSelect(preset.PresetName));
+
+    public static void DrawSurfaceSlapAndIdenticalCast(AutoSurfaceSlap surfaceSlap, AutoIdenticalCast identicalCast) {
+        DrawCheckboxTree(UIStrings.UseSurfaceSlap, ref surfaceSlap.Enabled,
+            () => surfaceSlap.DrawFishCaughtActionOptions(), surfaceSlap.HelpText);
+
+        DrawCheckboxTree(UIStrings.UseIdenticalCast, ref identicalCast.Enabled,
+            () => identicalCast.DrawFishTabOptions(), identicalCast.HelpText);
+    }
 }

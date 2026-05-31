@@ -14,7 +14,6 @@ namespace AutoHook;
 
 /* 
  * TODO: 
- * get rid of "don't cancel mooch" configs under per fish surface slap/IC
  * get rid of all other configs that could be conditions in auto casts et al. Migrate them to conditions.
  * stop movement while fishing
  * auto extract materia
