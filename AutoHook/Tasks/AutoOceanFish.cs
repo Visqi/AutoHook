@@ -9,7 +9,6 @@ namespace AutoHook.Tasks;
 /// </summary>
 public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex) : TaskBase {
     public uint ZoneIndex { get; } = zoneIndex;
-    private static readonly MovementConfig RailingMovement = new(1.5f, MovementOptions.None, PathingStrategy.Direct);
     private static readonly Random Rng = new();
 
     protected override async Task Execute() {
@@ -35,15 +34,15 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
 
     /// <summary>Random railing position on the boat deck (from Henchman OnABoat).</summary>
     internal static Vector3 GetFishingPosition() {
-        var left = new Vector3((float)(7 + Rng.NextDouble() * 0.25), 6.711f, Rng.Next(2) == 0 ? Rng.NextSingle() * 10f + -14f : Rng.NextSingle() * 7f + -2f);
-        var right = new Vector3((float)(-7 - Rng.NextDouble() * 0.25), 6.711f, Rng.NextSingle() * 15.5f + -10f);
+        var left = new Vector3(7 + Rng.NextSingle() * 0.25f, 6.711f, Rng.Next(2) == 0 ? Rng.NextSingle() * 10f + -14f : Rng.NextSingle() * 7f + -2f);
+        var right = new Vector3(-7 - Rng.NextSingle() * 0.25f, 6.711f, Rng.NextSingle() * 15.5f + -10f);
         return Rng.Next(2) == 0 ? left : right;
     }
 
     private async Task WalkToRailing() {
         var position = GetFishingPosition();
         var rotation = position.X > 0 ? 1.5f : -1.5f;
-        await MoveTo(position, RailingMovement, allowTeleportIfFaster: false, allowAethernet: false);
+        await MoveToDirectly(position, Service.WorldState.IsCastAvailable);
         unsafe {
             Svc.Objects.LocalPlayer?.Character()->SetRotation(rotation);
         }
