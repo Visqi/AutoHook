@@ -6,12 +6,15 @@ namespace AutoHook.Configurations;
 
 public partial class Configuration {
     private static readonly JsonSerializerSettings SaveSettings = new() {
-        Formatting = Formatting.None,
-        DefaultValueHandling = DefaultValueHandling.Include,
+        Formatting = Formatting.Indented,
+        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+        TypeNameHandling = TypeNameHandling.Objects,
     };
 
     private static readonly JsonSerializerSettings LoadSettings = new() {
         ObjectCreationHandling = ObjectCreationHandling.Replace,
+        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+        TypeNameHandling = TypeNameHandling.Objects,
     };
 
     private static int _savePending;
