@@ -7,14 +7,10 @@ namespace AutoHook.Configurations;
 public partial class Configuration {
     private static readonly JsonSerializerSettings SaveSettings = new() {
         Formatting = Formatting.Indented,
-        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-        TypeNameHandling = TypeNameHandling.Objects,
     };
 
     private static readonly JsonSerializerSettings LoadSettings = new() {
         ObjectCreationHandling = ObjectCreationHandling.Replace,
-        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-        TypeNameHandling = TypeNameHandling.Objects,
     };
 
     private static int _savePending;
@@ -44,6 +40,8 @@ public partial class Configuration {
                     return config;
                 }
 
+                BackupUnreadableConfigFile(file.FullName);
+                TryDeleteConfigFile(file.FullName);
                 Svc.Log.Warning(@"[Configuration] Config file exists but could not be deserialized; recreating defaults.");
             }
 
@@ -102,6 +100,36 @@ public partial class Configuration {
                 else
                     _saveTask = null;
             }
+        }
+    }
+
+    private static void TryDeleteConfigFile(string configPath) {
+        try {
+            if (File.Exists(configPath))
+                File.Delete(configPath);
+        }
+        catch (Exception e) {
+            Svc.Log.Warning(@$"[Configuration] Could not delete unreadable config before rewrite: {e.Message}");
+        }
+    }
+
+    private static void BackupUnreadableConfigFile(string configPath) {
+        try {
+            if (!File.Exists(configPath))
+                return;
+
+            var dir = Svc.Interface.GetPluginConfigDirectory();
+            var path = Path.Combine(dir, "autohook_load_failed_backup.json");
+            if (File.Exists(path)) {
+                var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                path = Path.Combine(dir, $"autohook_load_failed_backup_{stamp}.json");
+            }
+
+            File.Copy(configPath, path, overwrite: false);
+            Svc.Log.Warning(@$"[Configuration] Backed up unreadable config to {path}");
+        }
+        catch (Exception e) {
+            Svc.Log.Warning(@$"[Configuration] Failed to back up unreadable config: {e.Message}");
         }
     }
 
