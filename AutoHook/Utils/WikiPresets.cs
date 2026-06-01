@@ -1,4 +1,4 @@
-using ECommons.Throttlers;
+﻿using ECommons.Throttlers;
 using HtmlAgilityPack;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -18,30 +18,41 @@ public static class WikiPresets {
         if (!EzThrottler.Throttle("WikiUpdate", 20000))
             return;
 
-        Presets.Clear();
-        PresetsSf.Clear();
-        var mdUrls = await GetWikiPageUrls(BaseUrl);
-        foreach (var mdUrl in mdUrls) {
-            try {
-                var base64 = await ExtractBase64FromWikiPage($"{RawWiki}/{mdUrl}.md");
+        try {
+            var newPresets = new Dictionary<string, List<(PresetFolder? folder, List<CustomPresetConfig> Presets)>>();
+            var newPresetsSf = new Dictionary<string, List<AutoGigConfig>>();
+            var mdUrls = await GetWikiPageUrls(BaseUrl);
 
-                static (PresetFolder? Folder, List<CustomPresetConfig> Presets) selector(string x) {
-                    if (x.StartsWith(Configuration.ExportPrefixFolder)) {
-                        var imported = Configuration.ImportFolder(x) ?? throw new Exception("Failed to import"); // Kill wiki shouldn't have broken presets
-                        return (imported.Folder, imported.Presets);
+            foreach (var mdUrl in mdUrls) {
+                try {
+                    var base64 = await ExtractBase64FromWikiPage($"{RawWiki}/{mdUrl}.md");
+
+                    static (PresetFolder? Folder, List<CustomPresetConfig> Presets) selector(string x) {
+                        if (x.StartsWith(Configuration.ExportPrefixFolder)) {
+                            var imported = Configuration.ImportFolder(x) ?? throw new Exception("Failed to import"); // Kill wiki shouldn't have broken presets
+                            return (imported.Folder, imported.Presets);
+                        }
+                        var presets = Configuration.ImportPreset(x) ?? throw new Exception("Failed to import");
+
+                        return (null, [(CustomPresetConfig)presets]);
                     }
-                    var presets = Configuration.ImportPreset(x) ?? throw new Exception("Failed to import");
 
-                    return (null, [(CustomPresetConfig)presets]);
+                    var list = base64.presets.Select(selector).ToList();
+                    var listsf = base64.presetsSf.Select(Configuration.ImportPreset).OfType<AutoGigConfig>().ToList();
+                    var key = mdUrl.Replace(@"-", @" ");
+                    newPresets.Add(key, list);
+                    newPresetsSf.Add(key, listsf);
                 }
-                var list = base64.presets.Select(selector).ToList();
-                var listsf = base64.presetsSf.Select(Configuration.ImportPreset).OfType<AutoGigConfig>().ToList();
-                Presets.Add(mdUrl.Replace(@"-", @" "), list);
-                PresetsSf.Add(mdUrl.Replace(@"-", @" "), listsf);
+                catch (Exception e) {
+                    Svc.Log.Debug($"Can probably ignore: {e.Message}");
+                }
             }
-            catch (Exception e) {
-                Svc.Log.Debug($"Can probably ignore: {e.Message}");
-            }
+
+            Presets = newPresets;
+            PresetsSf = newPresetsSf;
+        }
+        catch (Exception e) {
+            Svc.Log.Error(e, "Failed to fetch wiki presets.");
         }
     }
 
