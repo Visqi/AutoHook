@@ -53,19 +53,15 @@ public partial class FishingManager {
         var multiHook = lastFishCatchCfg.Multihook;
 
         if (cast == null && multiHook.Enabled && multiHook.CastCondition()) {
-            Service.TaskManager.Enqueue(() =>
-                PlayerRes.CastActionDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));
-            Service.TaskManager.Enqueue(() =>
-                CastLineMoochOrRelease(GetAutoCastCfg(), lastFishCatchCfg));
+            Service.TaskManager.Enqueue(() => PlayerRes.CastActionDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));
+            Service.TaskManager.Enqueue(() => CastLineMoochOrRelease(GetAutoCastCfg(), lastFishCatchCfg));
             return true;
         }
 
         if (cast != null) {
             if (multiHook.Enabled && multiHook.CastCondition()) {
-                Service.TaskManager.Enqueue(() =>
-                    PlayerRes.CastActionDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));
-                Service.TaskManager.Enqueue(() =>
-                    PlayerRes.CastActionDelayed(cast.Id, cast.ActionType, cast.Name));
+                Service.TaskManager.Enqueue(() => PlayerRes.CastActionDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));
+                Service.TaskManager.Enqueue(() => PlayerRes.CastActionDelayed(cast.Id, cast.ActionType, cast.Name));
                 return true;
             }
 

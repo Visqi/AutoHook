@@ -211,7 +211,6 @@ public class SubTabFish {
         if (FishingManager.FishingHelper.SwappedPreset(fishConfig.UniqueId))
             alreadySwapped = UIStrings.AlreadySwapped;
 
-        DrawUtil.DrawCaughtCountLimitTree($"{UIStrings.Swap_Preset} {alreadySwapped}", fishConfig.SwapPresetLimit,
-            () => DrawUtil.DrawPresetSwapSelector(fishConfig.PresetToSwap, preset => fishConfig.PresetToSwap = preset));
+        DrawUtil.DrawCaughtCountLimitTree($"{UIStrings.Swap_Preset} {alreadySwapped}", fishConfig.SwapPresetLimit, () => DrawUtil.DrawPresetSwapSelector(fishConfig.PresetToSwap, preset => fishConfig.PresetToSwap = preset));
     }
 }

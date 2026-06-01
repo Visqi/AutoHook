@@ -29,11 +29,7 @@ public class PresetCreator {
         ImGui.PopTextWrapPos();
 
         DrawUtil.TextV("Selected the target fish");
-        DrawUtil.DrawComboSelector(
-            GameRes.ImportedFishes.Where(f => !f.IsSpearFish).ToList(),
-            item => item.Name,
-            _selectedTargetFish?.Name ?? UIStrings.None,
-            SetSelectedFish);
+        DrawUtil.DrawComboSelector(GameRes.ImportedFishes.Where(f => !f.IsSpearFish).ToList(), item => item.Name, _selectedTargetFish?.Name ?? UIStrings.None, SetSelectedFish);
 
         DrawUtil.TextV("Preset Name: ");
         ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);

@@ -134,8 +134,7 @@ public partial class FishingManager {
 
         // Swap preset
         if (trig.SwapPreset && !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
-            var preset = Presets.CustomPresets
-                .FirstOrDefault(p => p.PresetName == trig.PresetToSwap);
+            var preset = Presets.CustomPresets.FirstOrDefault(p => p.PresetName == trig.PresetToSwap);
 
                     Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
 

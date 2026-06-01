@@ -112,11 +112,7 @@ public class SubTabBaitMooch {
         else
             list.Insert(0, new BaitFishClass(UIStrings.All_Baits, GameRes.AllBaitsId));
 
-        DrawUtil.DrawComboSelector(
-            list,
-            item => $"[{item.Id}] {item.Name}",
-            hookConfig.BaitFish.Name,
-            item => hookConfig.BaitFish = item);
+        DrawUtil.DrawComboSelector(list, item => $"[{item.Id}] {item.Name}", hookConfig.BaitFish.Name, item => hookConfig.BaitFish = item);
 
         if (isMooch)
             return;
@@ -178,8 +174,7 @@ public class SubTabBaitMooch {
 
         var useSwimbait = config.UseSwimbait;
         DrawUtil.DrawCheckboxTree(headerLabel, ref useSwimbait, () => {
-            config.ConditionSet = ConditionUi.DrawConditionSetSlim(
-                UIStrings.Conditions, config.ConditionSet, ConditionScope.Hook, showAdvanced: true);
+            config.ConditionSet = ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, config.ConditionSet, ConditionScope.Hook, showAdvanced: true);
         }, helpText);
         config.UseSwimbait = useSwimbait;
     }

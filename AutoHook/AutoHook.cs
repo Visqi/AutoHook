@@ -90,8 +90,7 @@ public class AutoHook : IDalamudPlugin {
         Svc.Interface.UiBuilder.OpenConfigUi += _pluginUi.Toggle;
         Svc.Interface.UiBuilder.OpenMainUi += _pluginUi.Toggle;
 
-        _ = new EzDtr(() =>
-            $"{((SeIconChar)0xE05E).ToIconString()} {(Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled)}",
+        _ = new EzDtr(() => $"{((SeIconChar)0xE05E).ToIconString()} {(Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled)}",
             evt => {
                 if (evt.ClickType is MouseClickType.Left) {
                     Service.Configuration.PluginEnabled ^= true;

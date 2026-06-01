@@ -16,15 +16,7 @@ public sealed class WKSInfo {
         if (DevGrade != 0 || CurrentFateControlRowId != 0 || CurrentFateId != 0 ||
             CurrentMissionUnitRowId != 0 || CurrentScore != 0 || CurrentRank != WKSManager.MissionRank.None ||
             CollectedTotal != 0 || CollectedIndividual != 0) {
-            yield return new OpState(
-                DevGrade,
-                CurrentFateControlRowId,
-                CurrentFateId,
-                CurrentMissionUnitRowId,
-                CurrentScore,
-                CurrentRank,
-                CollectedTotal,
-                CollectedIndividual);
+            yield return new OpState(DevGrade, CurrentFateControlRowId, CurrentFateId, CurrentMissionUnitRowId, CurrentScore, CurrentRank, CollectedTotal, CollectedIndividual);
         }
     }
 

@@ -60,12 +60,7 @@ public partial class Configuration : IPluginConfiguration {
                 path = Path.Combine(dir, $"autohook_v{fromVersion}_backup_{stamp}.json");
             }
 
-            var json = JsonConvert.SerializeObject(
-                this,
-                new JsonSerializerSettings {
-                    Formatting = Formatting.Indented,
-                    DefaultValueHandling = DefaultValueHandling.Include
-                });
+            var json = JsonConvert.SerializeObject(this, new JsonSerializerSettings { Formatting = Formatting.Indented, DefaultValueHandling = DefaultValueHandling.Include });
 
             File.WriteAllText(path, json, Encoding.UTF8);
             Service.PrintDebug(@$"[Configuration] Wrote backup to {path}");
@@ -98,10 +93,7 @@ public partial class Configuration : IPluginConfiguration {
 
                 Configuration? config;
                 try {
-                    config = JsonConvert.DeserializeObject<Configuration>(migratedJson,
-                        new JsonSerializerSettings {
-                            ObjectCreationHandling = ObjectCreationHandling.Replace
-                        });
+                    config = JsonConvert.DeserializeObject<Configuration>(migratedJson, new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace });
                 }
                 catch (Exception ex) {
                     Svc.Log.Error(@$"[Configuration] Failed to deserialize migrated config JSON: {ex.Message}");
@@ -131,9 +123,7 @@ public partial class Configuration : IPluginConfiguration {
 
     // Got the export/import function from the UnknownX7's ReAction repo
     public static string ExportPreset(BasePresetConfig preset) {
-        var exported = CompressString(JsonConvert.SerializeObject(
-            preset,
-            new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Include }));
+        var exported = CompressString(JsonConvert.SerializeObject(preset, new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Include }));
 
         // check if preset is type of AutoGigConfig or CustomPresetConfig
         if (preset is AutoGigConfig)
@@ -153,8 +143,7 @@ public partial class Configuration : IPluginConfiguration {
     public static string ExportFolder(PresetFolder folder, List<CustomPresetConfig> presets, List<PresetFolder> allFolders) {
         var folderExport = BuildFolderExport(folder, presets, allFolders);
 
-        var exported = CompressString(JsonConvert.SerializeObject(folderExport,
-            new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Include }));
+        var exported = CompressString(JsonConvert.SerializeObject(folderExport, new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Include }));
 
         return ExportPrefixFolder + exported;
     }

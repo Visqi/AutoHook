@@ -44,9 +44,7 @@ public class SubTabExtra {
         }
         else {
             if (Service.Configuration.HookPresets.SelectedPreset?.ExtraCfg.Enabled ?? false)
-                ImGui.TextColored(ImGuiColors.DalamudViolet,
-                    string.Format(UIStrings.Custom_Extra_Being_Used,
-                        Service.Configuration.HookPresets.SelectedPreset.PresetName));
+                ImGui.TextColored(ImGuiColors.DalamudViolet, string.Format(UIStrings.Custom_Extra_Being_Used, Service.Configuration.HookPresets.SelectedPreset.PresetName));
             else if (!config.Enabled)
                 ImGui.TextColored(ImGuiColors.ParsedBlue, UIStrings.SubExtra_Disabled);
         }
@@ -64,11 +62,7 @@ public class SubTabExtra {
             DrawUtil.DrawCheckboxTree(UIStrings.ForceBaitSwap, ref config.ForceBaitSwap,
                 () => {
                     DrawUtil.TextV(UIStrings.SelectBaitStartFishing);
-                    DrawUtil.DrawComboSelector(
-                        GameRes.Baits,
-                        bait => $"[#{bait.Id}] {bait.Name}",
-                        $"{MultiString.GetItemName(config.ForcedBaitId)}",
-                        bait => config.ForcedBaitId = bait.Id);
+                    DrawUtil.DrawComboSelector(GameRes.Baits, bait => $"[#{bait.Id}] {bait.Name}", $"{MultiString.GetItemName(config.ForcedBaitId)}", bait => config.ForcedBaitId = bait.Id);
                 }
             );
 

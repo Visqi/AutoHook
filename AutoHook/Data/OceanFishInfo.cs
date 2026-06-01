@@ -135,12 +135,7 @@ public sealed class OceanFishInfo {
         }
 
         _previousZoneHadSpectral = true;
-        _spectralHistory.Add(new ZoneSpectralRecord(
-            (int)_lastZone,
-            DateTime.UtcNow,
-            null,
-            _spectralSeconds + _spectralCarrySeconds,
-            _spectralCarrySeconds));
+        _spectralHistory.Add(new ZoneSpectralRecord((int)_lastZone, DateTime.UtcNow, null, _spectralSeconds + _spectralCarrySeconds, _spectralCarrySeconds));
     }
 
     private void EndSpectral() {

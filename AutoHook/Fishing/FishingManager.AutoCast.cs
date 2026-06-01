@@ -100,9 +100,7 @@ public partial class FishingManager {
 
         var delayMs = 1200;
         try {
-            delayMs = new Random().Next(
-                Service.Configuration.DelayBetweenCastsMin,
-                Service.Configuration.DelayBetweenCastsMax) + 1200;
+            delayMs = new Random().Next(Service.Configuration.DelayBetweenCastsMin, Service.Configuration.DelayBetweenCastsMax) + 1200;
         }
         catch {
             // keep delayMs default

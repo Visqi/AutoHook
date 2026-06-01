@@ -107,8 +107,7 @@ public class AutoHookIPC {
         if (uint.TryParse(baitNameOrId, out var parsedId))
             return SwapBaitById(parsedId);
 
-        var bait = GameRes.Baits.FirstOrDefault(b =>
-            string.Equals(b.Name, baitNameOrId, StringComparison.OrdinalIgnoreCase));
+        var bait = GameRes.Baits.FirstOrDefault(b => string.Equals(b.Name, baitNameOrId, StringComparison.OrdinalIgnoreCase));
 
         if (bait == null || bait.Id <= 0)
             return false;

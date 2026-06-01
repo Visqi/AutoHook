@@ -13,8 +13,7 @@ internal static class LegacyPresetMapper {
         var newFields = newType.GetFields();
 
         foreach (var sourceField in oldFields) {
-            var targetField =
-                newFields.FirstOrDefault(f => f.Name == sourceField.Name && f.FieldType == sourceField.FieldType);
+            var targetField = newFields.FirstOrDefault(f => f.Name == sourceField.Name && f.FieldType == sourceField.FieldType);
             if (targetField != null) {
                 var value = sourceField.GetValue(old);
                 targetField.SetValue(newOne, value);

@@ -354,8 +354,7 @@ public partial class FishingManager : IDisposable {
     }
 
     private void HookFish(BiteType bite, HookConfig currentHook) {
-        var delay = new Random().Next(Service.Configuration.DelayBetweenHookMin,
-            Service.Configuration.DelayBetweenHookMax);
+        var delay = new Random().Next(Service.Configuration.DelayBetweenHookMin, Service.Configuration.DelayBetweenHookMax);
 
         if (!currentHook.Enabled)
             return;
@@ -369,8 +368,7 @@ public partial class FishingManager : IDisposable {
         var hook = currentHook.GetHook(bite, timePassed);
 
         if (hook is null or HookType.None) {
-            delay = new Random().Next(Service.Configuration.DelayBeforeCancelMin,
-                Service.Configuration.DelayBeforeCancelMax);
+            delay = new Random().Next(Service.Configuration.DelayBeforeCancelMin, Service.Configuration.DelayBeforeCancelMax);
 
             Service.TaskManager.EnqueueDelay(delay);
             Service.TaskManager.Enqueue(() => PlayerRes.CastAction(IDs.Actions.Rest));

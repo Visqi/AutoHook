@@ -30,11 +30,7 @@ public class BaseGig(int itemId) : BaseOption {
     public SpearfishSize Size => Fish?.Size ?? SpearfishSize.Unknown;
 
     public override void DrawOptions() {
-        DrawUtil.DrawComboSelector(
-            [.. GameRes.SpearfishFishes],
-            item => item.Name,
-            Fish?.Name ?? UIStrings.None,
-            item => Fish = item);
+        DrawUtil.DrawComboSelector([.. GameRes.SpearfishFishes], item => item.Name, Fish?.Name ?? UIStrings.None, item => Fish = item);
 
         DrawUtil.Checkbox(UIStrings.UseNaturesBounty, ref UseNaturesBounty);
 

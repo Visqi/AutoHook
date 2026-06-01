@@ -313,15 +313,7 @@ public sealed class WorldStateUpdater : IDisposable {
         }
         catch { }
 
-        return new WKSInfo.OpState(
-            devGrade,
-            currentFateControlRowId,
-            currentFateId,
-            currentMissionUnitRowId,
-            currentScore,
-            currentRank,
-            collectedTotal,
-            collectedIndividual);
+        return new WKSInfo.OpState(devGrade, currentFateControlRowId, currentFateId, currentMissionUnitRowId, currentScore, currentRank, collectedTotal, collectedIndividual);
     }
 
     private static unsafe WorldState.OpZone CollectZone()
