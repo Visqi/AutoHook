@@ -17,6 +17,8 @@ public partial class Configuration {
     private static Task? _saveTask;
     private static readonly object _lock = new();
 
+    internal static readonly object SerializationSync = new(); // lock for capturing snapshot
+
     public static async Task<Configuration> LoadAsync(CancellationToken cancellationToken = default) {
         try {
             var file = Svc.Interface.ConfigFile;
@@ -135,14 +137,17 @@ public partial class Configuration {
 
     private static Task WriteAsync(Configuration config, CancellationToken cancellationToken = default) {
         var path = Svc.Interface.ConfigFile.FullName;
-        return Task.Run(() => WriteToDisk(config, path, cancellationToken), cancellationToken);
+        var json = CaptureSnapshot(config);
+        return Task.Run(() => WriteJsonToDisk(json, path, cancellationToken), cancellationToken);
     }
 
-    private static void WriteToDisk(Configuration config, string path, CancellationToken cancellationToken) {
-        cancellationToken.ThrowIfCancellationRequested();
+    private static string CaptureSnapshot(Configuration config) {
+        lock (SerializationSync) {
+            return JsonConvert.SerializeObject(config, SaveSettings);
+        }
+    }
 
-        var json = JsonConvert.SerializeObject(config, SaveSettings);
-
+    private static void WriteJsonToDisk(string json, string path, CancellationToken cancellationToken) {
         cancellationToken.ThrowIfCancellationRequested();
 
         var directory = Path.GetDirectoryName(path);

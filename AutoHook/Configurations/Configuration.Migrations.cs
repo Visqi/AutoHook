@@ -68,7 +68,7 @@ public partial class Configuration {
 
             Service.PrintDebug(@$"[Configuration] Updating to v4");
             config.WriteVersionBackup(3);
-            WriteToDisk(config, Svc.Interface.ConfigFile.FullName, CancellationToken.None);
+            WriteJsonToDisk(CaptureSnapshot(config), Svc.Interface.ConfigFile.FullName, CancellationToken.None);
             config.Version = 4;
         }
     }
@@ -91,7 +91,7 @@ public partial class Configuration {
 
             config.HookPresets.DefaultPreset.PresetName = Service.GlobalPresetName;
 
-            WriteToDisk(config, Svc.Interface.ConfigFile.FullName, CancellationToken.None);
+            WriteJsonToDisk(CaptureSnapshot(config), Svc.Interface.ConfigFile.FullName, CancellationToken.None);
             config.Version = 5;
         }
     }
