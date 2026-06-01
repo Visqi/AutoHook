@@ -42,7 +42,7 @@ public static class DrawUtil {
 
         ImGui.SameLine();
 
-        ImGui.PushItemWidth(fieldWidth * ImGuiHelpers.GlobalScale);
+        ImGui.PushItemWidth(fieldWidth.Scale());
         var clicked = ImGui.InputFloat($"##{label}###", ref refValue, .1f, 0, @"%.1f%");
         ImGui.PopItemWidth();
 
@@ -71,7 +71,7 @@ public static class DrawUtil {
 
         ImGui.SameLine();
 
-        ImGui.PushItemWidth(fieldWidth * ImGuiHelpers.GlobalScale);
+        ImGui.PushItemWidth(fieldWidth.Scale());
         var clicked = ImGui.InputInt($"##{label}###", ref refValue, steps, 0);
         ImGui.PopItemWidth();
 
@@ -127,7 +127,7 @@ public static class DrawUtil {
         var cumulativeSize = 0.0f;
         var padding = 2.0f;
 
-        using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(2.0f * ImGuiHelpers.GlobalScale, 0.0f))) {
+        using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(2.0f.Scale(), 0.0f))) {
             foreach (var word in words) {
                 var wordWidth = ImGui.CalcTextSize(word).X;
 
@@ -151,15 +151,15 @@ public static class DrawUtil {
     private static string _filterText = "";
 
     public static void DrawComboSelector<T>(List<T> itemList, Func<T, string> getItemName, string selectedItem, Action<T> onSelect) {
-        ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(220.Scaled());
 
         using (var combo = ImRaii.Combo("###search", selectedItem)) {
             if (combo.Success) {
-                ImGui.SetNextItemWidth(190 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(190.Scaled());
                 ImGui.InputTextWithHint("##filter", UIStrings.Search_Hint, ref _filterText, 100);
                 ImGui.Separator();
 
-                using var child = ImRaii.Child($"###ComboSelector", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false);
+                using var child = ImRaii.Child($"###ComboSelector", new Vector2(0, 100.Scaled()), false);
                 foreach (var (item, index) in itemList.WithIndex()) {
                     var itemName = getItemName(item) ?? $"Error, Try renaming";
 
@@ -179,18 +179,18 @@ public static class DrawUtil {
     }
 
     public static void DrawComboSelectorPreset(BasePreset presetList) {
-        ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(220.Scaled());
 
         var selectedPreset = presetList.SelectedPreset;
         var comboOpen = false;
         using (var combo = ImRaii.Combo("###search", selectedPreset?.PresetName ?? UIStrings.Disabled)) {
             comboOpen = combo.Success;
             if (combo.Success) {
-                ImGui.SetNextItemWidth(210 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(210.Scaled());
                 ImGui.InputTextWithHint("##filter", UIStrings.Search_Hint, ref _filterText, 100);
                 ImGui.Separator();
 
-                using var child = ImRaii.Child("###ComboPreset", new Vector2(0, 100 * ImGuiHelpers.GlobalScale), false);
+                using var child = ImRaii.Child("###ComboPreset", new Vector2(0, 100.Scaled()), false);
                 if (ImGui.Selectable(UIStrings.Disabled, presetList.SelectedPreset == null)) {
                     Service.Save();
                     presetList.SelectedPreset = null;
@@ -386,7 +386,7 @@ public static class DrawUtil {
         if (helpText != string.Empty)
             ImGui.TooltipOnHover(helpText);
 
-        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
+        ImGui.SameLine(0, 3.Scaled());
 
         if (Service.Configuration.SwapToButtons) {
             switch (Service.Configuration.SwapType) {
@@ -445,7 +445,7 @@ public static class DrawUtil {
         if (!string.IsNullOrEmpty(helpText))
             ImGui.TooltipOnHover(helpText);
 
-        ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+        ImGui.SameLine(0, 6.Scaled());
         var x = ImGui.GetCursorPosX();
         if (forceOpen)
             ImGui.SetNextItemOpen(true, ImGuiCond.Always);
@@ -552,7 +552,7 @@ public static class DrawUtil {
         Action drawBody)
         where TCD : class, IConditionDefinition, ISimpleConditionValue<(bool Enabled, int Limit)> {
         DrawEnabledLimitTree(label, condition, (ref int limitLocal) => {
-            ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+            ImGui.SetNextItemWidth(90.Scaled());
             if (ImGui.InputInt(UIStrings.TimeS, ref limitLocal)) {
                 limitLocal = Math.Max(1, limitLocal);
                 Service.Save();

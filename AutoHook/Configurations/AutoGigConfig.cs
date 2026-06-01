@@ -60,11 +60,11 @@ public class AutoGigConfig : BasePresetConfig {
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(UIStrings.HoldShiftToDelete);
 
-            ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
+            ImGui.SameLine(0, 3.Scaled());
 
             DrawUtil.Checkbox(@$"", ref gig.Enabled);
 
-            ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
+            ImGui.SameLine(0, 3.Scaled());
 
             var x = ImGui.GetCursorPosX();
             if (ImGui.TreeNodeEx($"{gig.Fish?.Name ?? UIStrings.None}", ImGuiTreeNodeFlags.FramePadding)) {

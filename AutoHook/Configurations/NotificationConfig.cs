@@ -25,7 +25,7 @@ public record class NotificationConfig {
 
                     var text = string.IsNullOrWhiteSpace(ToastText) ? fallbackText : ToastText;
 
-                    ImGui.SetNextItemWidth(320 * ImGuiHelpers.GlobalScale);
+                    ImGui.SetNextItemWidth(320.Scaled());
                     if (ImGui.InputText("Toast text", ref text, 260)) {
                         ToastText = text;
                         Service.Save();

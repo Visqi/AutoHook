@@ -39,7 +39,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
         var rotation = position.X > 0 ? 1.5f : -1.5f;
         await MoveToDirectly(position, Service.WorldState.IsCastAvailable);
         unsafe {
-            Svc.Objects.LocalPlayer?.Character()->SetRotation(rotation);
+            Svc.Objects.LocalPlayer?.Character->SetRotation(rotation);
         }
     }
 }

@@ -20,7 +20,7 @@ public sealed class OceanTimeOfDayCD : IConditionDefinition {
     public void DrawParams(Condition condition) {
         var tod = (TimeOfDay)Math.Clamp(GetInt(condition.Params, "tod", 1), 1, 3);
 
-        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(80.Scaled());
         var label = tod switch {
             TimeOfDay.Day => "Day",
             TimeOfDay.Sunset => "Sunset",

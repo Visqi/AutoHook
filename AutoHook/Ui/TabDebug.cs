@@ -249,9 +249,9 @@ public class TabDebug : BaseTab {
                 ImGui.TextDisabled("Install NotificationMaster to test IPC calls.");
 
             ImGui.Spacing();
-            ImGui.SetNextItemWidth(320 * ImGuiHelpers.GlobalScale);
+            ImGui.SetNextItemWidth(320.Scaled());
             ImGui.InputText("Toast title", ref _nmToastTitle, 128);
-            ImGui.SetNextItemWidth(320 * ImGuiHelpers.GlobalScale);
+            ImGui.SetNextItemWidth(320.Scaled());
             ImGui.InputText("Toast text", ref _nmToastText, 260);
 
             ImGui.Spacing();

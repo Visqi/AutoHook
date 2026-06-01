@@ -59,7 +59,7 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
         var end = args.End;
 
         var startText = start.ToString("HH:mm");
-        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(80.Scaled());
         if (ImGui.InputText("Start (HH:mm)", ref startText, 5)) {
             if (TimeOnly.TryParse(startText, out var parsed)) {
                 args = args with { Start = parsed };
@@ -70,7 +70,7 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
         ImGui.SameLine();
 
         var endText = end.ToString("HH:mm");
-        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(80.Scaled());
         if (ImGui.InputText("End (HH:mm)", ref endText, 5)) {
             if (TimeOnly.TryParse(endText, out var parsed)) {
                 args = args with { End = parsed };

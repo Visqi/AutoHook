@@ -114,7 +114,7 @@ public class BaseHookset(uint requiredStatus) {
         if (ImGui.TreeNodeEx(UIStrings.Timeout,
                 ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.TimeoutOption);
-            ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
+            ImGui.SetNextItemWidth(100.Scaled());
             if (ImGui.InputDouble(UIStrings.TimeLimit, ref TimeoutMax, .1, 1, @"%.1f%")) {
                 switch (TimeoutMax) {
                     case 0.1:
@@ -135,7 +135,7 @@ public class BaseHookset(uint requiredStatus) {
             ImGui.SameLine();
             ImGuiComponents.HelpMarker($"{UIStrings.TimeoutHelpText}\n\n{UIStrings.DoesntHaveAffectUnderChum}");
 
-            ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
+            ImGui.SetNextItemWidth(100.Scaled());
             if (ImGui.InputDouble(UIStrings.ChumTimeLimit, ref ChumTimeoutMax, .1, 1, @"%.1f%")) {
                 switch (ChumTimeoutMax) {
                     case 0.1:

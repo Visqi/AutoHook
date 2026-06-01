@@ -114,7 +114,7 @@ public static class ConditionUi {
         }
         ImGui.TooltipOnHover("Add condition");
 
-        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
+        ImGui.SameLine(0, 3.Scaled());
         if (showAdvanced && ImGuiComponents.IconButton(FontAwesomeIcon.Code)) {
             set.SlimAdvancedExpanded = true;
             Service.Save();
@@ -122,7 +122,7 @@ public static class ConditionUi {
         ImGui.TooltipOnHover("Advanced (groups, expression)");
 
         if (drawHeaderExtras != null) {
-            ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
+            ImGui.SameLine(0, 3.Scaled());
             drawHeaderExtras();
         }
 
@@ -173,7 +173,7 @@ public static class ConditionUi {
         }
         DrawSetHeader(set);
         if (drawHeaderExtras != null) {
-            ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
+            ImGui.SameLine(0, 3.Scaled());
             drawHeaderExtras();
         }
         ImGui.Spacing();
@@ -322,7 +322,7 @@ public static class ConditionUi {
         var typeChanged = false;
         DrawInverseToggle(cond);
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(180 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(180.Scaled());
         var currentDef = defs.FirstOrDefault(d => d.Id == cond.TypeId) ?? defs.FirstOrDefault();
         var currentLabel = currentDef?.Name ?? cond.TypeId;
         using (var combo = ImRaii.Combo("##type", currentLabel)) {

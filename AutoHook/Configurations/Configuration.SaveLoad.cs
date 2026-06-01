@@ -1,0 +1,132 @@
+using Newtonsoft.Json;
+using System.IO;
+using System.Threading;
+
+namespace AutoHook.Configurations;
+
+public partial class Configuration {
+    private static readonly JsonSerializerSettings SaveSettings = new() {
+        Formatting = Formatting.None,
+        DefaultValueHandling = DefaultValueHandling.Include,
+    };
+
+    private static readonly JsonSerializerSettings LoadSettings = new() {
+        ObjectCreationHandling = ObjectCreationHandling.Replace,
+    };
+
+    private static int _savePending;
+    private static Task? _saveTask;
+    private static readonly object SaveGate = new();
+
+    public static async Task<Configuration> LoadAsync(CancellationToken cancellationToken = default) {
+        try {
+            var file = Svc.Interface.ConfigFile;
+
+            if (file.Exists) {
+                var json = await File.ReadAllTextAsync(file.FullName, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
+                var migratedJson = ConfigurationJsonMigrator.MigrateToLatest(json);
+
+                Configuration? config;
+                try {
+                    config = JsonConvert.DeserializeObject<Configuration>(migratedJson, LoadSettings);
+                }
+                catch (Exception ex) {
+                    Svc.Log.Error(@$"[Configuration] Failed to deserialize migrated config JSON: {ex.Message}");
+                    config = null;
+                }
+
+                if (config != null) {
+                    config.Initiate();
+                    await WriteAsync(config, cancellationToken).ConfigureAwait(false);
+                    return config;
+                }
+
+                Svc.Log.Warning(@"[Configuration] Config file exists but could not be deserialized; recreating defaults.");
+            }
+
+            var fresh = new Configuration();
+            fresh.Initiate();
+            await WriteAsync(fresh, cancellationToken).ConfigureAwait(false);
+            return fresh;
+        }
+        catch (Exception e) {
+            Svc.Log.Error(@$"[Configuration] {e.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>Queues a coalesced background write of <see cref="Service.Configuration"/>.</summary>
+    public static void Save() {
+        Interlocked.Exchange(ref _savePending, 1);
+
+        lock (SaveGate) {
+            if (_saveTask is { IsCompleted: false })
+                return;
+
+            _saveTask = RunSaveLoopAsync();
+        }
+    }
+
+    /// <summary>Waits for any in-prog save, then writes if still dirty.</summary>
+    public static async Task FlushAsync() {
+        var task = _saveTask;
+        if (task != null)
+            await task.ConfigureAwait(false);
+
+        if (Interlocked.CompareExchange(ref _savePending, 0, 0) == 0)
+            return;
+
+        await WriteAsync(Service.Configuration).ConfigureAwait(false);
+        Interlocked.Exchange(ref _savePending, 0);
+    }
+
+    private static async Task RunSaveLoopAsync() {
+        try {
+            while (true) {
+                Interlocked.Exchange(ref _savePending, 0);
+                await WriteAsync(Service.Configuration).ConfigureAwait(false);
+                if (Interlocked.CompareExchange(ref _savePending, 0, 0) == 0)
+                    break;
+            }
+        }
+        catch (Exception ex) {
+            Svc.Log.Error(ex, "[Configuration] Save failed.");
+        }
+        finally {
+            lock (SaveGate) {
+                if (Interlocked.CompareExchange(ref _savePending, 0, 0) == 1)
+                    _saveTask = RunSaveLoopAsync();
+                else
+                    _saveTask = null;
+            }
+        }
+    }
+
+    private static Task WriteAsync(Configuration config, CancellationToken cancellationToken = default) {
+        var path = Svc.Interface.ConfigFile.FullName;
+        return Task.Run(() => WriteToDisk(config, path, cancellationToken), cancellationToken);
+    }
+
+    private static void WriteToDisk(Configuration config, string path, CancellationToken cancellationToken) {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var json = JsonConvert.SerializeObject(config, SaveSettings);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
+
+        var tempPath = path + ".new";
+        if (File.Exists(tempPath)) {
+            var stamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            var orphaned = $"{tempPath}.{stamp}";
+            Svc.Log.Warning($"[Configuration] Orphaned temp file {tempPath}; moving to {orphaned}");
+            File.Move(tempPath, orphaned, overwrite: true);
+        }
+
+        File.WriteAllText(tempPath, json, Encoding.UTF8);
+        File.Move(tempPath, path, overwrite: true);
+    }
+}

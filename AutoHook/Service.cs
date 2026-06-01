@@ -1,6 +1,8 @@
+using AutoHook.IPC;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using ECommons.Automation.NeoTaskManager;
+using System.Globalization;
 
 namespace AutoHook;
 
@@ -19,7 +21,29 @@ public class Service {
     public static WindowSystem WindowSystem { get; } = new(PluginName);
     public static BaitFishClass LastCatch { get; set; } = new(@"-", -1);
     public static AutoCollectables AutoCollectables { get; set; } = null!;
+    public static FishingManager FishManager { get; set; } = null!;
+    public static AutoHookIPC Ipc { get; set; } = null!;
     public static NotificationMasterAPI.NotificationMasterApi NotificationMaster { get; set; } = null!;
+
+    public static async ValueTask InitAsync() {
+        WorldState = new WorldState();
+        Configuration = await Configuration.LoadAsync();
+        UIStrings.Culture = new CultureInfo(Configuration.CurrentLanguage);
+        AutoCollectables = new AutoCollectables();
+        NotificationMaster = new(Svc.Interface);
+        WorldStateUpdater = new WorldStateUpdater();
+        FishManager = new FishingManager();
+        Ipc = new AutoHookIPC();
+    }
+
+    public static async ValueTask DisposeAsync() {
+        FishManager.Dispose();
+        await Configuration.FlushAsync();
+        WorldStateUpdater.Dispose();
+        AutoCollectables.Dispose();
+    }
+
+    public static void Save() => Configuration.Save();
 
     public static string Status {
         get => _status;
@@ -29,26 +53,6 @@ public class Service {
     public static readonly TaskManager TaskManager = new() {
         DefaultConfiguration = { TimeLimitMS = 5000 }
     };
-
-    private static bool _savePending;
-
-    /// <summary>Queues a config write; at most one disk save runs per UI draw frame.</summary>
-    public static void Save() => _savePending = true;
-
-    /// <summary>Writes config immediately (plugin unload, window close, etc.).</summary>
-    public static void SaveNow() {
-        _savePending = false;
-        Configuration.Save();
-    }
-
-    /// <summary>Flushes a pending <see cref="Save"/> after UI input for this frame.</summary>
-    public static void FlushPendingSave() {
-        if (!_savePending)
-            return;
-
-        _savePending = false;
-        Configuration.Save();
-    }
 
     private const int MaxLogSize = 50;
     public static Queue<string> LogMessages = new();

@@ -166,7 +166,7 @@ public static class ConditionPresetsUi {
         if (!tex.TryGetWrap(out var wrap, out _))
             return false;
 
-        var size = new System.Numerics.Vector2(24 * ImGuiHelpers.GlobalScale, 24 * ImGuiHelpers.GlobalScale);
+        var size = new System.Numerics.Vector2(24.Scaled(), 24.Scaled());
         using var color = ImRaii.PushColor(ImGuiCol.Button, 0).Push(ImGuiCol.ButtonHovered, ImGui.GetColorU32(ImGuiCol.ButtonHovered)).Push(ImGuiCol.ButtonActive, ImGui.GetColorU32(ImGuiCol.ButtonActive));
         var clicked = ImGui.ImageButton(wrap.Handle, size);
 
@@ -181,7 +181,7 @@ public static class ConditionPresetsUi {
         if (!tex.TryGetWrap(out var wrap, out _))
             return false;
 
-        var size = new System.Numerics.Vector2(24 * ImGuiHelpers.GlobalScale, 24 * ImGuiHelpers.GlobalScale);
+        var size = new System.Numerics.Vector2(24.Scaled(), 24.Scaled());
         using var color = ImRaii.PushColor(ImGuiCol.Button, 0).Push(ImGuiCol.ButtonHovered, ImGui.GetColorU32(ImGuiCol.ButtonHovered)).Push(ImGuiCol.ButtonActive, ImGui.GetColorU32(ImGuiCol.ButtonActive));
         var clicked = ImGui.ImageButton(wrap.Handle, size);
 

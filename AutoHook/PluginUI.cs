@@ -42,7 +42,7 @@ public class PluginUi : Window, IDisposable {
     }
 
     public void Dispose() {
-        Service.SaveNow();
+        Configuration.FlushAsync().GetAwaiter().GetResult();
 
         foreach (var tab in _tabs) {
             tab.Dispose();
@@ -64,7 +64,7 @@ public class PluginUi : Window, IDisposable {
     }
     private void Debug() {
         using var _ = ImRaii.PushId("debug");
-        ImGui.SetNextItemWidth(300 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(300.Scaled());
         if (ImGui.Begin($"DebugWIndows", ref Service.OpenConsole)) {
             var logs = Service.LogMessages.AsEnumerable().Reverse().ToList();
             for (var i = 0; i < logs.Count; i++) {
@@ -96,7 +96,7 @@ public class PluginUi : Window, IDisposable {
         if (Service.OpenConsole)
             Debug();
 
-        using (var style = ImRaii.PushStyle(ImGuiStyleVar.CellPadding, new Vector2(5 * ImGuiHelpers.GlobalScale, 0))) {
+        using (var style = ImRaii.PushStyle(ImGuiStyleVar.CellPadding, new Vector2(5.Scaled(), 0))) {
             using var table = ImRaii.Table("###MainTable", 2, ImGuiTableFlags.Resizable);
             ImGui.TableSetupColumn("##LeftColumn", ImGuiTableColumnFlags.WidthFixed, ImGui.GetWindowWidth() / 3);
 
@@ -107,12 +107,12 @@ public class PluginUi : Window, IDisposable {
 
             using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight }, false, ImGuiWindowFlags.NoDecoration)) {
                 if (ImGui.Selectable(UIStrings.StartActions))
-                    AutoHook.Plugin.HookManager.StartFishing();
+                    Service.FishManager.StartFishing();
 
-                using (var c = ImRaii.Child("logo", new(0, 125 * ImGuiHelpers.GlobalScale))) {
+                using (var c = ImRaii.Child("logo", new(0, 125.Scaled()))) {
                     if (Svc.Texture.GetFromManifestResource(Assembly.GetExecutingAssembly(), $"AutoHook.Assets.Fishy{(Service.Configuration.PluginEnabled ? "" : "_g")}.png").TryGetWrap(out var image, out var _)) {
                         ImGuiEx.LineCentered("###AHLogo", () => {
-                            ImGui.Image(image.Handle, new Vector2(125 * ImGuiHelpers.GlobalScale, 125 * ImGuiHelpers.GlobalScale));
+                            ImGui.Image(image.Handle, new Vector2(125.Scaled(), 125.Scaled()));
 
                             if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
                                 Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;
@@ -191,13 +191,13 @@ public class PluginUi : Window, IDisposable {
                         Service.Status = $"Equipped Bait: {baitName} - Preset \'{presetName}\' will be used.";
 
                         ImGui.TextColored(ImGuiColors.DalamudViolet, $"Equipped Bait:");
-                        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
+                        ImGui.SameLine(0, 3.Scaled());
                         ImGui.TextColored(ImGuiColors.ParsedGold, $"\'{baitName}\'");
-                        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
+                        ImGui.SameLine(0, 3.Scaled());
                         ImGui.TextColored(ImGuiColors.DalamudViolet, $"- Preset");
-                        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
+                        ImGui.SameLine(0, 3.Scaled());
                         ImGui.TextColored(ImGuiColors.ParsedGold, $"\'{presetName}\'");
-                        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
+                        ImGui.SameLine(0, 3.Scaled());
                         ImGui.TextColored(ImGuiColors.DalamudViolet, $"will be used.");
                     }
                 }
@@ -212,7 +212,7 @@ public class PluginUi : Window, IDisposable {
         ImGui.Separator();
     }
 
-    public override void OnClose() => Service.SaveNow();
+    public override void OnClose() => Configuration.FlushAsync().GetAwaiter().GetResult();
 
     public static void ShowKofi() {
         ImGui.SameLine();
@@ -232,9 +232,9 @@ public class PluginUi : Window, IDisposable {
     [Localizable(false)]
     private void DrawChangelog() {
         var text = UIStrings.Changelog;
-        ImGui.SetCursorPosX(ImGui.GetWindowWidth() - ImGuiHelpers.GetButtonSize(text).X - 5 * ImGuiHelpers.GlobalScale);
+        ImGui.SetCursorPosX(ImGui.GetWindowWidth() - ImGuiHelpers.GetButtonSize(text).X - 5.Scaled());
 
-        ImGui.SetNextItemWidth(400 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(400.Scaled());
         if (ImGui.Begin($"{text}", ref _openChangelog)) {
             var changes = PluginChangelog.Versions;
 

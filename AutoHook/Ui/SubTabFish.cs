@@ -30,7 +30,7 @@ public class SubTabFish {
 
             DrawUtil.Checkbox($"###checkbox{idx}", ref fish.Enabled);
 
-            ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+            ImGui.SameLine(0, 6.Scaled());
             var x = ImGui.GetCursorPosX();
             if (ImGui.CollapsingHeader($"{fish.Fish.Name} {fishCount}###a{idx}")) {
                 ImGui.SetCursorPosX(x);

@@ -107,11 +107,11 @@ public abstract class BaseActionCast {
             if (DrawUtil.Checkbox(@$"###{label}", ref Enabled, HelpText, true))
                 Service.PrintDebug(@$"[BaseAction] {Name} - {(Enabled ? @"Enabled" : @"Disabled")}");
 
-            ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
+            ImGui.SameLine(0, 3.Scaled());
 
             var x = ImGui.GetCursorPosX();
             if (ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.FramePadding)) {
-                ImGui.SameLine(200 * ImGuiHelpers.GlobalScale);
+                ImGui.SameLine(200.Scaled());
                 DrawGpThreshold();
                 DrawUpDownArrows(availableActs);
                 ImGui.SetCursorPosX(x);
@@ -122,7 +122,7 @@ public abstract class BaseActionCast {
                 ImGui.TreePop();
             }
             else {
-                ImGui.SameLine(200 * ImGuiHelpers.GlobalScale);
+                ImGui.SameLine(200.Scaled());
                 DrawGpThreshold();
                 DrawUpDownArrows(availableActs);
             }
@@ -131,9 +131,9 @@ public abstract class BaseActionCast {
             if (DrawUtil.Checkbox(@$"###{label}", ref Enabled, HelpText, true))
                 Service.PrintDebug(@$"[BaseAction] {Name} - {(Enabled ? @"Enabled" : @"Disabled")}");
 
-            ImGui.SameLine(0, 28 * ImGuiHelpers.GlobalScale);
+            ImGui.SameLine(0, 28.Scaled());
             ImGui.Text(label);
-            ImGui.SameLine(200 * ImGuiHelpers.GlobalScale);
+            ImGui.SameLine(200.Scaled());
             DrawGpThreshold();
             DrawUpDownArrows(availableActs);
         }
@@ -195,7 +195,7 @@ public abstract class BaseActionCast {
         using var popup = ImRaii.Popup(@"gp_cfg");
         if (!popup.Success) return;
 
-        using var item = ImRaii.Child("###gp_cfg2", new Vector2(175 * ImGuiHelpers.GlobalScale, 125 * ImGuiHelpers.GlobalScale), true);
+        using var item = ImRaii.Child("###gp_cfg2", new Vector2(175.Scaled(), 125.Scaled()), true);
         if (ImGui.Button(@" X "))
             ImGui.CloseCurrentPopup();
         ImGui.SameLine();
@@ -218,7 +218,7 @@ public abstract class BaseActionCast {
 
         //ImGui.SameLine();
 
-        ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(100.Scaled());
         if (ImGui.InputInt(UIStrings.GP, ref GpThreshold, 1, 1)) {
             GpThreshold = Math.Max(GpThreshold, 0);
             SetThreshold(GpThreshold);

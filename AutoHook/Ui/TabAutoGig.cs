@@ -68,7 +68,7 @@ internal class TabAutoGig : BaseTab {
 
             ImGui.SameLine();
 
-            ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+            ImGui.SetNextItemWidth(90.Scaled());
             if (ImGui.InputInt(UIStrings.GigHitbox, ref selectedPreset.HitboxSize)) {
                 selectedPreset.HitboxSize = Math.Max(0, Math.Min(selectedPreset.HitboxSize, 300));
                 Service.Save();

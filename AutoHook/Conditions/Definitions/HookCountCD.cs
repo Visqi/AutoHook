@@ -21,7 +21,7 @@ public sealed class HookCountCD : IConditionDefinition, ISimpleConditionValue<(b
     }
 
     public void DrawParams(Condition condition) {
-        ImGui.SetNextItemWidth(70 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(70.Scaled());
         var guidText = GetGuidString(condition.Params);
         if (ImGui.InputText("Hook GUID", ref guidText, 128) && Guid.TryParse(guidText, out var guid))
             condition.Params["guid"] = guid.ToString();

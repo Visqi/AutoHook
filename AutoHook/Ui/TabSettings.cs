@@ -78,7 +78,7 @@ public class TabSettings : BaseTab {
         ref var min = ref Service.Configuration.DelayBetweenHookMin;
         ref var max = ref Service.Configuration.DelayBetweenHookMax;
 
-        ImGui.SetNextItemWidth(45 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(45.Scaled());
         if (ImGui.InputInt(UIStrings.DrawConfigs_Min_, ref min, 0)) {
             min = Math.Clamp(min, 0, max);
             Service.Save();
@@ -86,7 +86,7 @@ public class TabSettings : BaseTab {
 
         ImGui.SameLine();
 
-        ImGui.SetNextItemWidth(45 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(45.Scaled());
         if (ImGui.InputInt(UIStrings.DrawConfigs_Max_, ref max, 0)) {
             max = Math.Clamp(max, min, 9999);
             Service.Save();
@@ -101,14 +101,14 @@ public class TabSettings : BaseTab {
         ref var min = ref Service.Configuration.DelayBetweenCastsMin;
         ref var max = ref Service.Configuration.DelayBetweenCastsMax;
 
-        ImGui.SetNextItemWidth(45 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(45.Scaled());
         if (ImGui.InputInt(UIStrings.DrawConfigs_Min_, ref min, 0)) {
             min = Math.Clamp(min, 0, max);
             Service.Save();
         }
 
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(45 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(45.Scaled());
         if (ImGui.InputInt(UIStrings.DrawConfigs_Max_, ref max, 0)) {
             max = Math.Clamp(max, min, 9999);
             Service.Save();
@@ -125,14 +125,14 @@ public class TabSettings : BaseTab {
         ref var min = ref Service.Configuration.DelayBeforeCancelMin;
         ref var max = ref Service.Configuration.DelayBeforeCancelMax;
 
-        ImGui.SetNextItemWidth(45 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(45.Scaled());
         if (ImGui.InputInt(UIStrings.DrawConfigs_Min_, ref min, 0)) {
             min = Math.Clamp(min, 0, max);
             Service.Save();
         }
 
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(45 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(45.Scaled());
         if (ImGui.InputInt(UIStrings.DrawConfigs_Max_, ref max, 0)) {
             max = Math.Clamp(max, min, 9999);
             Service.Save();
@@ -140,7 +140,7 @@ public class TabSettings : BaseTab {
     }
 
     private void DrawLanguageSelector() {
-        ImGui.SetNextItemWidth(55 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(55.Scaled());
         var languages = new List<string>
         {
             @"en",

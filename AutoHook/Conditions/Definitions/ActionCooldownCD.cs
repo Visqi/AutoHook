@@ -57,7 +57,7 @@ public sealed class ActionCooldownCD : IConditionDefinition {
         var typeInt = args.Type;
         var label = typeInt == 1 ? "Item" : "Action";
 
-        ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(90.Scaled());
         using (var comboType = ImRaii.Combo("Type", label)) {
             if (comboType.Success) {
                 if (ImGui.Selectable("Action", typeInt == 0)) typeInt = 0;
@@ -119,7 +119,7 @@ public sealed class ActionCooldownCD : IConditionDefinition {
         }
 
         var sec = args.Seconds;
-        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(80.Scaled());
         if (ImGui.InputInt("Cooldown (sec)", ref sec)) {
             sec = Math.Max(0, sec);
             args = args with { Seconds = sec };
@@ -128,7 +128,7 @@ public sealed class ActionCooldownCD : IConditionDefinition {
 
         ImGui.SameLine();
         var opLabel = args.Op is ">" or ">=" or "<" or "<=" or "=" ? args.Op : "=";
-        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(50.Scaled());
         using (var comboOp = ImRaii.Combo("##act_cd_op", opLabel)) {
             if (comboOp.Success) {
                 foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {

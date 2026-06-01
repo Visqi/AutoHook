@@ -53,7 +53,7 @@ internal class AutoGig : Window, IDisposable {
     public void Dispose() {
         Service.WindowSystem.RemoveWindow(this);
         Svc.Condition.ConditionChange -= Condition_ConditionChange;
-        Service.SaveNow();
+        Configuration.FlushAsync().GetAwaiter().GetResult();
     }
 
     public override void Draw() {
@@ -75,10 +75,10 @@ internal class AutoGig : Window, IDisposable {
 
         DrawUtil.DrawComboSelector(_gigCfg.Presets, preset => preset.PresetName, _gigCfg.SelectedPreset?.PresetName ?? UIStrings.None, gig => _gigCfg.SelectedPreset = gig);
 
-        ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(90.Scaled());
         if (selectedPreset != null) {
             ImGui.SameLine();
-            ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+            ImGui.SetNextItemWidth(90.Scaled());
             if (ImGui.InputInt(UIStrings.Hitbox + @" ", ref selectedPreset.HitboxSize)) {
                 selectedPreset.HitboxSize = Math.Max(0, Math.Min(selectedPreset.HitboxSize, 300));
                 Service.Save();
@@ -220,12 +220,12 @@ internal class AutoGig : Window, IDisposable {
         //Hitbox left
         var lineStart = _uiPos + new Vector2(startX - space, centerY);
         var lineEnd = lineStart + new Vector2(0, endY);
-        drawList.AddLine(lineStart, lineEnd, 0xFF0000C0, 1 * ImGuiHelpers.GlobalScale);
+        drawList.AddLine(lineStart, lineEnd, 0xFF0000C0, 1.Scaled());
 
         //Hitbox right
         lineStart = _uiPos + new Vector2(startX + space, centerY);
         lineEnd = lineStart + new Vector2(0, endY);
-        drawList.AddLine(lineStart, lineEnd, 0xFF0000C0, 1 * ImGuiHelpers.GlobalScale);
+        drawList.AddLine(lineStart, lineEnd, 0xFF0000C0, 1.Scaled());
     }
 
     private unsafe void DrawFishHitbox(ImDrawListPtr drawList, float fishHitbox) {
@@ -238,7 +238,7 @@ internal class AutoGig : Window, IDisposable {
 
         var lineStart = _uiPos + new Vector2(fishHitbox, _addon->FishLines->Y * _uiScale);
         var lineEnd = lineStart + new Vector2(0, _addon->FishLines->Height * _uiScale);
-        drawList.AddLine(lineStart, lineEnd, 0xFF20B020, 1 * ImGuiHelpers.GlobalScale);
+        drawList.AddLine(lineStart, lineEnd, 0xFF20B020, 1.Scaled());
         Service.PrintDebug($"[AutoGig] DrawFishHitbox - Green line drawn at {fishHitbox}");
     }
 

@@ -26,7 +26,7 @@ public sealed class OceanMissionProgressCD : IConditionDefinition {
     public void DrawParams(Condition condition) {
         var mission = Math.Clamp(GetInt(condition.Params, "mission", 1), 1, 3);
 
-        ImGui.SetNextItemWidth(60 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(60.Scaled());
         using (var combo = ImRaii.Combo("Mission", $"{mission}")) {
             if (combo.Success) {
                 if (ImGui.Selectable("1", mission == 1)) condition.Params["mission"] = (long)1;

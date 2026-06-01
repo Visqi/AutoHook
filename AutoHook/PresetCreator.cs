@@ -32,7 +32,7 @@ public class PresetCreator {
         DrawUtil.DrawComboSelector(GameRes.ImportedFishes.Where(f => !f.IsSpearFish).ToList(), item => item.Name, _selectedTargetFish?.Name ?? UIStrings.None, SetSelectedFish);
 
         DrawUtil.TextV("Preset Name: ");
-        ImGui.SetNextItemWidth(220 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(220.Scaled());
         if (ImGui.InputTextWithHint("###input", $"Auto - {_selectedTargetFish?.Name ?? "Preset Name"}",
                 ref _newPresetName, 64, ImGuiInputTextFlags.AutoSelectAll)) {
         }

@@ -29,7 +29,7 @@ public sealed class AutoIdenticalCast : BaseActionCast {
 
         ImGui.SameLine();
 
-        ImGui.SetNextItemWidth(30 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(30.Scaled());
         if (ImGui.InputInt(UIStrings.TimeS, ref stack, 0, 0)) {
             CaughtAmountLimit = Math.Max(1, Math.Min(stack, 999));
             Service.Save();
@@ -45,7 +45,7 @@ public sealed class AutoIdenticalCast : BaseActionCast {
 
         ImGui.SameLine();
 
-        ImGui.SetNextItemWidth(30 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(30.Scaled());
         if (ImGui.InputInt(UIStrings.TimeS, ref stack, 0, 0)) {
             CaughtAmountLimit = Math.Max(1, Math.Min(stack, 999));
             Service.Save();

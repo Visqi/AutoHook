@@ -1,5 +1,4 @@
 using AutoHook.Conditions;
-using AutoHook.Data;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -93,7 +92,7 @@ public class SubTabExtra {
             }
 
             if (!config.AutoOceanFishAllStops) {
-                ImGui.SetNextItemWidth(280 * ImGuiHelpers.GlobalScale);
+                ImGui.SetNextItemWidth(280.Scaled());
                 var stopLabel = config.AutoOceanFishSpotId != 0 && config.AutoOceanFishTimeId != 0
                     ? OceanStopUtil.FormatStopLabel(config.AutoOceanFishSpotId, config.AutoOceanFishTimeId)
                     : UIStrings.SelectZoneAndTime;
@@ -147,20 +146,20 @@ public class SubTabExtra {
 
             if (DrawUtil.DrawCheckboxHeader(headerLabel, ref enabled, ImGuiTreeNodeFlags.DefaultOpen, () => {
                 trig.ConditionSet = ConditionUi.DrawConditionSetSlim(UIStrings.When, trig.ConditionSet, ConditionScope.Hook, showAdvanced: true, drawHeaderExtras: () => {
-                        ImGui.SameLine(0, 3 * ImGuiHelpers.GlobalScale);
-                        if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
-                            config.Triggers.RemoveAt(i);
-                            Service.Save();
-                            removed = true;
-                        }
-                        ImGui.TooltipOnHover(UIStrings.Delete);
-                    });
+                    ImGui.SameLine(0, 3.Scaled());
+                    if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
+                        config.Triggers.RemoveAt(i);
+                        Service.Save();
+                        removed = true;
+                    }
+                    ImGui.TooltipOnHover(UIStrings.Delete);
+                });
 
                 if (removed)
                     return;
 
                 ImGui.Separator();
-                ImGui.Indent(20 * ImGuiHelpers.GlobalScale);
+                ImGui.Indent(20.Scaled());
                 var startFishing = trig.StartFishing;
                 DrawUtil.DrawCheckboxTree("Start fishing", ref startFishing, null);
                 trig.StartFishing = startFishing;
@@ -224,7 +223,7 @@ public class SubTabExtra {
 
                 trig.NotifyOnSuccess.DrawConfig(string.Empty);
 
-                ImGui.Unindent(20 * ImGuiHelpers.GlobalScale);
+                ImGui.Unindent(20.Scaled());
             }, helpText: string.Empty, forceOpen: forceOpen)) {
                 trig.Enabled = enabled;
                 Service.Save();

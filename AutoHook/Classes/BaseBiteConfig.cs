@@ -106,7 +106,7 @@ public class BaseBiteConfig(HookType type) {
 
     private void SetupTimer(ref double minTimeDelay, ref double maxTimeDelay) {
 
-        ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(100.Scaled());
         if (ImGui.InputDouble(UIStrings.MinWait, ref minTimeDelay, .1, 1, @"%.1f%")) {
             switch (minTimeDelay) {
                 case <= 0:
@@ -123,7 +123,7 @@ public class BaseBiteConfig(HookType type) {
         ImGui.SameLine();
         ImGuiComponents.HelpMarker($"{UIStrings.HelpMarkerMinWaitTimer}\n\n{UIStrings.DoesntHaveAffectUnderChum}");
 
-        ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(100.Scaled());
         if (ImGui.InputDouble(UIStrings.MaxWait, ref maxTimeDelay, .1, 1, @"%.1f%")) {
             switch (maxTimeDelay) {
                 case 0.1:

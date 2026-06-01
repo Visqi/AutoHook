@@ -21,7 +21,7 @@ public sealed class OceanZoneCD : IConditionDefinition {
         var zone = GetInt(condition.Params, "zone", 0);
         zone = Math.Clamp(zone, 0, 2);
 
-        ImGui.SetNextItemWidth(60 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(60.Scaled());
         var label = zone switch {
             0 => "1",
             1 => "2",

@@ -70,8 +70,6 @@ public partial class Configuration : IPluginConfiguration {
         }
     }
 
-    public void Save() => Svc.Interface.SavePluginConfig(this);
-
     public void Initiate() {
         if (HookPresets.DefaultPreset.ListOfBaits.Count != 0)
             return;
@@ -81,44 +79,6 @@ public partial class Configuration : IPluginConfiguration {
 
         HookPresets.DefaultPreset.ListOfBaits.Add(new HookConfig(bait));
         HookPresets.DefaultPreset.ListOfMooch.Add(new HookConfig(mooch));
-    }
-
-    public static Configuration Load() {
-        try {
-            var file = Svc.Interface.ConfigFile;
-
-            if (file.Exists) {
-                var json = File.ReadAllText(file.FullName, Encoding.UTF8);
-                var migratedJson = ConfigurationJsonMigrator.MigrateToLatest(json);
-
-                Configuration? config;
-                try {
-                    config = JsonConvert.DeserializeObject<Configuration>(migratedJson, new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace });
-                }
-                catch (Exception ex) {
-                    Svc.Log.Error(@$"[Configuration] Failed to deserialize migrated config JSON: {ex.Message}");
-                    config = null;
-                }
-
-                if (config != null) {
-                    config.Initiate();
-                    config.Save();
-                    return config;
-                }
-
-                Svc.Log.Warning(@"[Configuration] Config file exists but could not be deserialized; recreating defaults.");
-            }
-
-            // No existing or valid config file: start fresh with defaults.
-            var fresh = new Configuration();
-            fresh.Initiate();
-            fresh.Save();
-            return fresh;
-        }
-        catch (Exception e) {
-            Svc.Log.Error(@$"[Configuration] {e.Message}");
-            throw;
-        }
     }
 
     // Got the export/import function from the UnknownX7's ReAction repo

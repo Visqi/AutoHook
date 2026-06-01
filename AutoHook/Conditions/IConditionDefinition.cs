@@ -1,6 +1,7 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using ECommons.ImGuiMethods;
 
 namespace AutoHook.Conditions;
 
@@ -65,7 +66,7 @@ public interface IConditionDefinition {
         var ids = GetIds(cond.Params);
         var text = string.Join(", ", ids);
         var buf = text;
-        ImGui.SetNextItemWidth(140 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(140.Scaled());
         if (!ImGui.InputText(label, ref buf, 128))
             return;
 
@@ -154,7 +155,7 @@ public interface IConditionDefinition {
         var val = args.Value;
         var label = args.Op is ">" or ">=" or "<" or "<=" or "=" ? args.Op : defaultOp;
 
-        ImGui.SetNextItemWidth(50 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(50.Scaled());
         using var combo = ImRaii.Combo(comboId, label);
         if (combo) {
             foreach (var choice in new[] { ">", ">=", "<", "<=", "=" }) {
@@ -166,7 +167,7 @@ public interface IConditionDefinition {
         }
 
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(valueWidth * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(valueWidth.Scale());
         if (ImGui.InputInt(valueLabel, ref val)) {
             val = clamp(val);
             ApplyIntCompareParams(condition, args with { Value = val }, valueKey, defaultOp);
@@ -196,7 +197,7 @@ public interface IConditionDefinition {
         var min = ranges.Count > 0 ? ranges[0].Min : 0;
         var max = ranges.Count > 0 ? ranges[0].Max : 0;
 
-        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(80f.Scale());
         if (ImGui.InputDouble("Min", ref min, 0.1, 1, "%.1f")) {
             var list = ranges.Count == 0 ? new List<(double, double)>() : [.. ranges];
             if (list.Count == 0)
@@ -208,7 +209,7 @@ public interface IConditionDefinition {
         }
 
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(80 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(80f.Scale());
         if (ImGui.InputDouble("Max (0 = no cap)", ref max, 0.1, 1, "%.1f")) {
             var list = ranges.Count == 0 ? new List<(double, double)>() : [.. ranges];
             if (list.Count == 0)

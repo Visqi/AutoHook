@@ -22,7 +22,7 @@ public sealed class FishCaughtCountCD : IConditionDefinition, ISimpleConditionVa
     public void DrawParams(Condition condition) {
         var fishId = GetInt(condition.Params, "id", 0);
 
-        ImGui.SetNextItemWidth(70 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(70.Scaled());
         if (ImGui.InputInt("Fish ID", ref fishId)) {
             fishId = Math.Max(0, fishId);
             condition.Params["id"] = (long)fishId;

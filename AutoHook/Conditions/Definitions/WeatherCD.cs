@@ -65,7 +65,7 @@ public sealed class WeatherCD : IConditionDefinition {
             _ => UIStrings.Current,
         };
 
-        ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth(90.Scaled());
         using (var comboSlot = ImRaii.Combo("##weather_slot", slotLabel)) {
             if (comboSlot.Success) {
                 if (ImGui.Selectable(UIStrings.Previous, slot == "prev")) slot = "prev";
