@@ -3,9 +3,6 @@ using System.Numerics;
 
 namespace AutoHook.Tasks;
 
-/// <summary>
-/// Moves to a boat railing spot (first zone only) and starts AutoHook fishing actions for an ocean stop.
-/// </summary>
 public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex) : TaskBase {
     public uint ZoneIndex { get; } = zoneIndex;
     private static readonly Random Rng = new();
@@ -27,7 +24,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
         Service.PrintDebug("[AutoOceanFish] StartFishing returned");
     }
 
-    /// <summary>Random railing position on the boat deck (from Henchman OnABoat).</summary>
+    // https://github.com/Knightmore/Henchman/blob/4aa8cf33b6164536acca81afefa0df5da6740e89/Henchman/Features/OnABoat/OnABoat.cs#L120
     internal static Vector3 GetFishingPosition() {
         var left = new Vector3(7 + Rng.NextSingle() * 0.25f, 6.711f, Rng.Next(2) == 0 ? Rng.NextSingle() * 10f + -14f : Rng.NextSingle() * 7f + -2f);
         var right = new Vector3(-7 - Rng.NextSingle() * 0.25f, 6.711f, Rng.NextSingle() * 15.5f + -10f);
@@ -37,7 +34,8 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
     private async Task WalkToRailing() {
         var position = GetFishingPosition();
         var rotation = position.X > 0 ? 1.5f : -1.5f;
-        await MoveToDirectly(position, Service.WorldState.IsCastAvailable);
+        await MoveToDirectly(position, () => Player.Object.WithinRange(position, 1) && Service.WorldState.IsCastAvailable());
+        await NextFrame(500);
         unsafe {
             Svc.Objects.LocalPlayer?.Character->SetRotation(rotation);
         }
