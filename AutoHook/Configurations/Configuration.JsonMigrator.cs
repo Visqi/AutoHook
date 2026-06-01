@@ -46,11 +46,14 @@ public static class ConfigurationJsonMigrator {
         if (version < 6) {
             MigrateV6(root);
             root["Version"] = 6;
+            version = 6;
         }
 
-        MigrateSwimbaitCountThresholdToConditions(root);
-        MigrateSparefulHandSwimbaitLimits(root);
-        MigrateFishCaughtActionEnabledPresets(root);
+        // v6 → v7: swimbait count thresholds, spareful hand swimbait limits, surface slap / identical cast enabled
+        if (version < 7) {
+            MigrateV7(root);
+            root["Version"] = 7;
+        }
 
         return root.ToString(Formatting.None);
     }
@@ -180,20 +183,23 @@ public static class ConfigurationJsonMigrator {
         }
     }
 
+    private static void MigrateV7(JObject root) {
+        MigrateSwimbaitCountThresholdToConditions(root);
+        MigrateSparefulHandSwimbaitLimits(root);
+        MigrateFishCaughtActionEnabledPresets(root);
+    }
+
     private static void MigratePresetConditions(JObject preset) {
         foreach (var hook in EnumerateArray(preset["ListOfBaits"]).Concat(EnumerateArray(preset["ListOfMooch"]))) {
             if (hook is JObject hookObj) {
                 MigrateHookConfigJson(hookObj);
                 MigrateHookSwimbaitJson(hookObj);
-                var hookFishId = (int?)(hookObj["BaitFish"]?["Id"] ?? 0) ?? 0;
-                MigrateHookSwimbaitCountThreshold(hookObj, hookFishId);
             }
         }
         foreach (var token in EnumerateArray(preset["ListOfFish"])) {
             if (token is JObject fishObj) {
                 MigrateFishConfigJson(fishObj);
                 MigrateFishConfigStopSwapJson(fishObj);
-                MigrateFishSparefulHandSwimbaitLimit(fishObj);
             }
         }
         if (preset["AutoCastsCfg"] is JObject autoCasts) {

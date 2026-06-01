@@ -11,7 +11,7 @@ namespace AutoHook.Configurations;
 
 [Serializable]
 public partial class Configuration : IPluginConfiguration {
-    public int Version { get; set; } = 6;
+    public int Version { get; set; } = 7;
     public string CurrentLanguage { get; set; } = @"en";
 
     public bool HideLocButton = true;

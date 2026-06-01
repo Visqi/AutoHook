@@ -21,8 +21,7 @@ public partial class Configuration {
         new V3Migration(),
         new V4Migration(),
         new V5Migration(),
-        // V6 migration is handled by ConfigurationJsonMigrator at the JSON level.
-        // new V6Migration(),
+        // V6+ migrations are handled by ConfigurationJsonMigrator at the JSON level
     ];
 
     internal static void RunMigrationsUpTo(Configuration config, int maxVersion) {
@@ -96,6 +95,4 @@ public partial class Configuration {
             config.Version = 5;
         }
     }
-
-    // V6 migration is handled entirely by ConfigurationJsonMigrator at the JSON level.
 }
