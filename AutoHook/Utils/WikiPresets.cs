@@ -1,17 +1,15 @@
-﻿using ECommons.Throttlers;
+using ECommons.Throttlers;
 using HtmlAgilityPack;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 
 namespace AutoHook.Utils;
 
-public static partial class WikiPresets {
+public static class WikiPresets {
     private const string BaseUrl = "https://github.com/PunishXIV/AutoHook/wiki";
     private const string RawWiki = "https://raw.githubusercontent.com/wiki/PunishXIV/AutoHook";
     private static readonly HttpClient httpClient = new(); // Reuse HttpClient
-
-    [GeneratedRegex("```\\s*(AH(?:[1-4]|FOLDER)\\s*[\\s\\S]*?)\\s*```", RegexOptions.Multiline)] public static partial Regex Ah();
-    [GeneratedRegex("```\\s*(AHSF1\\s*[\\s\\S]*?)\\s*```", RegexOptions.Multiline)] public static partial Regex Ahsf();
+    private static readonly Lazy<Regex> PresetBlockRegex = new(BuildPresetBlockRegex);
 
     public static Dictionary<string, List<(PresetFolder? folder, List<CustomPresetConfig> Presets)>> Presets = [];
     public static Dictionary<string, List<AutoGigConfig>> PresetsSf = [];
@@ -27,7 +25,7 @@ public static partial class WikiPresets {
             try {
                 var base64 = await ExtractBase64FromWikiPage($"{RawWiki}/{mdUrl}.md");
 
-                Func<string, (PresetFolder? Folder, List<CustomPresetConfig> Presets)> selector = x => {
+                static (PresetFolder? Folder, List<CustomPresetConfig> Presets) selector(string x) {
                     if (x.StartsWith(Configuration.ExportPrefixFolder)) {
                         var imported = Configuration.ImportFolder(x) ?? throw new Exception("Failed to import"); // Kill wiki shouldn't have broken presets
                         return (imported.Folder, imported.Presets);
@@ -35,12 +33,9 @@ public static partial class WikiPresets {
                     var presets = Configuration.ImportPreset(x) ?? throw new Exception("Failed to import");
 
                     return (null, [(CustomPresetConfig)presets]);
-                };
+                }
                 var list = base64.presets.Select(selector).ToList();
                 var listsf = base64.presetsSf.Select(Configuration.ImportPreset).OfType<AutoGigConfig>().ToList();
-
-
-
                 Presets.Add(mdUrl.Replace(@"-", @" "), list);
                 PresetsSf.Add(mdUrl.Replace(@"-", @" "), listsf);
             }
@@ -68,14 +63,15 @@ public static partial class WikiPresets {
 
     static async Task<(List<string> presets, List<string> presetsSf)> ExtractBase64FromWikiPage(string url) {
         var wikiPageContent = await httpClient.GetStringAsync(url);
-        var presets = Ah().Matches(wikiPageContent)
-            .Select(match => match.Groups[1].Value)
-            .ToList();
-
-        var presetsSf = Ahsf().Matches(wikiPageContent)
-            .Select(match => match.Groups[1].Value)
-            .ToList();
+        var blocks = PresetBlockRegex.Value.Matches(wikiPageContent).Select(match => match.Groups[1].Value.Trim()).ToList();
+        var presets = blocks.Where(b => !b.StartsWith(Configuration.ExportPrefixSf)).ToList();
+        var presetsSf = blocks.Where(b => b.StartsWith(Configuration.ExportPrefixSf)).ToList();
 
         return (presets, presetsSf);
+    }
+
+    static Regex BuildPresetBlockRegex() {
+        var prefixPattern = string.Join("|", Configuration.ExportPrefixes.OrderByDescending(p => p.Length).Select(Regex.Escape));
+        return new Regex($@"```\s*((?:{prefixPattern})[\s\S]*?)\s*```", RegexOptions.Multiline | RegexOptions.Compiled);
     }
 }

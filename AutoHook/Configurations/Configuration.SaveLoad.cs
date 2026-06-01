@@ -19,7 +19,7 @@ public partial class Configuration {
 
     private static int _savePending;
     private static Task? _saveTask;
-    private static readonly object SaveGate = new();
+    private static readonly object _lock = new();
 
     public static async Task<Configuration> LoadAsync(CancellationToken cancellationToken = default) {
         try {
@@ -62,7 +62,7 @@ public partial class Configuration {
     public static void Save() {
         Interlocked.Exchange(ref _savePending, 1);
 
-        lock (SaveGate) {
+        lock (_lock) {
             if (_saveTask is { IsCompleted: false })
                 return;
 
@@ -96,7 +96,7 @@ public partial class Configuration {
             Svc.Log.Error(ex, "[Configuration] Save failed.");
         }
         finally {
-            lock (SaveGate) {
+            lock (_lock) {
                 if (Interlocked.CompareExchange(ref _savePending, 0, 0) == 1)
                     _saveTask = RunSaveLoopAsync();
                 else

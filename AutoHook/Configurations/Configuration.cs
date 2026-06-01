@@ -203,7 +203,7 @@ public partial class Configuration : IPluginConfiguration {
     [NonSerialized] public const string ExportPrefixFolder = "AHFOLDER_";
 
     [NonSerialized]
-    private static readonly List<string> ExportPrefixes =
+    public static readonly IReadOnlyList<string> ExportPrefixes =
     [
         ExportPrefixV2,
         ExportPrefixV3,
