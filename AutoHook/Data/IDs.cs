@@ -58,6 +58,7 @@ public static class IDs {
             BigGameFishing = 3907,
             AmbitiousLure = 3972,
             ModestLure = 3973,
+            Multihook = 4414,
             None = 0;
     }
 

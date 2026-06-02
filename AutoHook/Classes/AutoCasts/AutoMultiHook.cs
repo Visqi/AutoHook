@@ -11,6 +11,8 @@ public sealed class AutoMultiHook : BaseActionCast {
     public override unsafe bool CastCondition() {
         if (!EvaluateConditionSet())
             return false;
+        if (Service.WorldState.HasStatus(IDs.Status.Multihook))
+            return false;
 
         if (DutyActionManager.GetInstanceIfReady() is not null and var dm)
             for (var i = 0; i < dm->NumValidSlots; i++)

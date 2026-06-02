@@ -31,21 +31,8 @@ public partial class FishingManager {
         if (lastFishCatchCfg.IdenticalCast.IsAvailableToCast(caughtCount))
             cast = lastFishCatchCfg.IdenticalCast;
 
-        // global IC
-        if (cast == null) {
-            var autoCastCfg = GetAutoCastCfg();
-            if (autoCastCfg.CastIdenticalCast.IsAvailableToCast(caughtCount))
-                cast = autoCastCfg.CastIdenticalCast;
-        }
-
         if (lastFishCatchCfg.SurfaceSlap.IsAvailableToCast())
             cast = lastFishCatchCfg.SurfaceSlap;
-
-        if (cast == null) {
-            var autoCastCfg = GetAutoCastCfg();
-            if (autoCastCfg.CastSurfaceSlap.IsAvailableToCast())
-                cast = autoCastCfg.CastSurfaceSlap;
-        }
 
         if (lastFishCatchCfg.SparefulHand.IsAvailableToCast())
             cast = lastFishCatchCfg.SparefulHand;

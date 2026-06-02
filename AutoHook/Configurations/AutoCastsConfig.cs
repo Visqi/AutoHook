@@ -26,9 +26,7 @@ public class AutoCastsConfig {
     public AutoPrizeCatch CastPrizeCatch = new();
     public AutoThaliaksFavor CastThaliaksFavor = new();
     public AutoBigGameFishing CastBigGame = new();
-    public AutoSurfaceSlap CastSurfaceSlap = new();
     public AutoMultiHook CastMultihook = new();
-    public AutoIdenticalCast CastIdenticalCast = new();
 
     private List<BaseActionCast> GetAutoCastOrder() {
         var output = new List<BaseActionCast>
@@ -88,14 +86,14 @@ public class AutoCastsConfig {
         if (!action.Enabled || !action.IsAvailableToCast(ignoreCurrentMooch))
             return false;
 
-        if (action.Id == IDs.Actions.Chum && ChumAnimationCancel)
+        if (action.Id == IDs.Actions.Chum && ChumAnimationCancel) {
             TryChumAnimationCancel();
+            return true;
+        }
         else if (noDelay)
-            PlayerRes.CastActionNoDelay(action.Id, action.ActionType, action.GetName());
+            return PlayerRes.TryCastActionNoDelay(action.Id, action.ActionType, action.GetName());
         else
-            PlayerRes.CastActionDelayed(action.Id, action.ActionType, action.GetName());
-
-        return true;
+            return PlayerRes.TryCastActionDelayed(action.Id, action.ActionType, action.GetName());
     }
 
     private void TryChumAnimationCancel() {

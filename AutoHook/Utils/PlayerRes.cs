@@ -45,40 +45,61 @@ public static class PlayerRes {
         return recast->Total - recast->Elapsed;
     }
 
-    public static void CastActionDelayed(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
-        if (WS.BlockCasting) return;
+    public static void CastActionDelayed(uint actionId, ActionType actionType = ActionType.Action, string actionName = "")
+        => TryCastActionDelayed(actionId, actionType, actionName);
+
+    public static bool TryCastActionDelayed(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
+        if (WS.BlockCasting) return false;
 
         if (actionType is ActionType.Action or ActionType.EventAction) {
-            if (!WS.ActionAvailable(actionId, actionType)) return;
+            if (!WS.ActionAvailable(actionId, actionType)) return false;
+
+            var casted = false;
             WS.Execute(new WorldState.OpSetBlockCasting(true));
             Service.PrintDebug(@$"[PlayerResources] Casting Action: {actionName}, Id: {actionId}");
-            try { CastAction(actionId, actionType); }
+            try { casted = CastAction(actionId, actionType); }
             catch (Exception e) { Service.PrintDebug(@$"Error casting action: {actionName}, Id: {actionId}, {e}"); }
+
+            if (!casted) {
+                WS.Execute(new WorldState.OpSetBlockCasting(false));
+                return false;
+            }
+
             DelayNextCast(actionId);
+            return true;
         }
-        else if (actionType == ActionType.Item) {
-            WS.Execute(new WorldState.OpSetBlockCasting(true));
-            Service.PrintDebug(@$"[PlayerResources] Using Item: {actionName}, Id: {actionId}");
-            try { UseItems(actionId); }
-            catch (Exception e) { Service.PrintDebug(@$"Error casting action: {actionName}, Id: {actionId}, {e}"); }
-            DelayNextCast(actionId);
-        }
+
+        if (actionType != ActionType.Item)
+            return false;
+
+        WS.Execute(new WorldState.OpSetBlockCasting(true));
+        Service.PrintDebug(@$"[PlayerResources] Using Item: {actionName}, Id: {actionId}");
+        try { UseItems(actionId); }
+        catch (Exception e) { Service.PrintDebug(@$"Error casting action: {actionName}, Id: {actionId}, {e}"); }
+        DelayNextCast(actionId);
+        return true;
     }
 
     private static bool _blockActionNoDelay;
 
-    public static void CastActionNoDelay(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
-        if (_blockActionNoDelay) return;
+    public static void CastActionNoDelay(uint actionId, ActionType actionType = ActionType.Action, string actionName = "")
+        => TryCastActionNoDelay(actionId, actionType, actionName);
+
+    public static bool TryCastActionNoDelay(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
+        if (_blockActionNoDelay) return false;
         _blockActionNoDelay = true;
+        var casted = false;
         if (actionType is ActionType.Action or ActionType.EventAction && WS.ActionAvailable(actionId, actionType)) {
-            var casted = CastAction(actionId, actionType);
+            casted = CastAction(actionId, actionType);
             if (casted) Service.PrintDebug(@$"[PlayerResources] Casting Action: {actionName}, Id: {actionId}");
         }
         else if (actionType == ActionType.Item) {
             Service.PrintDebug(@$"[PlayerResources] Using Item: {actionName}, Id: {actionId}");
             UseItems(actionId);
+            casted = true;
         }
         _blockActionNoDelay = false;
+        return casted;
     }
 
     public static async void DelayNextCast(uint actionId) {

@@ -1,6 +1,5 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
-using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
@@ -34,19 +33,7 @@ public class SubTabAutoCast {
         ];
 
         DrawHeader(acCfg);
-        DrawGlobalFishCaughtActions(acCfg);
         DrawBody(acCfg);
-    }
-
-    private static void DrawGlobalFishCaughtActions(AutoCastsConfig acCfg) {
-        if (ImGui.TreeNodeEx(UIStrings.FishCaught, ImGuiTreeNodeFlags.FramePadding)) {
-            ImGui.SameLine();
-            ImGuiComponents.HelpMarker(UIStrings.FishCaughtHelp);
-            DrawUtil.DrawSurfaceSlapAndIdenticalCast(acCfg.CastSurfaceSlap, acCfg.CastIdenticalCast);
-            ImGui.TreePop();
-        }
-
-        DrawUtil.SpacingSeparator();
     }
 
     private static void DrawHeader(AutoCastsConfig acCfg) {
@@ -96,34 +83,35 @@ public class SubTabAutoCast {
             ImGui.TreePop();
         }
 
-        if (DrawUtil.Checkbox(UIStrings.TurnCollectOffWithoutAnimCancel, ref acCfg.TurnCollectOffWithoutAnimCancel, UIStrings.TurnCollectOffWithoutAnimCancelHelp)) {
-            var (enabled, start, end) = acCfg.TimeWindow.Value;
-            var enabledLocal = enabled;
-            var startTime = start.ToString(@"HH:mm");
-            var endTime = end.ToString(@"HH:mm");
-            DrawUtil.DrawCheckboxTree(UIStrings.AutoCastOnlyAtSpecificTimes, ref enabledLocal, () => {
-                ImGui.PushItemWidth(40.Scaled());
-                var startTimeGui = ImGui.InputText(@$"{UIStrings.AutoCastStartTime}", ref startTime, 5,
-                    ImGuiInputTextFlags.EnterReturnsTrue);
-                ImGui.PopItemWidth();
-                if (startTimeGui && TimeOnly.TryParse(startTime, out var newStartTime)) {
-                    acCfg.TimeWindow.Value = (true, newStartTime, end);
-                    Service.Save();
-                }
+        DrawUtil.Checkbox(UIStrings.TurnCollectOffWithoutAnimCancel, ref acCfg.TurnCollectOffWithoutAnimCancel,
+            UIStrings.TurnCollectOffWithoutAnimCancelHelp);
 
-                ImGui.PushItemWidth(40.Scaled());
-                var endTimeGui = ImGui.InputText(@$"{UIStrings.AutoCastEndTime}", ref endTime, 5,
-                    ImGuiInputTextFlags.EnterReturnsTrue);
-                ImGui.PopItemWidth();
-                if (endTimeGui && TimeOnly.TryParse(endTime, out var newEndTime)) {
-                    acCfg.TimeWindow.Value = (true, start, newEndTime);
-                    Service.Save();
-                }
-            }, UIStrings.SpecificTimeWindowHelpText);
-            if (enabledLocal != enabled) {
-                acCfg.TimeWindow.Value = (enabledLocal, start, end);
+        var (enabled, start, end) = acCfg.TimeWindow.Value;
+        var enabledLocal = enabled;
+        var startTime = start.ToString(@"HH:mm");
+        var endTime = end.ToString(@"HH:mm");
+        DrawUtil.DrawCheckboxTree(UIStrings.AutoCastOnlyAtSpecificTimes, ref enabledLocal, () => {
+            ImGui.PushItemWidth(40.Scaled());
+            var startTimeGui = ImGui.InputText(@$"{UIStrings.AutoCastStartTime}", ref startTime, 5,
+                ImGuiInputTextFlags.EnterReturnsTrue);
+            ImGui.PopItemWidth();
+            if (startTimeGui && TimeOnly.TryParse(startTime, out var newStartTime)) {
+                acCfg.TimeWindow.Value = (true, newStartTime, end);
                 Service.Save();
             }
+
+            ImGui.PushItemWidth(40.Scaled());
+            var endTimeGui = ImGui.InputText(@$"{UIStrings.AutoCastEndTime}", ref endTime, 5,
+                ImGuiInputTextFlags.EnterReturnsTrue);
+            ImGui.PopItemWidth();
+            if (endTimeGui && TimeOnly.TryParse(endTime, out var newEndTime)) {
+                acCfg.TimeWindow.Value = (true, start, newEndTime);
+                Service.Save();
+            }
+        }, UIStrings.SpecificTimeWindowHelpText);
+        if (enabledLocal != enabled) {
+            acCfg.TimeWindow.Value = (enabledLocal, start, end);
+            Service.Save();
         }
 
         ImGui.TextColored(ImGuiColors.DalamudOrange, UIStrings.Auto_Cast_Sort_Notice);

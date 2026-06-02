@@ -204,7 +204,6 @@ public static class ConfigurationJsonMigrator {
         }
         if (preset["AutoCastsCfg"] is JObject autoCasts) {
             MigrateAutoCordialJson(autoCasts["CastCordial"] as JObject);
-            MigrateAutoIdenticalCastJson(autoCasts["CastIdenticalCast"] as JObject);
             MigrateAutoCastsTimeWindowJson(autoCasts);
             MigrateAutoCastsLegacyJson(autoCasts);
         }
@@ -666,13 +665,6 @@ public static class ConfigurationJsonMigrator {
             MigrateFishCaughtActionEnabled(fishObj, "SurfaceSlap", "UseSurfaceSlap");
             MigrateFishCaughtActionEnabled(fishObj, "IdenticalCast", "UseIdenticalCast");
         }
-
-        if (preset["AutoCastsCfg"] is JObject autoCasts) {
-            if (autoCasts["CastSurfaceSlap"] is JObject castSurfaceSlap)
-                MigrateActionEnabledFromConditions(castSurfaceSlap);
-            if (autoCasts["CastIdenticalCast"] is JObject castIdenticalCast)
-                MigrateActionEnabledFromConditions(castIdenticalCast);
-        }
     }
 
     private static void MigrateFishCaughtActionEnabled(JObject fish, string actionProperty, string legacyProperty) {
@@ -722,14 +714,6 @@ public static class ConfigurationJsonMigrator {
         if (existing?["g"] is JArray groups && groups.Count > 0) return;
         var set = Configuration.ConditionSetBuilder.SingleStatus(IDs.Status.IdenticalCast);
         cordial["OvercapConditionSet"] = JToken.FromObject(set);
-    }
-
-    private static void MigrateAutoIdenticalCastJson(JObject? identical) {
-        if (identical == null || (bool?)identical["OnlyUseUnderPatience"] != true) return;
-        var existing = identical["ConditionSet"] as JObject;
-        if (existing?["g"] is JArray groups && groups.Count > 0) return;
-        var set = Configuration.ConditionSetBuilder.SingleStatus(IDs.Status.AnglersFortune);
-        identical["ConditionSet"] = JToken.FromObject(set);
     }
 
     private static void MigrateAutoCastsTimeWindowJson(JObject autoCasts) {
