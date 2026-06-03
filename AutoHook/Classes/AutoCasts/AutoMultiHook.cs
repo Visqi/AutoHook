@@ -3,7 +3,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 namespace AutoHook.Classes.AutoCasts;
 
 public sealed class AutoMultiHook : BaseActionCast {
-    public AutoMultiHook() : base(UIStrings.Multihook, IDs.Actions.MultiHook, ActionType.EventAction) { }
+    public AutoMultiHook() : base(UIStrings.Multihook, IDs.Actions.MultiHook, ActionType.Action) { }
 
     public override int Priority { get; set; } = 0;
     public override bool IsExcludedPriority { get; set; } = true;
