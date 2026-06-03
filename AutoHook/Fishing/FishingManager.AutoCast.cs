@@ -4,7 +4,7 @@ using ECommons.Throttlers;
 namespace AutoHook.Fishing;
 
 public partial class FishingManager {
-    private const int MaxStartFishingAutoCastDepth = 12;
+    private const int MaxAutoCastChainDepth = 12;
     public AutoCastsConfig GetAutoCastCfg()
         => Presets.SelectedPreset?.AutoCastsCfg ?? Presets.DefaultPreset.AutoCastsCfg;
 
@@ -36,6 +36,9 @@ public partial class FishingManager {
         }
     }
 
+    /// <summary>
+    /// Run every enabled auto-cast whose conditions are met, in priority order, then cast line / mooch.
+    /// </summary>
     private void UseAutoCasts() {
         if (Ws.FishingStep.HasFlag(FishingSteps.None) || Ws.FishingStep.HasFlag(FishingSteps.BeganFishing) || Ws.FishingStep.HasFlag(FishingSteps.Quitting))
             return;
@@ -43,41 +46,15 @@ public partial class FishingManager {
         if (!Ws.IsCastAvailable() || Service.TaskManager.IsBusy)
             return;
 
-        Service.TaskManager.Enqueue(() => {
-            var lastFishCatchCfg = GetLastCatchConfig();
-
-            var acCfg = GetAutoCastCfg();
-
-            var ignoreMooch = lastFishCatchCfg?.NeverMooch ?? false;
-            var autoCast = acCfg.GetNextAutoCast(ignoreMooch);
-
-            if (acCfg.TryCastAction(autoCast, false, ignoreMooch))
-                return;
-
-            CastLineMoochOrRelease(acCfg, lastFishCatchCfg);
-        }, "AutoCasting");
+        Service.TaskManager.Enqueue(() => RunAutoCastChainStep(0), "AutoCasting");
     }
 
-    /// <summary>
-    /// After <see cref="StartFishing"/>, run buff/item auto-casts in sequence, then always attempt cast line / mooch
-    /// (avoids stopping after Cordial/Patience with no cast).
-    /// </summary>
-    private void UseAutoCastsAfterStartFishing() {
-        if (Ws.FishingStep.HasFlag(FishingSteps.None) || Ws.FishingStep.HasFlag(FishingSteps.BeganFishing) || Ws.FishingStep.HasFlag(FishingSteps.Quitting))
-            return;
-
-        if (!Ws.IsCastAvailable() || Service.TaskManager.IsBusy)
-            return;
-
-        Service.TaskManager.Enqueue(() => RunStartFishingAutoCastStep(0), "AutoCastingStart");
-    }
-
-    private void RunStartFishingAutoCastStep(int depth) {
+    private void RunAutoCastChainStep(int depth) {
         var lastFishCatchCfg = GetLastCatchConfig();
         var acCfg = GetAutoCastCfg();
         var ignoreMooch = lastFishCatchCfg?.NeverMooch ?? false;
 
-        if (depth >= MaxStartFishingAutoCastDepth) {
+        if (depth >= MaxAutoCastChainDepth) {
             CastLineMoochOrRelease(acCfg, lastFishCatchCfg);
             return;
         }
@@ -107,7 +84,7 @@ public partial class FishingManager {
         }
 
         Service.TaskManager.EnqueueDelay(delayMs);
-        Service.TaskManager.Enqueue(() => RunStartFishingAutoCastStep(depth + 1), "AutoCastingStart");
+        Service.TaskManager.Enqueue(() => RunAutoCastChainStep(depth + 1), "AutoCasting");
     }
 
     private void CastLineMoochOrRelease(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg) {

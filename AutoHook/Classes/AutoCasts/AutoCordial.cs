@@ -1,4 +1,5 @@
 using AutoHook.Conditions;
+using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
@@ -83,10 +84,13 @@ public sealed class AutoCordial : BaseActionCast {
         if (!IsSpearFishing)
             DrawUtil.Checkbox(UIStrings.CordialOutsideTimeWindow, ref IgnoreTimeWindow, UIStrings.CordialOutsideTimeWindowHelpText);
 
-        DrawAutoCastConditions();
+        using (ImRaii.PushId("CastConditions"))
+            DrawAutoCastConditions();
 
-        if (!IsSpearFishing)
-            OvercapConditionSet = Ui.ConditionUi.DrawConditionSetSlim("Overcap conditions", OvercapConditionSet, Ui.ConditionScope.AutoCordial, showAdvanced: true, showSubPrefix: true);
+        if (!IsSpearFishing) {
+            using (ImRaii.PushId("OvercapConditions"))
+                OvercapConditionSet = Ui.ConditionUi.DrawConditionSetSlim("Overcap conditions", OvercapConditionSet, Ui.ConditionScope.AutoCordial, showAdvanced: true, showSubPrefix: true);
+        }
     };
 
     public override int Priority { get; set; } = 4;

@@ -111,7 +111,7 @@ public partial class FishingManager : IDisposable {
         }
 
         Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.StartedCasting));
-        UseAutoCastsAfterStartFishing();
+        UseAutoCasts();
     }
 
     // The current config is updates two times: When we began fishing (to get the config based on the mooch/bait) and when we hooked the fish (in case the user updated their configs).
