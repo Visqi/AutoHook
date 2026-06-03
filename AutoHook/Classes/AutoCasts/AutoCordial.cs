@@ -43,6 +43,9 @@ public sealed class AutoCordial : BaseActionCast {
     }
 
     public override bool CastCondition() {
+        if (!EvaluateConditionSet())
+            return false;
+
         var cordialList = _cordialList;
 
         if (InvertCordialPriority)
@@ -77,11 +80,13 @@ public sealed class AutoCordial : BaseActionCast {
     protected override DrawOptionsDelegate DrawOptions => () => {
         DrawUtil.Checkbox(UIStrings.AutoCastCordialPriority, ref InvertCordialPriority);
 
-        if (!IsSpearFishing) {
+        if (!IsSpearFishing)
             DrawUtil.Checkbox(UIStrings.CordialOutsideTimeWindow, ref IgnoreTimeWindow, UIStrings.CordialOutsideTimeWindowHelpText);
 
+        DrawAutoCastConditions();
+
+        if (!IsSpearFishing)
             OvercapConditionSet = Ui.ConditionUi.DrawConditionSetSlim("Overcap conditions", OvercapConditionSet, Ui.ConditionScope.AutoCordial, showAdvanced: true, showSubPrefix: true);
-        }
     };
 
     public override int Priority { get; set; } = 4;
