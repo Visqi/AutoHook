@@ -118,15 +118,6 @@ public sealed class ActionCooldownCD : IConditionDefinition {
                 });
         }
 
-        var sec = args.Seconds;
-        ImGui.SetNextItemWidth(80.Scaled());
-        if (ImGui.InputInt("Cooldown (sec)", ref sec)) {
-            sec = Math.Max(0, sec);
-            args = args with { Seconds = sec };
-            condition.Params = args.ToParams();
-        }
-
-        ImGui.SameLine();
         var opLabel = args.Op is ">" or ">=" or "<" or "<=" or "=" ? args.Op : "=";
         ImGui.SetNextItemWidth(50.Scaled());
         using (var comboOp = ImRaii.Combo("##act_cd_op", opLabel)) {
@@ -141,6 +132,15 @@ public sealed class ActionCooldownCD : IConditionDefinition {
                 }
             }
         }
+
+        ImGui.SameLine();
+        var sec = args.Seconds;
+        ImGui.SetNextItemWidth(80.Scaled());
+        if (ImGui.InputInt("Cooldown (sec)", ref sec)) {
+            sec = Math.Max(0, sec);
+            args = args with { Seconds = sec };
+            condition.Params = args.ToParams();
+        }
     }
 
     private static ActionCooldownParams GetParams(IReadOnlyDictionary<string, object> p) {
@@ -153,19 +153,12 @@ public sealed class ActionCooldownCD : IConditionDefinition {
         return new ActionCooldownParams(id, type, secondsInt, op, inv);
     }
 
-    private static string GetIdLabel(int type, uint id) {
-        if (id == 0) {
-            return type switch {
-                1 => "Select item",
-                _ => "Select action",
-            };
-        }
-
-        return type switch {
-            1 => $"{id}: {MultiString.GetItemName(ItemUtil.GetBaseId(id).ItemId)}",
-            _ => $"{id}: {MultiString.GetActionName(id)}",
-        };
-    }
+    private static string GetIdLabel(int type, uint id) => type switch {
+        1 when id is 0 => "Select item",
+        _ when id is 0 => "Select action",
+        1 => $"{id}: {MultiString.GetItemName(ItemUtil.GetBaseId(id).ItemId)}",
+        _ => $"{id}: {MultiString.GetActionName(id)}",
+    };
 
     private static ActionType GetActionType(int type)
         => type == 1 ? ActionType.Item : ActionType.Action;
