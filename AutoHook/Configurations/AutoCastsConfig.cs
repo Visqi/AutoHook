@@ -90,10 +90,13 @@ public class AutoCastsConfig {
             TryChumAnimationCancel();
             return true;
         }
-        else if (noDelay)
-            return PlayerRes.TryCastActionNoDelay(action.Id, action.ActionType, action.GetName());
+
+        if (noDelay)
+            PlayerRes.CastActionNoDelay(action.Id, action.ActionType, action.GetName());
         else
-            return PlayerRes.TryCastActionDelayed(action.Id, action.ActionType, action.GetName());
+            PlayerRes.CastActionDelayed(action.Id, action.ActionType, action.GetName());
+
+        return true;
     }
 
     private void TryChumAnimationCancel() {

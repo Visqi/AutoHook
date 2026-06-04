@@ -45,38 +45,50 @@ public static class PlayerRes {
         return recast->Total - recast->Elapsed;
     }
 
-    public static void CastActionDelayed(uint actionId, ActionType actionType = ActionType.Action, string actionName = "")
-        => TryCastActionDelayed(actionId, actionType, actionName);
-
-    public static bool TryCastActionDelayed(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
-        if (WS.BlockCasting) return false;
+    public static void CastActionDelayed(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
+        if (WS.BlockCasting)
+            return;
 
         if (actionType is ActionType.Action or ActionType.EventAction) {
-            if (!WS.ActionAvailable(actionId, actionType)) return false;
+            if (!WS.ActionAvailable(actionId, actionType))
+                return;
 
-            var casted = false;
             WS.Execute(new WorldState.OpSetBlockCasting(true));
             Service.PrintDebug(@$"[PlayerResources] Casting Action: {actionName}, Id: {actionId}");
-            try { casted = CastAction(actionId, actionType); }
+            try { CastAction(actionId, actionType); }
             catch (Exception e) { Service.PrintDebug(@$"Error casting action: {actionName}, Id: {actionId}, {e}"); }
 
-            if (!casted) {
-                WS.Execute(new WorldState.OpSetBlockCasting(false));
-                return false;
-            }
-
             DelayNextCast(actionId);
-            return true;
+            return;
         }
 
         if (actionType != ActionType.Item)
-            return false;
+            return;
 
         WS.Execute(new WorldState.OpSetBlockCasting(true));
         Service.PrintDebug(@$"[PlayerResources] Using Item: {actionName}, Id: {actionId}");
         try { UseItems(actionId); }
         catch (Exception e) { Service.PrintDebug(@$"Error casting action: {actionName}, Id: {actionId}, {e}"); }
         DelayNextCast(actionId);
+    }
+
+    /// <summary>Returns whether a delayed cast was started (block set and post-cast delay scheduled).</summary>
+    public static bool TryCastActionDelayed(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
+        if (WS.BlockCasting)
+            return false;
+
+        if (actionType is ActionType.Action or ActionType.EventAction) {
+            if (!WS.ActionAvailable(actionId, actionType))
+                return false;
+
+            CastActionDelayed(actionId, actionType, actionName);
+            return true;
+        }
+
+        if (actionType != ActionType.Item)
+            return false;
+
+        CastActionDelayed(actionId, actionType, actionName);
         return true;
     }
 
