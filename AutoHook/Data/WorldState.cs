@@ -76,7 +76,7 @@ public sealed class WorldState {
         => ActionAvailable(IDs.Actions.Cast) && !BlockCasting;
 
     public bool HasMultihookAvailable()
-        => ActionAvailable(IDs.Actions.MultiHook, ActionType.EventAction);
+        => ActionAvailable(IDs.Actions.MultiHook, ActionType.Action);
 
     public OceanFishingState OceanFishing => Ocean.OceanFishing;
     public SpectralCurrentStatus SpectralCurrentStatus => Ocean.SpectralCurrentStatus;

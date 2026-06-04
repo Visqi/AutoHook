@@ -1,5 +1,8 @@
+using System.Reflection;
 using AutoHook.Tasks;
+using AutoHook.Utils;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.Throttlers;
@@ -178,8 +181,92 @@ public class TabDebug : BaseTab {
                         ImGui.Text($"{label}: available");
                 }
             }
+
+            DrawFshActionInfo(ws);
         }
     }
+
+    private static void DrawFshActionInfo(WorldState ws) {
+        if (!ImGui.CollapsingHeader("Action info (FSH)"))
+            return;
+
+        using (ImRaii.PushIndent()) {
+            ImGui.TextDisabled("ActionStatus != 0 blocks use; cooldown from GetRecastGroupDetail.");
+            if (!ImGui.BeginTable("fsh_action_info", 8, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY, new System.Numerics.Vector2(0, 280.Scaled()))) {
+                ImGui.EndTable();
+                return;
+            }
+
+            ImGui.TableSetupColumn("Action");
+            ImGui.TableSetupColumn("Id");
+            ImGui.TableSetupColumn("Type");
+            ImGui.TableSetupColumn("Status");
+            ImGui.TableSetupColumn("CD (s)");
+            ImGui.TableSetupColumn("Grp");
+            ImGui.TableSetupColumn("OnCD");
+            ImGui.TableSetupColumn("Avail");
+            ImGui.TableHeadersRow();
+
+            foreach (var (field, id, type) in FshActions) {
+                uint status;
+                float cd;
+                int group;
+                bool onCd;
+                bool avail;
+                try {
+                    status = PlayerRes.ActionStatus(id, type);
+                    cd = PlayerRes.GetCooldown(id, type);
+                    group = PlayerRes.GetRecastGroups(id, type);
+                    onCd = PlayerRes.ActionOnCoolDown(id, type);
+                    avail = ws.ActionAvailable(id, type);
+                }
+                catch (Exception e) {
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{field} ({id})");
+                    ImGui.TableNextColumn();
+                    ImGui.TextColored(ImGuiColors.DalamudRed, e.Message);
+                    continue;
+                }
+
+                var name = MultiString.GetActionName(id);
+                var label = string.IsNullOrEmpty(name) ? field : $"{field} ({name})";
+
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGui.TextUnformatted(label);
+                ImGui.TableNextColumn();
+                ImGui.Text($"{id}");
+                ImGui.TableNextColumn();
+                ImGui.TextUnformatted(type.ToString());
+                ImGui.TableNextColumn();
+                ImGui.TextColored(status == 0 ? ImGuiColors.DalamudGrey : ImGuiColors.ParsedOrange, $"{status}");
+                ImGui.TableNextColumn();
+                ImGui.Text(cd > 0 ? $"{cd:F1}" : "-");
+                ImGui.TableNextColumn();
+                ImGui.Text(group >= 0 ? $"{group}" : "-");
+                ImGui.TableNextColumn();
+                ImGui.Text(onCd ? "yes" : "no");
+                ImGui.TableNextColumn();
+                ImGui.Text(avail ? "yes" : "no");
+            }
+
+            ImGui.EndTable();
+        }
+    }
+
+    private static ActionType GetFishingActionType(uint id) => id switch {
+        IDs.Actions.Collect => ActionType.EventAction,
+        _ => ActionType.Action,
+    };
+
+    private static readonly (string Field, uint Id, ActionType Type)[] FshActions =
+        typeof(IDs.Actions).GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Select(f => (Field: f.Name, Id: Convert.ToUInt32(f.GetValue(null) ?? 0u)))
+            .Where(x => x.Id != IDs.Actions.None)
+            .Select(x => (x.Field, x.Id, GetFishingActionType(x.Id)))
+            .OrderBy(x => x.Field)
+            .ToArray();
 
     private static string StatusName(uint id) {
         return id switch {
@@ -214,7 +301,7 @@ public class TabDebug : BaseTab {
         (IDs.Actions.Patience, ActionType.Action, "Patience"),
         (IDs.Actions.Chum, ActionType.Action, "Chum"),
         (IDs.Actions.PrizeCatch, ActionType.Action, "PrizeCatch"),
-        (IDs.Actions.MultiHook, ActionType.EventAction, "MultiHook"),
+        (IDs.Actions.MultiHook, ActionType.Action, "MultiHook"),
     ];
 
     private static readonly (uint Id, string Label)[] KnownItemIds =
