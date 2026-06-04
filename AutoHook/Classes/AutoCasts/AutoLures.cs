@@ -1,6 +1,6 @@
-using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using ECommons.Throttlers;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
 namespace AutoHook.Classes.AutoCasts;
@@ -87,7 +87,9 @@ public sealed class AutoLures : BaseActionCast {
         if (!IsAvailableToCast() || lureSuccess)
             return;
 
-        PlayerRes.CastActionDelayed(Id);
+        if (!PlayerRes.TryCastActionNoDelay(Id, ActionType.Action, GetName()))
+            return;
+
         EzThrottler.Throttle("CastingLure", 2500);
     }
 

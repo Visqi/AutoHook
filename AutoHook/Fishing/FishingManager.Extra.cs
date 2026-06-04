@@ -1,6 +1,4 @@
 using AutoHook.Conditions;
-using AutoHook.Configurations;
-using AutoHook.Data;
 using AutoHook.Tasks;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;

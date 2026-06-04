@@ -1,5 +1,4 @@
 using AutoHook.Conditions;
-using AutoHook.Data;
 using AutoHook.Tasks;
 using Dalamud.Plugin.Services;
 using ECommons.Throttlers;
@@ -318,6 +317,7 @@ public partial class FishingManager : IDisposable {
             Service.PrintDebug(@$"Started mooching/swimbait with {baitname}");
 
         Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.BeganFishing));
+        EzThrottler.Reset("CastingLure");
 
         Service.TaskManager.EnqueueDelay(2500);
         Service.TaskManager.Enqueue(CastCollect);

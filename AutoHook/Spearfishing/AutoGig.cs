@@ -2,7 +2,6 @@ using AutoHook.Spearfishing.Struct;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface.Colors;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using ECommons.Automation;
 using ECommons.Automation.NeoTaskManager;

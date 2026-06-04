@@ -3,7 +3,6 @@ using AutoHook.Conditions.Definitions;
 using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
-using Dalamud.Interface.Utility;
 
 namespace AutoHook;
 

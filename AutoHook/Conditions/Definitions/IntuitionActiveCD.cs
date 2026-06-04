@@ -1,5 +1,3 @@
-using static AutoHook.Conditions.IConditionDefinition;
-
 namespace AutoHook.Conditions.Definitions;
 
 public sealed class IntuitionActiveCD : BoolInvertConditionDefinition {

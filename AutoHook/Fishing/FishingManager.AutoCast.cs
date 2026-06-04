@@ -8,18 +8,20 @@ public partial class FishingManager {
         => Presets.SelectedPreset?.AutoCastsCfg ?? Presets.DefaultPreset.AutoCastsCfg;
 
     private void CheckWhileFishingActions() {
-        if (!EzThrottler.Throttle("CheckWhileFishingActions", 500))
+        if (!EzThrottler.Throttle("CheckWhileFishingActions", 200))
             return;
 
-        if (Service.TaskManager.IsBusy)
-            return;
+        if (_fishingTimer.IsRunning) {
+            var elapsed = Math.Truncate(_fishingTimer.ElapsedMilliseconds / 1000.0 * 100) / 100;
+            Ws.Execute(new FishingInfo.OpBiteContext(elapsed, Ws.ChumActive));
+        }
 
         var hookCfg = GetHookCfg();
 
         if (!hookCfg.Enabled)
             return;
 
-        Service.TaskManager.Enqueue(() => hookCfg.GetHookset().CastLures.TryCasting(Ws.LureSuccess));
+        hookCfg.GetHookset().CastLures.TryCasting(Ws.LureSuccess);
     }
 
     private void CastCollect() {

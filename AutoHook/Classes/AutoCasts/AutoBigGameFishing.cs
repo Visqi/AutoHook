@@ -1,5 +1,3 @@
-using AutoHook.Ui;
-
 namespace AutoHook.Classes.AutoCasts;
 
 public sealed class AutoBigGameFishing : BaseActionCast {

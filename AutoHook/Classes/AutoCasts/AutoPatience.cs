@@ -1,4 +1,3 @@
-using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 

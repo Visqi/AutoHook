@@ -1,9 +1,7 @@
 using System.Reflection;
 using AutoHook.Tasks;
-using AutoHook.Utils;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;

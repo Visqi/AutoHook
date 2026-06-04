@@ -1,6 +1,4 @@
-using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;

@@ -1,5 +1,3 @@
-using FFXIVClientStructs.FFXIV.Client.Game;
-
 namespace AutoHook.Classes.AutoCasts;
 
 public sealed class AutoChum : BaseActionCast {

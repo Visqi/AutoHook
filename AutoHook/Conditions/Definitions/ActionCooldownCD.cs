@@ -1,6 +1,5 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.Text;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -25,8 +24,7 @@ public sealed class ActionCooldownCD : IConditionDefinition {
             if (Type != 0)
                 dict["type"] = (long)Type;
 
-            if (Seconds != 0)
-                dict["sec"] = (long)Seconds;
+            dict["sec"] = (long)Seconds;
 
             if (!string.IsNullOrEmpty(Op) && Op != "=")
                 dict["op"] = Op;
@@ -43,9 +41,8 @@ public sealed class ActionCooldownCD : IConditionDefinition {
         if (args.Id == 0)
             return false;
 
-        var actionType = GetActionType(args.Type);
-        var cd = GetEffectiveCooldown(args.Id, actionType);
-        var lhs = (int)Math.Floor(cd);
+        var actionType = GetActionType(args.Type, args.Id);
+        var lhs = GetCooldownSeconds(args.Id, actionType);
         var rhs = args.Seconds;
         var result = CompareInt(lhs, rhs, args.Op);
         return args.Apply(result);
@@ -160,19 +157,22 @@ public sealed class ActionCooldownCD : IConditionDefinition {
         _ => $"{id}: {MultiString.GetActionName(id)}",
     };
 
-    private static ActionType GetActionType(int type)
-        => type == 1 ? ActionType.Item : ActionType.Action;
+    private static ActionType GetActionType(int type, uint id) {
+        if (type == 1)
+            return ActionType.Item;
+        return id == IDs.Actions.Collect ? ActionType.EventAction : ActionType.Action;
+    }
 
-    private static float GetEffectiveCooldown(uint id, ActionType type) {
+    private static int GetCooldownSeconds(uint id, ActionType type) {
         try {
-            if (PlayerRes.ActionStatus(id, type) != 0)
-                return float.MaxValue;
+            if (!PlayerRes.ActionOnCoolDown(id, type))
+                return 0;
 
             var cd = PlayerRes.GetCooldown(id, type);
-            return cd <= 0 ? 0 : cd;
+            return cd <= 0 ? 0 : (int)Math.Ceiling(cd);
         }
         catch {
-            return float.MaxValue;
+            return int.MaxValue;
         }
     }
 }
