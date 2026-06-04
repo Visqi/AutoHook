@@ -1,5 +1,6 @@
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using Lumina.Excel.Sheets;
 
 namespace AutoHook.Data;
 
@@ -47,7 +48,13 @@ public sealed class WorldState {
         return detail->Total - detail->Elapsed <= 0;
     }
 
-    public int GetItemCount(uint itemId) => Player.GetItemCount(itemId);
+    public unsafe int GetItemCount(uint itemId) {
+        if (WKSItemInfo.Any(r => r.Item.RowId == itemId && r.WKSItemSubCategory.RowId is 5)) {
+            return ContentInventoryManager.Instance()->WKSInventoryProvider.Cosmopouch1.WKSItems.FirstOrNull(i => i.WKSItemId == itemId)?.WKSItemQuantity ?? 0;
+        }
+        return Player.GetItemCount(itemId);
+    }
+
     public bool HasItem(uint itemId) => Player.HasItem(itemId);
     public bool HaveCordialInInventory(uint id) => Player.HaveCordialInInventory(id);
 
