@@ -483,7 +483,6 @@ public static class DrawUtil {
                     TextV($" └");
                     ImGui.SameLine();
                     action();
-                    ImGui.Separator();
                 }
                 ImGui.TreePop();
             }
