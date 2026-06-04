@@ -194,7 +194,9 @@ public class HookConfig : BaseOption {
     private HookType? GetHookTypeForTime(BaseBiteConfig hookType, double timePassed)
         => hookType.UseMultipleHookTypesByTimer
             ? GetTimedHookType(hookType, timePassed) is { } timedHook ? timedHook : null
-            : (HookType?)hookType.HooksetType;
+            : HookTypeConditionsPass(hookType.HookTypeConditionSet)
+                ? hookType.HooksetType
+                : null;
 
     private HookType? GetTimedHookType(BaseBiteConfig hookType, double timePassed) {
         bool InRange(bool enabled, double min, double max) {
@@ -208,20 +210,27 @@ public class HookConfig : BaseOption {
         }
 
         // Highest value hook types first if multiple windows overlap
-        if (InRange(hookType.UseStellarHookTypeByTimer, hookType.StellarHookTypeMin, hookType.StellarHookTypeMax))
+        if (InRange(hookType.UseStellarHookTypeByTimer, hookType.StellarHookTypeMin, hookType.StellarHookTypeMax)
+            && HookTypeConditionsPass(hookType.StellarHookTypeConditionSet))
             return HookType.Stellar;
 
-        if (InRange(hookType.UsePowerfulHookTypeByTimer, hookType.PowerfulHookTypeMin, hookType.PowerfulHookTypeMax))
+        if (InRange(hookType.UsePowerfulHookTypeByTimer, hookType.PowerfulHookTypeMin, hookType.PowerfulHookTypeMax)
+            && HookTypeConditionsPass(hookType.PowerfulHookTypeConditionSet))
             return HookType.Powerful;
 
-        if (InRange(hookType.UsePrecisionHookTypeByTimer, hookType.PrecisionHookTypeMin, hookType.PrecisionHookTypeMax))
+        if (InRange(hookType.UsePrecisionHookTypeByTimer, hookType.PrecisionHookTypeMin, hookType.PrecisionHookTypeMax)
+            && HookTypeConditionsPass(hookType.PrecisionHookTypeConditionSet))
             return HookType.Precision;
 
-        if (InRange(hookType.UseNormalHookTypeByTimer, hookType.NormalHookTypeMin, hookType.NormalHookTypeMax))
+        if (InRange(hookType.UseNormalHookTypeByTimer, hookType.NormalHookTypeMin, hookType.NormalHookTypeMax)
+            && HookTypeConditionsPass(hookType.NormalHookTypeConditionSet))
             return HookType.Normal;
 
         return null;
     }
+
+    private static bool HookTypeConditionsPass(ConditionSet? set)
+        => set is not { Groups.Count: > 0 } || set.Evaluate(Service.WorldState, ConditionRegistry.Registry);
 
     private bool IsHookAvailable(BaseBiteConfig hookType, double timePassed) {
         if (GetHookTypeForTime(hookType, timePassed) is not { } timedHook)

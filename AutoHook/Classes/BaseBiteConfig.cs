@@ -34,6 +34,12 @@ public class BaseBiteConfig(HookType type) {
     public double StellarHookTypeMin;
     public double StellarHookTypeMax;
 
+    public ConditionSet? HookTypeConditionSet { get; set; } // when multiple hook types isn't selected
+    public ConditionSet? NormalHookTypeConditionSet { get; set; }
+    public ConditionSet? PrecisionHookTypeConditionSet { get; set; }
+    public ConditionSet? PowerfulHookTypeConditionSet { get; set; }
+    public ConditionSet? StellarHookTypeConditionSet { get; set; }
+
     public void DrawOptions(string biteName, bool enableSwap = false) {
         EnableHooksetSwap = enableSwap;
         using var id = ImRaii.PushId(@$"{biteName}");
@@ -72,23 +78,25 @@ public class BaseBiteConfig(HookType type) {
                 HooksetType = HookType.Stellar;
                 Service.Save();
             }
+
+            HookTypeConditionSet = Ui.ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, HookTypeConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
         }
         else {
-            DrawTimedHookTypeOption(UIStrings.Normal_Hook, HookType.Normal,
-                ref UseNormalHookTypeByTimer, ref NormalHookTypeMin, ref NormalHookTypeMax);
+            NormalHookTypeConditionSet = DrawTimedHookTypeOption(UIStrings.Normal_Hook, HookType.Normal,
+                ref UseNormalHookTypeByTimer, ref NormalHookTypeMin, ref NormalHookTypeMax, NormalHookTypeConditionSet);
 
-            DrawTimedHookTypeOption(UIStrings.PrecisionHookset, HookType.Precision,
-                ref UsePrecisionHookTypeByTimer, ref PrecisionHookTypeMin, ref PrecisionHookTypeMax);
+            PrecisionHookTypeConditionSet = DrawTimedHookTypeOption(UIStrings.PrecisionHookset, HookType.Precision,
+                ref UsePrecisionHookTypeByTimer, ref PrecisionHookTypeMin, ref PrecisionHookTypeMax, PrecisionHookTypeConditionSet);
 
-            DrawTimedHookTypeOption(UIStrings.PowerfulHookset, HookType.Powerful,
-                ref UsePowerfulHookTypeByTimer, ref PowerfulHookTypeMin, ref PowerfulHookTypeMax);
+            PowerfulHookTypeConditionSet = DrawTimedHookTypeOption(UIStrings.PowerfulHookset, HookType.Powerful,
+                ref UsePowerfulHookTypeByTimer, ref PowerfulHookTypeMin, ref PowerfulHookTypeMax, PowerfulHookTypeConditionSet);
 
-            DrawTimedHookTypeOption(UIStrings.StellarHookset, HookType.Stellar,
-                ref UseStellarHookTypeByTimer, ref StellarHookTypeMin, ref StellarHookTypeMax);
+            StellarHookTypeConditionSet = DrawTimedHookTypeOption(UIStrings.StellarHookset, HookType.Stellar,
+                ref UseStellarHookTypeByTimer, ref StellarHookTypeMin, ref StellarHookTypeMax, StellarHookTypeConditionSet);
         }
     }
 
-    private void DrawTimedHookTypeOption(string label, HookType hookType, ref bool enabled, ref double minTime, ref double maxTime) {
+    private ConditionSet? DrawTimedHookTypeOption(string label, HookType hookType, ref bool enabled, ref double minTime, ref double maxTime, ConditionSet? conditionSet) {
         using var id = ImRaii.PushId(label);
         using var indent = ImRaii.PushIndent();
 
@@ -101,7 +109,10 @@ public class BaseBiteConfig(HookType type) {
             using var innerIndent = ImRaii.PushIndent();
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.SetZeroToIgnore);
             SetupTimer(ref minTime, ref maxTime);
+            conditionSet = Ui.ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, conditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
         }
+
+        return conditionSet;
     }
 
     private void SetupTimer(ref double minTimeDelay, ref double maxTimeDelay) {
