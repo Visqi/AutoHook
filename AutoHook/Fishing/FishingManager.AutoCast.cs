@@ -4,7 +4,6 @@ using ECommons.Throttlers;
 namespace AutoHook.Fishing;
 
 public partial class FishingManager {
-    private const int MaxAutoCastChainDepth = 12;
     public AutoCastsConfig GetAutoCastCfg()
         => Presets.SelectedPreset?.AutoCastsCfg ?? Presets.DefaultPreset.AutoCastsCfg;
 
@@ -36,9 +35,6 @@ public partial class FishingManager {
         }
     }
 
-    /// <summary>
-    /// Run every enabled auto-cast whose conditions are met, in priority order, then cast line / mooch.
-    /// </summary>
     private void UseAutoCasts() {
         if (Ws.FishingStep.HasFlag(FishingSteps.None) || Ws.FishingStep.HasFlag(FishingSteps.BeganFishing) || Ws.FishingStep.HasFlag(FishingSteps.Quitting))
             return;
@@ -46,45 +42,17 @@ public partial class FishingManager {
         if (!Ws.IsCastAvailable() || Service.TaskManager.IsBusy)
             return;
 
-        Service.TaskManager.Enqueue(() => RunAutoCastChainStep(0), "AutoCasting");
-    }
+        Service.TaskManager.Enqueue(() => {
+            var lastFishCatchCfg = GetLastCatchConfig();
+            var acCfg = GetAutoCastCfg();
+            var ignoreMooch = lastFishCatchCfg?.NeverMooch ?? false;
+            var autoCast = acCfg.GetNextAutoCast(ignoreMooch);
 
-    private void RunAutoCastChainStep(int depth) {
-        var lastFishCatchCfg = GetLastCatchConfig();
-        var acCfg = GetAutoCastCfg();
-        var ignoreMooch = lastFishCatchCfg?.NeverMooch ?? false;
+            if (acCfg.TryCastAction(autoCast, false, ignoreMooch))
+                return;
 
-        if (depth >= MaxAutoCastChainDepth) {
             CastLineMoochOrRelease(acCfg, lastFishCatchCfg);
-            return;
-        }
-
-        if (!acCfg.EnableAll) {
-            CastLineMoochOrRelease(acCfg, lastFishCatchCfg);
-            return;
-        }
-
-        var next = acCfg.GetNextAutoCast(ignoreMooch);
-        if (next == null || ReferenceEquals(next, acCfg.CastLine) || ReferenceEquals(next, acCfg.CastMooch)) {
-            CastLineMoochOrRelease(acCfg, lastFishCatchCfg);
-            return;
-        }
-
-        if (!acCfg.TryCastAction(next, false, ignoreMooch)) {
-            CastLineMoochOrRelease(acCfg, lastFishCatchCfg);
-            return;
-        }
-
-        var delayMs = 1200;
-        try {
-            delayMs = new Random().Next(Service.Configuration.DelayBetweenCastsMin, Service.Configuration.DelayBetweenCastsMax) + 1200;
-        }
-        catch {
-            // keep delayMs default
-        }
-
-        Service.TaskManager.EnqueueDelay(delayMs);
-        Service.TaskManager.Enqueue(() => RunAutoCastChainStep(depth + 1), "AutoCasting");
+        }, "AutoCasting");
     }
 
     private void CastLineMoochOrRelease(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg) {
@@ -165,7 +133,6 @@ public partial class FishingManager {
                 Service.PrintDebug($"[Swimbait] Fish {fishId}: no enabled preset entry (found={swimbaitMoochConfig != null}, enabled={swimbaitMoochConfig?.Enabled ?? false})");
             }
 
-            // If no config found in selected preset, or swimbait not enabled for this window, check global preset config.
             if (activeSwimbaitCfg == null || !activeSwimbaitCfg.UseSwimbait) {
                 var globalAllMooches = Presets.DefaultPreset.ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == GameRes.AllMoochesId);
                 if (globalAllMooches != null && globalAllMooches.Enabled) {

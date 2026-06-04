@@ -103,11 +103,16 @@ public static class PlayerRes {
     }
 
     public static async void DelayNextCast(uint actionId) {
+        await Task.Delay(GetPostCastDelayMs(actionId));
+        WS.Execute(new WorldState.OpSetBlockCasting(false));
+    }
+
+    /// <summary>Delay after a delayed cast/item use before the next action (matches <see cref="DelayNextCast"/>).</summary>
+    public static int GetPostCastDelayMs(uint actionId) {
         var delay = 0;
         try { delay = new Random().Next(Service.Configuration.DelayBetweenCastsMin, Service.Configuration.DelayBetweenCastsMax); }
         catch (Exception e) { Svc.Log.Error(@$"Error getting delay between casts: {e}"); }
-        await Task.Delay(delay + ConditionalDelay(actionId));
-        WS.Execute(new WorldState.OpSetBlockCasting(false));
+        return delay + ConditionalDelay(actionId);
     }
 
     private static int ConditionalDelay(uint id) => id switch {
