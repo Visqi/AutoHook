@@ -173,8 +173,15 @@ public class HookConfig : BaseOption {
             // Normal - Patience
             if (hook.ph.HooksetEnabled) {
                 if (CheckHookCondition(hook.ph, timePassed)) {
-                    if (GetHookTypeForTime(hook.ph, timePassed) is { } ht)
-                        return IsHookAvailable(hook.ph, timePassed) ? ht : HookType.Normal;
+                    if (GetHookTypeForTime(hook.ph, timePassed) is { } ht) {
+                        if (IsHookAvailable(hook.ph, timePassed)) return ht;
+                        var fallback = ht switch {
+                            HookType.Stellar when bite is BiteType.Weak => HookType.Precision,
+                            HookType.Stellar when bite is not BiteType.Weak => HookType.Powerful,
+                            _ => HookType.Normal
+                        };
+                        return fallback != ht && Service.WorldState.ActionAvailable((uint)fallback, ActionType.Action) ? fallback : HookType.Normal;
+                    }
                     Service.Status = "(Normal/Patience Hook) No hook type for current bite timer.";
                 }
                 else
