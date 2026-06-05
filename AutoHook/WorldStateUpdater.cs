@@ -17,7 +17,7 @@ public readonly struct BiteContext {
     public IntuitionStatus IntuitionStatus { get; init; }
     public float IntuitionTimeRemaining { get; init; }
     public SpectralCurrentStatus SpectralCurrentStatus { get; init; }
-    public int? LastCaughtFishId { get; init; }
+    public uint? LastCaughtFishId { get; init; }
 }
 
 public sealed class WorldStateUpdater : IDisposable {
@@ -166,9 +166,10 @@ public sealed class WorldStateUpdater : IDisposable {
 
     private unsafe void UpdateCatchDetour(AgentCatch* thisPtr, uint itemId, bool isLarge, ushort size, byte amount, byte level, byte stars, byte oceanStars, bool isMoochable, bool isFirstTimeCatch, byte a11, byte a12) {
         _updateCatchHook!.Original(thisPtr, itemId, isLarge, size, amount, level, stars, oceanStars, isMoochable, isFirstTimeCatch, a11, a12);
-        var fishId = (int?)ItemUtil.GetBaseId(itemId).ItemId;
-        if (fishId is { } id && id > 0)
+        if (ItemUtil.GetBaseId(itemId) is { ItemId: > 0 and var id }) {
+            Service.PrintDebug($"Caught fish: {id}, amount: {amount}, large: {isLarge}, size: {size}, level: {level}, stars: {stars}, oceanStars: {oceanStars}, moochable: {isMoochable}, firstTimeCatch: {isFirstTimeCatch}");
             Service.WorldState.Execute(new FishingInfo.OpSetLastCatch(new CatchInfo(id, amount, isLarge, size, level, stars, oceanStars, isMoochable, isFirstTimeCatch)));
+        }
         Service.WorldState.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.FishCaught));
     }
 
@@ -183,15 +184,14 @@ public sealed class WorldStateUpdater : IDisposable {
         return _playAnimationHook!.Original(thisPtr, chara, actionTimelineId, a4);
     }
 
-    public static int ComputeCurrentBaitMoochId(uint currentId, uint? swimbaitId, bool isMooching, BiteContext biteContext) {
+    public static uint ComputeCurrentBaitMoochId(uint currentId, uint? swimbaitId, bool isMooching, BiteContext biteContext) {
         if (swimbaitId.HasValue && swimbaitId.Value != 0)
-            return (int)swimbaitId.Value;
+            return swimbaitId.Value;
         if (GameRes.Fishes.Any(f => f.Id == currentId))
-            return (int)currentId;
-        if (isMooching && biteContext.LastCaughtFishId is { } lastId && lastId > 0 &&
-            GameRes.Fishes.Any(f => f.Id == lastId))
+            return currentId;
+        if (isMooching && biteContext.LastCaughtFishId is { } lastId && lastId > 0 && GameRes.Fishes.Any(f => f.Id == lastId))
             return lastId;
-        return (int)currentId;
+        return currentId;
     }
 
     private static PlayerInfo.OpStatuses CollectStatuses() {
@@ -207,7 +207,7 @@ public sealed class WorldStateUpdater : IDisposable {
         uint baitId = 0;
         uint? swimbaitId = null;
         var isMooching = false;
-        var baitMoochId = 0;
+        var baitMoochId = 0u;
 
         try {
             if (Player.Territory is { Value.TerritoryIntendedUse.RowId: 60 }) {

@@ -55,7 +55,7 @@ public class CustomPresetConfig : BasePresetConfig {
         Service.Save();
     }
 
-    public HookConfig? GetCfgById(int id, bool isMooching) {
+    public HookConfig? GetCfgById(uint id, bool isMooching) {
         if (isMooching) {
             var mooch = ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == id);
             return mooch ?? ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == GameRes.AllMoochesId);
@@ -65,7 +65,7 @@ public class CustomPresetConfig : BasePresetConfig {
         return bait ?? ListOfBaits.FirstOrDefault(hook => hook.BaitFish.Id == GameRes.AllBaitsId);
     }
 
-    public FishConfig? GetFishById(int id) {
+    public FishConfig? GetFishById(uint id) {
         return ListOfFish.FirstOrDefault(fish => fish.Fish.Id == id);
     }
 

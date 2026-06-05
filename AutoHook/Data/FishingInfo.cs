@@ -8,7 +8,7 @@ public readonly record struct BiteInfo(double BiteTimeSeconds, FishingHookStreng
         => $"Time={BiteTimeSeconds:F2}, Tug={TugType}";
 }
 
-public readonly record struct BaitInfo(uint BaitId, uint? SelectedSwimbaitId, int MoochId, bool IsMooching) {
+public readonly record struct BaitInfo(uint BaitId, uint? SelectedSwimbaitId, uint MoochId, bool IsMooching) {
     public override string ToString()
         => $"BaitId={BaitId}, SwimbaitId={SelectedSwimbaitId}, MoochId={MoochId}, IsMooching={IsMooching}";
 }
@@ -34,7 +34,7 @@ public readonly record struct PreviousCatchInfo(
 }
 
 public readonly record struct CatchInfo(
-    int FishId,
+    uint FishId,
     byte Amount,
     bool IsLarge,
     ushort Size,
@@ -73,10 +73,10 @@ public sealed class FishingInfo {
 
     public readonly List<CatchInfo> SessionCatches = [];
 
-    public readonly Dictionary<int, int> FishCaughtCounts = [];
+    public readonly Dictionary<uint, int> FishCaughtCounts = [];
     public readonly List<uint> SwimbaitIds = [];
 
-    public int GetFishCaughtCount(int fishId) => FishCaughtCounts.TryGetValue(fishId, out var c) ? c : 0;
+    public int GetFishCaughtCount(uint fishId) => FishCaughtCounts.TryGetValue(fishId, out var c) ? c : 0;
 
     public IEnumerable<WorldState.Operation> CompareToInitial() {
         if (FishingState != FishingState.None || BaitInfo.BaitId != 0 || BaitInfo.SelectedSwimbaitId != null || BaitInfo.IsMooching || BaitInfo.MoochId != 0)
@@ -158,7 +158,7 @@ public sealed class FishingInfo {
         protected override void Exec(WorldState ws) => ws.Fishing.PreviousFishingState = Value;
     }
 
-    public sealed record OpAddFishCaught(int FishId, byte Amount) : WorldState.Operation {
+    public sealed record OpAddFishCaught(uint FishId, byte Amount) : WorldState.Operation {
         protected override void Exec(WorldState ws) {
             if (FishId <= 0 || Amount <= 0)
                 return;

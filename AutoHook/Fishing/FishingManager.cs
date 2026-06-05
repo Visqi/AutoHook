@@ -143,7 +143,7 @@ public partial class FishingManager : IDisposable {
 
     public string GetPresetName() {
         var bait = Ws.Fishing.BaitInfo;
-        var currentBaitId = bait.SelectedSwimbaitId is { } sb ? (int)sb : bait.MoochId;
+        var currentBaitId = bait.SelectedSwimbaitId is { } sb ? sb : bait.MoochId;
         var isMooching = bait.IsMooching;
 
         HookConfig? customHook = null;
@@ -165,7 +165,7 @@ public partial class FishingManager : IDisposable {
 
     public HookConfig GetHookCfg() {
         var bait = Ws.Fishing.BaitInfo;
-        var currentBaitId = bait.SelectedSwimbaitId is { } sb ? (int)sb : bait.MoochId;
+        var currentBaitId = bait.SelectedSwimbaitId is { } sb ? sb : bait.MoochId;
         var isMooching = bait.IsMooching;
 
         HookConfig? custom = null;

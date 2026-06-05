@@ -9,7 +9,7 @@ public sealed class FishCaughtCountCD : IConditionDefinition, ISimpleConditionVa
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.FishIgnore | ConditionScopeFlags.Hook;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
-        var fishId = GetInt(parameters, "id", 0);
+        var fishId = GetUInt(parameters, "id", 0);
         var args = GetIntCompareParams(parameters, defaultValue: 1);
         if (fishId <= 0)
             return args.Invert;

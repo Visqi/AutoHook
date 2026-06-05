@@ -118,7 +118,7 @@ public partial class FishingManager {
 
             HookConfig? swimbaitMoochConfig = null;
             if (Presets.SelectedPreset != null)
-                swimbaitMoochConfig = Presets.SelectedPreset.GetCfgById((int)fishId, true);
+                swimbaitMoochConfig = Presets.SelectedPreset.GetCfgById(fishId, true);
 
             SwimbaitConfig? activeSwimbaitCfg = null;
             var configSource = "none";

@@ -74,7 +74,7 @@ public sealed class WorldState {
 
     public bool ChumActive => Fishing.ChumActive;
     public bool LureSuccess => Fishing.LureSuccess;
-    public int GetFishCaughtCount(int fishId) => Fishing.GetFishCaughtCount(fishId);
+    public int GetFishCaughtCount(uint fishId) => Fishing.GetFishCaughtCount(fishId);
 
     public bool IsMoochAvailable()
         => ActionAvailable(IDs.Actions.Mooch) || ActionAvailable(IDs.Actions.Mooch2);
