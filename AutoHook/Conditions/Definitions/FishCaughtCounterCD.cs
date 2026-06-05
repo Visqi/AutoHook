@@ -3,9 +3,9 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class FishCountCD : IConditionDefinition {
-    public string Id => nameof(FishCountCD);
-    public string Name => "Fish count";
+public sealed class FishCaughtCounterCD : IConditionDefinition {
+    public string Id => "FishCountCD"; // either migrate or don't change
+    public string Name => "Fish caught counter";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {

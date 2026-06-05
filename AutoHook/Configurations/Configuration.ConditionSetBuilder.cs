@@ -62,7 +62,7 @@ public partial class Configuration {
             if (fishId > 0)
                 dict["id"] = (long)fishId;
             var cond = new Condition {
-                TypeId = Registry.GetId<FishCaughtCountCD>(),
+                TypeId = Registry.GetId<SessionCaughtCountCD>(),
                 Params = dict,
             };
 

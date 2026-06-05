@@ -43,15 +43,15 @@ public class FishConfig : BaseOption {
 
     [JsonProperty("StopConditionSet")]
     [JsonConverter(typeof(SingleConditionConverter))]
-    public SingleCondition<FishCaughtCountCD, (bool Enabled, int Limit)> StopAfterCaughtLimit { get => field ??= new SingleCondition<FishCaughtCountCD, (bool Enabled, int Limit)>(() => Fish.Id); set; }
+    public SingleCondition<SessionCaughtCountCD, (bool Enabled, int Limit)> StopAfterCaughtLimit { get => field ??= new SingleCondition<SessionCaughtCountCD, (bool Enabled, int Limit)>(() => Fish.Id); set; }
 
     [JsonProperty("SwapBaitConditionSet")]
     [JsonConverter(typeof(SingleConditionConverter))]
-    public SingleCondition<FishCaughtCountCD, (bool Enabled, int Limit)> SwapBaitLimit { get => field ??= new SingleCondition<FishCaughtCountCD, (bool Enabled, int Limit)>(() => Fish.Id); set; }
+    public SingleCondition<SessionCaughtCountCD, (bool Enabled, int Limit)> SwapBaitLimit { get => field ??= new SingleCondition<SessionCaughtCountCD, (bool Enabled, int Limit)>(() => Fish.Id); set; }
 
     [JsonProperty("SwapPresetConditionSet")]
     [JsonConverter(typeof(SingleConditionConverter))]
-    public SingleCondition<FishCaughtCountCD, (bool Enabled, int Limit)> SwapPresetLimit { get => field ??= new SingleCondition<FishCaughtCountCD, (bool Enabled, int Limit)>(() => Fish.Id); set; }
+    public SingleCondition<SessionCaughtCountCD, (bool Enabled, int Limit)> SwapPresetLimit { get => field ??= new SingleCondition<SessionCaughtCountCD, (bool Enabled, int Limit)>(() => Fish.Id); set; }
 
     public override void DrawOptions() { }
 }

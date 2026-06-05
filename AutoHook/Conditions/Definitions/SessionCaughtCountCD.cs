@@ -3,9 +3,9 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class FishCaughtCountCD : IConditionDefinition, ISimpleConditionValue<(bool Enabled, int Limit)> {
-    public string Id => nameof(FishCaughtCountCD);
-    public string Name => "Fish caught count";
+public sealed class SessionCaughtCountCD : IConditionDefinition, ISimpleConditionValue<(bool Enabled, int Limit)> {
+    public string Id => "FishCaughtCountCD"; // either migrate this or don't change it
+    public string Name => "Session caught count";
     public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.FishIgnore | ConditionScopeFlags.Hook;
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
@@ -20,15 +20,15 @@ public sealed class FishCaughtCountCD : IConditionDefinition, ISimpleConditionVa
 
     public void DrawParams(Condition condition) {
         var fishId = GetInt(condition.Params, "id", 0);
+        var currentFish = GameRes.Fishes.FirstOrDefault(f => f.Id == fishId);
+        var selectedName = currentFish is { Id: > 0 }
+            ? $"[#{currentFish.Id}] {currentFish.Name}"
+            : "-";
 
-        ImGui.SetNextItemWidth(70.Scaled());
-        if (ImGui.InputInt("Fish ID", ref fishId)) {
-            fishId = Math.Max(0, fishId);
-            condition.Params["id"] = (long)fishId;
-        }
+        DrawUtil.DrawComboSelector(GameRes.Fishes, fish => $"[#{fish.Id}] {fish.Name}", selectedName, fish => condition.Params["id"] = (long)fish.Id);
 
         ImGui.SameLine();
-        DrawIntCompareParams(condition, "##fish_count_op", "Count", defaultValue: 1, clamp: v => Math.Max(1, v), valueWidth: 60);
+        DrawIntCompareParams(condition, "##session_caught_op", "Count", defaultValue: 1, clamp: v => Math.Max(1, v), valueWidth: 60);
     }
 
     (bool Enabled, int Limit) ISimpleConditionValue<(bool Enabled, int Limit)>.FromParams(IReadOnlyDictionary<string, object> p)
