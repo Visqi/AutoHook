@@ -107,6 +107,8 @@ public partial class FishingManager : IDisposable {
                 Service.PrintChat(@$"[AutoHook] Starting with bait: {MultiString.GetItemName(extraCfg.ForcedBaitId)}");
                 Service.Save();
             }
+            else
+                Service.PrintChat(@$"[AutoHook] Failed to change bait for forced bait swap. Result: {result}");
         }
 
         Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.StartedCasting));
