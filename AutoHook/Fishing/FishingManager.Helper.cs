@@ -15,22 +15,27 @@ public partial class FishingManager {
 
     private void OnMessageDelegate(IHandleableChatMessage message) {
         try {
-            if (message.LogKind is XivChatType.Gathering) {
-                var text = message.Message.TextValue;
-                var logMessage = FindRow<LogMessage>(x => x.Text.ToString() == text);
-                if (GetHookCfg().GetHookset().CastLures.LureTarget != LureTarget.NotSpecial) {
-                    var success = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
-                    Ws.Execute(new FishingInfo.OpSetLureSuccess(success));
-                    if (success)
-                        return;
-                }
-                if (GetHookCfg().GetHookset().CastLures.LureTarget is LureTarget.Any or LureTarget.NotSpecial) {
-                    var success = logMessage is { RowId: XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess };
-                    Ws.Execute(new FishingInfo.OpSetLureSuccess(success));
-                }
-                if (logMessage is { RowId: XivChatLog.CantFish })
-                    Service.Status = UIStrings.CantFishHere;
-            }
+            if (message.LogKind is not XivChatType.Gathering)
+                return;
+
+            var text = message.Message.TextValue;
+            var logMessage = FindRow<LogMessage>(x => x.Text.ToString() == text);
+
+            var isSpecialFishLure = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
+            var isGenericLureSuccess = logMessage is { RowId: XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess };
+
+            var success = GetHookCfg().GetHookset().CastLures.LureTarget switch {
+                LureTarget.Any => isSpecialFishLure || isGenericLureSuccess,
+                LureTarget.Special => isSpecialFishLure,
+                LureTarget.NotSpecial => isGenericLureSuccess,
+                _ => false
+            };
+
+            if (success)
+                Ws.Execute(new FishingInfo.OpSetLureSuccess(true));
+
+            if (logMessage is { RowId: XivChatLog.CantFish })
+                Service.Status = UIStrings.CantFishHere;
         }
         catch (Exception e) {
             Svc.Log.Error(e.Message);
