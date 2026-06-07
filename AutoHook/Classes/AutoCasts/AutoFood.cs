@@ -9,7 +9,9 @@ public sealed class AutoFood : BaseActionCast //todo
     public override int Priority { get; set; } = 7;
     public override bool IsExcludedPriority { get; set; } = false;
 
-    public AutoFood() : base(UIStrings.Food_Buff, 0, ActionType.Item) { }
+    public AutoFood() : base(0, ActionType.Item) { }
+
+    public override string GetName() => UIStrings.Food_Buff;
 
     public override bool CastCondition() => Service.WorldState.GetStatusTime(IDs.Status.FoodBuff) <= SecondsRemaining;
 }

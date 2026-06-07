@@ -7,10 +7,12 @@ public sealed class AutoCastLine : BaseActionCast {
 
     public override bool RequiresTimeWindow() => true;
 
-    public AutoCastLine() : base(UIStrings.AutoCastLine_Auto_Cast_Line, IDs.Actions.Cast) {
+    public AutoCastLine() : base(IDs.Actions.Cast) {
         Enabled = true;
         Priority = 1;
     }
+
+    public override string GetName() => UIStrings.AutoCastLine_Auto_Cast_Line;
 
     public override int Priority { get; set; } = 0;
 

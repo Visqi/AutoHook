@@ -12,7 +12,11 @@ public sealed class AutoFishEyes : BaseActionCast {
 
     public override bool RequiresTimeWindow() => true;
 
-    public AutoFishEyes() : base(UIStrings.Fish_Eyes, IDs.Actions.FishEyes, ActionType.Action) => HelpText = UIStrings.CancelsCurrentMooch;
+    public AutoFishEyes() : base(IDs.Actions.FishEyes, ActionType.Action) { }
+
+    public override string GetName() => UIStrings.Fish_Eyes;
+
+    public override string GetHelpText() => UIStrings.CancelsCurrentMooch;
 
     public override bool CastCondition() => EvaluateConditionSet() && !Service.WorldState.HasStatus(IDs.Status.FishEyes);
 

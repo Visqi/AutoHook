@@ -6,10 +6,13 @@ public sealed class AutoThaliaksFavor : BaseActionCast {
     public int ThaliaksFavorStacks = 3;
     public int ThaliaksFavorRecover = 150;
 
-    public AutoThaliaksFavor(bool isSpearfishing = false) : base(UIStrings.Thaliaks_Favor, IDs.Actions.ThaliaksFavor, ActionType.Action) {
-        HelpText = UIStrings.TabAutoCasts_DrawThaliaksFavor_HelpText;
+    public AutoThaliaksFavor(bool isSpearfishing = false) : base(IDs.Actions.ThaliaksFavor, ActionType.Action) {
         IsSpearFishing = isSpearfishing;
     }
+
+    public override string GetName() => UIStrings.Thaliaks_Favor;
+
+    public override string GetHelpText() => UIStrings.TabAutoCasts_DrawThaliaksFavor_HelpText;
 
     public override bool CastCondition() {
         if (!EvaluateConditionSet())

@@ -7,8 +7,11 @@ public sealed class AutoMakeShiftBait : BaseActionCast {
 
     public override bool RequiresTimeWindow() => true;
 
-    public AutoMakeShiftBait() : base(UIStrings.MakeShift_Bait, IDs.Actions.MakeshiftBait, ActionType.Action)
-        => HelpText = UIStrings.TabAutoCasts_DrawMakeShiftBait_HelpText;
+    public AutoMakeShiftBait() : base(IDs.Actions.MakeshiftBait, ActionType.Action) { }
+
+    public override string GetName() => UIStrings.MakeShift_Bait;
+
+    public override string GetHelpText() => UIStrings.TabAutoCasts_DrawMakeShiftBait_HelpText;
 
     public override bool CastCondition() {
         if (!EvaluateConditionSet())

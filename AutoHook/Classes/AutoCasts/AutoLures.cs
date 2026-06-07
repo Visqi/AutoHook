@@ -11,7 +11,9 @@ public sealed class AutoLures : BaseActionCast {
 
     public LureTarget LureTarget;
 
-    public AutoLures() : base(UIStrings.UseLures, IDs.Actions.AmbitiousLure) { }
+    public AutoLures() : base(IDs.Actions.AmbitiousLure) { }
+
+    public override string GetName() => UIStrings.UseLures;
 
     private uint StatusId => Id == IDs.Actions.AmbitiousLure ? IDs.Status.AmbitiousLure : IDs.Status.ModestLure;
 

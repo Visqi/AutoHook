@@ -3,7 +3,11 @@ namespace AutoHook.Classes.AutoCasts;
 public sealed class AutoChum : BaseActionCast {
     public override bool DoesCancelMooch() => true;
 
-    public AutoChum() : base(UIStrings.Chum, IDs.Actions.Chum) => HelpText = UIStrings.CancelsCurrentMooch;
+    public AutoChum() : base(IDs.Actions.Chum) { }
+
+    public override string GetName() => UIStrings.Chum;
+
+    public override string GetHelpText() => UIStrings.CancelsCurrentMooch;
 
     public override bool CastCondition() => EvaluateConditionSet();
 

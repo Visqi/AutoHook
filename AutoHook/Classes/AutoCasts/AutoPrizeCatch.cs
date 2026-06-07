@@ -5,9 +5,11 @@ namespace AutoHook.Classes.AutoCasts;
 public sealed class AutoPrizeCatch : BaseActionCast {
     public override bool DoesCancelMooch() => true;
 
-    public AutoPrizeCatch() : base(UIStrings.Prize_Catch, IDs.Actions.PrizeCatch, ActionType.Action) {
-        HelpText = UIStrings.Use_Prize_Catch_HelpText;
-    }
+    public AutoPrizeCatch() : base(IDs.Actions.PrizeCatch, ActionType.Action) { }
+
+    public override string GetName() => UIStrings.Prize_Catch;
+
+    public override string GetHelpText() => UIStrings.Use_Prize_Catch_HelpText;
 
     public override bool CastCondition() {
         if (!EvaluateConditionSet())

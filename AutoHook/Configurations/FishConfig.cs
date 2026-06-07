@@ -33,8 +33,7 @@ public class FishConfig : BaseOption {
 
     public FishConfig(BaitFishClass fish) {
         Fish = fish;
-        Mooch.Name = UIStrings.Always_Mooch;
-        Mooch.HelpText = string.Empty;
+        Mooch.UseAlwaysMoochLabel = true;
     }
 
     public FishConfig(int fishId) {

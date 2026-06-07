@@ -10,8 +10,7 @@ using System.Numerics;
 namespace AutoHook.Classes;
 
 public abstract class BaseActionCast {
-    protected BaseActionCast(string name, uint id, ActionType actionType = ActionType.Action) {
-        Name = name;
+    protected BaseActionCast(uint id, ActionType actionType = ActionType.Action) {
         Id = id;
         Enabled = false;
 
@@ -20,10 +19,6 @@ public abstract class BaseActionCast {
         if (actionType == ActionType.Action && id != IDs.Actions.ThaliaksFavor)
             GpThreshold = (int)PlayerRes.CastActionCost(Id, ActionType);
     }
-
-    [NonSerialized] public string Name;
-
-    [NonSerialized] public string HelpText = @"";
 
     public bool Enabled;
 
@@ -79,14 +74,16 @@ public abstract class BaseActionCast {
         var actionAvailable = Service.WorldState.ActionAvailable(Id, ActionType);
 
         if (EzThrottler.Throttle("LogActions", 1000))
-            Service.PrintVerbose(@$"[BaseAction] {Name} - GpCheck:{hasGp}, ActionAvailable: {actionAvailable}, OtherConditions: {condition}");
+            Service.PrintDebug(@$"[BaseAction] {GetName()} - GpCheck:{hasGp}, ActionAvailable: {actionAvailable}, OtherConditions: {condition}");
 
         return hasGp && actionAvailable && condition;
     }
 
     public abstract bool CastCondition();
 
-    public virtual string GetName() => Name;
+    public abstract string GetName();
+
+    public virtual string GetHelpText() => "";
 
     public virtual int GetPriority() => Priority;
 
@@ -100,11 +97,11 @@ public abstract class BaseActionCast {
         => DrawConfigWithLabel(GetName(), availableActs);
 
     public void DrawConfigWithLabel(string label, List<BaseActionCast>? availableActs = null) {
-        using var cfgId = ImRaii.PushId(@$"{label}_cfg");
+        using var cfgId = ImRaii.PushId(@$"{GetType().Name}_cfg");
 
         if (DrawOptions != null) {
-            if (DrawUtil.Checkbox(@$"###{label}", ref Enabled, HelpText, true))
-                Service.PrintDebug(@$"[BaseAction] {Name} - {(Enabled ? @"Enabled" : @"Disabled")}");
+            if (DrawUtil.Checkbox(@$"###{GetType().Name}", ref Enabled, GetHelpText(), true))
+                Service.PrintDebug(@$"[BaseAction] {GetName()} - {(Enabled ? @"Enabled" : @"Disabled")}");
 
             ImGui.SameLine(0, 3.Scaled());
 
@@ -127,8 +124,8 @@ public abstract class BaseActionCast {
             }
         }
         else {
-            if (DrawUtil.Checkbox(@$"###{label}", ref Enabled, HelpText, true))
-                Service.PrintDebug(@$"[BaseAction] {Name} - {(Enabled ? @"Enabled" : @"Disabled")}");
+            if (DrawUtil.Checkbox(@$"###{GetType().Name}", ref Enabled, GetHelpText(), true))
+                Service.PrintDebug(@$"[BaseAction] {GetName()} - {(Enabled ? @"Enabled" : @"Disabled")}");
 
             ImGui.SameLine(0, 28.Scaled());
             ImGui.Text(label);
@@ -186,7 +183,7 @@ public abstract class BaseActionCast {
     }
 
     public virtual void DrawGpThreshold() {
-        using var gpId = ImRaii.PushId(@$"{GetName()}_gp");
+        using var gpId = ImRaii.PushId(@$"{GetType().Name}_gp");
         if (ImGui.Button(UIStrings.GPlabel)) {
             ImGui.OpenPopup(strId: @"gp_cfg");
         }

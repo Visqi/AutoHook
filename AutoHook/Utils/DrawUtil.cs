@@ -584,9 +584,9 @@ public static class DrawUtil {
 
     public static void DrawSurfaceSlapAndIdenticalCast(AutoSurfaceSlap surfaceSlap, AutoIdenticalCast identicalCast) {
         DrawCheckboxTree(UIStrings.UseSurfaceSlap, ref surfaceSlap.Enabled,
-            () => surfaceSlap.DrawFishCaughtActionOptions(), surfaceSlap.HelpText);
+            () => surfaceSlap.DrawFishCaughtActionOptions(), surfaceSlap.GetHelpText());
 
         DrawCheckboxTree(UIStrings.UseIdenticalCast, ref identicalCast.Enabled,
-            () => identicalCast.DrawFishCaughtActionOptions(), identicalCast.HelpText);
+            () => identicalCast.DrawFishCaughtActionOptions(), identicalCast.GetHelpText());
     }
 }

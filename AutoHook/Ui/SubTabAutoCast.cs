@@ -47,7 +47,7 @@ public class SubTabAutoCast {
             foreach (var action in _actionsAvailable.Where(action => action != null)) {
                 action.DontCancelMooch = acCfg.DontCancelMooch;
 
-                Service.PrintDebug($"{action.Name} DontCancelMooch: {action.DontCancelMooch}");
+                Service.PrintDebug($"{action.GetName()} DontCancelMooch: {action.DontCancelMooch}");
             }
         }
 

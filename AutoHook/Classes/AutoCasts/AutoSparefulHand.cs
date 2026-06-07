@@ -3,7 +3,11 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 namespace AutoHook.Classes.AutoCasts;
 
 public sealed class AutoSparefulHand : BaseActionCast {
-    public AutoSparefulHand() : base(UIStrings.SparefulHand, IDs.Actions.SparefulHand, ActionType.Action) => HelpText = UIStrings.SparefulHand_HelpText;
+    public AutoSparefulHand() : base(IDs.Actions.SparefulHand, ActionType.Action) { }
+
+    public override string GetName() => UIStrings.SparefulHand;
+
+    public override string GetHelpText() => UIStrings.SparefulHand_HelpText;
 
     public uint? FishIdToCheck { get; set; }
 

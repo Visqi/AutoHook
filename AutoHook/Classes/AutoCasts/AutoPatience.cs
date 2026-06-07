@@ -10,7 +10,11 @@ public sealed class AutoPatience : BaseActionCast {
 
     public override bool DoesCancelMooch() => true;
 
-    public AutoPatience() : base(UIStrings.AutoPatience_Patience, IDs.Actions.Patience2, ActionType.Action) => HelpText = UIStrings.CancelsCurrentMooch;
+    public AutoPatience() : base(IDs.Actions.Patience2, ActionType.Action) { }
+
+    public override string GetName() => UIStrings.AutoPatience_Patience;
+
+    public override string GetHelpText() => UIStrings.CancelsCurrentMooch;
 
     public override bool CastCondition() {
         if (!EvaluateConditionSet())

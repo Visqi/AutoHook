@@ -46,11 +46,11 @@ public partial class FishingManager {
         if (cast != null) {
             if (multiHook.Enabled && multiHook.CastCondition()) {
                 Service.TaskManager.Enqueue(() => PlayerRes.CastActionDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));
-                Service.TaskManager.Enqueue(() => PlayerRes.CastActionDelayed(cast.Id, cast.ActionType, cast.Name));
+                Service.TaskManager.Enqueue(() => PlayerRes.CastActionDelayed(cast.Id, cast.ActionType, cast.GetName()));
                 return true;
             }
 
-            PlayerRes.CastActionDelayed(cast.Id, cast.ActionType, cast.Name);
+            PlayerRes.CastActionDelayed(cast.Id, cast.ActionType, cast.GetName());
             return true;
         }
 

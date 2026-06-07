@@ -39,9 +39,11 @@ public sealed class AutoCordial : BaseActionCast {
         (IDs.Item.HiCordial,        CordialHiRecovery)
     ];
 
-    public AutoCordial(bool isSpearFishing = false) : base(UIStrings.Cordial, IDs.Item.Cordial, ActionType.Item) {
+    public AutoCordial(bool isSpearFishing = false) : base(IDs.Item.Cordial, ActionType.Item) {
         IsSpearFishing = isSpearFishing;
     }
+
+    public override string GetName() => UIStrings.Cordial;
 
     public override bool CastCondition() {
         if (!EvaluateConditionSet())

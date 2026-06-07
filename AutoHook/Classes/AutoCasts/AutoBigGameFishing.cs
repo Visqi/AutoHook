@@ -3,7 +3,9 @@ namespace AutoHook.Classes.AutoCasts;
 public sealed class AutoBigGameFishing : BaseActionCast {
     public int AnglersStacks = 2;
 
-    public AutoBigGameFishing() : base(UIStrings.BigGameFishing, IDs.Actions.BigGameFishing) { }
+    public AutoBigGameFishing() : base(IDs.Actions.BigGameFishing) { }
+
+    public override string GetName() => UIStrings.BigGameFishing;
 
     public override bool CastCondition() {
         if (!EvaluateConditionSet())

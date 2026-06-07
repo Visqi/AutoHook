@@ -5,8 +5,11 @@ namespace AutoHook.Classes.AutoCasts;
 public sealed class AutoSurfaceSlap : BaseActionCast {
     public override bool DoesCancelMooch() => true;
 
-    public AutoSurfaceSlap() : base(UIStrings.Surface_Slap, IDs.Actions.SurfaceSlap, ActionType.Action)
-        => HelpText = UIStrings.OverridesIdenticalCast;
+    public AutoSurfaceSlap() : base(IDs.Actions.SurfaceSlap, ActionType.Action) { }
+
+    public override string GetName() => UIStrings.Surface_Slap;
+
+    public override string GetHelpText() => UIStrings.OverridesIdenticalCast;
 
     public override bool CastCondition() => EvaluateConditionSet()
         && !Service.WorldState.HasStatus(IDs.Status.IdenticalCast)

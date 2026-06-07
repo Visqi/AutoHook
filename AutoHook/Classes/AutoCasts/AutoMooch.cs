@@ -7,8 +7,14 @@ public sealed class AutoMooch : BaseActionCast {
 
     public override bool RequiresTimeWindow() => true;
 
-    public AutoMooch() : base(UIStrings.AutoMooch, IDs.Actions.Mooch, ActionType.Action)
-        => HelpText = UIStrings.AutoMooch_HelpText;
+    public AutoMooch() : base(IDs.Actions.Mooch, ActionType.Action) { }
+
+    [NonSerialized] public bool UseAlwaysMoochLabel;
+    [NonSerialized] public bool SuppressHelpText;
+
+    public override string GetName() => UseAlwaysMoochLabel ? UIStrings.Always_Mooch : UIStrings.AutoMooch;
+
+    public override string GetHelpText() => SuppressHelpText ? string.Empty : UIStrings.AutoMooch_HelpText;
 
     public override bool CastCondition() {
         if (!EvaluateConditionSet())

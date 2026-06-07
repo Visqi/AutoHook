@@ -59,7 +59,7 @@ public class AutoCastsConfig {
             if (action.RequiresTimeWindow() && !IsWithinTimeWindow())
                 continue;
 
-            Service.PrintDebug($"[AutoCast] Returning {action.Name}");
+            Service.PrintDebug($"[AutoCast] Returning {action.GetName()}");
             return action;
         }
 
