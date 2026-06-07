@@ -85,6 +85,27 @@ public sealed class WorldState {
     public bool HasMultihookAvailable()
         => ActionAvailable(IDs.Actions.MultiHook, ActionType.Action);
 
+    public bool IsStellarHooksetAvailable()
+        => GetAvailableStellarHooksetId() is not null;
+
+    // why tf did they have to name both the same thing
+    public unsafe uint? GetAvailableStellarHooksetId() {
+        if (ActionAvailable(IDs.Actions.StellarHookMaster)) {
+            if (DutyActionManager.GetInstanceIfReady() is not null and var dm) {
+                for (var i = 0; i < dm->NumValidSlots; i++)
+                    if (dm->ActionId[i] is IDs.Actions.StellarHookMaster && dm->CurCharges[i] > 0)
+                        return IDs.Actions.StellarHookMaster;
+            }
+            else
+                return IDs.Actions.StellarHookMaster;
+        }
+
+        if (ActionAvailable(IDs.Actions.StellarHook))
+            return IDs.Actions.StellarHook;
+
+        return null;
+    }
+
     public OceanFishingState OceanFishing => Ocean.OceanFishing;
     public SpectralCurrentStatus SpectralCurrentStatus => Ocean.SpectralCurrentStatus;
     public OceanSpectralTimerInfo SpectralTimer => Ocean.SpectralTimer;

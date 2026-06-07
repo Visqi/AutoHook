@@ -73,6 +73,13 @@ public static class PlayerRes {
     }
 
     /// <summary>Returns whether a delayed cast was started (block set and post-cast delay scheduled).</summary>
+    public static bool TryUseStellarHookset(string actionName = "Stellar Hookset") {
+        if (WS.GetAvailableStellarHooksetId() is not { } actionId)
+            return false;
+
+        return TryCastActionDelayed(actionId, ActionType.Action, actionName);
+    }
+
     public static bool TryCastActionDelayed(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
         if (WS.BlockCasting)
             return false;

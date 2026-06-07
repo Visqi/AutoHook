@@ -242,6 +242,15 @@ public class HookConfig : BaseOption {
     private bool IsHookAvailable(BaseBiteConfig hookType, double timePassed) {
         if (GetHookTypeForTime(hookType, timePassed) is not { } timedHook)
             return false;
+
+        if (timedHook == HookType.Stellar) {
+            if (Service.WorldState.IsStellarHooksetAvailable())
+                return true;
+
+            Service.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
+            return false;
+        }
+
         if (!Service.WorldState.ActionAvailable((uint)timedHook, ActionType.Action)) {
             Service.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
             return false;

@@ -380,7 +380,12 @@ public partial class FishingManager : IDisposable {
         }
 
         Service.TaskManager.EnqueueDelay(delay);
-        Service.TaskManager.Enqueue(() => PlayerRes.CastActionDelayed((uint)hook, ActionType.Action, @$"{hook}"));
+        Service.TaskManager.Enqueue(() => {
+            if (hook == HookType.Stellar)
+                PlayerRes.TryUseStellarHookset();
+            else
+                PlayerRes.CastActionDelayed((uint)hook, ActionType.Action, @$"{hook}");
+        });
         Service.Status = @$"Using {hook} hook. (Bite: {bite})";
     }
 
