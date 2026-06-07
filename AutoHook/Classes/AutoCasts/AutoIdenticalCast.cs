@@ -17,7 +17,7 @@ public sealed class AutoIdenticalCast : BaseActionCast {
 
     protected override DrawOptionsDelegate DrawOptions => () => {
         DrawAutoCastConditions();
-        DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref DontCancelMooch, UIStrings.IdenticalCast_HelpText, true);
+        DrawMoochCancelOption();
     };
 
     public override int Priority { get; set; } = 8;

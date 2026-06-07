@@ -51,8 +51,14 @@ public abstract class BaseActionCast {
     protected void DrawAutoCastConditions(bool showSubPrefix = true)
         => ConditionSet = ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showAdvanced: true, showSubPrefix: showSubPrefix);
 
-    public void DrawFishCaughtActionOptions()
-        => DrawAutoCastConditions(showSubPrefix: false);
+    protected void DrawMoochCancelOption()
+        => DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref DontCancelMooch, UIStrings.IdenticalCast_HelpText, true);
+
+    public void DrawFishCaughtActionOptions() {
+        DrawAutoCastConditions(showSubPrefix: false);
+        if (DoesCancelMooch())
+            DrawMoochCancelOption();
+    }
 
     public virtual void SetThreshold(int newCost) {
         var actionCost = Id == IDs.Actions.ThaliaksFavor ? 0 : (int)PlayerRes.CastActionCost(Id, ActionType);
