@@ -22,7 +22,7 @@ public sealed class SingleCondition<TCD, TValue>(Func<object?>? context = null) 
         if (p == null || p.Count == 0) {
             var set = BackingSet;
             set = SingleConditionSetHelper.SetSingleCondition(set, Definition.Id, null);
-            BackingSet = set is not { Groups.Count: > 0 } ? null : set;
+            BackingSet = SingleConditionSetHelper.CompactOrNull(set);
         }
         else {
             BackingSet = SingleConditionSetHelper.SetSingleCondition(BackingSet, Definition.Id, p);

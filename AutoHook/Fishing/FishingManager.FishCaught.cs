@@ -65,10 +65,13 @@ public partial class FishingManager {
 
         var guid = lastCatchCfg.UniqueId;
 
-        if (lastCatchCfg.SwapPresetLimit.BackingSet is { Groups.Count: > 0 } && Presets.SelectedPreset?.PresetName == lastCatchCfg.PresetToSwap)
+        var (swapPresetEnabled, _) = lastCatchCfg.SwapPresetLimit.Value;
+
+        if (swapPresetEnabled && lastCatchCfg.SwapPresetLimit.BackingSet is { Groups.Count: > 0 } &&
+            Presets.SelectedPreset?.PresetName == lastCatchCfg.PresetToSwap)
             FishingHelper.RemovePresetSwap(guid);
 
-        if (lastCatchCfg.SwapPresetLimit.BackingSet is { Groups.Count: > 0 } presetSet &&
+        if (swapPresetEnabled && lastCatchCfg.SwapPresetLimit.BackingSet is { Groups.Count: > 0 } presetSet &&
             !FishingHelper.SwappedPreset(guid) && !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
             var readyForPresetSwap = presetSet.Evaluate(Ws, ConditionRegistry.Registry);
             if (readyForPresetSwap && lastCatchCfg.PresetToSwap != Presets.SelectedPreset?.PresetName) {
@@ -88,7 +91,9 @@ public partial class FishingManager {
             }
         }
 
-        if (lastCatchCfg.SwapBaitLimit.BackingSet is { Groups.Count: > 0 } baitSet &&
+        var (swapBaitEnabled, _) = lastCatchCfg.SwapBaitLimit.Value;
+
+        if (swapBaitEnabled && lastCatchCfg.SwapBaitLimit.BackingSet is { Groups.Count: > 0 } baitSet &&
             !FishingHelper.SwappedBait(guid) && !Ws.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
             var readyForBaitSwap = baitSet.Evaluate(Ws, ConditionRegistry.Registry);
             if (readyForBaitSwap &&

@@ -36,4 +36,12 @@ public static class SingleConditionSetHelper {
             cond.Params = paramsDict;
         return set;
     }
+
+    /// <summary>Removes empty groups. Returns null when nothing remains.</summary>
+    public static ConditionSet? CompactOrNull(ConditionSet? set) {
+        if (set is not { Groups.Count: > 0 })
+            return null;
+        set.Groups.RemoveAll(g => g.Conditions.Count == 0);
+        return set.Groups.Count > 0 ? set : null;
+    }
 }
