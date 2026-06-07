@@ -23,12 +23,10 @@ public partial class FishingManager {
                 return false;
         }
 
-        var caughtCount = FishingHelper.GetFishCount(lastFishCatchCfg.UniqueId);
-
         if (Ws.Fishing.LastCatch is { } lc && lc.FishId > 0)
             lastFishCatchCfg.SparefulHand.FishIdToCheck = lc.FishId;
 
-        if (lastFishCatchCfg.IdenticalCast.IsAvailableToCast(caughtCount))
+        if (lastFishCatchCfg.IdenticalCast.IsAvailableToCast())
             cast = lastFishCatchCfg.IdenticalCast;
 
         if (lastFishCatchCfg.SurfaceSlap.IsAvailableToCast())

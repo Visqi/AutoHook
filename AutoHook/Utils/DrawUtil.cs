@@ -587,6 +587,6 @@ public static class DrawUtil {
             () => surfaceSlap.DrawFishCaughtActionOptions(), surfaceSlap.HelpText);
 
         DrawCheckboxTree(UIStrings.UseIdenticalCast, ref identicalCast.Enabled,
-            () => identicalCast.DrawFishTabOptions(), identicalCast.HelpText);
+            () => identicalCast.DrawFishCaughtActionOptions(), identicalCast.HelpText);
     }
 }
