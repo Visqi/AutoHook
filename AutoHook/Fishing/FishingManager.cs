@@ -98,6 +98,7 @@ public partial class FishingManager : IDisposable {
         }
 
         TryApplyOceanFishingPreset();
+        CheckExtraActions();
 
         var extraCfg = GetExtraCfg();
         if (extraCfg is { ForceBaitSwap: true, Enabled: true }) {
@@ -107,7 +108,7 @@ public partial class FishingManager : IDisposable {
                 Service.PrintChat(@$"[AutoHook] Starting with bait: {MultiString.GetItemName(extraCfg.ForcedBaitId)}");
                 Service.Save();
             }
-            else
+            else if (result != ChangeBaitReturn.AlreadyEquipped)
                 Service.PrintChat(@$"[AutoHook] Failed to change bait for forced bait swap. Result: {result}");
         }
 
@@ -196,6 +197,9 @@ public partial class FishingManager : IDisposable {
 
         var currentState = Service.WorldState.Fishing.FishingState;
         if (currentState == FishingState.None) {
+            if (EzThrottler.Throttle(@"CheckExtraActionsNone", 500) && Ws.IsCastAvailable())
+                CheckExtraActions();
+
             if (Service.Configuration.AutoStartFishing && !ShouldSuppressAutoStartFishing() && EzThrottler.Throttle("AutoStartFishing", 1000)) {
                 var autoCastCfg = GetAutoCastCfg();
                 if (autoCastCfg.EnableAll && autoCastCfg.CastLine.IsAvailableToCast() && Ws.IsCastAvailable()) {

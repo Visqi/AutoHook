@@ -64,6 +64,27 @@ public partial class FishingManager {
             yield return preset;
     }
 
+    private CustomPresetConfig? FindPresetByName(string presetName) {
+        if (string.IsNullOrEmpty(presetName) || presetName == @"-")
+            return null;
+
+        if (Presets.DefaultPreset.PresetName == presetName)
+            return Presets.DefaultPreset;
+
+        return Presets.CustomPresets.FirstOrDefault(p => p.PresetName == presetName);
+    }
+
+    private bool ExtraSwapStillNeeded(ExtraTrigger trig) {
+        if (trig.SwapPreset && !string.IsNullOrEmpty(trig.PresetToSwap) && trig.PresetToSwap != @"-"
+            && Presets.SelectedPreset?.PresetName != trig.PresetToSwap)
+            return true;
+
+        if (trig.SwapBait && trig.BaitToSwap.Id > 0 && Ws.Fishing.BaitInfo.BaitId != trig.BaitToSwap.Id)
+            return true;
+
+        return false;
+    }
+
     private void QueueResolveCollectables() {
         var extraCfg = GetExtraCfg();
         foreach (var trig in extraCfg.Triggers) {
@@ -83,6 +104,7 @@ public partial class FishingManager {
 
         while (true) {
             Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.PresetSwapped));
+            Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.BaitSwapped));
 
             var presetBefore = Presets.SelectedPreset?.UniqueId;
             var extraCfg = GetExtraCfg();
@@ -108,7 +130,7 @@ public partial class FishingManager {
 
             var current = trig.ConditionSet.Evaluate(Ws, ConditionRegistry.Registry);
             var last = i < extraCfg.LastTriggerStates.Count && extraCfg.LastTriggerStates[i];
-            var fire = !last && current;
+            var fire = current && (!last || ExtraSwapStillNeeded(trig));
 
             if (i < extraCfg.LastTriggerStates.Count)
                 extraCfg.LastTriggerStates[i] = current;
@@ -132,19 +154,24 @@ public partial class FishingManager {
 
         // Swap preset
         if (trig.SwapPreset && !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
-            var preset = Presets.CustomPresets.FirstOrDefault(p => p.PresetName == trig.PresetToSwap);
-
-                    Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
-
-            if (preset != null) {
-                Service.Save();
-                Presets.SelectedPreset = preset;
-                preset.ExtraCfg.LastTriggerStates.Clear();
-                Service.PrintChat(@$"[Extra] Trigger: Swapping preset to {trig.PresetToSwap}");
-                Service.Save();
+            if (Presets.SelectedPreset?.PresetName == trig.PresetToSwap) {
+                Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
             }
-            else if (!string.IsNullOrEmpty(trig.PresetToSwap) && trig.PresetToSwap != @"-") {
-                Service.PrintChat(@$"[Extra] Trigger: Preset {trig.PresetToSwap} not found.");
+            else {
+                var preset = FindPresetByName(trig.PresetToSwap);
+
+                Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
+
+                if (preset != null) {
+                    Service.Save();
+                    Presets.SelectedPreset = preset;
+                    preset.ExtraCfg.LastTriggerStates.Clear();
+                    Service.PrintChat(@$"[Extra] Trigger: Swapping preset to {trig.PresetToSwap}");
+                    Service.Save();
+                }
+                else if (!string.IsNullOrEmpty(trig.PresetToSwap) && trig.PresetToSwap != @"-") {
+                    Service.PrintChat(@$"[Extra] Trigger: Preset {trig.PresetToSwap} not found.");
+                }
             }
         }
 
@@ -153,7 +180,7 @@ public partial class FishingManager {
             var result = ChangeBait(trig.BaitToSwap);
             Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.BaitSwapped, Or: true));
 
-            if (result == ChangeBaitReturn.Success) {
+            if (result is ChangeBaitReturn.Success or ChangeBaitReturn.AlreadyEquipped) {
                 Service.PrintChat(@$"[Extra] Trigger: Swapping bait to {trig.BaitToSwap.Name}");
                 Service.Save();
             }
