@@ -61,6 +61,17 @@ public interface IConditionDefinition {
         };
     }
 
+    public static bool CompareDouble(double lhs, double rhs, string op) {
+        return op switch {
+            ">" => lhs > rhs,
+            ">=" => lhs >= rhs,
+            "<" => lhs < rhs,
+            "<=" => lhs <= rhs,
+            "=" => lhs == rhs,
+            _ => lhs >= rhs,
+        };
+    }
+
     public static void DrawIdsParams(Condition cond, string label) {
         var ids = GetIds(cond.Params);
         var text = string.Join(", ", ids);

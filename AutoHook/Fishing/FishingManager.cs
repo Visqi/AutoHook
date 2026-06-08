@@ -82,6 +82,11 @@ public partial class FishingManager : IDisposable {
                         case IDs.Actions.Mooch2:
                             OnBeganFishing(true);
                             break;
+                        case IDs.Actions.AmbitiousLure:
+                        case IDs.Actions.ModestLure:
+                            Ws.Execute(new FishingInfo.OpSetLastLureCastBiteTime(
+                                Math.Truncate(_fishingTimer.ElapsedMilliseconds / 1000.0 * 100) / 100));
+                            break;
                     }
                 }
                 break;
@@ -315,6 +320,7 @@ public partial class FishingManager : IDisposable {
             return;
 
         Ws.Execute(new FishingInfo.OpSetLureSuccess(false));
+        Ws.Execute(new FishingInfo.OpSetLastLureCastBiteTime(null));
 
         var baitname = MultiString.GetItemName(Ws.Fishing.BaitInfo.MoochId);
         if (!mooching)

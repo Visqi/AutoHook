@@ -62,6 +62,7 @@ public sealed class FishingInfo {
     public UsedAction? LastUsedAction;
 
     public bool LureSuccess;
+    public double? LastLureCastBiteTime;
     public PreviousCatchInfo PreviousCatch;
 
     public bool CanFish;
@@ -95,6 +96,8 @@ public sealed class FishingInfo {
             yield return new OpSetPreviousFishingState(PreviousFishingState);
         if (LureSuccess)
             yield return new OpSetLureSuccess(LureSuccess);
+        if (LastLureCastBiteTime is { } lureCastBiteTime)
+            yield return new OpSetLastLureCastBiteTime(lureCastBiteTime);
         if (PreviousCatch.CanMoochPreviousCatch || PreviousCatch.CanMooch2PreviousCatch ||
             PreviousCatch.CanReleasePreviousCatch || PreviousCatch.CanIdenticalCastPreviousCatch || PreviousCatch.CanSurfaceSlapPreviousCatch ||
             CanFish || ChangingPosition || CurrentCastBaitFlags != 0 || CurrentSelectedSwimbait != 0 ||
@@ -152,6 +155,10 @@ public sealed class FishingInfo {
 
     public sealed record OpSetLureSuccess(bool Value) : WorldState.Operation {
         protected override void Exec(WorldState ws) => ws.Fishing.LureSuccess = Value;
+    }
+
+    public sealed record OpSetLastLureCastBiteTime(double? Value) : WorldState.Operation {
+        protected override void Exec(WorldState ws) => ws.Fishing.LastLureCastBiteTime = Value;
     }
 
     public sealed record OpSetPreviousFishingState(FishingState Value) : WorldState.Operation {

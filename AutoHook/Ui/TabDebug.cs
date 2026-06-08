@@ -135,6 +135,12 @@ public class TabDebug : BaseTab {
                 else
                     ImGui.Text("LastUsedAction: (none)");
                 ImGui.Text($"LureSuccess: {ws.LureSuccess}");
+                if (ws.Fishing.LastLureCastBiteTime is { } lureCastBiteTime) {
+                    var elapsed = ws.Fishing.BiteInfo.BiteTimeSeconds - lureCastBiteTime;
+                    ImGui.Text($"LastLureCastBiteTime: {lureCastBiteTime:F2}s (elapsed {elapsed:F2}s)");
+                }
+                else
+                    ImGui.Text("LastLureCastBiteTime: (none)");
             }
 
             // Statuses
