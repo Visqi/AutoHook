@@ -160,7 +160,7 @@ public sealed class ActionCooldownCD : IConditionDefinition {
     private static ActionType GetActionType(int type, uint id) {
         if (type == 1)
             return ActionType.Item;
-        return id == IDs.Actions.Collect ? ActionType.EventAction : ActionType.Action;
+        return ActionType.Action;
     }
 
     private static int GetCooldownSeconds(uint id, ActionType type) {

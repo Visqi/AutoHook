@@ -253,10 +253,7 @@ public class TabDebug : BaseTab {
         }
     }
 
-    private static ActionType GetFishingActionType(uint id) => id switch {
-        IDs.Actions.Collect => ActionType.EventAction,
-        _ => ActionType.Action,
-    };
+    private static ActionType GetFishingActionType(uint _) => ActionType.Action;
 
     private static readonly (string Field, uint Id, ActionType Type)[] FshActions =
         typeof(IDs.Actions).GetFields(BindingFlags.Public | BindingFlags.Static)

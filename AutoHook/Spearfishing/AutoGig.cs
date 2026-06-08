@@ -119,7 +119,7 @@ internal class AutoGig : Window, IDisposable {
             var selectedPreset = _gigCfg.SelectedPreset;
 
             if (selectedPreset is { KeepCollectorsGloveOn: true } && !Service.WorldState.HasStatus(IDs.Status.CollectorsGlove))
-                PlayerRes.CastActionDelayed(IDs.Actions.Collect, ActionType.EventAction, UIStrings.Collect);
+                PlayerRes.CastActionDelayed(IDs.Actions.Collect, actionName: UIStrings.Collect);
 
             if (!Service.WorldState.HasStatus(IDs.Status.NaturesBounty) && _gigCfg.NatureBountyBeforeFish)
                 PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
