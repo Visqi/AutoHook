@@ -20,9 +20,10 @@ public class AutoCollectables : IDisposable {
         Svc.AddonLifecycle.UnregisterListener(HandleAddon);
     }
 
+    // TODO: handle new line characters in the string. Large ui scale changes the actual string in the addon
     private readonly List<string> collectablePatterns =
     [
-        "collectability of",
+        "Preserve the following",
         "収集価値",
         "Sammlerwert",
         "Valeur de collection"
