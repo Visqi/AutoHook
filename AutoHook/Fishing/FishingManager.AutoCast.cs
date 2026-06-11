@@ -92,7 +92,7 @@ public partial class FishingManager {
         if (Ws.Fishing.LastCatch is not { FishId: > 0 } lastCatch)
             return false;
 
-        var fishId = (uint)lastCatch.FishId;
+        var fishId = lastCatch.FishId;
         if (!Ws.SwimbaitIds.Any(id => id == fishId))
             return false;
 

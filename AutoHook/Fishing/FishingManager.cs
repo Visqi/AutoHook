@@ -14,7 +14,6 @@ public partial class FishingManager : IDisposable {
 
     // todo: refactor this entire class
     private static readonly FishingPresets Presets = Service.Configuration.HookPresets;
-    private double _timeout;
     private readonly Stopwatch _fishingTimer = new();
     private readonly EventSubscriptions _oceanEventSubs;
 
@@ -122,13 +121,12 @@ public partial class FishingManager : IDisposable {
     }
 
     // The current config is updates two times: When we began fishing (to get the config based on the mooch/bait) and when we hooked the fish (in case the user updated their configs).
-    private unsafe void UpdateStatusAndTimer() {
+    private unsafe void UpdateStatusAndTimer(bool forceMooching = false) {
         if (Service.Configuration.ResetAfkTimer)
             InputTimerModule.Instance()->ResetAfkTimer();
 
-        var selected = GetHookCfg();
+        var selected = GetHookCfg(forceMooching);
         var hookset = selected.GetHookset();
-        _timeout = selected.Enabled ? Ws.HasStatus(IDs.Status.Chum) ? hookset.ChumTimeoutMax : hookset.TimeoutMax : 0;
 
         if (Service.Configuration.ShowStatus) {
             var buffStatus = "";
@@ -171,10 +169,10 @@ public partial class FishingManager : IDisposable {
         return presetName;
     }
 
-    public HookConfig GetHookCfg() {
+    public HookConfig GetHookCfg(bool forceMooching = false) {
         var bait = Ws.Fishing.BaitInfo;
-        var currentBaitId = bait.SelectedSwimbaitId is { } sb ? sb : bait.MoochId;
-        var isMooching = bait.IsMooching;
+        var isMooching = forceMooching || bait.IsMooching;
+        var currentBaitId = ResolveHookCfgId(bait, isMooching);
 
         HookConfig? custom = null;
         if (Presets.SelectedPreset != null)
@@ -187,6 +185,23 @@ public partial class FishingManager : IDisposable {
         var currentHook = custom?.Enabled ?? false ? custom : defaultHook!;
 
         return currentHook;
+    }
+
+    private static uint ResolveHookCfgId(BaitInfo bait, bool isMooching) {
+        if (bait.SelectedSwimbaitId is { } sb)
+            return sb;
+
+        if (isMooching && Ws.Fishing.LastCatch?.FishId is { } fishId and > 0)
+            return fishId;
+
+        return bait.MoochId;
+    }
+
+    private static double GetTimeoutMax(HookConfig selected) {
+        if (!selected.Enabled)
+            return 0;
+
+        return selected.GetHookset().GetEffectiveTimeoutMax(Ws.HasStatus(IDs.Status.Chum));
     }
 
     private void OnFrameworkUpdate(IFramework _) {
@@ -334,14 +349,16 @@ public partial class FishingManager : IDisposable {
         Service.TaskManager.EnqueueDelay(2500);
         Service.TaskManager.Enqueue(CastCollect);
 
-        UpdateStatusAndTimer();
+        _fishingTimer.Reset();
+        _fishingTimer.Start();
+        UpdateStatusAndTimer(mooching);
     }
 
     private void CheckTimeout() {
         if (!_fishingTimer.IsRunning)
             _fishingTimer.Start();
 
-        var maxTime = Math.Truncate(_timeout * 100) / 100;
+        var maxTime = Math.Truncate(GetTimeoutMax(GetHookCfg()) * 100) / 100;
 
         var currentTime = Math.Truncate(_fishingTimer.ElapsedMilliseconds / 1000.0 * 100) / 100;
 

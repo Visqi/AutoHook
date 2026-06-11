@@ -1,3 +1,4 @@
+using AutoHook.Conditions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
@@ -37,6 +38,8 @@ public class BaseHookset(uint requiredStatus) {
     //public double TimeoutMin = 0;
     public double TimeoutMax = 0;
     public double ChumTimeoutMax = 0;
+    public ConditionSet? TimeoutConditionSet { get; set; }
+    public ConditionSet? ChumTimeoutConditionSet { get; set; }
 
     public bool UseCustomStatusHook;
 
@@ -47,6 +50,18 @@ public class BaseHookset(uint requiredStatus) {
             _uniqueId = Guid.NewGuid();
 
         return _uniqueId;
+    }
+
+    public double GetEffectiveTimeoutMax(bool chumActive) {
+        var timeout = chumActive ? ChumTimeoutMax : TimeoutMax;
+        if (timeout <= 0)
+            return 0;
+
+        var set = chumActive ? ChumTimeoutConditionSet : TimeoutConditionSet;
+        if (set is { Groups.Count: > 0 } && !set.Evaluate(Service.WorldState, ConditionRegistry.Registry))
+            return 0;
+
+        return timeout;
     }
 
     public void DrawOptions() {
@@ -113,49 +128,41 @@ public class BaseHookset(uint requiredStatus) {
         if (ImGui.TreeNodeEx(UIStrings.Timeout,
                 ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.TimeoutOption);
-            ImGui.SetNextItemWidth(100.Scaled());
-            if (ImGui.InputDouble(UIStrings.TimeLimit, ref TimeoutMax, .1, 1, @"%.1f%")) {
-                switch (TimeoutMax) {
-                    case 0.1:
-                        TimeoutMax = 2;
-                        break;
-                    case <= 0:
-                    case <= 1.9: //This makes the option turn off if delay = 2 seconds when clicking the minus.
-                        TimeoutMax = 0;
-                        break;
-                    case > 99:
-                        TimeoutMax = 99;
-                        break;
-                }
-
-                Service.Save();
+            DrawTimeoutField(UIStrings.TimeLimit, ref TimeoutMax, UIStrings.DoesntHaveAffectUnderChum);
+            if (TimeoutMax > 0) {
+                TimeoutConditionSet = Ui.ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, TimeoutConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
             }
 
-            ImGui.SameLine();
-            ImGuiComponents.HelpMarker($"{UIStrings.TimeoutHelpText}\n\n{UIStrings.DoesntHaveAffectUnderChum}");
-
-            ImGui.SetNextItemWidth(100.Scaled());
-            if (ImGui.InputDouble(UIStrings.ChumTimeLimit, ref ChumTimeoutMax, .1, 1, @"%.1f%")) {
-                switch (ChumTimeoutMax) {
-                    case 0.1:
-                        ChumTimeoutMax = 2;
-                        break;
-                    case <= 0:
-                    case <= 1.9: //This makes the option turn off if delay = 2 seconds when clicking the minus.
-                        ChumTimeoutMax = 0;
-                        break;
-                    case > 99:
-                        ChumTimeoutMax = 99;
-                        break;
-                }
-
-                Service.Save();
+            DrawTimeoutField(UIStrings.ChumTimeLimit, ref ChumTimeoutMax);
+            if (ChumTimeoutMax > 0) {
+                ChumTimeoutConditionSet = Ui.ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, ChumTimeoutConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
             }
-
-            ImGui.SameLine();
-            ImGuiComponents.HelpMarker(UIStrings.TimeoutHelpText);
             ImGui.TreePop();
         }
+    }
+
+    private static void DrawTimeoutField(string label, ref double timeoutMax, string? extraHelp = null) {
+        ImGui.SetNextItemWidth(100.Scaled());
+        if (ImGui.InputDouble(label, ref timeoutMax, .1, 1, @"%.1f%")) {
+            switch (timeoutMax) {
+                case 0.1:
+                    timeoutMax = 2;
+                    break;
+                case <= 0:
+                case <= 1.9: //This makes the option turn off if delay = 2 seconds when clicking the minus.
+                    timeoutMax = 0;
+                    break;
+                case > 99:
+                    timeoutMax = 99;
+                    break;
+            }
+
+            Service.Save();
+        }
+
+        ImGui.SameLine();
+        var help = extraHelp is null ? UIStrings.TimeoutHelpText : $"{UIStrings.TimeoutHelpText}\n\n{extraHelp}";
+        ImGuiComponents.HelpMarker(help);
     }
 
     private void DrawLures() {
