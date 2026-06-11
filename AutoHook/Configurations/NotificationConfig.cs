@@ -5,6 +5,10 @@ namespace AutoHook.Configurations;
 
 public record class NotificationConfig {
     public bool Enabled;
+    public bool EchoChatMessage;
+    public string ChatText = "";
+    public bool DisplayGameToast;
+    public string GameToastText = "";
     public bool DisplayToastNotification;
     public string ToastText = "";
     public bool FlashTaskbarIcon;
@@ -17,19 +21,18 @@ public record class NotificationConfig {
             () => {
                 DrawUtil.Checkbox("Play a beep", ref BeepOnSuccess);
 
+                DrawUtil.Checkbox("Echo chat message", ref EchoChatMessage);
+                if (EchoChatMessage)
+                    DrawMessageInput("Chat message", ref ChatText, fallbackText);
+
+                DrawUtil.Checkbox("Display in-game toast", ref DisplayGameToast);
+                if (DisplayGameToast)
+                    DrawMessageInput("Toast message", ref GameToastText, fallbackText);
+
                 using var disabled = ImRaii.Disabled(!hasPlugin);
-                DrawUtil.Checkbox("Display toast notification", ref DisplayToastNotification);
-                if (DisplayToastNotification) {
-                    using var indent = ImRaii.PushIndent();
-
-                    var text = string.IsNullOrWhiteSpace(ToastText) ? fallbackText : ToastText;
-
-                    ImGui.SetNextItemWidth(320.Scaled());
-                    if (ImGui.InputText("Toast text", ref text, 260)) {
-                        ToastText = text;
-                        Service.Save();
-                    }
-                }
+                DrawUtil.Checkbox("Display tray notification", ref DisplayToastNotification);
+                if (DisplayToastNotification)
+                    DrawMessageInput("Tray message", ref ToastText, fallbackText);
 
                 DrawUtil.Checkbox("Flash taskbar icon", ref FlashTaskbarIcon);
                 DrawUtil.Checkbox("Bring game to foreground", ref BringGameForeground);
@@ -39,6 +42,18 @@ public record class NotificationConfig {
             if (tooltip.Alive) {
                 ImGui.TextUnformatted("NotificationMaster not installed. NotificationMaster-specific options below will have no effect");
             }
+        }
+    }
+
+    private static void DrawMessageInput(string label, ref string field, string fallbackText) {
+        using var indent = ImRaii.PushIndent();
+
+        var text = string.IsNullOrWhiteSpace(field) ? fallbackText : field;
+
+        ImGui.SetNextItemWidth(320.Scaled());
+        if (ImGui.InputText(label, ref text, 260)) {
+            field = text;
+            Service.Save();
         }
     }
 }

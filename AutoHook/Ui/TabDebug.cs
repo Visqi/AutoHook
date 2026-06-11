@@ -358,13 +358,14 @@ public class TabDebug : BaseTab {
             ImGui.Spacing();
             ImGui.TextUnformatted("Notify() (config-driven):");
             DrawUtil.Checkbox("Enabled", ref _nmTestConfig.Enabled);
-            DrawUtil.Checkbox("Display toast", ref _nmTestConfig.DisplayToastNotification);
+            DrawUtil.Checkbox("Echo chat", ref _nmTestConfig.EchoChatMessage);
+            DrawUtil.Checkbox("In-game toast", ref _nmTestConfig.DisplayGameToast);
+            DrawUtil.Checkbox("Tray toast", ref _nmTestConfig.DisplayToastNotification);
             DrawUtil.Checkbox("Flash taskbar", ref _nmTestConfig.FlashTaskbarIcon);
             DrawUtil.Checkbox("Bring foreground", ref _nmTestConfig.BringGameForeground);
             DrawUtil.Checkbox("Beep on success", ref _nmTestConfig.BeepOnSuccess);
-            _nmTestConfig.ToastText = _nmToastText;
             if (ImGui.Button("Notify"))
-                SetNmResult(Service.NotificationMaster.TryNotify(_nmTestConfig));
+                SetNmResult(Service.NotificationMaster.TryNotify(_nmTestConfig, _nmToastText));
 
             if (!string.IsNullOrEmpty(_nmLastResult)) {
                 ImGui.Spacing();

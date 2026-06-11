@@ -12,7 +12,6 @@ public class Service {
 
     public const string PluginName = "AutoHook";
     public const string GlobalPresetName = "Global Preset";
-    public static string _status = @"";
 
     public static WorldState WorldState { get; set; } = null!;
     /// <summary>Pushed each frame before fishing logic reads <see cref="WorldState"/> (framework tick).</summary>
@@ -45,10 +44,7 @@ public class Service {
 
     public static void Save() => Configuration.Save();
 
-    public static string Status {
-        get => _status;
-        set => _status = value;
-    }
+    public static string Status { get; set; } = @"";
 
     public static readonly TaskManager TaskManager = new() {
         DefaultConfiguration = { TimeLimitMS = 5000 }
@@ -85,14 +81,27 @@ public class Service {
 
 public static class NotificationMasterApiExtensions {
     extension(NotificationMasterAPI.NotificationMasterApi api) {
-        public bool TryNotify(NotificationConfig cfg) {
+        public bool TryNotify(NotificationConfig cfg, string? fallbackText = null) {
             if (!cfg.Enabled)
                 return false;
 
             var success = false;
+            var chatMessage = ResolveMessage(cfg.ChatText, fallbackText);
+            var gameToastMessage = ResolveMessage(cfg.GameToastText, fallbackText);
+            var trayMessage = ResolveMessage(cfg.ToastText, fallbackText);
+
+            if (cfg.EchoChatMessage && !string.IsNullOrWhiteSpace(chatMessage)) {
+                Svc.Chat.Print(new Dalamud.Game.Text.XivChatEntry() { Message = $"[AutoHook] {chatMessage}", Type = Dalamud.Game.Text.XivChatType.Echo });
+                success = true;
+            }
+
+            if (cfg.DisplayGameToast && !string.IsNullOrWhiteSpace(gameToastMessage)) {
+                Svc.Toasts.ShowQuest(gameToastMessage);
+                success = true;
+            }
 
             if (Service.NotificationMaster.IsIPCReady()) {
-                if (cfg.DisplayToastNotification && Service.NotificationMaster.DisplayTrayNotification("AutoHook", cfg.ToastText)) {
+                if (cfg.DisplayToastNotification && !string.IsNullOrWhiteSpace(trayMessage) && Service.NotificationMaster.DisplayTrayNotification("AutoHook", trayMessage)) {
                     success = true;
                 }
 
@@ -124,5 +133,8 @@ public static class NotificationMasterApiExtensions {
 
             return success;
         }
+
+        private static string ResolveMessage(string customText, string? fallbackText)
+            => string.IsNullOrWhiteSpace(customText) ? fallbackText ?? "" : customText;
     }
 }
