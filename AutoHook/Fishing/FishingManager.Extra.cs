@@ -32,9 +32,7 @@ public partial class FishingManager {
             if (!extra.AutoOceanFishAllStops
                 && !OceanStopUtil.MatchesStop(extra.AutoOceanFishSpotId, extra.AutoOceanFishTimeId, ocean))
                 continue;
-            if (extra.AutoOceanFishConditionSet is { Groups.Count: > 0 } set
-                && set.Groups.Any(g => g.Conditions.Count > 0)
-                && !set.Evaluate(Ws, ConditionRegistry.Registry))
+            if (extra.AutoOceanFishConditionSet is { } set && set.HasAnyCondition() && set.Fails())
                 continue;
             match = preset;
             break;

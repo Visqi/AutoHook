@@ -453,15 +453,12 @@ public partial class FishingManager : IDisposable {
         if (lastFishCatchCfg is not null) {
             var (stopEnabled, _) = lastFishCatchCfg.StopAfterCaughtLimit.Value;
 
-            if (stopEnabled && lastFishCatchCfg.StopAfterCaughtLimit.BackingSet is { Groups.Count: > 0 } stopSet) {
-                var shouldStop = stopSet.Evaluate(Ws, ConditionRegistry.Registry);
-                if (shouldStop) {
-                    var (_, limit) = lastFishCatchCfg.StopAfterCaughtLimit.Value;
-                    Service.PrintChat(string.Format(UIStrings.Caught_Limited_Reached_Chat_Message, @$"{lastFishCatchCfg.Fish.Name}: {limit}"));
+            if (stopEnabled && lastFishCatchCfg.StopAfterCaughtLimit.BackingSet.Passes()) {
+                var (_, limit) = lastFishCatchCfg.StopAfterCaughtLimit.Value;
+                Service.PrintChat(string.Format(UIStrings.Caught_Limited_Reached_Chat_Message, @$"{lastFishCatchCfg.Fish.Name}: {limit}"));
 
-                    Ws.Execute(new FishingInfo.OpSetFishingStep(lastFishCatchCfg.StopFishingStep, Or: true));
-                    if (lastFishCatchCfg.StopAfterResetCount) FishingHelper.ToBeRemoved.Add(lastFishCatchCfg.UniqueId);
-                }
+                Ws.Execute(new FishingInfo.OpSetFishingStep(lastFishCatchCfg.StopFishingStep, Or: true));
+                if (lastFishCatchCfg.StopAfterResetCount) FishingHelper.ToBeRemoved.Add(lastFishCatchCfg.UniqueId);
             }
         }
 
@@ -469,15 +466,12 @@ public partial class FishingManager : IDisposable {
         if (currentHook.Enabled) {
             var (stopEnabled, _) = currentHook.StopAfterCaughtLimit.Value;
 
-            if (stopEnabled && currentHook.StopAfterCaughtLimit.BackingSet is { Groups.Count: > 0 } stopSet) {
-                var shouldStop = stopSet.Evaluate(Ws, ConditionRegistry.Registry);
-                if (shouldStop) {
-                    var (_, limit) = currentHook.StopAfterCaughtLimit.Value;
-                    Service.PrintChat(string.Format(UIStrings.Hooking_Limited_Reached_Chat_Message, @$"{currentHook.BaitFish.Name}: {limit}"));
+            if (stopEnabled && currentHook.StopAfterCaughtLimit.BackingSet.Passes()) {
+                var (_, limit) = currentHook.StopAfterCaughtLimit.Value;
+                Service.PrintChat(string.Format(UIStrings.Hooking_Limited_Reached_Chat_Message, @$"{currentHook.BaitFish.Name}: {limit}"));
 
-                    Ws.Execute(new FishingInfo.OpSetFishingStep(currentHook.StopFishingStep, Or: true));
-                    if (currentHook.StopAfterResetCount) FishingHelper.ToBeRemoved.Add(currentHook.UniqueId);
-                }
+                Ws.Execute(new FishingInfo.OpSetFishingStep(currentHook.StopFishingStep, Or: true));
+                if (currentHook.StopAfterResetCount) FishingHelper.ToBeRemoved.Add(currentHook.UniqueId);
             }
         }
     }

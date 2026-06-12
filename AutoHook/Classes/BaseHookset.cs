@@ -58,7 +58,7 @@ public class BaseHookset(uint requiredStatus) {
             return 0;
 
         var set = chumActive ? ChumTimeoutConditionSet : TimeoutConditionSet;
-        if (set is { Groups.Count: > 0 } && !set.Evaluate(Service.WorldState, ConditionRegistry.Registry))
+        if (set.Fails())
             return 0;
 
         return timeout;

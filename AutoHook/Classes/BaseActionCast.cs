@@ -45,8 +45,7 @@ public abstract class BaseActionCast {
     public ConditionSet? ConditionSet { get; set; }
 
     protected bool EvaluateConditionSet()
-        => ConditionSet is not { Groups.Count: > 0 }
-           || ConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry);
+        => ConditionSet.PassesOrUnconfigured();
 
     protected void DrawAutoCastConditions(bool showSubPrefix = true)
         => ConditionSet = ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showAdvanced: true, showSubPrefix: showSubPrefix);

@@ -7,9 +7,7 @@ public abstract class BasePreset {
 
     [JsonIgnore]
     public virtual BasePresetConfig? SelectedPreset {
-        get {
-            return PresetList.FirstOrDefault(p => p.UniqueId.ToString() == SelectedGuid);
-        }
+        get => PresetList.FirstOrDefault(p => p.UniqueId.ToString() == SelectedGuid);
         set {
             Service.Status = string.Empty;
             if (value != null) {

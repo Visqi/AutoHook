@@ -18,10 +18,8 @@ public partial class FishingManager {
 
         // Treat an "empty" ignore set (only empty groups, no conditions) as if it wasn't configured at all.
         // Can't delete all groups in advanced mode because slim mode always ensures there's a group, even if empty
-        if (lastFishCatchCfg.IgnoreConditionSet is { Groups.Count: > 0 } ignoreSet && ignoreSet.Groups.Any(g => g.Conditions.Count > 0)) {
-            if (ignoreSet.Evaluate(Service.WorldState, ConditionRegistry.Registry))
-                return false;
-        }
+        if (lastFishCatchCfg.IgnoreConditionSet is { } ignoreSet && ignoreSet.HasAnyCondition() && ignoreSet.PassesOrUnconfigured())
+            return false;
 
         if (Ws.Fishing.LastCatch is { } lc && lc.FishId > 0)
             lastFishCatchCfg.SparefulHand.FishIdToCheck = lc.FishId;
@@ -65,14 +63,12 @@ public partial class FishingManager {
 
         var (swapPresetEnabled, _) = lastCatchCfg.SwapPresetLimit.Value;
 
-        if (swapPresetEnabled && lastCatchCfg.SwapPresetLimit.BackingSet is { Groups.Count: > 0 } &&
-            Presets.SelectedPreset?.PresetName == lastCatchCfg.PresetToSwap)
+        if (swapPresetEnabled && lastCatchCfg.SwapPresetLimit.BackingSet.HasGroups()
+            && Presets.SelectedPreset?.PresetName == lastCatchCfg.PresetToSwap)
             FishingHelper.RemovePresetSwap(guid);
 
-        if (swapPresetEnabled && lastCatchCfg.SwapPresetLimit.BackingSet is { Groups.Count: > 0 } presetSet &&
-            !FishingHelper.SwappedPreset(guid) && !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
-            var readyForPresetSwap = presetSet.Evaluate(Ws, ConditionRegistry.Registry);
-            if (readyForPresetSwap && lastCatchCfg.PresetToSwap != Presets.SelectedPreset?.PresetName) {
+        if (swapPresetEnabled && lastCatchCfg.SwapPresetLimit.BackingSet.Passes() && !FishingHelper.SwappedPreset(guid) && !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
+            if (lastCatchCfg.PresetToSwap != Presets.SelectedPreset?.PresetName) {
                 var preset = Presets.CustomPresets.FirstOrDefault(preset => preset.PresetName == lastCatchCfg.PresetToSwap);
 
                 FishingHelper.AddPresetSwap(guid);
@@ -91,11 +87,8 @@ public partial class FishingManager {
 
         var (swapBaitEnabled, _) = lastCatchCfg.SwapBaitLimit.Value;
 
-        if (swapBaitEnabled && lastCatchCfg.SwapBaitLimit.BackingSet is { Groups.Count: > 0 } baitSet &&
-            !FishingHelper.SwappedBait(guid) && !Ws.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
-            var readyForBaitSwap = baitSet.Evaluate(Ws, ConditionRegistry.Registry);
-            if (readyForBaitSwap &&
-                lastCatchCfg.BaitToSwap.Id != Ws.Fishing.BaitInfo.BaitId) {
+        if (swapBaitEnabled && lastCatchCfg.SwapBaitLimit.BackingSet.Passes() && !FishingHelper.SwappedBait(guid) && !Ws.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
+            if (lastCatchCfg.BaitToSwap.Id != Ws.Fishing.BaitInfo.BaitId) {
                 var result = ChangeBait(lastCatchCfg.BaitToSwap);
 
                 FishingHelper.AddBaitSwap(guid);

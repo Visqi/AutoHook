@@ -155,8 +155,7 @@ public partial class FishingManager {
 
             Ws.SwimbaitEvaluationFishId = fishId;
             try {
-                if (activeSwimbaitCfg.ConditionSet is { Groups.Count: > 0 } condSet &&
-                    !condSet.Evaluate(Ws, ConditionRegistry.Registry)) {
+                if (activeSwimbaitCfg.ConditionSet.Fails()) {
                     Service.PrintDebug($"[Swimbait] Fish {fishId}: conditions failed (source={configSource}), trying next slot");
                     continue;
                 }

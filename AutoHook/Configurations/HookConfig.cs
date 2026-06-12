@@ -144,7 +144,7 @@ public class HookConfig : BaseOption {
         if (hookDictionary.TryGetValue(bite, out var hook)) {
             // Triple Hook
             if (hookset.UseTripleHook && hook.th.HooksetEnabled) {
-                if (CheckHookCondition(hook.th, timePassed))
+                if (hook.th.ConditionSet.PassesOrUnconfigured())
                     if (GetHookTypeForTime(hook.th, timePassed) is { } ht && IsHookAvailable(hook.th, timePassed))
                         return ht;
 
@@ -158,7 +158,7 @@ public class HookConfig : BaseOption {
 
             // Double Hook
             if (hookset.UseDoubleHook && hook.dh.HooksetEnabled) {
-                if (CheckHookCondition(hook.dh, timePassed))
+                if (hook.dh.ConditionSet.PassesOrUnconfigured())
                     if (GetHookTypeForTime(hook.dh, timePassed) is { } ht && IsHookAvailable(hook.dh, timePassed))
                         return ht;
 
@@ -172,7 +172,7 @@ public class HookConfig : BaseOption {
 
             // Normal - Patience
             if (hook.ph.HooksetEnabled) {
-                if (CheckHookCondition(hook.ph, timePassed)) {
+                if (hook.ph.ConditionSet.PassesOrUnconfigured()) {
                     if (GetHookTypeForTime(hook.ph, timePassed) is { } ht) {
                         if (IsHookAvailable(hook.ph, timePassed)) return ht;
                         var fallback = ht switch {
@@ -195,13 +195,10 @@ public class HookConfig : BaseOption {
         return HookType.None;
     }
 
-    private bool CheckHookCondition(BaseBiteConfig hookType, double timePassed)
-        => hookType.ConditionSet is not { Groups.Count: > 0 } || hookType.ConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry);
-
     private HookType? GetHookTypeForTime(BaseBiteConfig hookType, double timePassed)
         => hookType.UseMultipleHookTypesByTimer
             ? GetTimedHookType(hookType, timePassed) is { } timedHook ? timedHook : null
-            : HookTypeConditionsPass(hookType.HookTypeConditionSet)
+            : hookType.HookTypeConditionSet.PassesOrUnconfigured()
                 ? hookType.HooksetType
                 : null;
 
@@ -218,26 +215,23 @@ public class HookConfig : BaseOption {
 
         // Highest value hook types first if multiple windows overlap
         if (InRange(hookType.UseStellarHookTypeByTimer, hookType.StellarHookTypeMin, hookType.StellarHookTypeMax)
-            && HookTypeConditionsPass(hookType.StellarHookTypeConditionSet))
+            && hookType.StellarHookTypeConditionSet.PassesOrUnconfigured())
             return HookType.Stellar;
 
         if (InRange(hookType.UsePowerfulHookTypeByTimer, hookType.PowerfulHookTypeMin, hookType.PowerfulHookTypeMax)
-            && HookTypeConditionsPass(hookType.PowerfulHookTypeConditionSet))
+            && hookType.PowerfulHookTypeConditionSet.PassesOrUnconfigured())
             return HookType.Powerful;
 
         if (InRange(hookType.UsePrecisionHookTypeByTimer, hookType.PrecisionHookTypeMin, hookType.PrecisionHookTypeMax)
-            && HookTypeConditionsPass(hookType.PrecisionHookTypeConditionSet))
+            && hookType.PrecisionHookTypeConditionSet.PassesOrUnconfigured())
             return HookType.Precision;
 
         if (InRange(hookType.UseNormalHookTypeByTimer, hookType.NormalHookTypeMin, hookType.NormalHookTypeMax)
-            && HookTypeConditionsPass(hookType.NormalHookTypeConditionSet))
+            && hookType.NormalHookTypeConditionSet.PassesOrUnconfigured())
             return HookType.Normal;
 
         return null;
     }
-
-    private static bool HookTypeConditionsPass(ConditionSet? set)
-        => set is not { Groups.Count: > 0 } || set.Evaluate(Service.WorldState, ConditionRegistry.Registry);
 
     private bool IsHookAvailable(BaseBiteConfig hookType, double timePassed) {
         if (GetHookTypeForTime(hookType, timePassed) is not { } timedHook)

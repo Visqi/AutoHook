@@ -249,7 +249,7 @@ public class SubTabExtra {
         if (trig.RemoveStatus && trig.StatusToRemove != 0)
             return $"Remove {MultiString.GetStatusName(trig.StatusToRemove)}";
 
-        if (trig.ConditionSet is not { Groups.Count: > 0 })
+        if (!trig.ConditionSet.HasGroups())
             return string.Empty;
 
         if (trig.ConditionSet.Groups.Count != 1)

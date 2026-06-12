@@ -56,7 +56,7 @@ public class AutoCastsConfig {
         var order = GetAutoCastOrder();
 
         foreach (var action in order.Where(action => action.IsAvailableToCast(ignoreCurrentMooch))) {
-            if (action.RequiresTimeWindow() && !IsWithinTimeWindow())
+            if (action.RequiresTimeWindow() && !TimeWindow.BackingSet.PassesOrUnconfigured())
                 continue;
 
             Service.PrintDebug($"[AutoCast] Returning {action.GetName()}");
@@ -64,12 +64,6 @@ public class AutoCastsConfig {
         }
 
         return cast;
-    }
-
-    private bool IsWithinTimeWindow() {
-        if (TimeWindow.BackingSet is not { Groups.Count: > 0 } set)
-            return true;
-        return set.Evaluate(Service.WorldState, ConditionRegistry.Registry);
     }
 
     [JsonProperty("TimeWindowConditionSet")]
@@ -80,7 +74,7 @@ public class AutoCastsConfig {
         if (action == null || !EnableAll)
             return false;
 
-        if (action.RequiresTimeWindow() && !IsWithinTimeWindow())
+        if (action.RequiresTimeWindow() && !TimeWindow.BackingSet.PassesOrUnconfigured())
             return false;
 
         if (!action.Enabled || !action.IsAvailableToCast(ignoreCurrentMooch))
