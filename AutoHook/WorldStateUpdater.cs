@@ -259,7 +259,8 @@ public sealed class WorldStateUpdater : IDisposable {
                     for (var k = 0; k < container->Size; k++) {
                         var slot = container->GetInventorySlot(k);
                         if (slot == null || slot->ItemId == 0) continue;
-                        var id = slot->ItemId;
+                        var kind = slot->Flags.HasFlag(InventoryItem.ItemFlags.HighQuality) ? ItemKind.Hq : slot->Flags.HasFlag(InventoryItem.ItemFlags.Collectable) ? ItemKind.Collectible : ItemKind.Normal;
+                        var id = ItemUtil.GetRawId(slot->ItemId, kind);
                         dict[id] = dict.GetValueOrDefault(id, 0) + slot->Quantity;
                     }
                 }
@@ -295,7 +296,7 @@ public sealed class WorldStateUpdater : IDisposable {
         ushort currentFateId = 0;
         ushort currentMissionUnitRowId = 0;
         uint currentScore = 0;
-        var currentRank = WKSManager.MissionRank.None;
+        var currentRank = WKSMissionModule.MissionRank.None;
         ushort collectedTotal = 0;
         byte collectedIndividual = 0;
 
@@ -304,11 +305,11 @@ public sealed class WorldStateUpdater : IDisposable {
                 devGrade = wks->State.DevGrade;
                 currentFateControlRowId = wks->State.CurrentFateControlRowId;
                 currentFateId = wks->State.CurrentFateId;
-                currentMissionUnitRowId = wks->State.CurrentMissionUnitRowId;
-                currentScore = wks->State.CurrentScore;
-                currentRank = wks->State.CurrentRank;
-                collectedTotal = wks->State.CollectedTotal;
-                collectedIndividual = wks->State.CollectedIndividual;
+                currentMissionUnitRowId = wks->State.CurrentMission.MissionUnitRowId;
+                currentScore = wks->State.CurrentMission.Score;
+                currentRank = wks->State.CurrentMission.Rank;
+                collectedTotal = wks->State.CurrentMission.CollectedTotal;
+                collectedIndividual = wks->State.CurrentMission.CollectedIndividual;
             }
         }
         catch { }
