@@ -24,17 +24,25 @@ public partial class FishingManager {
         hookCfg.GetHookset().CastLures.TryCasting(Ws.LureSuccess);
     }
 
-    private void CastCollect() {
+    private bool TryCastCollectBeforeLine(AutoCastsConfig acCfg) {
+        if (!acCfg.EnableAll || !acCfg.CastCollect.Enabled || Ws.HasStatus(IDs.Status.CollectorsGlove))
+            return false;
+
+        if (!acCfg.CastCollect.IsAvailableToCast())
+            return false;
+
+        return acCfg.TryCastAction(acCfg.CastCollect);
+    }
+
+    private void CastCollectAfterLine() {
         var cfg = GetAutoCastCfg();
 
         if (Ws.HasStatus(IDs.Status.CollectorsGlove) && cfg.RecastAnimationCancel && cfg.TurnCollectOff && !cfg.CastCollect.Enabled)
             PlayerRes.CastAction(IDs.Actions.Collect);
         else if (Ws.HasStatus(IDs.Status.CollectorsGlove) && cfg.TurnCollectOffWithoutAnimCancel && !cfg.CastCollect.Enabled)
             PlayerRes.CastAction(IDs.Actions.Collect);
-        else {
+        else
             cfg.TryCastAction(cfg.CastCollect);
-            return;
-        }
     }
 
     private void UseAutoCasts() {
@@ -58,6 +66,9 @@ public partial class FishingManager {
     }
 
     private void CastLineMoochOrRelease(AutoCastsConfig acCfg, FishConfig? lastFishCatchCfg) {
+        if (TryCastCollectBeforeLine(acCfg))
+            return;
+
         var blockMooch = lastFishCatchCfg is { Enabled: true, NeverMooch: true };
 
         if (TryMoochBeforeSwimbaitForSameFish(acCfg, lastFishCatchCfg, blockMooch))

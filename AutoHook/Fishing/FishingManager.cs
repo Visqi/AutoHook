@@ -347,7 +347,7 @@ public partial class FishingManager : IDisposable {
         EzThrottler.Reset("CastingLure");
 
         Service.TaskManager.EnqueueDelay(2500);
-        Service.TaskManager.Enqueue(CastCollect);
+        Service.TaskManager.Enqueue(CastCollectAfterLine);
 
         _fishingTimer.Reset();
         _fishingTimer.Start();
