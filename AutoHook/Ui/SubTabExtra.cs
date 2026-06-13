@@ -208,7 +208,7 @@ public class SubTabExtra {
 
                 var resolve = trig.ResolveCollectablesWindow;
                 var forceNo = trig.ResolveCollectablesForceNo;
-                DrawUtil.DrawCheckboxTree("Resolve collectables window", ref resolve, () => DrawUtil.Checkbox("Force NO", ref forceNo));
+                DrawUtil.DrawCheckboxTree("Resolve collectables window", ref resolve, () => { DrawUtil.Checkbox("Force NO", ref forceNo); ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.AutoHandleCollectables_Preset_HelpText); });
                 trig.ResolveCollectablesWindow = resolve;
                 trig.ResolveCollectablesForceNo = forceNo;
 

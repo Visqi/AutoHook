@@ -1691,6 +1691,9 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
     <value>Auto handle collectables</value>
   </data>
   <data name="AutoHandleCollectablesHelpText" xml:space="preserve">
-    <value>Auto accepts the prompt when a collectable appears. Can be overridden per preset in Extra options.</value>
+    <value>Auto accepts the prompt when a collectable appears. Can be overridden per preset in Extra Options. If overridden, will wait for the preset's conditions to be true before activating.</value>
+  </data>
+  <data name="AutoHandleCollectables_Preset_HelpText" xml:space="preserve">
+    <value>Will override the global auto collectables setting and only fire when this rule's conditions are met.</value>
   </data>
 </root>
