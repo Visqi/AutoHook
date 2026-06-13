@@ -138,6 +138,9 @@
   <data name="ImportThisPreset" xml:space="preserve">
     <value>¿Importar este Preset?</value>
   </data>
+  <data name="AutoMooch" xml:space="preserve">
+    <value>Auto Mooch</value>
+  </data>
   <data name="AddLastCatch" xml:space="preserve">
     <value>Añadir última captura:</value>
   </data>
@@ -161,6 +164,9 @@
   </data>
   <data name="TabPresets_DrawHeader_IsEnabledByDefault" xml:space="preserve">
     <value>se activa por defecto cuando se añade carnada/mooch nuevo </value>
+  </data>
+  <data name="TabPresets_DrawHeader_CorrectlyEditTheBaitMoochName" xml:space="preserve">
+    <value>"Todos los Baits" y "Todos los Mooches" tienen la prioridad más baja</value>
   </data>
   <data name="NewBaitMooch" xml:space="preserve">
     <value>Nueva carnada/mooch</value>
@@ -192,6 +198,9 @@
   <data name="TabPresets_DrawHeader_TabDescription" xml:space="preserve">
     <value>Aquí puedes configurar qué anzuelo usar basado en el cebo o "mooch". Si no hay cebo especificado, se utilizará la configuración global.</value>
   </data>
+  <data name="TabPresets_DrawHeader_NewTabDescription" xml:space="preserve">
+    <value>Aquí puedes configurar qué anzuelo usar basado en el cebo o "mooch". Si no hay cebo especificado, se utilizará la configuración global.</value>
+  </data>
   <data name="NewPreset" xml:space="preserve">
     <value>Nuevo Preset</value>
   </data>
@@ -203,6 +212,9 @@
   </data>
   <data name="TabGPConfig_TabDescription" xml:space="preserve">
     <value>Aquí puedes elegir el límite de GP para las acciones e ítems usados por la función de AutoCast.</value>
+  </data>
+  <data name="GP" xml:space="preserve">
+    <value>GP</value>
   </data>
   <data name="Above" xml:space="preserve">
     <value>Por Encima De</value>
@@ -217,6 +229,9 @@
   <data name="None" xml:space="preserve">
     <value>Ninguno</value>
   </data>
+  <data name="TabnameGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
   <data name="DrawHeader_GeneralSettings" xml:space="preserve">
     <value>Ajustes Generales</value>
   </data>
@@ -225,6 +240,9 @@
   </data>
   <data name="DrawHeader_ClickToReportAnIssue" xml:space="preserve">
     <value>Haz clic aquí para reportar un problema o hacer una sugerencia</value>
+  </data>
+  <data name="Changelog" xml:space="preserve">
+    <value>Historial de cambios</value>
   </data>
   <data name="HookWeakExclamation" xml:space="preserve">
     <value>Hook Débil (!)</value>
@@ -237,6 +255,9 @@
   </data>
   <data name="HookWillBeUsedIfPatienceIsNotUp" xml:space="preserve">
     <value>"Hook" será utilizado si Patience no está activa</value>
+  </data>
+  <data name="PrecisionHookset" xml:space="preserve">
+    <value>Precision Hookset</value>
   </data>
   <data name="MoochBaitName" xml:space="preserve">
     <value>Nombre de Mooch/Carnada</value>
@@ -337,6 +358,9 @@ Si está desactivado, se utilizará Precision/Powerful Hookset cuando Patience e
   </data>
   <data name="Enable" xml:space="preserve">
     <value>Activar</value>
+  </data>
+  <data name="TabNameAutoGig" xml:space="preserve">
+    <value>AutoGig</value>
   </data>
   <data name="TabAutoGigDescription" xml:space="preserve">
     <value>Esta funcion es experimental y a veces falla. Si crees que falla mucho, intenta ajustando la ventana de pesca a un tamaño distinto</value>
@@ -450,6 +474,9 @@ Esto podria salvarte 100GP si solo estas yendo por mooches</value>
   <data name="New_Preset" xml:space="preserve">
     <value>Nuevo Preset</value>
   </data>
+  <data name="Auto_Casts" xml:space="preserve">
+    <value>Auto lanzamientos</value>
+  </data>
   <data name="TabAutoCasts_DrawAutoCast_HelpText" xml:space="preserve">
     <value>Cast (Acción de FSH) sera usado despues de una mordida
 
@@ -519,6 +546,9 @@ Si Auto Mooch (Global o Preset Personalizado) no está activado, se usara Cast n
   <data name="Incomplete" xml:space="preserve">
     <value>Incompleto</value>
   </data>
+  <data name="AutoHook" xml:space="preserve">
+    <value>Auto Hook (enganchar)</value>
+  </data>
   <data name="PluginUi_Language" xml:space="preserve">
     <value>Idioma</value>
   </data>
@@ -531,6 +561,9 @@ Si Auto Mooch (Global o Preset Personalizado) no está activado, se usara Cast n
   <data name="Add_new_mooch" xml:space="preserve">
     <value>Añadir nuevo mooch</value>
   </data>
+  <data name="AutoCastLine_Auto_Cast_Line" xml:space="preserve">
+    <value>Sedal de lanzar automática</value>
+  </data>
   <data name="Normal_Hook" xml:space="preserve">
     <value>Hook normal</value>
   </data>
@@ -542,6 +575,9 @@ Si Auto Mooch (Global o Preset Personalizado) no está activado, se usara Cast n
   </data>
   <data name="All_Mooches" xml:space="preserve">
     <value>Todos los Mooches</value>
+  </data>
+  <data name="AutoPatience_Patience" xml:space="preserve">
+    <value>Paciencia</value>
   </data>
   <data name="Fish" xml:space="preserve">
     <value>Pez</value>
@@ -693,5 +729,41 @@ Comprueba la pestaña de guías para las guías.</value>
   </data>
   <data name="Draw_Guides" xml:space="preserve">
     <value>Guías</value>
+  </data>
+  <data name="Set_agpreset_command" xml:space="preserve">
+    <value>Establecer preset de Autogig por comando de chat -&gt; /agpreset presetNombre</value>
+  </data>
+  <data name="Starts_AutoHook" xml:space="preserve">
+    <value>Empieza a lanzar con tu preset seleccionado</value>
+  </data>
+  <data name="AutoCastEndTime" xml:space="preserve">
+    <value>Tiempo de finalización para permitir el lanzamiento automático</value>
+  </data>
+  <data name="AutoCastStartTime" xml:space="preserve">
+    <value>Tiempo de inicio para permitir el lanzamiento automático</value>
+  </data>
+  <data name="AutoCastOnlyAtSpecificTimes" xml:space="preserve">
+    <value>Usar acciones sólo en momentos específicos (Eorzea Time)</value>
+  </data>
+  <data name="AutoCastOnlyUnderFishEyes" xml:space="preserve">
+    <value>Solo usar cuando Fish Eyes está activa.</value>
+  </data>
+  <data name="AutoStartFishing" xml:space="preserve">
+    <value>Lanzar automáticamente cuando no pescas</value>
+  </data>
+  <data name="AutoStartFishingHelpText" xml:space="preserve">
+    <value>Lanzar automáticamente cuando no pescas. Desactivar si mantiene encendido el AutoHook en todo momento.</value>
+  </data>
+  <data name="AutoCastExtraOptionMakeshiftBait" xml:space="preserve">
+    <value>Usar solo cuando Mooch II está en tiempo de reutilización</value>
+  </data>
+  <data name="AutoCastExtraOptionPatience" xml:space="preserve">
+    <value>Usar solo cuando Mooch II está en tiempo de reutilización</value>
+  </data>
+  <data name="AutoLures_Target_Fish" xml:space="preserve">
+    <value>Peces de Destino:</value>
+  </data>
+  <data name="AutoCastsHelp" xml:space="preserve">
+    <value>Opciones para acciones de auto casting</value>
   </data>
 </root>
