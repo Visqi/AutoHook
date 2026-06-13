@@ -16,6 +16,7 @@ public partial class Configuration {
     private static int _savePending;
     private static Task? _saveTask;
     private static readonly object _lock = new();
+    private static readonly object _diskWriteLock = new();
 
     internal static readonly object SerializationSync = new(); // lock for capturing snapshot
 
@@ -25,7 +26,8 @@ public partial class Configuration {
 
             if (file.Exists) {
                 var json = await File.ReadAllTextAsync(file.FullName, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
-                var migratedJson = ConfigurationJsonMigrator.MigrateToLatest(json);
+                var configDirectory = Path.GetDirectoryName(file.FullName);
+                var migratedJson = ConfigurationJsonMigrator.MigrateToLatest(json, configDirectory);
 
                 Configuration? config;
                 try {
@@ -38,7 +40,8 @@ public partial class Configuration {
 
                 if (config != null) {
                     config.Initiate();
-                    await WriteAsync(config, cancellationToken).ConfigureAwait(false);
+                    if (migratedJson != json)
+                        await WriteAsync(config, cancellationToken).ConfigureAwait(false);
                     return config;
                 }
 
@@ -150,19 +153,19 @@ public partial class Configuration {
     private static void WriteJsonToDisk(string json, string path, CancellationToken cancellationToken) {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var directory = Path.GetDirectoryName(path);
-        if (!string.IsNullOrEmpty(directory))
-            Directory.CreateDirectory(directory);
+        lock (_diskWriteLock) {
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
 
-        var tempPath = path + ".new";
-        if (File.Exists(tempPath)) {
-            var stamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            var orphaned = $"{tempPath}.{stamp}";
-            Svc.Log.Warning($"[Configuration] Orphaned temp file {tempPath}; moving to {orphaned}");
-            File.Move(tempPath, orphaned, overwrite: true);
+            var tempPath = path + ".new";
+            if (File.Exists(tempPath)) {
+                Svc.Log.Warning($"[Configuration] Removing stale temp file {tempPath}");
+                File.Delete(tempPath);
+            }
+
+            File.WriteAllText(tempPath, json, Encoding.UTF8);
+            File.Move(tempPath, path, overwrite: true);
         }
-
-        File.WriteAllText(tempPath, json, Encoding.UTF8);
-        File.Move(tempPath, path, overwrite: true);
     }
 }

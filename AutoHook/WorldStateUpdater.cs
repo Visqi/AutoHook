@@ -306,7 +306,7 @@ public sealed class WorldStateUpdater : IDisposable {
                 currentFateControlRowId = wks->State.CurrentFateControlRowId;
                 currentFateId = wks->State.CurrentFateId;
                 currentMissionUnitRowId = wks->State.CurrentMission.MissionUnitRowId;
-                currentScore = wks->State.CurrentMission.Score;
+                currentScore = wks->State.CurrentMission.ScoreUInt;
                 currentRank = wks->State.CurrentMission.Rank;
                 collectedTotal = wks->State.CurrentMission.CollectedTotal;
                 collectedIndividual = wks->State.CurrentMission.CollectedIndividual;

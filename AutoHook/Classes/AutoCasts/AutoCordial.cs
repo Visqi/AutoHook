@@ -55,8 +55,10 @@ public sealed class AutoCordial : BaseActionCast {
             cordialList = _invertedList;
 
         foreach (var (id, recovery) in cordialList) {
-            if (!Service.WorldState.HaveCordialInInventory(id))
+            if (!Service.WorldState.HaveCordialInInventory(id)) {
+                Svc.Log.Debug($"No cordial in inventory");
                 continue;
+            }
 
             Id = id;
 

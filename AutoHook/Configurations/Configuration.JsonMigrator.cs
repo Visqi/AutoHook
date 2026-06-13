@@ -3,6 +3,8 @@ using AutoHook.Conditions.Definitions;
 using AutoHook.Configurations.Legacy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.IO;
+using System.Text;
 using static AutoHook.Conditions.ConditionRegistry;
 
 namespace AutoHook.Configurations;
@@ -11,7 +13,7 @@ namespace AutoHook.Configurations;
 /// Migrates raw JSON up to the latest cfg version before deserializing into <see cref="Configuration"/>
 /// </summary>
 public static class ConfigurationJsonMigrator {
-    public static string MigrateToLatest(string json) {
+    public static string MigrateToLatest(string json, string? configDirectory = null) {
         JObject root;
         try {
             root = JObject.Parse(json);
@@ -22,6 +24,8 @@ public static class ConfigurationJsonMigrator {
         }
 
         var version = (int?)(root["Version"] ?? 1) ?? 1;
+        if (version >= Configuration.LatestVersion)
+            return json;
 
         // v2 → v3: convert BaitPresetList into HookPresets.CustomPresets
         if (version < 3) {
@@ -44,18 +48,36 @@ public static class ConfigurationJsonMigrator {
 
         // v5 → v6: JSON-based, converting all trigger based bools into ConditionSets
         if (version < 6) {
+            if (!string.IsNullOrEmpty(configDirectory))
+                WriteV5Backup(configDirectory, root);
             MigrateV6(root);
             root["Version"] = 6;
             version = 6;
         }
 
         // v6 → v7: swimbait count thresholds, spareful hand swimbait limits, surface slap / identical cast enabled
-        if (version < 7) {
+        if (version < Configuration.LatestVersion) {
             MigrateV7(root);
-            root["Version"] = 7;
+            root["Version"] = Configuration.LatestVersion;
         }
 
         return root.ToString(Formatting.None);
+    }
+
+    private static void WriteV5Backup(string configDirectory, JObject root) {
+        try {
+            var path = Path.Combine(configDirectory, "autohook_v5_backup.json");
+            if (File.Exists(path)) {
+                var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                path = Path.Combine(configDirectory, $"autohook_v5_backup_{stamp}.json");
+            }
+
+            File.WriteAllText(path, root.ToString(Formatting.Indented), Encoding.UTF8);
+            Svc.Log.Information(@$"[Configuration] Wrote v5 backup before v6 migration to {path}");
+        }
+        catch (Exception e) {
+            Svc.Log.Warning(@$"[Configuration] Failed to write v5 backup before v6 migration: {e.Message}");
+        }
     }
 
     /// <summary>
