@@ -49,6 +49,12 @@ public class AutoCollectables : IDisposable {
             return;
         }
 
+        if (TryGetPresetResolve(out var forceNo)) {
+            if (TrySelectYesNo(addon, forceNo))
+                _pendingResolve = false;
+            return;
+        }
+
         if (_pendingResolve) {
             if (TrySelectYesNo(addon, _pendingForceNo))
                 _pendingResolve = false;
@@ -61,13 +67,20 @@ public class AutoCollectables : IDisposable {
         TrySelectYesNo(addon, forceNo: false);
     }
 
-    private bool IsWaitingOnConditions() {
-        var p = Service.Configuration.HookPresets;
-        var sets = (p.SelectedPreset?.ExtraCfg.Enabled ?? false ? p.SelectedPreset!.ExtraCfg : p.DefaultPreset.ExtraCfg).Triggers
-            .Where(t => t is { Enabled: true, ResolveCollectablesWindow: true, ConditionSet: not null } && t.ConditionSet.HasAnyCondition())
-            .Select(t => t.ConditionSet!);
+    private IEnumerable<ExtraTrigger> GetTriggers()
+        => Service.Configuration.HookPresets.CurrentPreset.ExtraCfg.Triggers.Where(t => t is { Enabled: true, ResolveCollectablesWindow: true, ConditionSet: not null });
 
+    private bool IsWaitingOnConditions() {
+        var sets = GetTriggers().Select(t => t.ConditionSet!).Where(set => set.HasAnyCondition());
         return sets.Any() && sets.All(set => !set.Evaluate(Service.WorldState, ConditionRegistry.Registry));
+    }
+
+    private bool TryGetPresetResolve(out bool forceNo) {
+        forceNo = false;
+        if (GetTriggers().FirstOrDefault(t => t.ConditionSet!.Evaluate(Service.WorldState, ConditionRegistry.Registry)) is not { } match)
+            return false;
+        forceNo = match.ResolveCollectablesForceNo;
+        return true;
     }
 
     private unsafe bool TrySelectYesNo(AddonSelectYesno* addon, bool forceNo) {

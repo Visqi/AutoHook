@@ -11,6 +11,7 @@ public class FishingPresets : BasePreset {
     public List<PresetFolder> Folders = [];
 
     [JsonIgnore] public override CustomPresetConfig? SelectedPreset => base.SelectedPreset as CustomPresetConfig;
+    [JsonIgnore] public CustomPresetConfig CurrentPreset => SelectedPreset ?? DefaultPreset;
 
     public override void AddNewPreset(string presetName) {
         var newPreset = new CustomPresetConfig(presetName);
