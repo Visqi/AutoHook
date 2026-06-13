@@ -18,8 +18,6 @@ public class ConditionParamConverter : JsonConverter<Dictionary<string, object>>
                 continue;
 
             switch (rawVal) {
-                case bool b when !b:
-                    continue;
                 case int i when i == 0:
                     continue;
                 case long l when l == 0:
