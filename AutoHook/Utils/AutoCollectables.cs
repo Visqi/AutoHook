@@ -1,3 +1,4 @@
+using AutoHook.Conditions;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Utility;
@@ -43,6 +44,11 @@ public class AutoCollectables : IDisposable {
         if (!addon->AtkUnitBase.IsReady)
             return;
 
+        if (IsWaitingOnConditions()) {
+            _pendingResolve = false;
+            return;
+        }
+
         if (_pendingResolve) {
             if (TrySelectYesNo(addon, _pendingForceNo))
                 _pendingResolve = false;
@@ -53,6 +59,15 @@ public class AutoCollectables : IDisposable {
             return;
 
         TrySelectYesNo(addon, forceNo: false);
+    }
+
+    private bool IsWaitingOnConditions() {
+        var p = Service.Configuration.HookPresets;
+        var sets = (p.SelectedPreset?.ExtraCfg.Enabled ?? false ? p.SelectedPreset!.ExtraCfg : p.DefaultPreset.ExtraCfg).Triggers
+            .Where(t => t is { Enabled: true, ResolveCollectablesWindow: true, ConditionSet: not null } && t.ConditionSet.HasAnyCondition())
+            .Select(t => t.ConditionSet!);
+
+        return sets.Any() && sets.All(set => !set.Evaluate(Service.WorldState, ConditionRegistry.Registry));
     }
 
     private unsafe bool TrySelectYesNo(AddonSelectYesno* addon, bool forceNo) {
