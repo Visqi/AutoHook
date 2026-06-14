@@ -6,16 +6,28 @@ using FFXIVClientStructs.FFXIV.Common.Math;
 namespace AutoHook.Ui;
 
 public class SubTabAutoCast {
-    private static List<BaseActionCast> _actionsAvailable = [];
+    private static readonly List<BaseActionCast> _actionsAvailable = [with(14)];
 
+    private static CustomPresetConfig? _lastPreset;
     private static CustomPresetConfig _preset = null!;
 
     public static void DrawAutoCastTab(CustomPresetConfig presetCfg) {
         _preset = presetCfg;
         var acCfg = _preset.AutoCastsCfg;
 
-        _actionsAvailable =
-        [
+        EnsureActions(acCfg);
+
+        DrawHeader(acCfg);
+        DrawBody(acCfg);
+    }
+
+    private static void EnsureActions(AutoCastsConfig acCfg) {
+        if (_lastPreset == _preset && _actionsAvailable.Count > 0)
+            return;
+
+        _lastPreset = _preset;
+        _actionsAvailable.Clear();
+        _actionsAvailable.AddRange([
             acCfg.CastLine,
             acCfg.CastMooch,
             acCfg.CastChum,
@@ -29,10 +41,17 @@ public class SubTabAutoCast {
             acCfg.CastThaliaksFavor,
             acCfg.CastBigGame,
             acCfg.CastMultihook,
-        ];
+        ]);
+        _actionsAvailable.Sort(CompareActions);
+    }
 
-        DrawHeader(acCfg);
-        DrawBody(acCfg);
+    private static int CompareActions(BaseActionCast a, BaseActionCast b) {
+        var aType = a.GetType();
+        var bType = b.GetType();
+        var aOrder = aType == typeof(AutoCastLine) ? 0 : aType == typeof(AutoMooch) ? 1 : aType == typeof(AutoCollect) ? 2 : aType == typeof(AutoSnagging) ? 3 : aType == typeof(AutoMultiHook) ? 4 : 5;
+        var bOrder = bType == typeof(AutoCastLine) ? 0 : bType == typeof(AutoMooch) ? 1 : bType == typeof(AutoCollect) ? 2 : bType == typeof(AutoSnagging) ? 3 : bType == typeof(AutoMultiHook) ? 4 : 5;
+        var typeCompare = aOrder.CompareTo(bOrder);
+        return typeCompare != 0 ? typeCompare : a.Priority.CompareTo(b.Priority);
     }
 
     private static void DrawHeader(AutoCastsConfig acCfg) {
@@ -116,9 +135,7 @@ public class SubTabAutoCast {
         ImGui.TextColored(ImGuiColors.DalamudOrange, UIStrings.Auto_Cast_Sort_Notice);
 
         using var item = ImRaii.Child("###AutoCastItems", new Vector2(0, 0), true);
-        foreach (var action in _actionsAvailable.OrderBy(x => x.GetType() == typeof(AutoCastLine))
-                     .ThenBy(x => x.GetType() == typeof(AutoMooch)).ThenBy(x => x.GetType() == typeof(AutoCollect)).ThenBy(x => x.GetType() == typeof(AutoSnagging)).ThenBy(x => x.GetType() == typeof(AutoMultiHook))
-                     .ThenBy(x => x.Priority)) {
+        foreach (var action in _actionsAvailable) {
             try {
                 using var id = ImRaii.PushId(action.GetType().ToString());
                 action.DrawConfig(_actionsAvailable);

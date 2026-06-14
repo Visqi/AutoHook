@@ -96,7 +96,13 @@ public class TabFishingPresets : BaseTab {
             return;
 
         var searchActive = !string.IsNullOrWhiteSpace(_searchFilter);
-        bool MatchesSearch(string name) => !searchActive || name.Contains(_searchFilter.Trim().ToLowerInvariant(), StringComparison.InvariantCultureIgnoreCase);
+        var searchFilter = searchActive ? _searchFilter.Trim() : string.Empty;
+        bool MatchesSearch(string name) => !searchActive || name.Contains(searchFilter, StringComparison.InvariantCultureIgnoreCase);
+
+        var presetsInFolders = BuildPresetsInFoldersSet();
+        Dictionary<Guid, CustomPresetConfig>? presetById = searchActive
+            ? _basePreset.CustomPresets.ToDictionary(p => p.UniqueId)
+            : null;
 
         DrawUtil.Info(UIStrings.GlobalPresetHelpText);
         ImGui.SameLine(0, 4.Scaled());
@@ -115,8 +121,9 @@ public class TabFishingPresets : BaseTab {
             if (searchActive) {
                 var folderNameMatches = MatchesSearch(folder.FolderName);
                 var anyPresetMatches = GetAllPresetIdsInFolderTree(folder).Any(id => {
-                    var p = _basePreset.CustomPresets.FirstOrDefault(c => c.UniqueId == id);
-                    return p != null && MatchesSearch(p.PresetName);
+                    if (presetById == null || !presetById.TryGetValue(id, out var p))
+                        return false;
+                    return MatchesSearch(p.PresetName);
                 });
                 if (!folderNameMatches && !anyPresetMatches)
                     continue;
@@ -126,19 +133,28 @@ public class TabFishingPresets : BaseTab {
         }
 
         // Draw non-folder presets
-        for (var i = 0; i < _basePreset.PresetList.Count; i++) {
-            var preset = _basePreset.PresetList[i];
+        var customPresets = _basePreset.CustomPresets;
+        for (var i = 0; i < customPresets.Count; i++) {
+            var preset = customPresets[i];
 
-            // Skip presets that are inside a folder
-            if (_basePreset.IsPresetInAnyFolder(preset.UniqueId))
+            if (presetsInFolders.Contains(preset.UniqueId))
                 continue;
 
             if (searchActive && !MatchesSearch(preset.PresetName))
                 continue;
 
-            if (preset is CustomPresetConfig customPreset)
-                DrawItem(customPreset, i);
+            DrawItem(preset, i);
         }
+    }
+
+    private HashSet<Guid> BuildPresetsInFoldersSet() {
+        var result = new HashSet<Guid>();
+        foreach (var folder in _basePreset.Folders) {
+            foreach (var presetId in folder.PresetIds)
+                result.Add(presetId);
+        }
+
+        return result;
     }
 
     private IEnumerable<Guid> GetAllPresetIdsInFolderTree(PresetFolder rootFolder) {
@@ -242,7 +258,7 @@ public class TabFishingPresets : BaseTab {
                 // Accept preset drops from outside folders
                 if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_ORDER", out int itemIndex)) {
                     if (ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
-                        var preset = _basePreset.PresetList[itemIndex];
+                        var preset = _basePreset.CustomPresets[itemIndex];
                         folder.AddPreset(preset.UniqueId);
                         Service.Save();
                     }

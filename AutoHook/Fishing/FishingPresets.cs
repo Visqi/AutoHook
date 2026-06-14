@@ -16,6 +16,7 @@ public class FishingPresets : BasePreset {
     public override void AddNewPreset(string presetName) {
         var newPreset = new CustomPresetConfig(presetName);
         CustomPresets.Add(newPreset);
+        InvalidatePresetListCache();
         Service.Save();
     }
 
@@ -25,6 +26,7 @@ public class FishingPresets : BasePreset {
         var copy = JsonConvert.DeserializeObject<CustomPresetConfig>(json);
         copy!.UniqueId = Guid.NewGuid();
         CustomPresets.Add(copy);
+        InvalidatePresetListCache();
         Service.Save();
     }
 
@@ -39,6 +41,7 @@ public class FishingPresets : BasePreset {
         }
 
         CustomPresets.Remove(preset);
+        InvalidatePresetListCache();
         Service.Save();
     }
 
@@ -60,6 +63,7 @@ public class FishingPresets : BasePreset {
 
         RemovePreset(moved.UniqueId);
         CustomPresets.Insert(targetIndex, moved);
+        InvalidatePresetListCache();
         Service.Save();
     }
 
@@ -117,5 +121,23 @@ public class FishingPresets : BasePreset {
         return Folders.FirstOrDefault(f => f.ContainsPreset(presetId));
     }
 
-    [JsonIgnore] public override List<BasePresetConfig> PresetList => [.. CustomPresets.Cast<BasePresetConfig>()];
+    [JsonIgnore] private List<BasePresetConfig>? _presetListCache;
+    [JsonIgnore] private int _presetListCacheCount = -1;
+
+    [JsonIgnore]
+    public override List<BasePresetConfig> PresetList {
+        get {
+            if (_presetListCache == null || _presetListCacheCount != CustomPresets.Count) {
+                _presetListCache = [.. CustomPresets.Cast<BasePresetConfig>()];
+                _presetListCacheCount = CustomPresets.Count;
+            }
+
+            return _presetListCache;
+        }
+    }
+
+    private void InvalidatePresetListCache() {
+        _presetListCache = null;
+        _presetListCacheCount = -1;
+    }
 }

@@ -13,7 +13,7 @@ public static class GameRes {
 
     public static List<BaitFishClass> Baits { get; private set; } = [];
     public static List<BaitFishClass> Fishes { get; private set; } = [];
-    public static List<BaitFishClass> LureFishes => [.. Fishes.Where(f => f.LureMessage != "")];
+    public static List<BaitFishClass> LureFishes { get; private set; } = [];
     public static List<BaitFishClass> MoochableFish { get; private set; } = [];
     public static List<ImportedFish> ImportedFishes { get; private set; } = [];
     public static List<ImportedFish> SpearfishFishes { get; private set; } = [];
@@ -32,6 +32,8 @@ public static class GameRes {
 
         Fishes = FindRows<FishParameter>(f => f.Item.RowId is not 0 and < 1000000)
             .Select(f => new BaitFishClass(f)).GroupBy(f => f.Id).Select(group => group.First()).ToList() ?? [];
+
+        LureFishes = [.. Fishes.Where(f => f.LureMessage != "")];
 
         MoochableFish = FindRows<FishingBaitParameter>(x => x.Item.Value.ItemUICategory.RowId != 33).Select(f => new BaitFishClass(f.Item.RowId)).ToList() ?? [];
 

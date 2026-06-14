@@ -186,8 +186,7 @@ public class PluginUi : Window, IDisposable {
                         var baitName = MultiString.GetItemName(baitId);
 
                         var hasBait = preset != null && preset.HasBaitOrMooch(baitId);
-                        var presetName =
-                            hasBait ? _presets.SelectedPreset?.PresetName : _presets.DefaultPreset.PresetName;
+                        var presetName = hasBait ? _presets.SelectedPreset?.PresetName : _presets.DefaultPreset.PresetName;
                         Service.Status = $"Equipped Bait: {baitName} - Preset \'{presetName}\' will be used.";
 
                         ImGui.TextColored(ImGuiColors.DalamudViolet, $"Equipped Bait:");

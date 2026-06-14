@@ -22,6 +22,7 @@ public static class ConditionUi {
     private static ConditionSet? _clipboard;
     private static string _exportBase64 = string.Empty;
     private static int _forceOpenConditionUiId;
+    private static readonly Dictionary<ConditionScope, List<ConditionTypeDef>> ScopedTypesCache = [];
 
     public static bool IsConditionCurrentlyTrue(Condition cond)
         => cond.Enabled && cond.Evaluate(Service.WorldState, Registry);
@@ -89,9 +90,7 @@ public static class ConditionUi {
         }
 
         var group = set.Groups[0];
-        var types = allowedTypeIds != null && allowedTypeIds.Count > 0
-            ? GetScopedTypes(scope).Where(d => allowedTypeIds.Contains(d.Id)).ToList()
-            : [.. GetScopedTypes(scope)];
+        var types = allowedTypeIds != null && allowedTypeIds.Count > 0 ? [.. GetScopedTypes(scope).Where(d => allowedTypeIds.Contains(d.Id))] : GetScopedTypes(scope);
         var defaultTypeId = types.FirstOrDefault()?.Id ?? Registry.GetId<StatusActiveCD>();
 
         // Header: (optional) sub marker + label + add + small advanced icon + optional extras.
@@ -187,7 +186,7 @@ public static class ConditionUi {
                 if (deleteGroup)
                     toRemoveGroup.Add(gi);
                 ImGui.Spacing();
-                DrawConditionsWithTypes(g, scope, [.. GetScopedTypes(scope)]);
+                DrawConditionsWithTypes(g, scope, GetScopedTypes(scope));
             }, highlightLabel: IsGroupCurrentlyTrue(g));
             if (gEnabled != g.Enabled)
                 g.Enabled = gEnabled;
@@ -315,9 +314,9 @@ public static class ConditionUi {
     }
 
     private static void DrawConditions(ConditionGroup group, ConditionScope scope)
-        => DrawConditionsWithTypes(group, scope, [.. GetScopedTypes(scope)]);
+        => DrawConditionsWithTypes(group, scope, GetScopedTypes(scope));
 
-    private static bool DrawConditionContent(Condition cond, ConditionScope scope, List<ConditionTypeDef> defs) {
+    private static bool DrawConditionContent(Condition cond, ConditionScope scope, IReadOnlyList<ConditionTypeDef> defs) {
         var typeChanged = false;
         DrawInverseToggle(cond);
         ImGui.SameLine();
@@ -341,7 +340,7 @@ public static class ConditionUi {
         return typeChanged;
     }
 
-    private static void DrawConditionsWithTypes(ConditionGroup group, ConditionScope scope, List<ConditionTypeDef> defs) {
+    private static void DrawConditionsWithTypes(ConditionGroup group, ConditionScope scope, IReadOnlyList<ConditionTypeDef> defs) {
         for (var ci = 0; ci < group.Conditions.Count; ci++) {
             var cond = group.Conditions[ci];
             cond.EnsureUiId();
@@ -358,7 +357,10 @@ public static class ConditionUi {
         }
     }
 
-    private static IEnumerable<ConditionTypeDef> GetScopedTypes(ConditionScope scope) {
+    private static IReadOnlyList<ConditionTypeDef> GetScopedTypes(ConditionScope scope) {
+        if (ScopedTypesCache.TryGetValue(scope, out var cached))
+            return cached;
+
         var all = Registry.All;
         var flag = scope switch {
             ConditionScope.Hook => ConditionScopeFlags.Hook,
@@ -367,7 +369,9 @@ public static class ConditionUi {
             ConditionScope.AutoCast => ConditionScopeFlags.AutoCast,
             _ => ConditionScopeFlags.All,
         };
-        return all.Where(d => (d.AllowedScopes & flag) != 0);
+        cached = [.. all.Where(d => (d.AllowedScopes & flag) != 0)];
+        ScopedTypesCache[scope] = cached;
+        return cached;
     }
 
     private static void DrawInverseToggle(Condition cond) {
