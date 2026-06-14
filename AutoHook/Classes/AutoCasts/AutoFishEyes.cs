@@ -1,13 +1,10 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoFishEyes : BaseActionCast
-{
+public sealed class AutoFishEyes : BaseActionCast {
     public override int Priority { get; set; } = 6;
     public override bool IsExcludedPriority { get; set; } = false;
-
-    public bool OnlyWhenMakeShiftUp;
 
     public bool IgnoreMooch;
 
@@ -15,30 +12,16 @@ public class AutoFishEyes : BaseActionCast
 
     public override bool RequiresTimeWindow() => true;
 
-    public AutoFishEyes() : base(UIStrings.Fish_Eyes, IDs.Actions.FishEyes, ActionType.Action)
-    {
-        HelpText = UIStrings.CancelsCurrentMooch;
-    }
+    public AutoFishEyes() : base(IDs.Actions.FishEyes, ActionType.Action) { }
 
-    public override string GetName()
-        => Name = UIStrings.Fish_Eyes;
+    public override string GetName() => UIStrings.Fish_Eyes;
 
-    public override bool CastCondition()
-    {
-        if (PlayerRes.HasStatus(IDs.Status.FishEyes))
-            return false;
+    public override string GetHelpText() => UIStrings.CancelsCurrentMooch;
 
-        if (OnlyWhenMakeShiftUp && !PlayerRes.HasStatus(IDs.Status.MakeshiftBait) &&
-            !PlayerRes.HasStatus(IDs.Status.AnglersFortune))
-            return false;
+    public override bool CastCondition() => EvaluateConditionSet() && !Service.WorldState.HasStatus(IDs.Status.FishEyes);
 
-        return true;
-    }
-
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
-        DrawUtil.Checkbox(UIStrings.OnlyWhenMakeshiftOrPatience, ref OnlyWhenMakeShiftUp);
-
+    protected override DrawOptionsDelegate DrawOptions => () => {
         DrawUtil.Checkbox(UIStrings.IgnoreMooch, ref IgnoreMooch, UIStrings.IgnoreMoochFishEyes);
+        DrawAutoCastConditions();
     };
 }

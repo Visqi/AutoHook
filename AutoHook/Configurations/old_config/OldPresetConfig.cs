@@ -1,7 +1,6 @@
-namespace AutoHook.Configurations.old_config;
+namespace AutoHook.Configurations.Legacy;
 
-public class OldPresetConfig(string presetName)
-{
+public class OldPresetConfig(string presetName) {
     public string PresetName { get; set; } = presetName;
 
     public List<OldHookConfig> ListOfBaits { get; set; } = [];
@@ -14,15 +13,12 @@ public class OldPresetConfig(string presetName)
 
     public ExtraConfig ExtraCfg = new();
 
-    public void ConvertV3ToV4()
-    {
-        foreach (var item in ListOfBaits)
-        {
+    public void ConvertV3ToV4() {
+        foreach (var item in ListOfBaits) {
             item.ConvertV3ToV4();
         }
 
-        foreach (var item in ListOfMooch)
-        {
+        foreach (var item in ListOfMooch) {
             item.ConvertV3ToV4();
         }
     }

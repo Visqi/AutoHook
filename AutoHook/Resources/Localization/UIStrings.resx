@@ -497,7 +497,7 @@ This could save you 100gp if going only for mooches</value>
     <value>Opens Config Window</value>
   </data>
   <data name="TabAutoCasts_When_Stack_Equals" xml:space="preserve">
-    <value>When Stacks = </value>
+    <value>When Stacks &gt;= </value>
   </data>
   <data name="Use_Prize_Catch" xml:space="preserve">
     <value>Use Prize Catch</value>
@@ -605,7 +605,7 @@ If Auto Mooch (Global or Custom Preset) is not enabled, the line will be casted 
     <value>This might conflict with Auto Thaliak's Favor</value>
   </data>
   <data name="TabAutoCasts_DrawExtraOptionsThaliaksFavor_" xml:space="preserve">
-    <value>When Stacks =</value>
+    <value>When Stacks &gt;=</value>
   </data>
   <data name="TabAutoCasts_DrawThaliaksFavor_HelpText" xml:space="preserve">
     <value>This might conflict with Auto MakeShift Bait</value>
@@ -946,6 +946,12 @@ Check the Guide Tab for Guides.</value>
   </data>
   <data name="CollectHelpText" xml:space="preserve">
     <value>Collector's Glove will be activated when you start fishing</value>
+  </data>
+  <data name="Snagging" xml:space="preserve">
+    <value>Snagging</value>
+  </data>
+  <data name="SnaggingHelpText" xml:space="preserve">
+    <value>Snagging will be activated when you start fishing</value>
   </data>
   <data name="RefreshWhenTimeIsLessThanOrEqual" xml:space="preserve">
     <value>Refresh when buff timer is less than or equal to</value>
@@ -1615,7 +1621,79 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="Status_HookNotAvailableNormalWillBeUsed" xml:space="preserve">
     <value>Not available. Normal hook will be used instead</value>
   </data>
-  <data name="UseMutlipleHooksByTimer" xml:space="preserve">
+  <data name="UseMultipleHooksByTimer" xml:space="preserve">
     <value>Use multiple hook types by timer</value>
+  </data>
+  <data name="SwapStopRules" xml:space="preserve">
+    <value>Swap/Stop Rules:</value>
+  </data>
+  <data name="AetherialReduction_ReduceFish" xml:space="preserve">
+    <value>Reduce fish (aetherial reduction)</value>
+  </data>
+  <data name="AetherialReduction_ReduceFishHelp" xml:space="preserve">
+    <value>Will stop fishing to reduce all reducible fish in your inventory before resuming fishing.</value>
+  </data>
+  <data name="AetherialReduction_NotUnlocked" xml:space="preserve">
+    <value>Aetherial reduction is not unlocked on this character</value>
+  </data>
+  <data name="AetherialReduction_Started" xml:space="preserve">
+    <value>Reducing fish...</value>
+  </data>
+  <data name="AetherialReduction_Complete" xml:space="preserve">
+    <value>Reduction complete. Resuming fishing</value>
+  </data>
+  <data name="AetherialReduction_Status_Quitting" xml:space="preserve">
+    <value>Quitting fishing...</value>
+  </data>
+  <data name="AetherialReduction_Status_Reducing" xml:space="preserve">
+    <value>Reducing fish...</value>
+  </data>
+  <data name="AetherialReduction_Status_Resuming" xml:space="preserve">
+    <value>Resuming fishing...</value>
+  </data>
+  <data name="OnlyUseWhenMakeshiftBaitActive" xml:space="preserve">
+    <value>Only use when Makeshift Bait active</value>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="Current" xml:space="preserve">
+    <value>Current</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="IgnoreFishSettingWhen" xml:space="preserve">
+    <value>Ignore fish setting when</value>
+  </data>
+  <data name="BlockMovementWhileFishingOption" xml:space="preserve">
+    <value>Block movement while fishing</value>
+  </data>
+  <data name="UseWithOceanFishing" xml:space="preserve">
+    <value>Use with ocean fishing</value>
+  </data>
+  <data name="UseForAllZoneTimes" xml:space="preserve">
+    <value>Use for all zones/times</value>
+  </data>
+  <data name="SelectZoneAndTime" xml:space="preserve">
+    <value>Select zone and time</value>
+  </data>
+  <data name="When" xml:space="preserve">
+    <value>When</value>
+  </data>
+  <data name="AutoOceanFish" xml:space="preserve">
+    <value>AutoOceanFish</value>
+  </data>
+  <data name="AutoOceanFishHelpText" xml:space="preserve">
+    <value>Handles everything on the boat itself: moving into position, casting, preset management.</value>
+  </data>
+  <data name="AutoHandleCollectables" xml:space="preserve">
+    <value>Auto handle collectables</value>
+  </data>
+  <data name="AutoHandleCollectablesHelpText" xml:space="preserve">
+    <value>Auto accepts the prompt when a collectable appears. Can be overridden per preset in Extra Options. If overridden, will wait for the preset's conditions to be true before activating.</value>
+  </data>
+  <data name="AutoHandleCollectables_Preset_HelpText" xml:space="preserve">
+    <value>Will override the global auto collectables setting and only fire when this rule's conditions are met.</value>
   </data>
 </root>

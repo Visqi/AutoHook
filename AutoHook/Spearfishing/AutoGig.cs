@@ -1,18 +1,17 @@
-﻿using AutoHook.Spearfishing.Struct;
+using AutoHook.Spearfishing.Struct;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface.Colors;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using ECommons.Automation;
 using ECommons.Automation.NeoTaskManager;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using System.Numerics;
 
 namespace AutoHook.Spearfishing;
 
-internal class AutoGig : Window, IDisposable
-{
+internal class AutoGig : Window, IDisposable {
     private const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags.NoDecoration
                                                  | ImGuiWindowFlags.NoInputs
                                                  | ImGuiWindowFlags.AlwaysAutoResize
@@ -32,43 +31,36 @@ internal class AutoGig : Window, IDisposable
 
     public static string Gig = "Gig";
 
-    private readonly TaskManager _taskManager = new()
-    {
+    private readonly TaskManager _taskManager = new() {
         DefaultConfiguration = { TimeLimitMS = 10000, ShowDebug = false }
     };
 
-    public AutoGig() : base(@"SpearfishingHelper", WindowFlags, true)
-    {
+    public AutoGig() : base(@"SpearfishingHelper", WindowFlags, true) {
         Service.WindowSystem.AddWindow(this);
         IsOpen = true;
         Svc.Condition.ConditionChange += Condition_ConditionChange;
         Gig = MultiString.GetActionName(IDs.Actions.Gig);
     }
 
-    private void Condition_ConditionChange(Dalamud.Game.ClientState.Conditions.ConditionFlag flag, bool value)
-    {
-        if (flag == (Dalamud.Game.ClientState.Conditions.ConditionFlag)85)
-        {
+    private void Condition_ConditionChange(Dalamud.Game.ClientState.Conditions.ConditionFlag flag, bool value) {
+        if (flag == (Dalamud.Game.ClientState.Conditions.ConditionFlag)85) {
             if (value)
                 checkForNullAddon = false;
         }
     }
 
-    public void Dispose()
-    {
+    public void Dispose() {
         Service.WindowSystem.RemoveWindow(this);
         Svc.Condition.ConditionChange -= Condition_ConditionChange;
-        Service.Save();
+        Configuration.FlushAsync().GetAwaiter().GetResult();
     }
 
-    public override void Draw()
-    {
+    public override void Draw() {
         if (!_gigCfg.AutoGigHideOverlay || _gigCfg.AutoGigEnabled)
             DrawFishOverlay();
     }
 
-    public unsafe void DrawSettings()
-    {
+    public void DrawSettings() {
         if (ImGui.Checkbox(UIStrings.Enable_AutoGig, ref _gigCfg.AutoGigEnabled))
             Service.Save();
 
@@ -76,24 +68,17 @@ internal class AutoGig : Window, IDisposable
 
         ImGui.SameLine();
 
-        if (DrawUtil.Checkbox(UIStrings.CatchEverything, ref _gigCfg.CatchAll, UIStrings.IgnoresPresets))
-            Service.Save();
+        DrawUtil.Checkbox(UIStrings.CatchEverything, ref _gigCfg.CatchAll, UIStrings.IgnoresPresets);
 
         PluginUi.ShowKofi();
 
-        DrawUtil.DrawComboSelector(
-            _gigCfg.Presets,
-            preset => preset.PresetName,
-            _gigCfg.SelectedPreset?.PresetName ?? UIStrings.None,
-            gig => _gigCfg.SelectedPreset = gig);
+        DrawUtil.DrawComboSelector(_gigCfg.Presets, preset => preset.PresetName, _gigCfg.SelectedPreset?.PresetName ?? UIStrings.None, gig => _gigCfg.SelectedPreset = gig);
 
-        ImGui.SetNextItemWidth(90);
-        if (selectedPreset != null)
-        {
+        ImGui.SetNextItemWidth(90.Scaled());
+        if (selectedPreset != null) {
             ImGui.SameLine();
-            ImGui.SetNextItemWidth(90);
-            if (ImGui.InputInt(UIStrings.Hitbox + @" ", ref selectedPreset.HitboxSize))
-            {
+            ImGui.SetNextItemWidth(90.Scaled());
+            if (ImGui.InputInt(UIStrings.Hitbox + @" ", ref selectedPreset.HitboxSize)) {
                 selectedPreset.HitboxSize = Math.Max(0, Math.Min(selectedPreset.HitboxSize, 300));
                 Service.Save();
             }
@@ -105,12 +90,10 @@ internal class AutoGig : Window, IDisposable
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.CatchAllGigWindow);
     }
 
-    private unsafe void DrawFishOverlay()
-    {
+    private unsafe void DrawFishOverlay() {
         _addon = (SpearfishWindow*)Svc.GameGui.GetAddonByName("SpearFishing").Address;
 
-        if (!checkForNullAddon && (_addon == null || _addon->Base.WindowNode == null))
-        {
+        if (!checkForNullAddon && (_addon == null || _addon->Base.WindowNode == null)) {
             if (_addon == null)
                 Svc.Chat.PrintError($"AutoHook has detected a null addon whilst spearfishing. Please let us know in the Discord this happened.");
 
@@ -121,21 +104,24 @@ internal class AutoGig : Window, IDisposable
             return;
         }
 
-        bool isOpen = _addon != null && _addon->Base.WindowNode != null;
+        var isOpen = _addon != null && _addon->Base.WindowNode != null;
 
         if (!isOpen)
             return;
 
         ImGui.SetNextWindowPos(new Vector2(_addon->Base.X + 5, _addon->Base.Y - 65));
-        if (ImGui.Begin("gig###gig", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar))
-        {
+        if (ImGui.Begin("gig###gig", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar)) {
             DrawSettings();
             ImGui.End();
         }
 
-        if (_gigCfg is { AutoGigEnabled: true, })
-        {
-            if (!PlayerRes.HasStatus(IDs.Status.NaturesBounty) && _gigCfg.NatureBountyBeforeFish)
+        if (_gigCfg is { AutoGigEnabled: true, }) {
+            var selectedPreset = _gigCfg.SelectedPreset;
+
+            if (selectedPreset is { KeepCollectorsGloveOn: true } && !Service.WorldState.HasStatus(IDs.Status.CollectorsGlove))
+                PlayerRes.CastActionDelayed(IDs.Actions.Collect, actionName: UIStrings.Collect);
+
+            if (!Service.WorldState.HasStatus(IDs.Status.NaturesBounty) && _gigCfg.NatureBountyBeforeFish)
                 PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
 
             GigFish(_addon->Fish1, _addon->Fish1Node);
@@ -144,8 +130,7 @@ internal class AutoGig : Window, IDisposable
         }
     }
 
-    private unsafe void GigFish(SpearfishWindow.Info info, AtkResNode* node)
-    {
+    private unsafe void GigFish(SpearfishWindow.Info info, AtkResNode* node) {
         var drawList = ImGui.GetWindowDrawList();
 
         var gigHitbox = _gigCfg.SelectedPreset?.HitboxSize ?? 0;
@@ -156,8 +141,7 @@ internal class AutoGig : Window, IDisposable
             PlayerRes.CastActionDelayed(_gigCfg.ThaliaksFavor.Id, _gigCfg.ThaliaksFavor.ActionType,
                 UIStrings.Thaliaks_Favor);
 
-        if (!info.Available)
-        {
+        if (!info.Available) {
             Service.PrintDebug("[AutoGig] GigFish - Fish not available");
             return;
         }
@@ -165,16 +149,15 @@ internal class AutoGig : Window, IDisposable
         var fish = _gigCfg.CatchAll ? GetCatchAllGig() : CheckFish(info);
         Service.PrintDebug($"[AutoGig] GigFish - fish: {(fish != null ? fish.Fish?.Name ?? "null" : "null")}, Enabled: {fish?.Enabled ?? false}, CatchAll: {_gigCfg.CatchAll}");
 
-        if (fish == null || !fish.Enabled)
-        {
+        if (fish == null || !fish.Enabled) {
             Service.PrintDebug($"[AutoGig] GigFish - Skipping (fish is null: {fish == null}, enabled: {fish?.Enabled ?? false})");
             return;
         }
 
-        if (!PlayerRes.HasStatus(IDs.Status.NaturesBounty) && fish.UseNaturesBounty)
+        if (!Service.WorldState.HasStatus(IDs.Status.NaturesBounty) && fish.UseNaturesBounty)
             PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
 
-        var centerX = (_uiSize.X / 2);
+        var centerX = _uiSize.X / 2;
 
         float fishHitbox = 0;
 
@@ -185,94 +168,82 @@ internal class AutoGig : Window, IDisposable
 
         // did i fucking do it?
         if (info.InverseDirection)
-            fishHitbox = (node->X * _uiScale) + (node->Width * node->ScaleX * _uiScale * (0.5f + (fish.RightOffset / 10)));
+            fishHitbox = node->X * _uiScale + node->Width * node->ScaleX * _uiScale * (0.5f + fish.RightOffset / 10);
         else
-            fishHitbox = (node->X * _uiScale) + (node->Width * node->ScaleX * _uiScale * (0.4f - (fish.LeftOffset / 10)));
+            fishHitbox = node->X * _uiScale + node->Width * node->ScaleX * _uiScale * (0.4f - fish.LeftOffset / 10);
 
         Service.PrintDebug($"[AutoGig] GigFish - Drawing hitbox at {fishHitbox}, centerX: {centerX}, gigHitbox: {gigHitbox}");
         DrawFishHitbox(drawList, fishHitbox);
 
-        if (fishHitbox >= (centerX - gigHitbox) && fishHitbox <= (centerX + gigHitbox))
-        {
+        if (fishHitbox >= (centerX - gigHitbox) && fishHitbox <= (centerX + gigHitbox)) {
             Service.PrintDebug("[AutoGig] GigFish - Fish in range, casting gig");
             _taskManager.Enqueue(() => { Chat.ExecuteCommand($"/ac \"{Gig}\""); });
         }
     }
 
-    private BaseGig? CheckFish(SpearfishWindow.Info info)
-    {
+    private BaseGig? CheckFish(SpearfishWindow.Info info) {
         Service.PrintDebug($"[AutoGig] CheckFish - currentNode: {currentNode}, Speed: {info.Speed}, Size: {info.Size}");
 
         var fishes = _gigCfg.SelectedPreset?.GetGigCurrentNode(currentNode);
         Service.PrintDebug($"[AutoGig] GetGigCurrentNode returned {fishes?.Count ?? 0} fish(es)");
 
-        if (fishes is null || fishes.Count == 0)
-        {
+        if (fishes is null || fishes.Count == 0) {
             Service.PrintDebug("[AutoGig] No fish found for current node");
             return null;
         }
 
-        foreach (var f in fishes)
-        {
+        foreach (var f in fishes) {
             Service.PrintDebug($"[AutoGig] Checking fish: {f.Fish?.Name ?? "null"}, Enabled: {f.Enabled}, Fish.Speed: {f.Fish?.Speed}, Fish.Size: {f.Fish?.Size}");
         }
 
-        var matched = fishes.FirstOrDefault(f =>
-            f.Fish != null &&
-            f.Fish.Speed == info.Speed &&
-            f.Fish.Size == info.Size);
+        var matched = fishes.FirstOrDefault(f => f.Fish != null && f.Fish.Speed == info.Speed && f.Fish.Size == info.Size);
         Service.PrintDebug($"[AutoGig] Matched fish: {(matched != null ? matched.Fish?.Name ?? "null" : "none")}, Enabled: {matched?.Enabled ?? false}");
 
         return matched;
     }
 
-    private BaseGig? GetCatchAllGig()
-    {
+    private BaseGig? GetCatchAllGig() {
         return new BaseGig(0) { Enabled = true, UseNaturesBounty = _gigCfg.CatchAllNaturesBounty };
     }
 
-    private unsafe void DrawGigHitbox(ImDrawListPtr drawList, int gigHitbox)
-    {
+    private unsafe void DrawGigHitbox(ImDrawListPtr drawList, int gigHitbox) {
         if (!_gigCfg.AutoGigDrawGigHitbox)
             return;
 
-        int space = gigHitbox;
+        var space = gigHitbox;
 
-        float startX = _uiSize.X / 2;
-        float centerY = _addon->FishLines->Y * _uiScale;
-        float endY = _addon->FishLines->Height * _uiScale;
+        var startX = _uiSize.X / 2;
+        var centerY = _addon->FishLines->Y * _uiScale;
+        var endY = _addon->FishLines->Height * _uiScale;
 
         //Hitbox left
         var lineStart = _uiPos + new Vector2(startX - space, centerY);
         var lineEnd = lineStart + new Vector2(0, endY);
-        drawList.AddLine(lineStart, lineEnd, 0xFF0000C0, 1 * ImGuiHelpers.GlobalScale);
+        drawList.AddLine(lineStart, lineEnd, 0xFF0000C0, 1.Scaled());
 
         //Hitbox right
         lineStart = _uiPos + new Vector2(startX + space, centerY);
         lineEnd = lineStart + new Vector2(0, endY);
-        drawList.AddLine(lineStart, lineEnd, 0xFF0000C0, 1 * ImGuiHelpers.GlobalScale);
+        drawList.AddLine(lineStart, lineEnd, 0xFF0000C0, 1.Scaled());
     }
 
-    private unsafe void DrawFishHitbox(ImDrawListPtr drawList, float fishHitbox)
-    {
+    private unsafe void DrawFishHitbox(ImDrawListPtr drawList, float fishHitbox) {
         Service.PrintDebug($"[AutoGig] DrawFishHitbox - AutoGigDrawFishHitbox: {_gigCfg.AutoGigDrawFishHitbox}, fishHitbox: {fishHitbox}");
 
-        if (!_gigCfg.AutoGigDrawFishHitbox)
-        {
+        if (!_gigCfg.AutoGigDrawFishHitbox) {
             Service.PrintDebug("[AutoGig] DrawFishHitbox - Setting is disabled, not drawing");
             return;
         }
 
         var lineStart = _uiPos + new Vector2(fishHitbox, _addon->FishLines->Y * _uiScale);
         var lineEnd = lineStart + new Vector2(0, _addon->FishLines->Height * _uiScale);
-        drawList.AddLine(lineStart, lineEnd, 0xFF20B020, 1 * ImGuiHelpers.GlobalScale);
+        drawList.AddLine(lineStart, lineEnd, 0xFF20B020, 1.Scaled());
         Service.PrintDebug($"[AutoGig] DrawFishHitbox - Green line drawn at {fishHitbox}");
     }
 
     private bool _isOpen = false;
 
-    public override unsafe bool DrawConditions()
-    {
+    public override unsafe bool DrawConditions() {
         var lastOpen = _isOpen;
 
         _addon = (SpearfishWindow*)Svc.GameGui.GetAddonByName("SpearFishing").Address;
@@ -287,15 +258,13 @@ internal class AutoGig : Window, IDisposable
         return true;
     }
 
-    private void SetFishTargets()
-    {
+    private void SetFishTargets() {
         currentNode = 0;
         if (Svc.Targets.Target is { ObjectKind: ObjectKind.GatheringPoint, BaseId: var id })
             currentNode = (int)id;
     }
 
-    public override unsafe void PreDraw()
-    {
+    public override unsafe void PreDraw() {
         if (_addon is null) return;
         _uiScale = _addon->Base.Scale;
         _uiPos = new Vector2(_addon->Base.X, _addon->Base.Y);
@@ -303,8 +272,7 @@ internal class AutoGig : Window, IDisposable
             _addon->Base.WindowNode->AtkResNode.Height * _uiScale);
 
         Position = _uiPos;
-        SizeConstraints = new WindowSizeConstraints
-        {
+        SizeConstraints = new WindowSizeConstraints {
             MinimumSize = _uiSize,
             MaximumSize = Vector2.One * 10000,
         };

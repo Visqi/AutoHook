@@ -151,6 +151,78 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reduction complete. Resuming fishing.
+        /// </summary>
+        internal static string AetherialReduction_Complete {
+            get {
+                return ResourceManager.GetString("AetherialReduction_Complete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Aetherial reduction is not unlocked on this character.
+        /// </summary>
+        internal static string AetherialReduction_NotUnlocked {
+            get {
+                return ResourceManager.GetString("AetherialReduction_NotUnlocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reduce fish (aetherial reduction).
+        /// </summary>
+        internal static string AetherialReduction_ReduceFish {
+            get {
+                return ResourceManager.GetString("AetherialReduction_ReduceFish", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Will stop fishing to reduce all reducible fish in your inventory before resuming fishing..
+        /// </summary>
+        internal static string AetherialReduction_ReduceFishHelp {
+            get {
+                return ResourceManager.GetString("AetherialReduction_ReduceFishHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reducing fish....
+        /// </summary>
+        internal static string AetherialReduction_Started {
+            get {
+                return ResourceManager.GetString("AetherialReduction_Started", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Quitting fishing....
+        /// </summary>
+        internal static string AetherialReduction_Status_Quitting {
+            get {
+                return ResourceManager.GetString("AetherialReduction_Status_Quitting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reducing fish....
+        /// </summary>
+        internal static string AetherialReduction_Status_Reducing {
+            get {
+                return ResourceManager.GetString("AetherialReduction_Status_Reducing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Resuming fishing....
+        /// </summary>
+        internal static string AetherialReduction_Status_Resuming {
+            get {
+                return ResourceManager.GetString("AetherialReduction_Status_Resuming", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to After being caught....
         /// </summary>
         internal static string AfterBeingCaught {
@@ -476,6 +548,33 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Auto handle collectables.
+        /// </summary>
+        internal static string AutoHandleCollectables {
+            get {
+                return ResourceManager.GetString("AutoHandleCollectables", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Will override the global auto collectables setting and only fire when this rule&apos;s conditions are met..
+        /// </summary>
+        internal static string AutoHandleCollectables_Preset_HelpText {
+            get {
+                return ResourceManager.GetString("AutoHandleCollectables_Preset_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto accepts the prompt when a collectable appears. Can be overridden per preset in Extra Options. If overridden, will wait for the preset&apos;s conditions to be true before activating..
+        /// </summary>
+        internal static string AutoHandleCollectablesHelpText {
+            get {
+                return ResourceManager.GetString("AutoHandleCollectablesHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AutoHook.
         /// </summary>
         internal static string AutoHook {
@@ -557,6 +656,24 @@ namespace AutoHook.Resources.Localization {
         internal static string AutoMoochPresetHelpMarker {
             get {
                 return ResourceManager.GetString("AutoMoochPresetHelpMarker", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AutoOceanFish.
+        /// </summary>
+        internal static string AutoOceanFish {
+            get {
+                return ResourceManager.GetString("AutoOceanFish", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles everything on the boat itself: moving into position, casting, preset management..
+        /// </summary>
+        internal static string AutoOceanFishHelpText {
+            get {
+                return ResourceManager.GetString("AutoOceanFishHelpText", resourceCulture);
             }
         }
         
@@ -647,6 +764,15 @@ namespace AutoHook.Resources.Localization {
         internal static string BigGameFishing {
             get {
                 return ResourceManager.GetString("BigGameFishing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Block movement while fishing.
+        /// </summary>
+        internal static string BlockMovementWhileFishingOption {
+            get {
+                return ResourceManager.GetString("BlockMovementWhileFishingOption", resourceCulture);
             }
         }
         
@@ -944,6 +1070,15 @@ namespace AutoHook.Resources.Localization {
         internal static string CreateNewFolder {
             get {
                 return ResourceManager.GetString("CreateNewFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current.
+        /// </summary>
+        internal static string Current {
+            get {
+                return ResourceManager.GetString("Current", resourceCulture);
             }
         }
         
@@ -2080,6 +2215,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ignore fish setting when.
+        /// </summary>
+        internal static string IgnoreFishSettingWhen {
+            get {
+                return ResourceManager.GetString("IgnoreFishSettingWhen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ignore Mooch.
         /// </summary>
         internal static string IgnoreMooch {
@@ -2503,6 +2647,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Next.
+        /// </summary>
+        internal static string Next {
+            get {
+                return ResourceManager.GetString("Next", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to None.
         /// </summary>
         internal static string None {
@@ -2742,6 +2895,15 @@ namespace AutoHook.Resources.Localization {
         internal static string OnlyUseWhenIdenticalCastIsActive {
             get {
                 return ResourceManager.GetString("OnlyUseWhenIdenticalCastIsActive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only use when Makeshift Bait active.
+        /// </summary>
+        internal static string OnlyUseWhenMakeshiftBaitActive {
+            get {
+                return ResourceManager.GetString("OnlyUseWhenMakeshiftBaitActive", resourceCulture);
             }
         }
         
@@ -3061,6 +3223,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Previous.
+        /// </summary>
+        internal static string Previous {
+            get {
+                return ResourceManager.GetString("Previous", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Prize Catch.
         /// </summary>
         internal static string Prize_Catch {
@@ -3259,6 +3430,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select zone and time.
+        /// </summary>
+        internal static string SelectZoneAndTime {
+            get {
+                return ResourceManager.GetString("SelectZoneAndTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Set Autogig preset by chat command -&gt; /agpreset presetName.
         /// </summary>
         internal static string Set_agpreset_command {
@@ -3363,6 +3543,24 @@ namespace AutoHook.Resources.Localization {
         internal static string Size {
             get {
                 return ResourceManager.GetString("Size", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Snagging.
+        /// </summary>
+        internal static string Snagging {
+            get {
+                return ResourceManager.GetString("Snagging", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Snagging will be activated when you start fishing.
+        /// </summary>
+        internal static string SnaggingHelpText {
+            get {
+                return ResourceManager.GetString("SnaggingHelpText", resourceCulture);
             }
         }
         
@@ -3738,6 +3936,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Swap/Stop Rules:.
+        /// </summary>
+        internal static string SwapStopRules {
+            get {
+                return ResourceManager.GetString("SwapStopRules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Swap Tree Node to Buttons.
         /// </summary>
         internal static string SwapTreeNodeButtons {
@@ -3804,7 +4011,7 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to When Stacks =.
+        ///   Looks up a localized string similar to When Stacks &gt;=.
         /// </summary>
         internal static string TabAutoCasts_DrawExtraOptionsThaliaksFavor_ {
             get {
@@ -3858,7 +4065,7 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to When Stacks = .
+        ///   Looks up a localized string similar to When Stacks &gt;= .
         /// </summary>
         internal static string TabAutoCasts_When_Stack_Equals {
             get {
@@ -4267,6 +4474,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use for all zones/times.
+        /// </summary>
+        internal static string UseForAllZoneTimes {
+            get {
+                return ResourceManager.GetString("UseForAllZoneTimes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Use when Identical Cast is active.
         /// </summary>
         internal static string UseIcActive {
@@ -4305,9 +4521,9 @@ namespace AutoHook.Resources.Localization {
         /// <summary>
         ///   Looks up a localized string similar to Use multiple hook types by timer.
         /// </summary>
-        internal static string UseMutlipleHooksByTimer {
+        internal static string UseMultipleHooksByTimer {
             get {
-                return ResourceManager.GetString("UseMutlipleHooksByTimer", resourceCulture);
+                return ResourceManager.GetString("UseMultipleHooksByTimer", resourceCulture);
             }
         }
         
@@ -4402,6 +4618,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use with ocean fishing.
+        /// </summary>
+        internal static string UseWithOceanFishing {
+            get {
+                return ResourceManager.GetString("UseWithOceanFishing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Using Chum timer.
         /// </summary>
         internal static string Using_Chum_Timer {
@@ -4416,6 +4641,15 @@ namespace AutoHook.Resources.Localization {
         internal static string Watered_Cordial {
             get {
                 return ResourceManager.GetString("Watered_Cordial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to When.
+        /// </summary>
+        internal static string When {
+            get {
+                return ResourceManager.GetString("When", resourceCulture);
             }
         }
         

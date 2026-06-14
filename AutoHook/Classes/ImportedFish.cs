@@ -2,8 +2,7 @@
 
 namespace AutoHook.Classes;
 
-public class ImportedFish
-{
+public class ImportedFish {
     public int ItemId { get; set; }
     public HookType HookType { get; set; }
     public BiteType BiteType { get; set; }
@@ -43,8 +42,7 @@ public class ImportedFish
         public int Quantity { get; set; }
     }
 
-    public class FishInterval
-    {
+    public class FishInterval {
         public int OnTime { get; set; }
         public int OffTime { get; set; }
         public int ShiftTime { get; set; }

@@ -1,7 +1,6 @@
-﻿namespace AutoHook.Configurations.old_config;
+namespace AutoHook.Configurations.Legacy;
 
-public class BaitConfig(string bait)
-{
+public class BaitConfig(string bait) {
     /* old config, dont use*/
     public bool Enabled = true;
 
@@ -50,12 +49,10 @@ public class BaitConfig(string bait)
     public bool StopAfterCaught = false;
     public int StopAfterCaughtLimit = 1;
 
-    public HookType? GetHook(BiteType bite)
-    {
-        bool hasIntuition = PlayerRes.HasStatus(IDs.Status.FishersIntuition);
+    public HookType? GetHook(BiteType bite) {
+        var hasIntuition = Service.WorldState.HasStatus(IDs.Status.FishersIntuition);
 
-        if (hasIntuition && UseCustomIntuitionHook)
-        {
+        if (hasIntuition && UseCustomIntuitionHook) {
             if (!CheckHookIntuitionEnabled(bite))
                 return HookType.None;
         }
@@ -73,9 +70,8 @@ public class BaitConfig(string bait)
             return GetPatienceHook(bite);
     }
 
-    public HookType? GetHookIgnoreEnable(BiteType bite)
-    {
-        bool hasIntuition = PlayerRes.HasStatus(IDs.Status.FishersIntuition);
+    public HookType? GetHookIgnoreEnable(BiteType bite) {
+        var hasIntuition = Service.WorldState.HasStatus(IDs.Status.FishersIntuition);
 
         var hook = GetDoubleTripleHook(bite);
 
@@ -88,54 +84,47 @@ public class BaitConfig(string bait)
             return GetPatienceHook(bite);
     }
 
-    public bool CheckHookEnabled(BiteType bite) =>
-        bite == BiteType.Weak ? HookWeakEnabled :
+    public bool CheckHookEnabled(BiteType bite)
+        => bite == BiteType.Weak ? HookWeakEnabled :
         bite == BiteType.Strong ? HookStrongEnabled :
-        bite == BiteType.Legendary ? HookLegendaryEnabled :
-        false;
+        bite == BiteType.Legendary && HookLegendaryEnabled;
 
-    public bool CheckHookIntuitionEnabled(BiteType bite) =>
-        bite == BiteType.Weak ? HookWeakIntuitionEnabled :
+    public bool CheckHookIntuitionEnabled(BiteType bite)
+        => bite == BiteType.Weak ? HookWeakIntuitionEnabled :
         bite == BiteType.Strong ? HookStrongIntuitionEnabled :
-        bite == BiteType.Legendary ? HookLegendaryIntuitionEnabled :
-        false;
+        bite == BiteType.Legendary && HookLegendaryIntuitionEnabled;
 
-    public bool CheckHookDHTHEnabled(BiteType bite) =>
-        bite == BiteType.Weak ? HookWeakDHTHEnabled :
+    public bool CheckHookDHTHEnabled(BiteType bite)
+        => bite == BiteType.Weak ? HookWeakDHTHEnabled :
         bite == BiteType.Strong ? HookStrongDHTHEnabled :
-        bite == BiteType.Legendary ? HookLegendaryDHTHEnabled :
-        false;
+        bite == BiteType.Legendary && HookLegendaryDHTHEnabled;
 
-    private HookType GetPatienceHook(BiteType bite) => bite switch
-    {
+    private HookType GetPatienceHook(BiteType bite) => bite switch {
         BiteType.Weak => HookTypeWeak,
         BiteType.Strong => HookTypeStrong,
         BiteType.Legendary => HookTypeLegendary,
         _ => HookType.None,
     };
 
-    private HookType GetIntuitionHook(BiteType bite) => bite switch
-    {
+    private HookType GetIntuitionHook(BiteType bite) => bite switch {
         BiteType.Weak => HookTypeWeakIntuition,
         BiteType.Strong => HookTypeStrongIntuition,
         BiteType.Legendary => HookTypeLegendaryIntuition,
         _ => HookType.None,
     };
 
-    private HookType? GetDoubleTripleHook(BiteType bite)
-    {
-        if (UseTripleHook || UseDoubleHook)
-        {
-            if (UseDHTHOnlySurfaceSlap && !PlayerRes.HasStatus(IDs.Status.IdenticalCast))
+    private HookType? GetDoubleTripleHook(BiteType bite) {
+        if (UseTripleHook || UseDoubleHook) {
+            if (UseDHTHOnlySurfaceSlap && !Service.WorldState.HasStatus(IDs.Status.IdenticalCast))
                 return HookType.None;
 
-            if (PlayerRes.HasStatus(IDs.Status.AnglersFortune) && !UseDHTHPatience)
+            if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune) && !UseDHTHPatience)
                 return HookType.None;
 
-            if (UseTripleHook && PlayerRes.GetCurrentGp() >= 700 && CheckHookDHTHEnabled(bite))
+            if (UseTripleHook && Service.WorldState.CurrentGp >= 700 && CheckHookDHTHEnabled(bite))
                 return HookType.Triple;
 
-            if (UseDoubleHook && PlayerRes.GetCurrentGp() >= 400 && CheckHookDHTHEnabled(bite))
+            if (UseDoubleHook && Service.WorldState.CurrentGp >= 400 && CheckHookDHTHEnabled(bite))
                 return HookType.Double;
 
             if (LetFishEscape)
@@ -145,14 +134,12 @@ public class BaitConfig(string bait)
         return HookType.None;
     }
 
-    public override bool Equals(object? obj)
-    {
+    public override bool Equals(object? obj) {
         return obj is BaitConfig settings &&
                BaitName == settings.BaitName;
     }
 
-    public override int GetHashCode()
-    {
+    public override int GetHashCode() {
         return HashCode.Combine(BaitName + @"a");
     }
 }

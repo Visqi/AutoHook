@@ -1,28 +1,16 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoMooch2 : BaseActionCast
-{
+public sealed class AutoMooch2 : BaseActionCast {
     public override int Priority { get; set; } = 11;
     public override bool IsExcludedPriority { get; set; } = true;
 
-    public override bool RequiresTimeWindow() => true;
+    public AutoMooch2() : base(IDs.Actions.Mooch2, ActionType.Action) { }
 
-    public AutoMooch2() : base(UIStrings.UseMoochII, Data.IDs.Actions.Mooch2, ActionType.Action)
-    {
-    }
+    public override string GetName() => UIStrings.Mooch_II;
 
-    public override string GetName()
-        => Name = UIStrings.UseMoochII;
+    public override string GetHelpText() => UIStrings.AutoMooch_HelpText;
 
-    public override bool CastCondition()
-    {
-        return true;
-    }
-
-    /*protected override DrawOptionsDelegate DrawOptions => () =>
-    {
-
-    };*/
+    public override bool CastCondition() => true;
 }

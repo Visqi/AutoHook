@@ -1,58 +1,45 @@
-﻿namespace AutoHook.Configurations.old_config;
+namespace AutoHook.Configurations.Legacy;
 
-public class BaitPresetConfig
-{
+public class BaitPresetConfig {
     /* old config, dont use*/
-    private string presetName = UIStrings.New_Preset;
+    public string PresetName { get; set; } = UIStrings.New_Preset;
+    public List<BaitConfig> ListOfBaits { get; set; } = [];
 
-    private List<BaitConfig> _listOfBaits = [];
+    public BaitPresetConfig() {
+        ListOfBaits = [];
+    }
 
-    public string PresetName { get => presetName; set => presetName = value; }
-    public List<BaitConfig> ListOfBaits { get => _listOfBaits; set => _listOfBaits = value; }
-
-    public BaitPresetConfig(string presetName)
-    {
-        if (ListOfBaits == null)
-            ListOfBaits = [];
-
+    public BaitPresetConfig(string presetName) : this() {
         PresetName = presetName;
     }
 
-    public void AddBaitConfig(BaitConfig baitConfig)
-    {
-        if (ListOfBaits != null && !ListOfBaits.Contains(baitConfig))
-        {
+    public void AddBaitConfig(BaitConfig baitConfig) {
+        if (ListOfBaits != null && !ListOfBaits.Contains(baitConfig)) {
             ListOfBaits.Add(baitConfig);
         }
     }
 
-    public void RemoveBaitConfig(BaitConfig baitConfig)
-    {
-        if (ListOfBaits != null && ListOfBaits.Contains(baitConfig))
-        {
+    public void RemoveBaitConfig(BaitConfig baitConfig) {
+        if (ListOfBaits != null && ListOfBaits.Contains(baitConfig)) {
             ListOfBaits.Remove(baitConfig);
         }
     }
 
     // This is just for the conversion of the Config version 1 to version 2
-    public void AddListOfHook(List<BaitConfig> listOfBaits)
-    {
+    public void AddListOfHook(List<BaitConfig> listOfBaits) {
         ListOfBaits.AddRange(listOfBaits);
     }
 
-    public override bool Equals(object? obj)
-    {
+    public override bool Equals(object? obj) {
         return obj is BaitPresetConfig settings &&
-               presetName == settings.presetName;
+               PresetName == settings.PresetName;
     }
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(presetName + @"a");
+    public override int GetHashCode() {
+        return HashCode.Combine(PresetName + @"a");
     }
 
-    public void RenamePreset(string name)
-    {
+    public void RenamePreset(string name) {
         PresetName = name;
     }
 }

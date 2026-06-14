@@ -1,33 +1,25 @@
-﻿using System.ComponentModel;
 using AutoHook.Spearfishing.Enums;
 
 namespace AutoHook.Classes;
 
-public class BaseGig(int itemId) : BaseOption
-{
-    [DefaultValue(true)]
+public class BaseGig(int itemId) : BaseOption {
     public bool Enabled = true;
 
     private int _itemId = itemId;
-    public ImportedFish? Fish
-    {
-        get
-        {
-            if (_fish == null && _itemId != 0)
-            {
-                Service.PrintDebug($"[AutoGig] BaseGig.Fish - Lazy initializing for itemId: {_itemId}, ImportedFishes count: {GameRes.ImportedFishes.Count}");
-                _fish = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == _itemId);
-                Service.PrintDebug($"[AutoGig] BaseGig.Fish - Found: {(_fish != null ? _fish.Name : "null")}");
+    public ImportedFish? Fish {
+        get {
+            if (field == null && _itemId != 0) {
+                Service.PrintDebug($"[AutoGig] BaseGig.Fish - Lazy initializing for itemId: {_itemId}, SpearfishFishes count: {GameRes.SpearfishFishes.Count}");
+                field = GameRes.SpearfishFishes.FirstOrDefault(f => f.ItemId == _itemId);
+                Service.PrintDebug($"[AutoGig] BaseGig.Fish - Found: {(field != null ? field.Name : "null")}");
             }
-            return _fish;
+            return field;
         }
-        set
-        {
+        set {
             Service.PrintDebug($"[AutoGig] BaseGig.Fish - Setting to: {(value != null ? value.Name : "null")}");
-            _fish = value;
+            field = value;
         }
-    }
-    private ImportedFish? _fish = GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == itemId);
+    } = GameRes.SpearfishFishes.FirstOrDefault(f => f.ItemId == itemId);
 
     public bool UseNaturesBounty;
 
@@ -37,28 +29,20 @@ public class BaseGig(int itemId) : BaseOption
     public SpearfishSpeed Speed => Fish?.Speed ?? SpearfishSpeed.Unknown;
     public SpearfishSize Size => Fish?.Size ?? SpearfishSize.Unknown;
 
-    public override void DrawOptions()
-    {
-        DrawUtil.DrawComboSelector(
-            [.. GameRes.ImportedFishes.Where(f => f.IsSpearFish)],
-            (ImportedFish item) => item.Name,
-            Fish?.Name ?? UIStrings.None,
-            (ImportedFish item) => Fish = item);
+    public override void DrawOptions() {
+        DrawUtil.DrawComboSelector([.. GameRes.SpearfishFishes], item => item.Name, Fish?.Name ?? UIStrings.None, item => Fish = item);
 
         DrawUtil.Checkbox(UIStrings.UseNaturesBounty, ref UseNaturesBounty);
 
-        DrawUtil.DrawTreeNodeEx(UIStrings.Fish_Hitbox_Offset, () =>
-        {
+        DrawUtil.DrawTreeNodeEx(UIStrings.Fish_Hitbox_Offset, () => {
             if (DrawUtil.EditFloatField(UIStrings.OffsetLR, ref LeftOffset,
-                    UIStrings.OffsetLRHelpText, true))
-            {
+                    UIStrings.OffsetLRHelpText, true)) {
                 LeftOffset = Math.Max(-10, Math.Min(LeftOffset, 10));
                 Service.Save();
             }
 
             if (DrawUtil.EditFloatField(UIStrings.OffsetRL, ref RightOffset,
-                    UIStrings.OffsetRLHelpText, true))
-            {
+                    UIStrings.OffsetRLHelpText, true)) {
                 RightOffset = Math.Max(-10, Math.Min(RightOffset, 10));
                 Service.Save();
             }
@@ -66,14 +50,12 @@ public class BaseGig(int itemId) : BaseOption
 
     }
 
-    public override bool Equals(object? obj)
-    {
+    public override bool Equals(object? obj) {
         return obj is BaseGig settings &&
                Fish?.ItemId == settings.Fish?.ItemId;
     }
 
-    public override int GetHashCode()
-    {
+    public override int GetHashCode() {
         return HashCode.Combine(UniqueId);
     }
 }

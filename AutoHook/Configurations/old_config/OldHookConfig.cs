@@ -1,7 +1,9 @@
-namespace AutoHook.Configurations.old_config;
+using AutoHook.Conditions;
+using AutoHook.Conditions.Definitions;
 
-public class OldHookConfig
-{
+namespace AutoHook.Configurations.Legacy;
+
+public class OldHookConfig {
     public bool Enabled = true;
 
     public BaitFishClass BaitFish = new();
@@ -67,14 +69,10 @@ public class OldHookConfig
         BaitName = bait;
     }*/
 
-    public void ConvertV3ToV4()
-    {
+    public void ConvertV3ToV4() {
 
-        if (NormalHook == null)
-            NormalHook = new(IDs.Status.None);
-
-        if (IntuitionHook == null)
-            IntuitionHook = new(IDs.Status.None);
+        NormalHook ??= new(IDs.Status.None);
+        IntuitionHook ??= new(IDs.Status.None);
 
         Convert(NormalHook, false);
         Convert(IntuitionHook, true);
@@ -82,12 +80,10 @@ public class OldHookConfig
         IntuitionHook.UseCustomStatusHook = UseCustomIntuitionHook;
     }
 
-    private void Convert(BaseHookset hookset, bool isIntuition)
-    {
+    private void Convert(BaseHookset hookset, bool isIntuition) {
         Dictionary<BaseBiteConfig, (bool, HookType, bool, bool, bool)> normal;
 
-        if (isIntuition)
-        {
+        if (isIntuition) {
             normal = new()
             {
                 {
@@ -104,8 +100,7 @@ public class OldHookConfig
                 },
             };
         }
-        else
-        {
+        else {
             normal = new()
             {
                 {
@@ -158,27 +153,28 @@ public class OldHookConfig
         var list = new List<Dictionary<BaseBiteConfig, (bool, HookType, bool, bool, bool)>>
             { normal, doubleHook, tripleHook };
 
-        foreach (var dict in list)
-        {
-            foreach (var (bite, (enabled, type, slapActive, slapNotActive, identicalActive)) in dict)
-            {
+        foreach (var dict in list) {
+            foreach (var (bite, (enabled, type, slapActive, slapNotActive, identicalActive)) in dict) {
                 bite.HooksetEnabled = enabled;
                 bite.HooksetType = type;
-                bite.OnlyWhenActiveSlap = slapActive;
-                bite.OnlyWhenNotActiveSlap = slapNotActive;
 
-                bite.OnlyWhenActiveIdentical = identicalActive;
-
-                bite.MinHookTimer = MinTimeDelay;
-                bite.MaxHookTimer = MaxTimeDelay;
-
-                if (MinTimeDelay > 0 || MaxTimeDelay > 0)
-                {
-                    bite.HookTimerEnabled = true;
+                var conditions = new List<Condition>();
+                if (slapActive)
+                    conditions.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.SurfaceSlap));
+                if (slapNotActive)
+                    conditions.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.SurfaceSlap, inverse: true));
+                if (identicalActive)
+                    conditions.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.IdenticalCast));
+                if (MinTimeDelay > 0 || MaxTimeDelay > 0) {
+                    var timer = Configuration.ConditionSetBuilder.Range<BiteTimerCD>(MinTimeDelay, MaxTimeDelay);
+                    if (timer != null) conditions.Add(timer);
                 }
-                bite.ChumMinHookTimer = MinChumTimeDelay;
-                bite.ChumMaxHookTimer = MaxChumTimeDelay;
-                bite.ChumTimerEnabled = UseChumTimer;
+                if (UseChumTimer) {
+                    var chum = Configuration.ConditionSetBuilder.Range<ChumTimerCD>(MinChumTimeDelay, MaxChumTimeDelay);
+                    if (chum != null) conditions.Add(chum);
+                }
+                if (conditions.Count > 0)
+                    bite.ConditionSet = new ConditionSet { CombineMode = ConditionCombineMode.All, Groups = [new ConditionGroup { CombineMode = ConditionCombineMode.All, Conditions = conditions }] };
             }
         }
 
@@ -187,10 +183,5 @@ public class OldHookConfig
 
         hookset.UseTripleHook = UseTripleHook;
         hookset.LetFishEscapeTripleHook = LetFishEscape;
-
-        hookset.StopAfterCaught = StopAfterCaught;
-        hookset.StopAfterCaughtLimit = StopAfterCaughtLimit;
-        hookset.StopAfterResetCount = StopAfterResetCount;
-        hookset.StopFishingStep = StopFishingStep;
     }
 }

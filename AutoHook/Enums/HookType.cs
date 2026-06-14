@@ -1,7 +1,6 @@
 namespace AutoHook.Enums;
 
-public enum HookType : uint
-{
+public enum HookType : uint {
     None = 0,
     Normal = IDs.Actions.Hook,
     Precision = IDs.Actions.PrecisionHS,

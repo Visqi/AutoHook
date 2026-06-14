@@ -1,38 +1,17 @@
+using AutoHook.Conditions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
-using System.ComponentModel;
 
 namespace AutoHook.Classes;
 
-public class BaseBiteConfig(HookType type)
-{
-    [DefaultValue(true)]
+public class BaseBiteConfig(HookType type) {
     public bool HooksetEnabled = true;
 
     public bool EnableHooksetSwap;
 
-    public bool HookTimerEnabled;
-    public double MinHookTimer;
-    public double MaxHookTimer;
-
-    public bool ChumTimerEnabled;
-    public double ChumMinHookTimer;
-    public double ChumMaxHookTimer;
-
-    public bool OnlyWhenActiveSlap;
-    public bool OnlyWhenNotActiveSlap;
-
-    public bool OnlyWhenActiveIdentical;
-    public bool OnlyWhenNotActiveIdentical;
-
-    public bool PrizeCatchReq;
-    public bool PrizeCatchNotReq;
-
-    public bool OnlyWhenActiveMultihook;
-    public bool OnlyWhenNotActiveMultihook;
+    public ConditionSet? ConditionSet { get; set; }
 
     public HookType HooksetType = type;
 
@@ -54,194 +33,92 @@ public class BaseBiteConfig(HookType type)
     public double StellarHookTypeMin;
     public double StellarHookTypeMax;
 
-    public void DrawOptions(string biteName, bool enableSwap = false)
-    {
+    public ConditionSet? HookTypeConditionSet { get; set; } // when multiple hook types isn't selected
+    public ConditionSet? NormalHookTypeConditionSet { get; set; }
+    public ConditionSet? PrecisionHookTypeConditionSet { get; set; }
+    public ConditionSet? PowerfulHookTypeConditionSet { get; set; }
+    public ConditionSet? StellarHookTypeConditionSet { get; set; }
+
+    public void DrawOptions(string biteName, bool enableSwap = false) {
         EnableHooksetSwap = enableSwap;
         using var id = ImRaii.PushId(@$"{biteName}");
 
         DrawUtil.DrawCheckboxTree(biteName, ref HooksetEnabled,
-            () =>
-            {
-                DrawUtil.DrawTreeNodeEx(UIStrings.Conditions, () =>
-                {
-                    using var indent = ImRaii.PushIndent();
-                    DrawUtil.DrawTreeNodeEx(UIStrings.Surface_Slap_Options, DrawSurfaceSwap);
-                    DrawUtil.DrawTreeNodeEx(UIStrings.Identical_Cast_Options, DrawIdenticalCast);
-                    DrawUtil.DrawTreeNodeEx(UIStrings.Prize_Catch_Options, DrawPrizeCatch);
-                    DrawUtil.DrawTreeNodeEx(UIStrings.Multihook_Options, DrawMultihook);
-
-                }, UIStrings.Conditions_HelpText);
+            () => {
+                ConditionSet = Ui.ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, ConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: false);
 
                 if (EnableHooksetSwap)
                     DrawUtil.DrawTreeNodeEx(UIStrings.HookType, DrawBite, UIStrings.HookWillBeUsedIfPatienceIsNotUp);
-
-                DrawUtil.DrawTreeNodeEx(UIStrings.HookingTimer, DrawTimers, UIStrings.HookingTimerHelpText);
-
             });
     }
 
-    private void DrawBite()
-    {
+    private void DrawBite() {
         using var indent = ImRaii.PushIndent();
 
-        DrawUtil.Checkbox(UIStrings.UseMutlipleHooksByTimer, ref UseMultipleHookTypesByTimer);
+        DrawUtil.Checkbox(UIStrings.UseMultipleHooksByTimer, ref UseMultipleHookTypesByTimer);
 
-        if (!UseMultipleHookTypesByTimer)
-        {
-            if (ImGui.RadioButton(UIStrings.Normal_Hook, HooksetType == HookType.Normal))
-            {
+        if (!UseMultipleHookTypesByTimer) {
+            if (ImGui.RadioButton(UIStrings.Normal_Hook, HooksetType == HookType.Normal)) {
                 HooksetType = HookType.Normal;
                 Service.Save();
             }
 
-            if (ImGui.RadioButton(UIStrings.PrecisionHookset, HooksetType == HookType.Precision))
-            {
+            if (ImGui.RadioButton(UIStrings.PrecisionHookset, HooksetType == HookType.Precision)) {
                 HooksetType = HookType.Precision;
                 Service.Save();
             }
 
-            if (ImGui.RadioButton(UIStrings.PowerfulHookset, HooksetType == HookType.Powerful))
-            {
+            if (ImGui.RadioButton(UIStrings.PowerfulHookset, HooksetType == HookType.Powerful)) {
                 HooksetType = HookType.Powerful;
                 Service.Save();
             }
 
-            if (ImGui.RadioButton(UIStrings.StellarHookset, HooksetType == HookType.Stellar))
-            {
+            if (ImGui.RadioButton(UIStrings.StellarHookset, HooksetType == HookType.Stellar)) {
                 HooksetType = HookType.Stellar;
                 Service.Save();
             }
+
+            HookTypeConditionSet = Ui.ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, HookTypeConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
         }
-        else
-        {
-            DrawTimedHookTypeOption(UIStrings.Normal_Hook, HookType.Normal,
-                ref UseNormalHookTypeByTimer, ref NormalHookTypeMin, ref NormalHookTypeMax);
+        else {
+            NormalHookTypeConditionSet = DrawTimedHookTypeOption(UIStrings.Normal_Hook, HookType.Normal,
+                ref UseNormalHookTypeByTimer, ref NormalHookTypeMin, ref NormalHookTypeMax, NormalHookTypeConditionSet);
 
-            DrawTimedHookTypeOption(UIStrings.PrecisionHookset, HookType.Precision,
-                ref UsePrecisionHookTypeByTimer, ref PrecisionHookTypeMin, ref PrecisionHookTypeMax);
+            PrecisionHookTypeConditionSet = DrawTimedHookTypeOption(UIStrings.PrecisionHookset, HookType.Precision,
+                ref UsePrecisionHookTypeByTimer, ref PrecisionHookTypeMin, ref PrecisionHookTypeMax, PrecisionHookTypeConditionSet);
 
-            DrawTimedHookTypeOption(UIStrings.PowerfulHookset, HookType.Powerful,
-                ref UsePowerfulHookTypeByTimer, ref PowerfulHookTypeMin, ref PowerfulHookTypeMax);
+            PowerfulHookTypeConditionSet = DrawTimedHookTypeOption(UIStrings.PowerfulHookset, HookType.Powerful,
+                ref UsePowerfulHookTypeByTimer, ref PowerfulHookTypeMin, ref PowerfulHookTypeMax, PowerfulHookTypeConditionSet);
 
-            DrawTimedHookTypeOption(UIStrings.StellarHookset, HookType.Stellar,
-                ref UseStellarHookTypeByTimer, ref StellarHookTypeMin, ref StellarHookTypeMax);
+            StellarHookTypeConditionSet = DrawTimedHookTypeOption(UIStrings.StellarHookset, HookType.Stellar,
+                ref UseStellarHookTypeByTimer, ref StellarHookTypeMin, ref StellarHookTypeMax, StellarHookTypeConditionSet);
         }
     }
 
-    private void DrawTimedHookTypeOption(string label, HookType hookType, ref bool enabled, ref double minTime, ref double maxTime)
-    {
+    private ConditionSet? DrawTimedHookTypeOption(string label, HookType hookType, ref bool enabled, ref double minTime, ref double maxTime, ConditionSet? conditionSet) {
         using var id = ImRaii.PushId(label);
         using var indent = ImRaii.PushIndent();
 
-        if (DrawUtil.Checkbox(label, ref enabled))
-        {
+        if (DrawUtil.Checkbox(label, ref enabled)) {
             if (enabled && HooksetType == HookType.None)
                 HooksetType = hookType;
         }
 
-        if (enabled)
-        {
+        if (enabled) {
             using var innerIndent = ImRaii.PushIndent();
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.SetZeroToIgnore);
             SetupTimer(ref minTime, ref maxTime);
+            conditionSet = Ui.ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, conditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
         }
+
+        return conditionSet;
     }
 
-    private void DrawSurfaceSwap()
-    {
-        using var indent = ImRaii.PushIndent();
+    private void SetupTimer(ref double minTimeDelay, ref double maxTimeDelay) {
 
-        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenActiveSurfaceSlap, ref OnlyWhenActiveSlap))
-        {
-            OnlyWhenNotActiveSlap = false;
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenNOTActiveSurfaceSlap, ref OnlyWhenNotActiveSlap))
-        {
-            OnlyWhenActiveSlap = false;
-            Service.Save();
-        }
-    }
-
-    private void DrawIdenticalCast()
-    {
-        using var indent = ImRaii.PushIndent();
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenActiveIdentical, ref OnlyWhenActiveIdentical))
-        {
-            OnlyWhenNotActiveIdentical = false;
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenNOTActiveIdentical, ref OnlyWhenNotActiveIdentical))
-        {
-            OnlyWhenActiveIdentical = false;
-            Service.Save();
-        }
-    }
-
-    private void DrawPrizeCatch()
-    {
-        using var indent = ImRaii.PushIndent();
-
-        if (DrawUtil.Checkbox(UIStrings.Prize_Catch_Required, ref PrizeCatchReq))
-        {
-            PrizeCatchNotReq = false;
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.PrizeCatchNotActive, ref PrizeCatchNotReq))
-        {
-            PrizeCatchReq = false;
-            Service.Save();
-        }
-    }
-
-    private void DrawMultihook()
-    {
-        using var indent = ImRaii.PushIndent();
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenActiveMultihook, ref OnlyWhenActiveMultihook))
-        {
-            OnlyWhenNotActiveMultihook = false;
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyHookWhenNOTActiveMultihook, ref OnlyWhenNotActiveMultihook))
-        {
-            OnlyWhenActiveMultihook = false;
-            Service.Save();
-        }
-    }
-
-    private void DrawTimers()
-    {
-        using var indent = ImRaii.PushIndent();
-        using (var _ = ImRaii.PushId(@"HookingTimer"))
-        {
-            ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.SetZeroToIgnore);
-            DrawUtil.Checkbox(UIStrings.EnableHookingTimer, ref HookTimerEnabled);
-            SetupTimer(ref MinHookTimer, ref MaxHookTimer);
-        }
-
-        DrawUtil.SpacingSeparator();
-
-        //ImGui.TextWrapped(UIStrings.ChumTimer);
-        ImGui.PushID(@"MoochTimer");
-        using var id = ImRaii.PushId(@"MoochTimer");
-        DrawUtil.Checkbox(UIStrings.EnableChumTimer, ref ChumTimerEnabled);
-        SetupTimer(ref ChumMinHookTimer, ref ChumMaxHookTimer);
-    }
-
-    private void SetupTimer(ref double minTimeDelay, ref double maxTimeDelay)
-    {
-
-        ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputDouble(UIStrings.MinWait, ref minTimeDelay, .1, 1, @"%.1f%"))
-        {
-            switch (minTimeDelay)
-            {
+        ImGui.SetNextItemWidth(100.Scaled());
+        if (ImGui.InputDouble(UIStrings.MinWait, ref minTimeDelay, .1, 1, @"%.1f%")) {
+            switch (minTimeDelay) {
                 case <= 0:
                     minTimeDelay = 0;
                     break;
@@ -256,11 +133,9 @@ public class BaseBiteConfig(HookType type)
         ImGui.SameLine();
         ImGuiComponents.HelpMarker($"{UIStrings.HelpMarkerMinWaitTimer}\n\n{UIStrings.DoesntHaveAffectUnderChum}");
 
-        ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputDouble(UIStrings.MaxWait, ref maxTimeDelay, .1, 1, @"%.1f%"))
-        {
-            switch (maxTimeDelay)
-            {
+        ImGui.SetNextItemWidth(100.Scaled());
+        if (ImGui.InputDouble(UIStrings.MaxWait, ref maxTimeDelay, .1, 1, @"%.1f%")) {
+            switch (maxTimeDelay) {
                 case 0.1:
                     maxTimeDelay = 2;
                     break;

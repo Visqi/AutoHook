@@ -2,29 +2,26 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoMultiHook : BaseActionCast
-{
-    /// <summary>Auto Casts: only use when Identical Cast status is active. Fish Caught: only use when Identical Cast is the action being cast.</summary>
-    public bool OnlyUseWhenIdenticalCastActive;
+public sealed class AutoMultiHook : BaseActionCast {
+    public AutoMultiHook() : base(IDs.Actions.MultiHook, ActionType.Action) { }
 
-    public AutoMultiHook() : base(UIStrings.Multihook, IDs.Actions.MultiHook) { }
+    public override string GetName() => UIStrings.Multihook;
 
     public override int Priority { get; set; } = 0;
     public override bool IsExcludedPriority { get; set; } = true;
-    public override unsafe bool CastCondition()
-    {
+
+    public override unsafe bool CastCondition() {
+        if (!EvaluateConditionSet())
+            return false;
+        if (Service.WorldState.HasStatus(IDs.Status.Multihook))
+            return false;
+
         if (DutyActionManager.GetInstanceIfReady() is not null and var dm)
             for (var i = 0; i < dm->NumValidSlots; i++)
                 if (dm->ActionId[i] is IDs.Actions.MultiHook && dm->CurCharges[i] > 0)
-                    return !OnlyUseWhenIdenticalCastActive || PlayerRes.HasStatus(IDs.Status.IdenticalCast);
+                    return true;
         return false;
     }
 
-    public override string GetName() => Name = UIStrings.Multihook;
-
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
-        if (DrawUtil.Checkbox(UIStrings.OnlyUseWhenIdenticalCastIsActive, ref OnlyUseWhenIdenticalCastActive))
-            Service.Save();
-    };
+    protected override DrawOptionsDelegate DrawOptions => () => DrawAutoCastConditions();
 }

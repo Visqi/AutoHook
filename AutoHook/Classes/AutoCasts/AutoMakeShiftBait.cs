@@ -1,78 +1,39 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Classes.AutoCasts;
 
-public class AutoMakeShiftBait : BaseActionCast
-{
+public sealed class AutoMakeShiftBait : BaseActionCast {
     public int MakeshiftBaitStacks = 5;
-    public bool _onlyUseWithIntuition;
-
-    public bool OnlyWhenMoochNotUp;
-    public bool UseOnlyWhenMoochIIOnCD;
 
     public override bool RequiresTimeWindow() => true;
 
-    public AutoMakeShiftBait() : base(UIStrings.MakeShift_Bait, IDs.Actions.MakeshiftBait, ActionType.Action)
-    {
-        HelpText = UIStrings.TabAutoCasts_DrawMakeShiftBait_HelpText;
-    }
+    public AutoMakeShiftBait() : base(IDs.Actions.MakeshiftBait, ActionType.Action) { }
 
-    public override string GetName()
-        => Name = UIStrings.MakeShift_Bait;
+    public override string GetName() => UIStrings.MakeShift_Bait;
 
-    public override bool CastCondition()
-    {
-        if (!Enabled)
+    public override string GetHelpText() => UIStrings.TabAutoCasts_DrawMakeShiftBait_HelpText;
+
+    public override bool CastCondition() {
+        if (!EvaluateConditionSet())
             return false;
 
-        if (PlayerRes.HasStatus(IDs.Status.MakeshiftBait))
+        if (Service.WorldState.BlocksFortune())
             return false;
 
-        if (PlayerRes.HasStatus(IDs.Status.PrizeCatch))
-            return false;
-
-        if (PlayerRes.HasStatus(IDs.Status.AnglersFortune))
-            return false;
-
-        if (!PlayerRes.HasStatus(IDs.Status.FishersIntuition) && _onlyUseWithIntuition)
-            return false;
-
-        if (PlayerRes.IsMoochAvailable() && OnlyWhenMoochNotUp)
-            return false;
-
-        if (UseOnlyWhenMoochIIOnCD && !PlayerRes.ActionOnCoolDown(IDs.Actions.Mooch2))
-            return false;
-
-        bool available = PlayerRes.ActionTypeAvailable(IDs.Actions.MakeshiftBait);
-        bool hasStacks = PlayerRes.HasAnglersArtStacks(MakeshiftBaitStacks);
+        var available = Service.WorldState.ActionAvailable(IDs.Actions.MakeshiftBait);
+        var hasStacks = Service.WorldState.HasAnglersArtStacks(MakeshiftBaitStacks);
 
         return hasStacks && available;
     }
 
-    protected override DrawOptionsDelegate DrawOptions => () =>
-    {
+    protected override DrawOptionsDelegate DrawOptions => () => {
         var stack = MakeshiftBaitStacks;
-        if (DrawUtil.EditNumberField(UIStrings.TabAutoCasts_When_Stack_Equals, ref stack))
-        {
-            // value has to be between 5 and 10
+        if (DrawUtil.EditNumberField(UIStrings.TabAutoCasts_When_Stack_Equals, ref stack)) {
             MakeshiftBaitStacks = Math.Max(5, Math.Min(stack, 10));
             Service.Save();
         }
 
-        if (DrawUtil.Checkbox(UIStrings.OnlyUseWhenFisherSIntutionIsActive, ref _onlyUseWithIntuition))
-        {
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.OnlyWhenMoochNotAvailable, ref OnlyWhenMoochNotUp))
-        {
-            Service.Save();
-        }
-
-        if (DrawUtil.Checkbox(UIStrings.AutoCastExtraOptionMakeshiftBait, ref UseOnlyWhenMoochIIOnCD))
-        {
-            Service.Save();
-        }
+        DrawAutoCastConditions();
     };
 
     public override int Priority { get; set; } = 9;

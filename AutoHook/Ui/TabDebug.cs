@@ -1,260 +1,399 @@
-﻿using Dalamud.Bindings.ImGui;
-using Dalamud.Hooking;
+using System.Reflection;
+using AutoHook.Tasks;
+using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
-using ECommons.Automation.NeoTaskManager;
 using ECommons.Throttlers;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using FFXIVClientStructs.FFXIV.Client.Game.WKS;
-using HtmlAgilityPack;
-using Lumina.Excel.Sheets;
-using System.Net.Http;
-using System.Text.RegularExpressions;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Ui;
 
-public class TabDebug : BaseTab
-{
+public class TabDebug : BaseTab {
     public override OpenWindow Type => OpenWindow.Debug;
-
-    private delegate byte ExecuteCommandDelegate(int id, int unk1, uint baitId, int unk2, int unk3);
-
-    private Hook<ExecuteCommandDelegate>? _executeCommandHook;
-    public TabDebug()
-    {
-        //_taskManager.DefaultConfiguration.OnTaskTimeout += RepairFailed;
-        //CreateDalamudHooks();
-        //taskManager.DefaultConfiguration.OnTaskCompletion
-    }
-
-    private unsafe void CreateDalamudHooks()
-    {
-        _executeCommandHook = Svc.Hook.HookFromSignature<ExecuteCommandDelegate>(
-            SignaturePatterns.ExecuteCommand,
-            ExecuteCommandDetour);
-        _executeCommandHook?.Enable();
-    }
-
-    private unsafe byte ExecuteCommandDetour(int id, int unk1, uint baitId, int unk2, int unk3)
-    {
-        Svc.Log.Debug($"ExecuteCommandDetour: {id} {unk1} {baitId} {unk2} {unk3}");
-        return _executeCommandHook!.Original(id, unk1, baitId, unk2, unk3);
-    }
-
-    private readonly TaskManager _taskManager = new()
-    {
-        DefaultConfiguration = { TimeLimitMS = 10000 }
-    };
 
     public override string TabName => "Debug";
     public override bool Enabled => true;
 
-    private static RepairStatus repairStauts = RepairStatus.Idle;
-
-    public override void DrawHeader()
-    {
-        DrawUtil.TextV($"Theres no debug here its just random stuff i add to see what happens");
-
-        DrawUtil.TextV($"AutoRepair Status: {repairStauts}");
+    public override void DrawHeader() {
+        DrawUtil.TextV("WorldState viewer and wiki presets.");
     }
 
-    enum RepairStatus
-    {
-        Idle,
-        Repairing,
-        Success,
-        Failed
-    }
-
-    private unsafe uint FishCaught => PlayerState.Instance()->NumFishCaught;
-
-    public override unsafe void Draw()
-    {
-        try
-        {
-            if (ImGui.Selectable($"Revert Plugin Version: {Service.Configuration.Version}"))
-                Service.Configuration.Version = 4;
-
-            if (Player.Available)
-            {
-                ImGui.Text($"Fish Caught: {FishCaught}");
-                ImGui.Text($"Current Bait: {Service.BaitManager.Current}");
-                ImGui.Text($"Current Swimbait: {Service.BaitManager.CurrentSwimBait}");
-                ImGui.Text($"Current BaitSwimbait: {Service.BaitManager.CurrentBaitSwimBait}");
-                ImGui.Text($"Is Mooching (Swimbait): {Service.BaitManager.IsMooching()}");
-                ImGui.Text($"Last Catch: {Service.LastCatch?.Name ?? "None"} (ID: {Service.LastCatch?.Id ?? -1})");
-                ImGui.Text($"Current Swimbait: {string.Join(", ", Service.BaitManager.SwimbaitIds.ToArray())}");
-            }
-
-            if (ImGui.Selectable($" {Service.Configuration.HookPresets.Folders.Count} Folders"))
-            {
-                Service.Configuration.HookPresets.Folders.Clear();
-                Service.Configuration.Save();
-            }
-
-            if (ImGui.CollapsingHeader("Testing buttons (scary)", ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                if (ImGui.Button("Try repair"))
-                {
-                    repairStauts = RepairStatus.Repairing;
-                    _taskManager.Enqueue(ProcessRepair, "Repair");
-                }
-
-                if (ImGui.Button("Scan Offsets"))
-                {
-                    Checkoffsets();
-                }
-
-                if (ImGui.Button("Export fish ids"))
-                {
-                    var fishList = GameRes.Fishes;
-
-                    string allKeys = $"[{string.Join(", ", fishList.Select(f => f.Id))}]";
-                    ImGui.SetClipboardText(allKeys);
-                }
-
-                if (ImGui.Button("Fix Global Preset"))
-                {
-                    Service.Configuration.HookPresets.DefaultPreset.PresetName = Service.GlobalPresetName;
-                }
-            }
-
-            ImGui.InputInt("Swimbait Id", ref _swimbaitId);
-
-            if (ImGui.Button("Swap Swimbait"))
-            {
-                Service.BaitManager.ChangeBait((uint)_swimbaitId);
-            }
-
-            if (ImGui.Button($"copy mooches"))
-                ImGui.SetClipboardText(string.Join("\n", FindRows<FishingBaitParameter>(x => x.Item.Value.ItemUICategory.RowId != 33).Select(x => $"[{x.Item.RowId}] {x.Item.Value.Singular}")));
-
-            if (ImGui.CollapsingHeader("Get Wiki presets", ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                using (ImRaii.Group())
-                {
-                    if (ImGui.Button($"Get Wiki info (cd: {EzThrottler.GetRemainingTime("WikiUpdate")})"))
-                    {
-                        _ = WikiPresets.ListWikiPages();
-                    }
-
-                    //ImGui.InputTextWithHint("", "regex", ref regex, 500);
-
-                    foreach (var preset in WikiPresets.Presets)
-                    {
-                        ImGui.TextWrapped($"Preset: {preset.Key}, Qtd: {preset.Value.Count}");
-                        foreach (var item in preset.Value)
-                            ImGui.TextWrapped($"-> {item.Presets.FirstOrDefault()?.PresetName ?? "No preset name"}");
-                        DrawUtil.SpacingSeparator();
-                    }
-                }
-            }
+    public override void Draw() {
+        try {
+            DrawAutomationTask();
+            DrawNotificationMaster();
+            DrawWorldState();
+            DrawWikiPresets();
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Svc.Log.Error(e.Message);
         }
     }
 
-    //private static string regexold = @"```\s*AH\s*([\s\S]*?)\s*```";
-    private static readonly string regex = @"```\s*(AH\s*[\s\S]*?)\s*```";
-
-    private static bool ProcessRepair()
-    {/*
-        var s = RepairManager.ProcessRepair();
-
-        if (s)
-            repairStauts = RepairStatus.Success;*/
-
-        return false;
-    }
-
-    private void RepairFailed(TaskManagerTask task, ref long ms)
-    {
-        repairStauts = RepairStatus.Failed;
-    }
-
-    private static readonly HttpClient client = new();
-
-    private static readonly Dictionary<string, List<string>> Presets = [];
-    private int _swimbaitId = 45949;
-
-    //public static async Task UpdateWiki()
-    //{
-    //    if (!EzThrottler.Throttle("WikiUpdate", 10000))
-    //    {
-    //    }
-
-    //    // Example usage:
-    //    string wikiPageUrl = "https://raw.githubusercontent.com/wiki/PunishXIV/AutoHook/Scrip-Farming-%5BUpdated-to-DT%5D.md"; // Replace with the actual URL
-    //    //presets = await ExtractBase64FromWikiPage(wikiPageUrl);
-
-    //    // Print the extracted base64 codes
-    //}
-
-    private const string BaseUrl = "https://github.com/PunishXIV/AutoHook/wiki";
-    private const string RawWiki = "https://raw.githubusercontent.com/wiki/PunishXIV/AutoHook";
-    private static readonly HttpClient httpClient = new(); // Reuse HttpClient
-
-    public static async Task ListWikiPages()
-    {
-        var mdUrls = await GetWikiPageUrls(BaseUrl);
-        Service.PrintDebug($"Size1: {mdUrls.Count}");
-
-        foreach (var mdUrl in mdUrls)
-        {
-            var preset = await ExtractBase64FromWikiPage($"{RawWiki}/{mdUrl}.md");
-            Presets.Add(mdUrl.Replace(@"-", @" "), preset);
-        }
-    }
-
-    static async Task<List<string>> GetWikiPageUrls(string url)
-    {
-        var pageUrls = new List<string>();
-        var htmlDoc = new HtmlDocument();
-        htmlDoc.LoadHtml(await httpClient.GetStringAsync(url));
-
-        var pageLinks = htmlDoc.DocumentNode
-            ?.SelectSingleNode("//nav[contains(@class, 'wiki-pages-box')]")
-            ?.SelectNodes(".//a[@href]")
-            ?.Skip(1) // Skip the first link (usually the Home link)
-            ?.Select(link => $"{link.Attributes["href"]?.Value?.Replace(@"/PunishXIV/AutoHook/wiki/", "")}");
-
-        if (pageLinks != null)
-            pageUrls.AddRange(pageLinks);
-
-        return pageUrls;
-    }
-
-    static async Task<List<string>> ExtractBase64FromWikiPage(string url)
-    {
-        string wikiPageContent = await httpClient.GetStringAsync(url);
-        return [.. Regex.Matches(wikiPageContent, regex).Select(match => match.Groups[1].Value)];
-    }
-
-    public override void Dispose()
-    {
-        _executeCommandHook?.Dispose();
-        _taskManager.Dispose();
-    }
-
-    public unsafe void Checkoffsets()
-    {
-        Svc.Log.Debug($"Initializing WKSManager offset scan");
-        var cosmicManager = WKSManager.Instance();
-        if (cosmicManager == null)
-        {
-            Svc.Log.Debug("WKSManager pointer is null.");
+    private static void DrawAutomationTask() {
+        if (!ImGui.CollapsingHeader("Aetherial reduction task", ImGuiTreeNodeFlags.DefaultOpen))
             return;
-        }
-        for (int offset = 1; offset <= 10000; offset++)
-        {
-            uint value = *(uint*)((byte*)cosmicManager + offset);
-            if (value == 45949)
-            {
-                Svc.Log.Debug($"Match found at offset 0x{offset:X}: {value}");
+
+        using (ImRaii.PushIndent()) {
+            var automation = Svc.Automation;
+            ImGui.Text($"Automation running: {automation.Running}");
+            ImGui.Text($"Task name: {automation.Name}");
+            ImGui.Text($"Task status: {automation.Status}");
+
+            using (ImRaii.Disabled(!automation.Running)) {
+                if (ImGui.Button("Stop current task"))
+                    automation.Stop();
             }
 
-            // else Svc.Log.Debug($"Offset 0x{offset:X}: {value}");
+            ImGui.Spacing();
+            if (Svc.Automation.CurrentTask is AetherialReduction reductionTask)
+                reductionTask.DrawDebug();
         }
+    }
+
+    private static void DrawWorldState() {
+        var ws = Service.WorldState;
+        if (ws == null) return;
+
+        if (!ImGui.CollapsingHeader("WorldState", ImGuiTreeNodeFlags.DefaultOpen))
+            return;
+
+        using (ImRaii.PushIndent()) {
+            // Core
+            if (ImGui.CollapsingHeader("Core", ImGuiTreeNodeFlags.DefaultOpen)) {
+                ImGui.Text($"CurrentGp / MaxGp: {ws.CurrentGp} / {ws.MaxGp}");
+                ImGui.Text($"BlockCasting: {ws.BlockCasting}");
+                ImGui.Text($"CurrentWeatherId: {ws.CurrentWeatherId}");
+                ImGui.Text($"TerritoryId: {ws.TerritoryId}");
+            }
+
+            // Fishing state
+            if (ImGui.CollapsingHeader("Fishing state", ImGuiTreeNodeFlags.DefaultOpen)) {
+                var f = ws.Fishing;
+                ImGui.Text($"FishingState: {ws.FishingState}");
+                ImGui.Text($"PreviousFishingState: {ws.PreviousFishingState}");
+                ImGui.Text($"FishingStep: {ws.FishingStep} (0x{(uint)ws.FishingStep:X})");
+                ImGui.Text($"BaitInfo: BaitId={f.BaitInfo.BaitId} SwimbaitId={f.BaitInfo.SelectedSwimbaitId} MoochId={f.BaitInfo.MoochId} IsMooching={f.BaitInfo.IsMooching}");
+            }
+
+            // Bite / context
+            if (ImGui.CollapsingHeader("Bite / context")) {
+                ImGui.Text($"BiteInfo: Time={ws.Fishing.BiteInfo.BiteTimeSeconds:F2} TugType={ws.Fishing.BiteInfo.TugType}");
+                ImGui.Text($"ChumActive: {ws.ChumActive}");
+            }
+
+            // Intuition
+            if (ImGui.CollapsingHeader("Intuition")) {
+                ImGui.Text($"Intuition: Status={ws.Fishing.Intuition.Status} TimeRemaining={ws.Fishing.Intuition.TimeRemaining:F1}s");
+                ImGui.Text($"SpectralCurrentStatus: {ws.SpectralCurrentStatus}");
+            }
+
+            // Ocean fishing
+            if (ImGui.CollapsingHeader("Ocean fishing")) {
+                var of = ws.OceanFishing;
+                var st = ws.SpectralTimer;
+                ImGui.Text($"SpectralCurrentActive: {of.SpectralCurrentActive}");
+                ImGui.Text($"SpectralTimeRemaining: {st.TimeRemaining:F1}s (active={st.IsActive})");
+                ImGui.Text($"NextSpectralDuration: {st.NextSpectralDuration:F1}s");
+                ImGui.Text($"TimeLeftInZone: {of.TimeLeftInZone:F1}s");
+                ImGui.Text($"AutoOceanFish: {Service.Configuration.AutoOceanFish}");
+                if (Svc.Automation.CurrentTask is AutoOceanFish oceanTask)
+                    ImGui.Text($"OceanAutoFishTask: zone {oceanTask.ZoneIndex + 1}, status={oceanTask.Status}");
+                ImGui.Text($"CurrentRoute: {of.CurrentRoute}");
+                ImGui.Text($"CurrentZone: {of.CurrentZone}");
+                ImGui.Text($"Mission1: type={of.Mission1.Type} progress={of.Mission1.Progress}");
+                ImGui.Text($"Mission2: type={of.Mission2.Type} progress={of.Mission2.Progress}");
+                ImGui.Text($"Mission3: type={of.Mission3.Type} progress={of.Mission3.Progress}");
+                ImGui.Text($"FishData count: {of.FishData?.Count ?? 0}");
+                if (ws.SpectralHistory.Count > 0) {
+                    ImGui.Separator();
+                    ImGui.Text("Spectral history (this voyage):");
+                    foreach (var rec in ws.SpectralHistory) {
+                        var dur = rec.ActualDurationSeconds is { } d ? $"{d:F0}s" : "active";
+                        ImGui.BulletText($"zone {rec.ZoneIndex + 1}: planned {rec.PlannedDurationSeconds:F0}s, carried {rec.CarriedExtraSeconds:F0}s, {dur}");
+                    }
+                }
+            }
+
+            // Last catch
+            if (ImGui.CollapsingHeader("Last catch")) {
+                var lc = ws.Fishing.LastCatch;
+                if (lc.HasValue)
+                    ImGui.Text($"LastCatch: FishId={lc.Value.FishId} Amount={lc.Value.Amount}");
+                else
+                    ImGui.Text("LastCatch: (none)");
+                if (Service.LastCatch != null)
+                    ImGui.Text($"LastCatch (name): {Service.LastCatch.Name} (Id: {Service.LastCatch.Id})");
+                ImGui.Text($"SessionCatches count: {ws.Fishing.SessionCatches.Count}");
+            }
+
+            // Actions
+            if (ImGui.CollapsingHeader("Actions")) {
+                var ua = ws.Fishing.LastUsedAction;
+                if (ua.HasValue)
+                    ImGui.Text($"LastUsedAction: {ua.Value.ActionId} ({ua.Value.ActionType})");
+                else
+                    ImGui.Text("LastUsedAction: (none)");
+                ImGui.Text($"LureSuccess: {ws.LureSuccess}");
+                if (ws.Fishing.LastLureCastBiteTime is { } lureCastBiteTime) {
+                    var elapsed = ws.Fishing.BiteInfo.BiteTimeSeconds - lureCastBiteTime;
+                    ImGui.Text($"LastLureCastBiteTime: {lureCastBiteTime:F2}s (elapsed {elapsed:F2}s)");
+                }
+                else
+                    ImGui.Text("LastLureCastBiteTime: (none)");
+            }
+
+            // Statuses
+            if (ImGui.CollapsingHeader("Statuses")) {
+                foreach (var (id, (time, stacks)) in ws.Statuses) {
+                    var name = StatusName(id);
+                    ImGui.Text($"{id}: {name} — time={time:F1}s stacks={stacks}");
+                }
+                if (ws.Statuses.Count == 0)
+                    ImGui.TextDisabled("(none)");
+            }
+
+            // Swimbait
+            if (ImGui.CollapsingHeader("Swimbait")) {
+                ImGui.Text($"SwimbaitIds: [{string.Join(", ", ws.SwimbaitIds)}]");
+                ImGui.Text($"GetSwimbaitCount(): {ws.GetSwimbaitCount()}");
+                ImGui.Text($"IsSwimbaitFull: {ws.IsSwimbaitFull()}");
+                ImGui.Text($"IsSwimbaitEmpty: {ws.IsSwimbaitEmpty()}");
+            }
+
+            // Pot
+            if (ImGui.CollapsingHeader("Pot")) {
+                ImGui.Text($"IsPotOffCooldown: {ws.Player.IsPotOffCooldown}");
+            }
+
+            // Item counts (known IDs)
+            if (ImGui.CollapsingHeader("Item counts (known)")) {
+                foreach (var (id, label) in KnownItemIds) {
+                    var c = ws.GetItemCount(id);
+                    if (c > 0)
+                        ImGui.Text($"{label} ({id}): {c}");
+                }
+            }
+
+            // Action availability (key actions)
+            if (ImGui.CollapsingHeader("Action availability (key)")) {
+                ImGui.Text($"IsCastAvailable: {ws.IsCastAvailable()}");
+                ImGui.Text($"IsMoochAvailable: {ws.IsMoochAvailable()}");
+                ImGui.Text($"HasMultihookAvailable: {ws.HasMultihookAvailable()}");
+                foreach (var (id, type, label) in KnownActionIds) {
+                    if (ws.ActionAvailable(id, type))
+                        ImGui.Text($"{label}: available");
+                }
+            }
+
+            DrawFshActionInfo(ws);
+        }
+    }
+
+    private static void DrawFshActionInfo(WorldState ws) {
+        if (!ImGui.CollapsingHeader("Action info (FSH)"))
+            return;
+
+        using (ImRaii.PushIndent()) {
+            ImGui.TextDisabled("ActionStatus != 0 blocks use; cooldown from GetRecastGroupDetail.");
+            if (!ImGui.BeginTable("fsh_action_info", 8, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY, new System.Numerics.Vector2(0, 280.Scaled()))) {
+                ImGui.EndTable();
+                return;
+            }
+
+            ImGui.TableSetupColumn("Action");
+            ImGui.TableSetupColumn("Id");
+            ImGui.TableSetupColumn("Type");
+            ImGui.TableSetupColumn("Status");
+            ImGui.TableSetupColumn("CD (s)");
+            ImGui.TableSetupColumn("Grp");
+            ImGui.TableSetupColumn("OnCD");
+            ImGui.TableSetupColumn("Avail");
+            ImGui.TableHeadersRow();
+
+            foreach (var (field, id, type) in FshActions) {
+                uint status;
+                float cd;
+                int group;
+                bool onCd;
+                bool avail;
+                try {
+                    status = PlayerRes.ActionStatus(id, type);
+                    cd = PlayerRes.GetCooldown(id, type);
+                    group = PlayerRes.GetRecastGroups(id, type);
+                    onCd = PlayerRes.ActionOnCoolDown(id, type);
+                    avail = ws.ActionAvailable(id, type);
+                }
+                catch (Exception e) {
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{field} ({id})");
+                    ImGui.TableNextColumn();
+                    ImGui.TextColored(ImGuiColors.DalamudRed, e.Message);
+                    continue;
+                }
+
+                var name = MultiString.GetActionName(id);
+                var label = string.IsNullOrEmpty(name) ? field : $"{field} ({name})";
+
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGui.TextUnformatted(label);
+                ImGui.TableNextColumn();
+                ImGui.Text($"{id}");
+                ImGui.TableNextColumn();
+                ImGui.TextUnformatted(type.ToString());
+                ImGui.TableNextColumn();
+                ImGui.TextColored(status == 0 ? ImGuiColors.DalamudGrey : ImGuiColors.ParsedOrange, $"{status}");
+                ImGui.TableNextColumn();
+                ImGui.Text(cd > 0 ? $"{cd:F1}" : "-");
+                ImGui.TableNextColumn();
+                ImGui.Text(group >= 0 ? $"{group}" : "-");
+                ImGui.TableNextColumn();
+                ImGui.Text(onCd ? "yes" : "no");
+                ImGui.TableNextColumn();
+                ImGui.Text(avail ? "yes" : "no");
+            }
+
+            ImGui.EndTable();
+        }
+    }
+
+    private static ActionType GetFishingActionType(uint _) => ActionType.Action;
+
+    private static readonly (string Field, uint Id, ActionType Type)[] FshActions =
+        typeof(IDs.Actions).GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Select(f => (Field: f.Name, Id: Convert.ToUInt32(f.GetValue(null) ?? 0u)))
+            .Where(x => x.Id != IDs.Actions.None)
+            .Select(x => (x.Field, x.Id, GetFishingActionType(x.Id)))
+            .OrderBy(x => x.Field)
+            .ToArray();
+
+    private static string StatusName(uint id) {
+        return id switch {
+            IDs.Status.FoodBuff => "FoodBuff",
+            IDs.Status.FishersIntuition => "FishersIntuition",
+            IDs.Status.SurfaceSlap => "SurfaceSlap",
+            IDs.Status.IdenticalCast => "IdenticalCast",
+            IDs.Status.AnglersFortune => "AnglersFortune",
+            IDs.Status.AnglersArt => "AnglersArt",
+            IDs.Status.MakeshiftBait => "MakeshiftBait",
+            IDs.Status.PrizeCatch => "PrizeCatch",
+            IDs.Status.NaturesBounty => "NaturesBounty",
+            IDs.Status.Chum => "Chum",
+            IDs.Status.CollectorsGlove => "CollectorsGlove",
+            IDs.Status.Snagging => "Snagging",
+            IDs.Status.Salvage => "Salvage",
+            IDs.Status.FishEyes => "FishEyes",
+            IDs.Status.TruthOcean => "TruthOcean",
+            IDs.Status.BigGameFishing => "BigGameFishing",
+            IDs.Status.AmbitiousLure => "AmbitiousLure",
+            IDs.Status.ModestLure => "ModestLure",
+            _ => "?",
+        };
+    }
+
+    private static readonly (uint Id, ActionType Type, string Label)[] KnownActionIds =
+    [
+        (IDs.Actions.Cast, ActionType.Action, "Cast"),
+        (IDs.Actions.Mooch, ActionType.Action, "Mooch"),
+        (IDs.Actions.Mooch2, ActionType.Action, "Mooch2"),
+        (IDs.Actions.Hook, ActionType.Action, "Hook"),
+        (IDs.Actions.Patience, ActionType.Action, "Patience"),
+        (IDs.Actions.Chum, ActionType.Action, "Chum"),
+        (IDs.Actions.PrizeCatch, ActionType.Action, "PrizeCatch"),
+        (IDs.Actions.MultiHook, ActionType.Action, "MultiHook"),
+    ];
+
+    private static readonly (uint Id, string Label)[] KnownItemIds =
+    [
+        (IDs.Item.Cordial, "Cordial"),
+        (IDs.Item.HQCordial, "HQCordial"),
+        (IDs.Item.HiCordial, "HiCordial"),
+        (IDs.Item.WateredCordial, "WateredCordial"),
+        (IDs.Item.HQWateredCordial, "HQWateredCordial"),
+    ];
+
+    private static string _nmToastTitle = "AutoHook test";
+    private static string _nmToastText = "Debug notification";
+    private static string _nmLastResult = "";
+
+    private static readonly NotificationConfig _nmTestConfig = new() {
+        Enabled = true,
+        BeepOnSuccess = true,
+        DisplayToastNotification = true,
+    };
+
+    private static void DrawNotificationMaster() {
+        if (!ImGui.CollapsingHeader("NotificationMaster"))
+            return;
+
+        using (ImRaii.PushIndent()) {
+            var hasPlugin = Svc.Interface.IsPluginLoaded("NotificationMaster");
+            var ipcReady = Service.NotificationMaster.IsIPCReady();
+            ImGui.Text($"Plugin loaded: {hasPlugin}");
+            ImGui.Text($"IPC ready: {ipcReady}");
+            if (!hasPlugin)
+                ImGui.TextDisabled("Install NotificationMaster to test IPC calls.");
+
+            ImGui.Spacing();
+            ImGui.SetNextItemWidth(320.Scaled());
+            ImGui.InputText("Toast title", ref _nmToastTitle, 128);
+            ImGui.SetNextItemWidth(320.Scaled());
+            ImGui.InputText("Toast text", ref _nmToastText, 260);
+
+            ImGui.Spacing();
+            if (ImGui.Button("IsIPCReady"))
+                SetNmResult(Service.NotificationMaster.IsIPCReady());
+            ImGui.SameLine();
+            if (ImGui.Button("DisplayTrayNotification"))
+                SetNmResult(Service.NotificationMaster.DisplayTrayNotification(_nmToastTitle, _nmToastText));
+            ImGui.SameLine();
+            if (ImGui.Button("FlashTaskbarIcon"))
+                SetNmResult(Service.NotificationMaster.FlashTaskbarIcon());
+
+            if (ImGui.Button("TryBringGameForeground"))
+                SetNmResult(Service.NotificationMaster.TryBringGameForeground());
+
+            ImGui.Spacing();
+            ImGui.TextUnformatted("Notify() (config-driven):");
+            DrawUtil.Checkbox("Enabled", ref _nmTestConfig.Enabled);
+            DrawUtil.Checkbox("Echo chat", ref _nmTestConfig.EchoChatMessage);
+            DrawUtil.Checkbox("In-game toast", ref _nmTestConfig.DisplayGameToast);
+            DrawUtil.Checkbox("Tray toast", ref _nmTestConfig.DisplayToastNotification);
+            DrawUtil.Checkbox("Flash taskbar", ref _nmTestConfig.FlashTaskbarIcon);
+            DrawUtil.Checkbox("Bring foreground", ref _nmTestConfig.BringGameForeground);
+            DrawUtil.Checkbox("Beep on success", ref _nmTestConfig.BeepOnSuccess);
+            if (ImGui.Button("Notify"))
+                SetNmResult(Service.NotificationMaster.TryNotify(_nmTestConfig, _nmToastText));
+
+            if (!string.IsNullOrEmpty(_nmLastResult)) {
+                ImGui.Spacing();
+                ImGui.TextWrapped($"Last result: {_nmLastResult}");
+            }
+        }
+    }
+
+    private static void SetNmResult(bool success) => _nmLastResult = success ? "true" : "false";
+
+    private static void DrawWikiPresets() {
+        if (!ImGui.CollapsingHeader("Get Wiki presets", ImGuiTreeNodeFlags.DefaultOpen))
+            return;
+
+        using (ImRaii.Group()) {
+            if (ImGui.Button($"Get Wiki info (cd: {EzThrottler.GetRemainingTime("WikiUpdate")})")) {
+                _ = WikiPresets.ListWikiPages();
+            }
+
+            foreach (var preset in WikiPresets.Presets) {
+                ImGui.TextWrapped($"Preset: {preset.Key}, Qtd: {preset.Value.Count}");
+                foreach (var item in preset.Value)
+                    ImGui.TextWrapped($"-> {item.Presets.FirstOrDefault()?.PresetName ?? "No preset name"}");
+                DrawUtil.SpacingSeparator();
+            }
+        }
+    }
+
+    public override void Dispose() {
     }
 }

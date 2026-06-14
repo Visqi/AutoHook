@@ -1,18 +1,13 @@
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using System.ComponentModel;
+using AutoHook.Conditions;
+using AutoHook.Conditions.Definitions;
+using Newtonsoft.Json;
 
 namespace AutoHook.Configurations;
 
-public class AutoCastsConfig
-{
+public class AutoCastsConfig {
     public bool EnableAll = false;
 
-    [DefaultValue(true)] public bool DontCancelMooch = true;
-
-    public TimeOnly StartTime = new(0);
-    public TimeOnly EndTime = new(0);
-
-    public bool OnlyCastDuringSpecificTime = false;
+    public bool DontCancelMooch = true;
 
     public bool RecastAnimationCancel;
     public bool TurnCollectOff;
@@ -23,6 +18,7 @@ public class AutoCastsConfig
     public AutoMooch CastMooch = new();
     public AutoChum CastChum = new();
     public AutoCollect CastCollect = new();
+    public AutoSnagging CastSnagging = new();
     public AutoCordial CastCordial = new();
     public AutoFishEyes CastFishEyes = new();
     public AutoMakeShiftBait CastMakeShiftBait = new();
@@ -31,10 +27,8 @@ public class AutoCastsConfig
     public AutoThaliaksFavor CastThaliaksFavor = new();
     public AutoBigGameFishing CastBigGame = new();
     public AutoMultiHook CastMultihook = new();
-    //public AutoLures CastLures = new();
 
-    private List<BaseActionCast> GetAutoCastOrder()
-    {
+    private List<BaseActionCast> GetAutoCastOrder() {
         var output = new List<BaseActionCast>
         {
             CastThaliaksFavor,
@@ -45,6 +39,7 @@ public class AutoCastsConfig
             CastFishEyes,
             CastPrizeCatch,
             //CastCollect,
+            CastSnagging,
             CastBigGame,
             CastMultihook,
         }.OrderBy(x => x.Priority).ToList();
@@ -52,8 +47,7 @@ public class AutoCastsConfig
         return output;
     }
 
-    public BaseActionCast? GetNextAutoCast(bool ignoreCurrentMooch)
-    {
+    public BaseActionCast? GetNextAutoCast(bool ignoreCurrentMooch) {
         if (!EnableAll)
             return null;
 
@@ -61,40 +55,37 @@ public class AutoCastsConfig
 
         var order = GetAutoCastOrder();
 
-        foreach (var action in order.Where(action => action.IsAvailableToCast(ignoreCurrentMooch)))
-        {
-            if (OnlyCastDuringSpecificTime && action.RequiresTimeWindow() && !InsideCastWindow())
+        foreach (var action in order.Where(action => action.IsAvailableToCast(ignoreCurrentMooch))) {
+            if (action.RequiresTimeWindow() && !TimeWindow.BackingSet.PassesOrUnconfigured())
                 continue;
 
-            Service.PrintDebug($"[AutoCast] Returning {action.Name}");
+            Service.PrintDebug($"[AutoCast] Returning {action.GetName()}");
             return action;
         }
 
         return cast;
     }
 
-    private unsafe bool InsideCastWindow()
-    {
-        var clientTime = Framework.Instance()->ClientTime.EorzeaTime;
-        var eorzeaTime = TimeOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(clientTime).DateTime);
+    [JsonProperty("TimeWindowConditionSet")]
+    [JsonConverter(typeof(SingleConditionConverter))]
+    public SingleCondition<TimeWindowCD, (bool Enabled, TimeOnly Start, TimeOnly End)> TimeWindow { get; set; } = new SingleCondition<TimeWindowCD, (bool Enabled, TimeOnly Start, TimeOnly End)>();
 
-        return eorzeaTime.IsBetween(StartTime, EndTime);
-    }
-
-    public bool TryCastAction(BaseActionCast? action, bool noDelay = false, bool ignoreCurrentMooch = false)
-    {
+    public bool TryCastAction(BaseActionCast? action, bool noDelay = false, bool ignoreCurrentMooch = false) {
         if (action == null || !EnableAll)
             return false;
 
-        if (OnlyCastDuringSpecificTime && action.RequiresTimeWindow() && !InsideCastWindow())
+        if (action.RequiresTimeWindow() && !TimeWindow.BackingSet.PassesOrUnconfigured())
             return false;
 
         if (!action.Enabled || !action.IsAvailableToCast(ignoreCurrentMooch))
             return false;
 
-        if (action.Id == IDs.Actions.Chum && ChumAnimationCancel)
+        if (action.Id == IDs.Actions.Chum && ChumAnimationCancel) {
             TryChumAnimationCancel();
-        else if (noDelay)
+            return true;
+        }
+
+        if (noDelay)
             PlayerRes.CastActionNoDelay(action.Id, action.ActionType, action.GetName());
         else
             PlayerRes.CastActionDelayed(action.Id, action.ActionType, action.GetName());
@@ -102,8 +93,7 @@ public class AutoCastsConfig
         return true;
     }
 
-    private void TryChumAnimationCancel()
-    {
+    private void TryChumAnimationCancel() {
         Service.PrintDebug("Trying to cancel chum animation");
         // Make sure Salvage is disabled before chum
 

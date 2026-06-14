@@ -1,0 +1,50 @@
+using Dalamud.Bindings.ImGui;
+using static AutoHook.Conditions.IConditionDefinition;
+
+namespace AutoHook.Conditions.Definitions;
+
+public sealed class SwimbaitCountCD : IConditionDefinition {
+    public string Id => nameof(SwimbaitCountCD);
+    public string Name => "Swimbait count";
+    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast;
+
+    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
+        var args = GetIntCompareParams(parameters);
+        var fishId = GetInt(parameters, "id", 0);
+        if (fishId == 0 && world.SwimbaitEvaluationFishId != 0)
+            fishId = (int)world.SwimbaitEvaluationFishId;
+
+        var count = fishId > 0
+            ? world.GetSwimbaitCountForFish((uint)fishId)
+            : world.GetSwimbaitCount();
+        var result = CompareInt(count, args.Value, ResolveOp(parameters));
+        return args.Apply(result);
+    }
+
+    public void DrawParams(Condition condition) {
+        var fishId = GetInt(condition.Params, "id", 0);
+        var selectedName = fishId switch {
+            0 => "Current slot fish",
+            > 0 when GameRes.Fishes.FirstOrDefault(f => f.Id == fishId) is { } fish => $"[#{fish.Id}] {fish.Name}",
+            _ => "-",
+        };
+
+        var fishOptions = new List<BaitFishClass> { new("Current slot fish", 0) };
+        fishOptions.AddRange(GameRes.Fishes);
+        DrawUtil.DrawComboSelector(fishOptions, fish => fish.Id == 0 ? fish.Name : $"[#{fish.Id}] {fish.Name}", selectedName, fish => condition.Params["id"] = (long)fish.Id);
+
+        ImGui.SameLine();
+        DrawIntCompareParams(condition, "##swimbait_op", "Swimbaits");
+    }
+
+    private static string ResolveOp(IReadOnlyDictionary<string, object> parameters) {
+        if (parameters.TryGetValue("op", out var opObj) && opObj != null)
+            return opObj.ToString() ?? ">=";
+        if (parameters.TryGetValue("above", out var aboveObj)) {
+            var above = aboveObj is bool b ? b : Convert.ToInt32(aboveObj) != 0;
+            return above ? ">=" : "<=";
+        }
+
+        return ">=";
+    }
+}

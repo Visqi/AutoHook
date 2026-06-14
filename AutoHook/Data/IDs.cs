@@ -1,9 +1,7 @@
 namespace AutoHook.Data;
 
-public static class IDs
-{
-    public static class Actions
-    {
+public static class IDs {
+    public static class Actions {
         public const uint
             Cast = 289,
             Quit = 299,
@@ -24,11 +22,13 @@ public static class IDs
             DoubleHook = 269,
             TripleHook = 27523,
             StellarHook = 41278,
+            StellarHookMaster = 42068,
             PrecisionHS = 4179,
             PowerfulHS = 4103,
             FishEyes = 4105,
             Chum = 4104,
             Collect = 4101,
+            Snagging = 4100,
             Salvage = 7910,
             Rest = 37047,
             BigGameFishing = 37046,
@@ -39,8 +39,7 @@ public static class IDs
             None = 0;
     }
 
-    public static class Status
-    {
+    public static class Status {
         public const uint
             FoodBuff = 48,
             FishersIntuition = 568,
@@ -53,17 +52,18 @@ public static class IDs
             NaturesBounty = 1171,
             Chum = 763,
             CollectorsGlove = 805,
+            Snagging = 761,
             Salvage = 1172,
             FishEyes = 762,
             TruthOcean = 1173,
             BigGameFishing = 3907,
             AmbitiousLure = 3972,
             ModestLure = 3973,
+            Multihook = 4414,
             None = 0;
     }
 
-    public static class Item
-    {
+    public static class Item {
         public const uint
             WateredCordial = 16911,
             HQWateredCordial = 1016911,

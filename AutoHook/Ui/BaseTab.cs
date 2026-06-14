@@ -2,8 +2,7 @@ using Dalamud.Bindings.ImGui;
 
 namespace AutoHook.Ui;
 
-public abstract class BaseTab : IDisposable
-{
+public abstract class BaseTab : IDisposable {
     public abstract string TabName { get; }
     public abstract bool Enabled { get; }
 
@@ -15,24 +14,19 @@ public abstract class BaseTab : IDisposable
 
     public abstract void Draw();
 
-    public virtual void Dispose()
-    {
+    public virtual void Dispose() {
     }
 
-    public void DrawTabDescription(string tabDescription)
-    {
-        if (!Service.Configuration.HideTabDescription)
-        {
-            if (ImGui.TreeNodeEx(UIStrings.Tab_Description, ImGuiTreeNodeFlags.FramePadding))
-            {
+    public void DrawTabDescription(string tabDescription) {
+        if (!Service.Configuration.HideTabDescription) {
+            if (ImGui.TreeNodeEx(UIStrings.Tab_Description, ImGuiTreeNodeFlags.FramePadding)) {
                 _showDescription = true;
                 ImGui.TreePop();
             }
             else
                 _showDescription = false;
 
-            if (_showDescription)
-            {
+            if (_showDescription) {
                 ImGui.TextWrapped(tabDescription);
                 ImGui.Spacing();
             }

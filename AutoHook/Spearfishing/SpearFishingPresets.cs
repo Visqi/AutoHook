@@ -1,17 +1,13 @@
-﻿using System.ComponentModel;
 using Newtonsoft.Json;
 
 namespace AutoHook.Spearfishing;
 
-public class SpearFishingPresets : BasePreset
-{
+public class SpearFishingPresets : BasePreset {
     public bool AutoGigEnabled = false;
     public bool AutoGigHideOverlay = false;
 
-    [DefaultValue(true)]
     public bool AutoGigDrawFishHitbox = true;
 
-    [DefaultValue(true)]
     public bool AutoGigDrawGigHitbox = true;
 
     public AutoThaliaksFavor ThaliaksFavor = new(true);
@@ -27,16 +23,14 @@ public class SpearFishingPresets : BasePreset
 
     [JsonIgnore] public override AutoGigConfig? SelectedPreset => base.SelectedPreset as AutoGigConfig;
 
-    public override void AddNewPreset(string presetName)
-    {
+    public override void AddNewPreset(string presetName) {
         var newPreset = new AutoGigConfig(presetName);
         Presets.Add(newPreset);
         SelectedGuid = newPreset.UniqueId.ToString();
         Service.Save();
     }
 
-    public override void AddNewPreset(BasePresetConfig preset)
-    {
+    public override void AddNewPreset(BasePresetConfig preset) {
         var json = JsonConvert.SerializeObject(preset);
         var copy = JsonConvert.DeserializeObject<AutoGigConfig>(json);
         copy!.UniqueId = Guid.NewGuid();
@@ -45,8 +39,7 @@ public class SpearFishingPresets : BasePreset
         Service.Save();
     }
 
-    public override void RemovePreset(Guid value)
-    {
+    public override void RemovePreset(Guid value) {
         var preset = Presets.Find(p => p.UniqueId == value);
         if (preset == null)
             return;
@@ -55,8 +48,7 @@ public class SpearFishingPresets : BasePreset
         Service.Save();
     }
 
-    public override void SwapIndex(int itemIndex, int targetIndex)
-    {
+    public override void SwapIndex(int itemIndex, int targetIndex) {
         var moved = Presets[itemIndex];
 
         if (moved == null)

@@ -2,7 +2,7 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
     <PropertyGroup>
         <Authors>Det</Authors>
-        <Version>0.0.0.0</Version>
+        <Version>6.0.0.36</Version>
         <LangVersion>preview</LangVersion>
 		<GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
     </PropertyGroup>
@@ -20,8 +20,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ECommons" Version="3.2.0.2" />
+        <PackageReference Include="croizat.clib" Version="1.0.32" />
+        <PackageReference Include="ECommons" Version="3.2.0.16" />
         <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+        <PackageReference Include="NotificationMasterAPI" Version="1.0.0.1" />
         <ProjectReference Include="..\PunishLib\PunishLib\PunishLib.csproj" />
     </ItemGroup>
 
@@ -38,9 +40,5 @@
             <Generator>ResXFileCodeGenerator</Generator>
             <LastGenOutput>UIStrings.Designer.cs</LastGenOutput>
         </EmbeddedResource>
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Update="DotNet.ReproducibleBuilds" Version="2.0.2" />
     </ItemGroup>
 </Project>

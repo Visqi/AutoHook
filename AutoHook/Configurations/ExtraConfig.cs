@@ -1,57 +1,69 @@
-﻿namespace AutoHook.Configurations;
+using AutoHook.Conditions;
+using Newtonsoft.Json;
+using System.Threading;
 
-public class ExtraConfig : BaseOption
-{
+namespace AutoHook.Configurations;
+
+public enum ExtraStopAction {
+    None,
+    StopOnly,
+    QuitFishing,
+}
+
+public class ExtraTrigger {
+    [JsonIgnore]
+    private static int _nextUiId = 1;
+
+    public bool Enabled { get; set; } = true;
+
+    [JsonIgnore]
+    public int UiId { get; set; }
+
+    public ConditionSet? ConditionSet { get; set; }
+
+    public bool SwapPreset { get; set; }
+    public string PresetToSwap { get; set; } = @"-";
+
+    public bool SwapBait { get; set; }
+    public BaitFishClass BaitToSwap { get; set; } = new();
+
+    public ExtraStopAction StopAction { get; set; } = ExtraStopAction.None;
+
+    public bool ResolveCollectablesWindow { get; set; }
+    public bool ResolveCollectablesForceNo { get; set; }
+
+    public bool StartFishing { get; set; }
+
+    public bool ReduceFish { get; set; }
+
+    public bool RemoveStatus { get; set; }
+    public uint StatusToRemove { get; set; }
+
+    public NotificationConfig NotifyOnSuccess { get; set; } = new();
+
+    public void EnsureUiId() {
+        if (UiId <= 0)
+            UiId = Interlocked.Increment(ref _nextUiId);
+    }
+}
+
+public class ExtraConfig : BaseOption {
     public bool Enabled = false;
 
-    public bool SwapBaitIntuitionGain = false;
-    public BaitFishClass BaitToSwapIntuitionGain = new();
-
-    public bool SwapBaitIntuitionLost = false;
-    public BaitFishClass BaitToSwapIntuitionLost = new();
-
-    public bool SwapPresetIntuitionGain = false;
-    public string PresetToSwapIntuitionGain = @"-";
-
-    public bool SwapPresetIntuitionLost = false;
-    public string PresetToSwapIntuitionLost = @"-";
-
-    public bool SwapBaitSpectralCurrentGain = false;
-    public BaitFishClass BaitToSwapSpectralCurrentGain = new();
-
-    public bool SwapBaitSpectralCurrentLost = false;
-    public BaitFishClass BaitToSwapSpectralCurrentLost = new();
-
-    public bool SwapPresetSpectralCurrentGain = false;
-    public string PresetToSwapSpectralCurrentGain = @"-";
-
-    public bool SwapPresetSpectralCurrentLost = false;
-    public string PresetToSwapSpectralCurrentLost = @"-";
-
     public bool ResetCounterPresetSwap = false;
-    public bool QuitOnIntuitionLost = false;
-    public bool StopOnIntuitionLost = false;
-
     public bool ForceBaitSwap;
     public int ForcedBaitId;
 
-    // Angler's Art
-    public bool StopAfterAnglersArt = false;
-    public int AnglerStackQtd = 0;
-    public FishingSteps AnglerStopFishingStep = FishingSteps.None;
-    public bool SwapBaitAnglersArt = false;
-    public BaitFishClass BaitToSwapAnglersArt = new();
-    public bool SwapPresetAnglersArt = false;
-    public string PresetToSwapAnglersArt = @"-";
+    public List<ExtraTrigger> Triggers { get; set; } = [];
 
-    // Swimbait
-    public SwimbaitAction SwimbaitFillsAction = SwimbaitAction.None;
-    public string PresetToSwapSwimbaitFills = @"-";
-    public SwimbaitAction SwimbaitRunsOutAction = SwimbaitAction.None;
-    public string PresetToSwapSwimbaitRunsOut = @"-";
+    /// <summary>Use this preset when auto ocean fishing starts a stop matching zone/time and optional conditions.</summary>
+    public bool AutoOceanFishEnabled;
+    public bool AutoOceanFishAllStops;
+    public uint AutoOceanFishSpotId;
+    public uint AutoOceanFishTimeId;
+    public ConditionSet? AutoOceanFishConditionSet;
 
-    public override void DrawOptions()
-    {
+    [JsonIgnore] public List<bool> LastTriggerStates { get; } = [];
 
-    }
+    public override void DrawOptions() { }
 }

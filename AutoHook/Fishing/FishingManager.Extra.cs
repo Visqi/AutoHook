@@ -1,337 +1,204 @@
-﻿namespace AutoHook.Fishing;
+using AutoHook.Conditions;
+using AutoHook.Tasks;
+using ECommons.Throttlers;
+using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
-public partial class FishingManager
-{
+namespace AutoHook.Fishing;
+
+public partial class FishingManager {
     public ExtraConfig GetExtraCfg()
-    {
-        return Presets.SelectedPreset?.ExtraCfg.Enabled ?? false
+        => Presets.SelectedPreset?.ExtraCfg.Enabled ?? false
             ? Presets.SelectedPreset.ExtraCfg
             : Presets.DefaultPreset.ExtraCfg;
-    }
 
-    private void CheckExtraActions(ExtraConfig extraCfg)
-    {
-        CheckIntuition(extraCfg);
-        CheckSpectral(extraCfg);
-        CheckAnglersArt(extraCfg);
-        CheckSwimbait(extraCfg);
-    }
-
-    private void CheckSpectral(ExtraConfig extraCfg)
-    {
-        if (_spectralCurrentStatus == SpectralCurrentStatus.NotActive)
-        {
-            if (!PlayerRes.IsInActiveSpectralCurrent())
-                return;
-
-            _spectralCurrentStatus = SpectralCurrentStatus.Active;
-
-            if (!extraCfg.Enabled)
-                return;
-
-            // Check if the preset was already swapped
-            if (extraCfg.SwapPresetSpectralCurrentGain && !_lastStep.HasFlag(FishingSteps.PresetSwapped))
-            {
-                var preset =
-                    Presets.CustomPresets.FirstOrDefault(preset =>
-                        preset.PresetName == extraCfg.PresetToSwapSpectralCurrentGain);
-
-                _lastStep |= FishingSteps.PresetSwapped; // one try
-                if (preset != null)
-                {
-                    Service.Save();
-                    Presets.SelectedPreset = preset;
-                    Service.PrintChat(
-                        @$"[Extra] Spectral Current Active: Swapping preset to {extraCfg.PresetToSwapSpectralCurrentGain}");
-                    Service.Save();
-                }
-                else
-                    Service.PrintChat(@$"Preset {extraCfg.PresetToSwapSpectralCurrentGain} not found.");
-            }
-
-            // Check if the bait was already swapped
-            if (extraCfg.SwapBaitSpectralCurrentGain && !_lastStep.HasFlag(FishingSteps.BaitSwapped))
-            {
-                var result = Service.BaitManager.ChangeBait(extraCfg.BaitToSwapSpectralCurrentGain);
-
-                _lastStep |= FishingSteps.BaitSwapped; // one try
-                if (result == BaitManager.ChangeBaitReturn.Success)
-                {
-                    Service.PrintChat(
-                        @$"[Extra] Spectral Current Active: Swapping bait to {extraCfg.BaitToSwapSpectralCurrentGain.Name}");
-                    Service.Save();
-                }
-            }
-        }
-
-        if (_spectralCurrentStatus == SpectralCurrentStatus.Active)
-        {
-            if (PlayerRes.IsInActiveSpectralCurrent())
-                return;
-
-            _spectralCurrentStatus = SpectralCurrentStatus.NotActive;
-
-            // Check if the preset was already swapped
-            if (!extraCfg.Enabled)
-                return;
-
-            if (extraCfg.SwapPresetSpectralCurrentLost && !_lastStep.HasFlag(FishingSteps.PresetSwapped))
-            {
-                var preset =
-                    Presets.CustomPresets.FirstOrDefault(preset =>
-                        preset.PresetName == extraCfg.PresetToSwapSpectralCurrentLost);
-
-                _lastStep |= FishingSteps.PresetSwapped; // one try
-
-                if (preset != null)
-                {
-                    Service.Save();
-                    Presets.SelectedPreset = preset;
-                    Service.PrintChat(
-                        @$"[Extra] Spectral Current Ended: Swapping preset to {extraCfg.PresetToSwapIntuitionLost}");
-                    Service.Save();
-                }
-                else
-                    Service.PrintChat(@$"Preset {extraCfg.SwapPresetSpectralCurrentLost} not found.");
-            }
-
-            // Check if the bait was already swapped
-            if (extraCfg.SwapBaitSpectralCurrentLost && !_lastStep.HasFlag(FishingSteps.BaitSwapped))
-            {
-                var result = Service.BaitManager.ChangeBait(extraCfg.BaitToSwapSpectralCurrentLost);
-
-                _lastStep |= FishingSteps.BaitSwapped; // one try
-
-                if (result == BaitManager.ChangeBaitReturn.Success)
-                {
-                    Service.PrintChat(
-                        @$"[Extra] Spectral Current Ended: Swapping bait to {extraCfg.BaitToSwapSpectralCurrentLost.Name}");
-                    Service.Save();
-                }
-            }
-        }
-    }
-
-    private void CheckIntuition(ExtraConfig extraCfg)
-    {
-        if (IntuitionStatus == IntuitionStatus.NotActive)
-        {
-            if (!PlayerRes.HasStatus(IDs.Status.FishersIntuition))
-                return;
-
-            IntuitionStatus = IntuitionStatus.Active; // only one try
-
-            if (!extraCfg.Enabled)
-                return;
-            ExtraCfgGainedIntuition(extraCfg);
-        }
-
-        if (IntuitionStatus == IntuitionStatus.Active)
-        {
-            if (PlayerRes.HasStatus(IDs.Status.FishersIntuition))
-                return;
-
-            IntuitionStatus = IntuitionStatus.NotActive; // only one try
-
-            if (!extraCfg.Enabled)
-                return;
-
-            ExtraCfgLostIntuition(extraCfg);
-        }
-    }
-
-    private void ExtraCfgGainedIntuition(ExtraConfig extraCfg)
-    {
-        // Check if the preset was already swapped
-        if (extraCfg.SwapPresetIntuitionGain && !_lastStep.HasFlag(FishingSteps.PresetSwapped))
-        {
-            var preset = Presets.CustomPresets.FirstOrDefault(preset =>
-                preset.PresetName == extraCfg.PresetToSwapIntuitionGain);
-
-            _lastStep |= FishingSteps.PresetSwapped;
-            if (preset != null)
-            {
-                Service.Save();
-                Presets.SelectedPreset = preset;
-                Service.PrintChat(
-                    @$"[Extra] Intuition Active - Swapping preset to {extraCfg.PresetToSwapIntuitionGain}");
-                Service.Save();
-            }
-            else
-                Service.PrintChat(
-                    @$"[Extra] Intuition Active - Preset {extraCfg.PresetToSwapIntuitionGain} not found.");
-        }
-
-        // Check if the bait was already swapped
-        if (extraCfg.SwapBaitIntuitionGain && !_lastStep.HasFlag(FishingSteps.BaitSwapped))
-        {
-            var result = Service.BaitManager.ChangeBait(extraCfg.BaitToSwapIntuitionGain);
-
-            _lastStep |= FishingSteps.BaitSwapped; // one try per catch
-
-            if (result == BaitManager.ChangeBaitReturn.Success)
-            {
-                Service.PrintChat(
-                    @$"[Extra] Intuition Active - Swapping bait to {extraCfg.BaitToSwapIntuitionGain.Name}");
-                Service.Save();
-            }
-        }
-    }
-
-    private void ExtraCfgLostIntuition(ExtraConfig extraCfg)
-    {
-        // Check if the preset was already swapped
-        if (extraCfg.SwapPresetIntuitionLost && !_lastStep.HasFlag(FishingSteps.PresetSwapped))
-        {
-            var preset =
-                Presets.CustomPresets.FirstOrDefault(preset =>
-                    preset.PresetName == extraCfg.PresetToSwapIntuitionLost);
-
-            _lastStep |= FishingSteps.PresetSwapped;
-
-            if (preset != null)
-            {
-                Service.Save();
-                // one try per catch
-                Presets.SelectedPreset = preset;
-                Service.PrintChat(@$"[Extra] Intuition Lost - Swapping preset to {extraCfg.PresetToSwapIntuitionLost}");
-                Service.Save();
-            }
-            else
-                Service.PrintChat(@$"[Extra] Intuition Lost - Preset {extraCfg.PresetToSwapIntuitionLost} not found.");
-        }
-
-        // Check if the bait was already swapped
-        if (extraCfg.SwapBaitIntuitionLost && !_lastStep.HasFlag(FishingSteps.BaitSwapped))
-        {
-            var result = Service.BaitManager.ChangeBait(extraCfg.BaitToSwapIntuitionLost);
-
-            // one try per catch
-            _lastStep |= FishingSteps.BaitSwapped;
-            if (result == BaitManager.ChangeBaitReturn.Success)
-            {
-                Service.PrintChat(
-                    @$"[Extra] Intuition Lost - Swapping bait to {extraCfg.BaitToSwapIntuitionLost.Name}");
-                Service.Save();
-            }
-        }
-
-        if (extraCfg.QuitOnIntuitionLost)
-        {
-            _lastStep = FishingSteps.Quitting;
-        }
-
-        if (extraCfg.StopOnIntuitionLost)
-        {
-            _lastStep = FishingSteps.None;
-        }
-    }
-
-    private void CheckAnglersArt(ExtraConfig extraCfg)
-    {
-        if (!PlayerRes.HasAnglersArtStacks(extraCfg.AnglerStackQtd))
+    /// <summary>
+    /// When <see cref="Configuration.AutoOceanFish"/> is on, select the first preset whose Extra config
+    /// is enabled for auto ocean fishing and matches the current zone (spot) and time of day.
+    /// </summary>
+    private void TryApplyOceanFishingPreset() {
+        if (!Service.Configuration.AutoOceanFish)
             return;
 
-        if (extraCfg.SwapPresetAnglersArt && !_lastStep.HasFlag(FishingSteps.PresetSwapped))
-        {
-            var preset =
-                Presets.CustomPresets.FirstOrDefault(preset =>
-                    preset.PresetName == extraCfg.PresetToSwapAnglersArt);
+        var ocean = Ws.OceanFishing;
+        if (ocean == OceanFishingState.Empty || ocean.TimeOfDay == TimeOfDay.None)
+            return;
 
-            _lastStep |= FishingSteps.PresetSwapped;
-
-            if (preset != null)
-            {
-                Service.Save();
-                Presets.SelectedPreset = preset;
-                Service.PrintChat(
-                    @$"[Extra] Angler's Stack - Swapping preset to {extraCfg.PresetToSwapAnglersArt}");
-                Service.Save();
-            }
-            else
-                Service.PrintChat(@$"[Extra] Anglers Stack - Preset {extraCfg.PresetToSwapAnglersArt} not found.");
+        CustomPresetConfig? match = null;
+        foreach (var preset in EnumerateHookPresets()) {
+            var extra = preset.ExtraCfg;
+            if (!extra.AutoOceanFishEnabled)
+                continue;
+            if (!extra.AutoOceanFishAllStops
+                && !OceanStopUtil.MatchesStop(extra.AutoOceanFishSpotId, extra.AutoOceanFishTimeId, ocean))
+                continue;
+            if (extra.AutoOceanFishConditionSet is { } set && set.HasAnyCondition() && set.Fails())
+                continue;
+            match = preset;
+            break;
         }
 
-        if (extraCfg.SwapBaitAnglersArt && !_lastStep.HasFlag(FishingSteps.BaitSwapped))
-        {
-            var result = Service.BaitManager.ChangeBait(extraCfg.BaitToSwapAnglersArt);
-            _lastStep |= FishingSteps.BaitSwapped;
-            if (result == BaitManager.ChangeBaitReturn.Success)
-            {
-                Service.PrintChat(
-                    @$"[Extra] Angler's Stack - Swapping bait to {extraCfg.BaitToSwapAnglersArt.Name}");
-                Service.Save();
-            }
+        if (match == null)
+            return;
+
+        if (match.IsGlobal) {
+            if (Presets.SelectedPreset == null)
+                return;
+            Presets.SelectedPreset = null;
+            Service.PrintDebug($"[AutoOceanFish] Preset set to global (zone {ocean.CurrentZone}, spot {ocean.CurrentSpotId}, time {ocean.CurrentTimeId})");
+            return;
+        }
+
+        if (Presets.SelectedPreset?.UniqueId == match.UniqueId)
+            return;
+
+        Presets.SelectedPreset = match;
+        Service.PrintDebug($"[AutoOceanFish] Preset set to {match.PresetName} (zone {ocean.CurrentZone}, spot {ocean.CurrentSpotId}, time {ocean.CurrentTimeId})");
+    }
+
+    private IEnumerable<CustomPresetConfig> EnumerateHookPresets() {
+        yield return Presets.DefaultPreset;
+        foreach (var preset in Presets.CustomPresets)
+            yield return preset;
+    }
+
+    private CustomPresetConfig? FindPresetByName(string presetName) {
+        if (string.IsNullOrEmpty(presetName) || presetName == @"-")
+            return null;
+
+        if (Presets.DefaultPreset.PresetName == presetName)
+            return Presets.DefaultPreset;
+
+        return Presets.CustomPresets.FirstOrDefault(p => p.PresetName == presetName);
+    }
+
+    private bool ExtraSwapStillNeeded(ExtraTrigger trig) {
+        if (trig.SwapPreset && !string.IsNullOrEmpty(trig.PresetToSwap) && trig.PresetToSwap != @"-"
+            && Presets.SelectedPreset?.PresetName != trig.PresetToSwap)
+            return true;
+
+        if (trig.SwapBait && trig.BaitToSwap.Id > 0 && Ws.Fishing.BaitInfo.BaitId != trig.BaitToSwap.Id)
+            return true;
+
+        return false;
+    }
+
+    private void QueueResolveCollectables() {
+        var extraCfg = GetExtraCfg();
+        foreach (var trig in extraCfg.Triggers) {
+            if (trig is not { Enabled: true, ResolveCollectablesWindow: true, ConditionSet: not null })
+                continue;
+
+            if (!trig.ConditionSet.Evaluate(Ws, ConditionRegistry.Registry))
+                continue;
+
+            Service.AutoCollectables.RequestResolve(trig.ResolveCollectablesForceNo);
+            return;
         }
     }
 
-    private int _lastSwimbaitCount = -1;
+    private void CheckExtraActions() {
+        var anyPresetSwapped = false;
 
-    private void CheckSwimbait(ExtraConfig extraCfg)
-    {
-        if (!extraCfg.Enabled)
-            return;
+        while (true) {
+            Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.PresetSwapped));
+            Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.BaitSwapped));
 
-        var currentSwimbaitCount = Service.BaitManager.GetSwimbaitCount();
+            var presetBefore = Presets.SelectedPreset?.UniqueId;
+            var extraCfg = GetExtraCfg();
+            if (extraCfg.Triggers.Count == 0)
+                break;
 
-        // Only check on state change
-        if (_lastSwimbaitCount == currentSwimbaitCount)
-            return;
+            RunExtraTriggers(extraCfg);
 
-        // Check if swimbait filled (0 -> 3 or any increase to 3)
-        if (currentSwimbaitCount >= 3 && _lastSwimbaitCount < 3 && extraCfg.SwimbaitFillsAction != SwimbaitAction.None)
-        {
-            if (extraCfg.SwimbaitFillsAction == SwimbaitAction.SwapPreset && !_lastStep.HasFlag(FishingSteps.PresetSwapped))
-            {
-                var preset = Presets.CustomPresets.FirstOrDefault(preset =>
-                    preset.PresetName == extraCfg.PresetToSwapSwimbaitFills);
+            if (Presets.SelectedPreset?.UniqueId == presetBefore)
+                break;
 
-                _lastStep |= FishingSteps.PresetSwapped;
+            anyPresetSwapped = true;
+        }
 
-                if (preset != null)
-                {
+        if (anyPresetSwapped)
+                    Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
+    }
+
+    private void RunExtraTriggers(ExtraConfig extraCfg) {
+        for (var i = 0; i < extraCfg.Triggers.Count; i++) {
+            if (extraCfg.Triggers[i] is not { Enabled: true, ConditionSet: not null } trig)
+                continue;
+
+            var current = trig.ConditionSet.Evaluate(Ws, ConditionRegistry.Registry);
+            var last = i < extraCfg.LastTriggerStates.Count && extraCfg.LastTriggerStates[i];
+            var fire = current && (!last || ExtraSwapStillNeeded(trig));
+
+            if (i < extraCfg.LastTriggerStates.Count)
+                extraCfg.LastTriggerStates[i] = current;
+            else
+                extraCfg.LastTriggerStates.Add(current);
+            if (!fire)
+                continue;
+
+            ExecuteExtraTriggerActions(extraCfg, trig);
+        }
+    }
+
+    private void ExecuteExtraTriggerActions(ExtraConfig extraCfg, ExtraTrigger trig) {
+        // Stop/quit fishing
+        if (trig.StopAction == ExtraStopAction.StopOnly) {
+            Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.None));
+        }
+        else if (trig.StopAction == ExtraStopAction.QuitFishing) {
+            Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.Quitting));
+        }
+
+        // Swap preset
+        if (trig.SwapPreset && !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
+            if (Presets.SelectedPreset?.PresetName == trig.PresetToSwap) {
+                Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
+            }
+            else {
+                var preset = FindPresetByName(trig.PresetToSwap);
+
+                Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
+
+                if (preset != null) {
                     Service.Save();
                     Presets.SelectedPreset = preset;
-                    Service.PrintChat(@$"[Extra] Swimbait Filled: Swapping preset to {extraCfg.PresetToSwapSwimbaitFills}");
+                    preset.ExtraCfg.LastTriggerStates.Clear();
+                    Service.PrintChat(@$"[Extra] Trigger: Swapping preset to {trig.PresetToSwap}");
                     Service.Save();
                 }
-                else
-                    Service.PrintChat(@$"[Extra] Swimbait Filled: Preset {extraCfg.PresetToSwapSwimbaitFills} not found.");
-            }
-            else if (extraCfg.SwimbaitFillsAction == SwimbaitAction.Stop)
-            {
-                _lastStep = FishingSteps.None;
-                Service.PrintChat(@$"[Extra] Swimbait Filled: Stopping fishing");
+                else if (!string.IsNullOrEmpty(trig.PresetToSwap) && trig.PresetToSwap != @"-") {
+                    Service.PrintChat(@$"[Extra] Trigger: Preset {trig.PresetToSwap} not found.");
+                }
             }
         }
 
-        // Check if swimbait ran out (any count -> 0)
-        if (currentSwimbaitCount == 0 && _lastSwimbaitCount > 0 && extraCfg.SwimbaitRunsOutAction != SwimbaitAction.None)
-        {
-            if (extraCfg.SwimbaitRunsOutAction == SwimbaitAction.SwapPreset && !_lastStep.HasFlag(FishingSteps.PresetSwapped))
-            {
-                var preset = Presets.CustomPresets.FirstOrDefault(preset =>
-                    preset.PresetName == extraCfg.PresetToSwapSwimbaitRunsOut);
+        // Swap bait
+        if (trig.SwapBait && !Ws.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
+            var result = ChangeBait(trig.BaitToSwap);
+            Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.BaitSwapped, Or: true));
 
-                _lastStep |= FishingSteps.PresetSwapped;
-
-                if (preset != null)
-                {
-                    Service.Save();
-                    Presets.SelectedPreset = preset;
-                    Service.PrintChat(@$"[Extra] Swimbait Ran Out: Swapping preset to {extraCfg.PresetToSwapSwimbaitRunsOut}");
-                    Service.Save();
-                }
-                else
-                    Service.PrintChat(@$"[Extra] Swimbait Ran Out: Preset {extraCfg.PresetToSwapSwimbaitRunsOut} not found.");
-            }
-            else if (extraCfg.SwimbaitRunsOutAction == SwimbaitAction.Stop)
-            {
-                _lastStep = FishingSteps.None;
-                Service.PrintChat(@$"[Extra] Swimbait Ran Out: Stopping fishing");
+            if (result is ChangeBaitReturn.Success or ChangeBaitReturn.AlreadyEquipped) {
+                Service.PrintChat(@$"[Extra] Trigger: Swapping bait to {trig.BaitToSwap.Name}");
+                Service.Save();
             }
         }
 
-        _lastSwimbaitCount = currentSwimbaitCount;
+        if (trig.RemoveStatus && trig.StatusToRemove != 0 && Ws.HasStatus(trig.StatusToRemove) && EzThrottler.Throttle("ExtraRemoveStatus", 500)) {
+            if (StatusManager.ExecuteStatusOff(trig.StatusToRemove)) {
+                Service.PrintChat(@$"[Extra] Trigger: Removed {MultiString.GetStatusName(trig.StatusToRemove)}");
+            }
+        }
+
+        if (trig.StartFishing && !ShouldSuppressAutoStartFishing() && Ws.Fishing.FishingState is FishingState.None or FishingState.PoleReady && Ws.IsCastAvailable() && EzThrottler.Throttle("ExtraStartFishingRule", 1000)) {
+            StartFishing();
+        }
+
+        if (trig.ReduceFish && Svc.Automation.CurrentTask is not AetherialReduction) {
+            Svc.Automation.Start(new AetherialReduction(this));
+            Service.PrintChat(UIStrings.AetherialReduction_Started);
+        }
+
+        Service.NotificationMaster.TryNotify(trig.NotifyOnSuccess, "Rule condition success");
     }
 }
