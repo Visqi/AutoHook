@@ -46,12 +46,25 @@ public class SubTabAutoCast {
     }
 
     private static int CompareActions(BaseActionCast a, BaseActionCast b) {
-        var aType = a.GetType();
-        var bType = b.GetType();
-        var aOrder = aType == typeof(AutoCastLine) ? 0 : aType == typeof(AutoMooch) ? 1 : aType == typeof(AutoCollect) ? 2 : aType == typeof(AutoSnagging) ? 3 : aType == typeof(AutoMultiHook) ? 4 : 5;
-        var bOrder = bType == typeof(AutoCastLine) ? 0 : bType == typeof(AutoMooch) ? 1 : bType == typeof(AutoCollect) ? 2 : bType == typeof(AutoSnagging) ? 3 : bType == typeof(AutoMultiHook) ? 4 : 5;
-        var typeCompare = aOrder.CompareTo(bOrder);
-        return typeCompare != 0 ? typeCompare : a.Priority.CompareTo(b.Priority);
+        int CompareByType(Type type) {
+            var aMatch = a.GetType() == type;
+            var bMatch = b.GetType() == type;
+            if (aMatch == bMatch)
+                return 0;
+            return aMatch.CompareTo(bMatch);
+        }
+
+        var c = CompareByType(typeof(AutoCastLine));
+        if (c != 0) return c;
+        c = CompareByType(typeof(AutoMooch));
+        if (c != 0) return c;
+        c = CompareByType(typeof(AutoCollect));
+        if (c != 0) return c;
+        c = CompareByType(typeof(AutoSnagging));
+        if (c != 0) return c;
+        c = CompareByType(typeof(AutoMultiHook));
+        if (c != 0) return c;
+        return a.Priority.CompareTo(b.Priority);
     }
 
     private static void DrawHeader(AutoCastsConfig acCfg) {
