@@ -114,8 +114,12 @@ public class PluginUi : Window, IDisposable {
                         ImGuiEx.LineCentered("###AHLogo", () => {
                             ImGui.Image(image.Handle, new Vector2(125.Scaled(), 125.Scaled()));
 
-                            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
-                                Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;
+                            if (ImGui.IsItemClicked(ImGuiMouseButton.Left)) {
+                                if (ImGui.GetIO().KeyShift && Service.Configuration.PluginEnabled)
+                                    Service.FishManager.RequestStopAfterNextFish();
+                                else
+                                    Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;
+                            }
 
                             if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                                 Service.OpenConsole = !Service.OpenConsole;
