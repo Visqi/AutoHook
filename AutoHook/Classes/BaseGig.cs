@@ -18,6 +18,7 @@ public class BaseGig(int itemId) : BaseOption {
         set {
             Service.PrintDebug($"[AutoGig] BaseGig.Fish - Setting to: {(value != null ? value.Name : "null")}");
             field = value;
+            _itemId = value?.ItemId ?? 0;
         }
     } = GameRes.SpearfishFishes.FirstOrDefault(f => f.ItemId == itemId);
 

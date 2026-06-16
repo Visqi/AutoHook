@@ -43,6 +43,19 @@ public static class GameRes {
             if (File.Exists(fishList)) {
                 ImportedFishes = JsonSerializer.Deserialize<List<ImportedFish>>(File.ReadAllText(fishList))!;
             }
+
+            // fish_list is wrong when it comes to most timeworn maps not being spearfish so build a list of actual spearfish and match fish_list to it
+            SpearfishFishes =
+            [
+                .. SpearfishingItem
+                    .Where(row => row.Item.RowId != 0)
+                    .Join(ImportedFishes, row => (int)row.Item.RowId, f => f.ItemId, (_, match) => new ImportedFish {
+                        ItemId = match.ItemId,
+                        IsSpearFish = true,
+                        Size = match.Size,
+                        Speed = match.Speed,
+                    })
+            ];
         }
         catch (Exception e) {
             ImGui.SetClipboardText(e.Message);

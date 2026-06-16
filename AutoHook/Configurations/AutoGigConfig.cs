@@ -20,7 +20,7 @@ public class AutoGigConfig : BasePresetConfig {
 
         var result = Gigs.Where(f => {
             var hasFish = f.Fish != null;
-            var hasNode = f.Fish?.Nodes.Contains(node) ?? false;
+            var hasNode = f.Fish?.Nodes is not { Count: > 0 } || f.Fish.Nodes.Contains(node);
             Service.PrintDebug($"[AutoGig] GetGigCurrentNode - Fish: {f.Fish?.Name ?? "null"}, Enabled: {f.Enabled}, HasFish: {hasFish}, HasNode: {hasNode}");
             return hasFish && hasNode;
         }).ToList();
