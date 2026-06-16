@@ -1277,6 +1277,9 @@
   <data name="SparefulHand_Settings" xml:space="preserve">
     <value>낚시꾼의 묘안 설정</value>
   </data>
+  <data name="SparefulHand_HelpText" xml:space="preserve">
+    <value>설정한 GP 값에 따라 낚시꾼의 묘안을 자동으로 사용합니다</value>
+  </data>
   <data name="OnlyUseIfSwimbaitCountLessThan" xml:space="preserve">
     <value>보관된 생미끼가 해당 수치 미만일 경우 사용:</value>
   </data>
@@ -1499,7 +1502,19 @@
   <data name="Dtr_Help" xml:space="preserve">
     <value>달라무드 설정에서 Dtr 바의 표시 순서를 변경할 수 있습니다.</value>
   </data>
+  <data name="UseWithOceanFishing" xml:space="preserve">
+    <value>먼바다 낚시 설정 사용</value>
+  </data>
+  <data name="UseForAllZoneTimes" xml:space="preserve">
+    <value>모든 해역/시간에 적용</value>
+  </data>
+  <data name="SelectZoneAndTime" xml:space="preserve">
+    <value>먼바다 낚시 해역/시간 선택</value>
+  </data>
   <data name="AutoOceanFish" xml:space="preserve">
     <value>자동 먼바다 낚시</value>
+  </data>
+  <data name="AutoOceanFishHelpText" xml:space="preserve">
+    <value>먼바다 낚시에서 이뤄지는 모든 작업을 실행합니다: 자리이동, 낚싯대 던지기, 프리셋 실행.</value>
   </data>
 </root>
