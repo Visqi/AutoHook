@@ -1256,6 +1256,9 @@
   <data name="SpecialFishExemple" xml:space="preserve">
     <value>특수 물고기는 루어를 사용할 때 고유한 설명을 가진 물고기를 의미합니다.</value>
   </data>
+  <data name="NotSpecial" xml:space="preserve">
+    <value>소형/대형 물고기만</value>
+  </data>
   <data name="MaxAttempts" xml:space="preserve">
     <value>최대 시도 횟수</value>
   </data>
@@ -1495,5 +1498,8 @@
   </data>
   <data name="Dtr_Help" xml:space="preserve">
     <value>달라무드 설정에서 Dtr 바의 표시 순서를 변경할 수 있습니다.</value>
+  </data>
+  <data name="AutoOceanFish" xml:space="preserve">
+    <value>자동 먼바다 낚시</value>
   </data>
 </root>
