@@ -1522,6 +1522,24 @@
   <data name="Dtr_Help" xml:space="preserve">
     <value>달라무드 설정에서 Dtr 바의 표시 순서를 변경할 수 있습니다.</value>
   </data>
+  <data name="SwapStopRules" xml:space="preserve">
+    <value>교체/중단 규칙:</value>
+  </data>
+  <data name="AetherialReduction_ReduceFish" xml:space="preserve">
+    <value>소지품 비우기(정제)</value>
+  </data>
+  <data name="AetherialReduction_ReduceFishHelp" xml:space="preserve">
+    <value>낚시를 하기 전에 소지품에 정제가 가능한 물고기를 정제합니다. 정제가 끝날 때까지 낚시를 일시중단합니다.</value>
+  </data>
+  <data name="AetherialReduction_NotUnlocked" xml:space="preserve">
+    <value>해당 캐릭터는 정제를 배우지 않았습니다</value>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>이전</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>다음</value>
+  </data>
   <data name="UseWithOceanFishing" xml:space="preserve">
     <value>먼바다 낚시 설정 사용</value>
   </data>
@@ -1544,7 +1562,7 @@
     <value>소장품 획득 자동 수락</value>
   </data>
   <data name="AutoHandleCollectablesHelpText" xml:space="preserve">
-    <value>소장품을 획득하면 확인 창을 자동으로 수락합니다. 추가 설정에서 프리셋 별로 설정을 적용할 수 있습니다. 프리셋 설정이 적용된 경우, 해당 조건을 충족하면 실행됩니다.</value>
+    <value>소장품을 획득하면 확인 창을 자동으로 수락합니다. 추가 설정에서 프리셋 별로 설정을 적용할 수 있습니다. 추가 설정이 적용된 경우, 해당 프리셋의 설정 규칙을 따릅니다.</value>
   </data>
   <data name="AutoHandleCollectables_Preset_HelpText" xml:space="preserve">
     <value>설정 탭에서 적용한 소장품 획득 자동 수락 설정을 무시하고, 해당 프리셋의 규칙 조건을 따라 수락을 결정합니다.</value>
