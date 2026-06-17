@@ -1283,6 +1283,9 @@
   <data name="OnlyUseIfSwimbaitCountLessThan" xml:space="preserve">
     <value>보관된 생미끼가 해당 수치 미만일 경우 사용:</value>
   </data>
+  <data name="UseSwimbait" xml:space="preserve">
+    <value>보관된 생미끼 사용</value>
+  </data>
   <data name="DelayBeforeCancel" xml:space="preserve">
     <value>낚시 시도 취소 전 지연 시간(ms)</value>
   </data>
@@ -1465,6 +1468,9 @@
   </data>
   <data name="CreateNewFolder" xml:space="preserve">
     <value>새 폴더</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>생성</value>
   </data>
   <data name="FolderNameHint" xml:space="preserve">
     <value>새 폴더의 이름을 입력해주세요:</value>
