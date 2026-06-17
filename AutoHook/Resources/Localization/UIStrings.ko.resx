@@ -1463,6 +1463,9 @@
   <data name="ExportFolderClipboard" xml:space="preserve">
     <value>폴더를 클립보드에 복사</value>
   </data>
+  <data name="EnterNewFolderName" xml:space="preserve">
+    <value>폴더의 새 이름을 입력하세요:</value>
+  </data>
   <data name="RenameFolder" xml:space="preserve">
     <value>폴더 이름 수정</value>
   </data>
@@ -1474,6 +1477,9 @@
   </data>
   <data name="FolderNameHint" xml:space="preserve">
     <value>새 폴더의 이름을 입력해주세요:</value>
+  </data>
+  <data name="NoPresetsSelected" xml:space="preserve">
+    <value>선택된 프리셋이 없어 가져올 수 없습니다</value>
   </data>
   <data name="RenamePreset" xml:space="preserve">
     <value>프리셋 이름 변경</value>
@@ -1492,6 +1498,14 @@
   </data>
   <data name="CreateFolder" xml:space="preserve">
     <value>새 폴더</value>
+  </data>
+  <data name="Moving_" xml:space="preserve">
+    <value>이동:</value>
+    <comment>Moving: PresetName</comment>
+  </data>
+  <data name="MovingFolder_" xml:space="preserve">
+    <value>폴더 이동:</value>
+    <comment>Moving folder: FolderName</comment>
   </data>
   <data name="Dtr_Show" xml:space="preserve">
     <value>Dtr 바에 표시</value>
@@ -1517,10 +1531,22 @@
   <data name="SelectZoneAndTime" xml:space="preserve">
     <value>먼바다 낚시 해역/시간 선택</value>
   </data>
+  <data name="When" xml:space="preserve">
+    <value>조건부</value>
+  </data>
   <data name="AutoOceanFish" xml:space="preserve">
     <value>자동 먼바다 낚시</value>
   </data>
   <data name="AutoOceanFishHelpText" xml:space="preserve">
     <value>먼바다 낚시에서 이뤄지는 모든 작업을 실행합니다: 자리이동, 낚싯대 던지기, 프리셋 실행.</value>
+  </data>
+  <data name="AutoHandleCollectables" xml:space="preserve">
+    <value>소장품 획득 자동 수락</value>
+  </data>
+  <data name="AutoHandleCollectablesHelpText" xml:space="preserve">
+    <value>소장품을 획득하면 확인 창을 자동으로 수락합니다. 추가 설정에서 프리셋 별로 설정을 적용할 수 있습니다. 프리셋 설정이 적용된 경우, 해당 조건을 충족하면 실행됩니다.</value>
+  </data>
+  <data name="AutoHandleCollectables_Preset_HelpText" xml:space="preserve">
+    <value>설정 탭에서 적용한 소장품 획득 자동 수락 설정을 무시하고, 해당 프리셋의 규칙 조건을 따라 수락을 결정합니다.</value>
   </data>
 </root>
