@@ -22,11 +22,18 @@ public class TabCommunity : BaseTab {
     // Keep per-category folder names while popups are open
     private readonly Dictionary<string, string> _importAllFolderNames = [];
 
+    private string _searchFilter = string.Empty;
+    private bool SearchActive => !string.IsNullOrWhiteSpace(_searchFilter);
+    private string SearchFilter => _searchFilter.Trim();
+    private bool MatchesSearch(string text) => !SearchActive || text.Contains(SearchFilter, StringComparison.InvariantCultureIgnoreCase);
+
     public override void DrawHeader() { }
 
     public override void Draw() {
-        ImGui.TextColored(ImGuiColors.DalamudYellow,
-            UIStrings.CommunityDescription);
+        ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.CommunityDescription);
+        ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
+        ImGui.InputTextWithHint("##CommunityPresetSearch", UIStrings.Search_Hint, ref _searchFilter, 128);
+
         using (ImRaii.Group()) {
             using (var disabled = ImRaii.Disabled(EzThrottler.GetRemainingTime("WikiUpdate") > 0)) {
                 if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.CloudDownloadAlt, UIStrings.GetWikiPresets))
@@ -41,10 +48,16 @@ public class TabCommunity : BaseTab {
 
             if (ImGui.CollapsingHeader(UIStrings.Fishing, ImGuiTreeNodeFlags.DefaultOpen)) {
                 foreach (var (key, value) in WikiPresets.Presets.Where(preset => preset.Value.Count != 0)) {
+                    var list = value.Where(x => x.folder == null).SelectMany(x => x.Presets).Cast<BasePresetConfig>().ToList();
+                    var foldered = value.Where(x => x.folder != null)
+                        .Select(x => new KeyValuePair<PresetFolder, List<BasePresetConfig>>(x.folder!, [.. x.Presets.Cast<BasePresetConfig>()]))
+                        .ToDictionary(kv => kv.Key!, kv => kv.Value);
+                    var (filteredList, filteredFoldered) = FilterPresets(key, list, foldered);
+                    if (SearchActive && filteredList.Count == 0 && filteredFoldered is not { Count: > 0 })
+                        continue;
+
                     ImGui.Indent();
-                    DrawHeaderList(key, [.. value.Where(x => x.folder == null).SelectMany(x => x.Presets).Cast<BasePresetConfig>()],
-                        value.Where(x => x.folder != null).Select(x => new KeyValuePair<PresetFolder, List<BasePresetConfig>>(x.folder!, [.. x.Presets.Cast<BasePresetConfig>()])).ToDictionary(kv => kv.Key!, kv => kv.Value)
-                    );
+                    DrawHeaderList(key, filteredList, filteredFoldered);
                     ImGui.Unindent();
                 }
             }
@@ -53,12 +66,49 @@ public class TabCommunity : BaseTab {
 
             if (ImGui.CollapsingHeader(UIStrings.Spearfishing, ImGuiTreeNodeFlags.DefaultOpen)) {
                 foreach (var (key, value) in WikiPresets.PresetsSf.Where(preset => preset.Value.Count != 0)) {
+                    var list = value.Cast<BasePresetConfig>().ToList();
+                    if (SearchActive) {
+                        if (!MatchesSearch(key))
+                            list = [.. list.Where(p => MatchesSearch(p.PresetName))];
+                        if (list.Count == 0)
+                            continue;
+                    }
+
                     ImGui.Indent();
-                    DrawHeaderList(key, [.. value.Cast<BasePresetConfig>()]);
+                    DrawHeaderList(key, list);
                     ImGui.Unindent();
                 }
             }
         }
+    }
+
+    private (List<BasePresetConfig> list, Dictionary<PresetFolder, List<BasePresetConfig>>? foldered) FilterPresets(string category, List<BasePresetConfig> list, Dictionary<PresetFolder, List<BasePresetConfig>>? foldered) {
+        if (!SearchActive)
+            return (list, foldered);
+
+        if (MatchesSearch(category))
+            return (list, foldered);
+
+        var filteredList = list.Where(p => MatchesSearch(p.PresetName)).ToList();
+        Dictionary<PresetFolder, List<BasePresetConfig>>? filteredFoldered = null;
+
+        if (foldered != null) {
+            foreach (var bundle in foldered) {
+                if (MatchesSearch(bundle.Key.FolderName)) {
+                    filteredFoldered ??= [];
+                    filteredFoldered[bundle.Key] = bundle.Value;
+                }
+                else {
+                    var filtered = bundle.Value.Where(p => MatchesSearch(p.PresetName)).ToList();
+                    if (filtered.Count > 0) {
+                        filteredFoldered ??= [];
+                        filteredFoldered[bundle.Key] = filtered;
+                    }
+                }
+            }
+        }
+
+        return (filteredList, filteredFoldered);
     }
 
     private static int GetWikiCategoryTotal(List<BasePresetConfig> list, Dictionary<PresetFolder, List<BasePresetConfig>>? folderedPresets) {
@@ -187,7 +237,8 @@ public class TabCommunity : BaseTab {
 
     private void DrawHeaderList(string tab, List<BasePresetConfig> list, Dictionary<PresetFolder, List<BasePresetConfig>>? folderedPresets = null) {
         var total = GetWikiCategoryTotal(list, folderedPresets);
-        if (ImGui.CollapsingHeader($"{tab}, Total: {total}")) {
+        var headerFlags = SearchActive ? ImGuiTreeNodeFlags.DefaultOpen : ImGuiTreeNodeFlags.None;
+        if (ImGui.CollapsingHeader($"{tab}, Total: {total}", headerFlags)) {
             ImGui.Indent();
 
             // Import-all with confirmation (and folder creation for fishing presets)
@@ -232,7 +283,7 @@ public class TabCommunity : BaseTab {
 
             if (folderedPresets != null) {
                 foreach (var bundle in folderedPresets) {
-                    if (ImGui.CollapsingHeader($"{bundle.Key.FolderName}, Total: {bundle.Value.Count}")) {
+                    if (ImGui.CollapsingHeader($"{bundle.Key.FolderName}, Total: {bundle.Value.Count}", headerFlags)) {
                         using (ImRaii.PushIndent()) {
                             // Import-all with confirmation (and folder creation for fishing presets)
                             if (ImGui.Button($"Import all###{tab}-{bundle.Key.FolderName}")) {
