@@ -496,6 +496,9 @@
   <data name="Opens_Config_Window" xml:space="preserve">
     <value>打开配置窗口</value>
   </data>
+  <data name="TabAutoCasts_When_Stack_Equals" xml:space="preserve">
+    <value></value>
+  </data>
   <data name="Use_Prize_Catch" xml:space="preserve">
     <value>使用大鱼猎手</value>
   </data>
