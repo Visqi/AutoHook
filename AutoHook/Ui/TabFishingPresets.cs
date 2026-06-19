@@ -119,7 +119,7 @@ public class TabFishingPresets : BaseTab {
 
         var anonPresets = _basePreset.CustomPresets.Where(IsAnonymousPreset).ToList();
         if (searchActive) {
-            anonPresets = anonPresets.Where(p => MatchesSearch(p.PresetName) || MatchesSearch(GetAnonymousPresetDisplayName(p.PresetName))).ToList();
+            anonPresets = [.. anonPresets.Where(p => MatchesSearch(p.PresetName) || MatchesSearch(GetAnonymousPresetDisplayName(p.PresetName)))];
         }
 
         if (anonPresets.Count > 0)
@@ -176,7 +176,7 @@ public class TabFishingPresets : BaseTab {
         if (!ImGui.CollapsingHeader(string.Format(UIStrings.AnonymousPresets_Header, anonPresets.Count), headerFlags))
             return;
 
-        using var indent = ImRaii.Indent(10.Scaled());
+        using var indent = ImRaii.PushIndent(10.Scaled());
         foreach (var preset in anonPresets)
             DrawAnonymousItem(preset);
     }
