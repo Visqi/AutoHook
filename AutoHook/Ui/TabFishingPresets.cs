@@ -65,6 +65,14 @@ public class TabFishingPresets : BaseTab {
 
     private static BasePresetConfig? displayed = _basePreset.SelectedPreset ?? _basePreset.DefaultPreset;
 
+    private const string AnonymousPresetPrefix = "anon_";
+
+    private static bool IsAnonymousPreset(CustomPresetConfig preset)
+        => preset.PresetName.StartsWith(AnonymousPresetPrefix, StringComparison.Ordinal);
+
+    private static string GetAnonymousPresetDisplayName(string presetName)
+        => presetName.StartsWith(AnonymousPresetPrefix, StringComparison.Ordinal) ? presetName[AnonymousPresetPrefix.Length..] : presetName;
+
     private void DrawList() {
         using var table = ImRaii.Table($"###PresetTable", 2, ImGuiTableFlags.Resizable);
         if (!table)
@@ -109,6 +117,14 @@ public class TabFishingPresets : BaseTab {
         if ((!searchActive || MatchesSearch(UIStrings.GlobalPreset)) && ImGui.Selectable(UIStrings.GlobalPreset, displayed?.PresetName == _basePreset.DefaultPreset.PresetName, ImGuiSelectableFlags.AllowDoubleClick))
             displayed = _basePreset.DefaultPreset;
 
+        var anonPresets = _basePreset.CustomPresets.Where(IsAnonymousPreset).ToList();
+        if (searchActive) {
+            anonPresets = anonPresets.Where(p => MatchesSearch(p.PresetName) || MatchesSearch(GetAnonymousPresetDisplayName(p.PresetName))).ToList();
+        }
+
+        if (anonPresets.Count > 0)
+            DrawAnonymousPresetsSection(anonPresets, searchActive);
+
         ImGui.Separator();
 
         // Draw folders
@@ -122,6 +138,8 @@ public class TabFishingPresets : BaseTab {
                 var folderNameMatches = MatchesSearch(folder.FolderName);
                 var anyPresetMatches = GetAllPresetIdsInFolderTree(folder).Any(id => {
                     if (presetById == null || !presetById.TryGetValue(id, out var p))
+                        return false;
+                    if (IsAnonymousPreset(p))
                         return false;
                     return MatchesSearch(p.PresetName);
                 });
@@ -140,11 +158,51 @@ public class TabFishingPresets : BaseTab {
             if (presetsInFolders.Contains(preset.UniqueId))
                 continue;
 
+            if (IsAnonymousPreset(preset))
+                continue;
+
             if (searchActive && !MatchesSearch(preset.PresetName))
                 continue;
 
             DrawItem(preset, i);
         }
+    }
+
+    private void DrawAnonymousPresetsSection(List<CustomPresetConfig> anonPresets, bool searchActive) {
+        var headerFlags = ImGuiTreeNodeFlags.None;
+        if (searchActive || anonPresets.Any(p => _basePreset.SelectedGuid == p.UniqueId.ToString()))
+            headerFlags = ImGuiTreeNodeFlags.DefaultOpen;
+
+        if (!ImGui.CollapsingHeader(string.Format(UIStrings.AnonymousPresets_Header, anonPresets.Count), headerFlags))
+            return;
+
+        using var indent = ImRaii.Indent(10.Scaled());
+        foreach (var preset in anonPresets)
+            DrawAnonymousItem(preset);
+    }
+
+    private void DrawAnonymousItem(CustomPresetConfig preset) {
+        using var id = ImRaii.PushId(preset.UniqueId.ToString());
+        var selected = _basePreset.SelectedGuid == preset.UniqueId.ToString();
+        var color = selected ? ImGuiColors.DalamudOrange : ImGuiColors.DalamudWhite;
+        var displayName = GetAnonymousPresetDisplayName(preset.PresetName);
+
+        using (var a = ImRaii.PushColor(ImGuiCol.Text, color)) {
+            if (ImGui.Selectable((selected ? "> " : "") + displayName,
+                    displayed?.UniqueId == preset.UniqueId,
+                    ImGuiSelectableFlags.AllowDoubleClick)) {
+                displayed = preset;
+
+                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
+                    _basePreset.SelectedPreset = selected ? null : preset;
+                    Service.Save();
+                }
+            }
+        }
+
+        ImGui.TooltipOnHover(UIStrings.RightClickOptions);
+
+        DrawPresetContext(preset);
     }
 
     private HashSet<Guid> BuildPresetsInFoldersSet() {
@@ -373,6 +431,9 @@ public class TabFishingPresets : BaseTab {
             foreach (var presetId in folder.PresetIds) {
                 var preset = _basePreset.CustomPresets.FirstOrDefault(p => p.UniqueId == presetId);
                 if (preset != null) {
+                    if (IsAnonymousPreset(preset))
+                        continue;
+
                     if (!string.IsNullOrWhiteSpace(_searchFilter) &&
                         !preset.PresetName.Contains(_searchFilter.Trim(), StringComparison.InvariantCultureIgnoreCase))
                         continue;

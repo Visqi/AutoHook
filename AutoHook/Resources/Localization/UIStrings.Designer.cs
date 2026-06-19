@@ -321,7 +321,16 @@ namespace AutoHook.Resources.Localization {
                 return ResourceManager.GetString("AnimationCanceling", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Temporary presets ({0}).
+        /// </summary>
+        internal static string AnonymousPresets_Header {
+            get {
+                return ResourceManager.GetString("AnonymousPresets_Header", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Anti-Afk while fishing.
         /// </summary>

@@ -1421,6 +1421,9 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="AnimationCanceling" xml:space="preserve">
     <value>Animation Canceling</value>
   </data>
+  <data name="AnonymousPresets_Header" xml:space="preserve">
+    <value>Temporary presets ({0})</value>
+  </data>
   <data name="EnableRecastCancel" xml:space="preserve">
     <value>Enable line recasting animation cancel</value>
   </data>
