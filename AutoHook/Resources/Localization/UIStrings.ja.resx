@@ -966,9 +966,6 @@
   <data name="Reset_the_counter" xml:space="preserve">
     <value>カウンターをリセット</value>
   </data>
-  <data name="Reset_counter_after_swapping_presets" xml:space="preserve">
-    <value>プリセットを変更した後にカウンターをリセット</value>
-  </data>
   <data name="Only_use_when_Cordial_is_available" xml:space="preserve">
     <value>コーディアルが利用可能な場合にのみ使用</value>
   </data>
