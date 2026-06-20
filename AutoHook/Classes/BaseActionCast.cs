@@ -144,41 +144,31 @@ public abstract class BaseActionCast {
         if (GetPriority() == 0) //failsafe I guess
             Priority = availableActs.MaxBy(x => x.Priority)!.Priority + 1;
 
-        ImGui.NextColumn();
-
         ImGui.SameLine();
 
-        if (!availableActs.Any(x => x.Priority < Priority && !x.IsExcludedPriority))
-            ImGui.BeginDisabled();
-
-        if (ImGui.ArrowButton(@"###UpArrow", ImGuiDir.Up)) {
-            if (availableActs.Any(x => x.Priority < Priority && !x.IsExcludedPriority)) {
+        var canMoveUp = availableActs.Any(x => x.Priority < Priority && !x.IsExcludedPriority);
+        using (ImRaii.Disabled(!canMoveUp)) {
+            if (ImGui.ArrowButton(@"###UpArrow", ImGuiDir.Up)) {
                 var nextAct = availableActs.Where(x => x.Priority < Priority && !x.IsExcludedPriority)
                     .OrderByDescending(x => x.Priority).First();
                 nextAct.Priority = Priority;
                 Priority--;
+                Service.Save();
             }
         }
 
-        if (!availableActs.Any(x => x.Priority < Priority && !x.IsExcludedPriority))
-            ImGui.EndDisabled();
-
         ImGui.SameLine();
 
-        if (!availableActs.Any(x => x.Priority > Priority && !x.IsExcludedPriority))
-            ImGui.BeginDisabled();
-
-        if (ImGui.ArrowButton(@"###DownArrow", ImGuiDir.Down)) {
-            if (availableActs.Any(x => x.Priority > Priority && !x.IsExcludedPriority)) {
+        var canMoveDown = availableActs.Any(x => x.Priority > Priority && !x.IsExcludedPriority);
+        using (ImRaii.Disabled(!canMoveDown)) {
+            if (ImGui.ArrowButton(@"###DownArrow", ImGuiDir.Down)) {
                 var lastAct = availableActs.Where(x => x.Priority > Priority && !x.IsExcludedPriority)
                     .OrderBy(x => x.Priority).First();
                 lastAct.Priority = Priority;
                 Priority++;
+                Service.Save();
             }
         }
-
-        if (!availableActs.Any(x => x.Priority > Priority && !x.IsExcludedPriority))
-            ImGui.EndDisabled();
     }
 
     public virtual void DrawGpThreshold() {

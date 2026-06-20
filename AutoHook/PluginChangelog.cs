@@ -5,6 +5,13 @@ namespace AutoHook;
 public static class PluginChangelog {
     public static readonly List<Version> Versions =
     [
+        new Version("6.0.0.45")
+        {
+            Minor =
+            {
+                "Fixed Auto Casts tab reorder arrows not visually updating",
+            }
+        },
         new Version("6.0.0.44")
         {
             Minor =

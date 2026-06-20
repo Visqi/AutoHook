@@ -147,6 +147,8 @@ public class SubTabAutoCast {
 
         ImGui.TextColored(ImGuiColors.DalamudOrange, UIStrings.Auto_Cast_Sort_Notice);
 
+        _actionsAvailable.Sort(CompareActions);
+
         using var item = ImRaii.Child("###AutoCastItems", new Vector2(0, 0), true);
         foreach (var action in _actionsAvailable) {
             try {
