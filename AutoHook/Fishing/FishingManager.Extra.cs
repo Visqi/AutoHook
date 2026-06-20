@@ -72,6 +72,9 @@ public partial class FishingManager {
         return Presets.CustomPresets.FirstOrDefault(p => p.PresetName == presetName);
     }
 
+    private CustomPresetConfig GetExtraOwnerPreset()
+        => Presets.SelectedPreset?.ExtraCfg.Enabled == true ? Presets.SelectedPreset : Presets.DefaultPreset;
+
     private bool ExtraSwapStillNeeded(ExtraTrigger trig) {
         if (trig.SwapPreset && !string.IsNullOrEmpty(trig.PresetToSwap) && trig.PresetToSwap != @"-"
             && Presets.SelectedPreset?.PresetName != trig.PresetToSwap)
@@ -150,10 +153,16 @@ public partial class FishingManager {
             Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.Quitting));
         }
 
+        if (trig.ResetFishCaughtCounter) {
+            GetExtraOwnerPreset().ResetCounter();
+            Service.PrintChat(@$"[Extra] Trigger: Reset fish caught counter");
+        }
+
         // Swap preset
         if (trig.SwapPreset && !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
-            if (Presets.SelectedPreset?.PresetName == trig.PresetToSwap) {
+            if (Presets.CurrentPreset.PresetName == trig.PresetToSwap) {
                 Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
+                FindPresetByName(trig.PresetToSwap)?.TryResetCounter();
             }
             else {
                 var preset = FindPresetByName(trig.PresetToSwap);

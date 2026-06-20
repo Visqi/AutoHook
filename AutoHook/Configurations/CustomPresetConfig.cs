@@ -95,6 +95,11 @@ public class CustomPresetConfig : BasePresetConfig {
         }
     }
 
+    public void TryResetCounter() {
+        if (ExtraCfg is { Enabled: true, ResetCounterPresetSwap: true })
+            ResetCounter();
+    }
+
     public override bool Equals(object? obj) {
         return obj is CustomPresetConfig settings &&
                UniqueId == settings.UniqueId;

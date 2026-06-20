@@ -160,7 +160,7 @@ public class SubTabExtra {
                 ImGui.Separator();
                 ImGui.Indent(20.Scaled());
                 var startFishing = trig.StartFishing;
-                DrawUtil.DrawCheckboxTree("Start fishing", ref startFishing, null);
+                DrawUtil.DrawCheckboxTree("Start Fishing", ref startFishing, null);
                 trig.StartFishing = startFishing;
 
                 var reduceFish = trig.ReduceFish;
@@ -206,9 +206,13 @@ public class SubTabExtra {
                 trig.SwapBait = swapBait;
                 trig.BaitToSwap = bait;
 
+                var resetFishCaughtCounter = trig.ResetFishCaughtCounter;
+                DrawUtil.DrawCheckboxTree(UIStrings.Reset_fish_caught_counter, ref resetFishCaughtCounter, null);
+                trig.ResetFishCaughtCounter = resetFishCaughtCounter;
+
                 var resolve = trig.ResolveCollectablesWindow;
                 var forceNo = trig.ResolveCollectablesForceNo;
-                DrawUtil.DrawCheckboxTree("Resolve collectables window", ref resolve, () => { DrawUtil.Checkbox("Force NO", ref forceNo); ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.AutoHandleCollectables_Preset_HelpText); });
+                DrawUtil.DrawCheckboxTree("Resolve Collectables Window", ref resolve, () => { DrawUtil.Checkbox("Force No", ref forceNo); ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.AutoHandleCollectables_Preset_HelpText); });
                 trig.ResolveCollectablesWindow = resolve;
                 trig.ResolveCollectablesForceNo = forceNo;
 
@@ -243,6 +247,9 @@ public class SubTabExtra {
     }
 
     private static string SummarizeTrigger(ExtraTrigger trig) {
+        if (trig.ResetFishCaughtCounter)
+            return UIStrings.Reset_fish_caught_counter;
+
         if (trig.ReduceFish)
             return UIStrings.AetherialReduction_ReduceFish;
 
@@ -272,7 +279,7 @@ public class SubTabExtra {
             else if (invObj is long l) inv = l != 0;
         }
 
-        var prefix = inv ? "OnLose " : "OnGain ";
+        var prefix = inv ? "On Lose " : "On Gain ";
 
         return prefix + core;
     }
@@ -282,7 +289,7 @@ public class SubTabExtra {
             case "IntuitionActive":
                 return "Fisher's Intuition";
             case "SpectralActive":
-                return "Spectral current";
+                return "Spectral Current";
             case "StatusStacks": {
                     if (cond.Params.TryGetValue("ids", out var idsObj) && idsObj is List<object> list && list.Count == 1) {
                         var id = Convert.ToUInt32(list[0]);
@@ -290,10 +297,10 @@ public class SubTabExtra {
                             var stacks = 1;
                             if (cond.Params.TryGetValue("minStacks", out var msObj))
                                 stacks = Convert.ToInt32(msObj);
-                            return $"Angler's Art ≥ {stacks} stacks";
+                            return $"Angler's Art ≥ {stacks} Stacks";
                         }
                     }
-                    return "Status stacks";
+                    return "Status Stacks";
                 }
             case "SwimbaitCount": {
                     var v = 0;
@@ -314,7 +321,7 @@ public class SubTabExtra {
                     var fishId = 0;
                     if (cond.Params.TryGetValue("id", out var idObj))
                         fishId = Convert.ToInt32(idObj);
-                    var fishLabel = fishId == 0 ? "slot fish" : MultiString.GetItemName(fishId);
+                    var fishLabel = fishId == 0 ? "Slot Fish" : MultiString.GetItemName(fishId);
                     return $"Swimbaits ({fishLabel}) {cmp} {v}";
                 }
             default:
@@ -336,7 +343,7 @@ public class SubTabExtra {
         using var _ = ImRaii.PushId(@$"{nameof(DrawRemoveStatus)}");
 
         var selectedId = statusId;
-        DrawUtil.DrawCheckboxTree("Remove status", ref enable,
+        DrawUtil.DrawCheckboxTree("Remove Status", ref enable,
             () => {
                 if (GameRes.FishingStatuses.Count == 0)
                     return;

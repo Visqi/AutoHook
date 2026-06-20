@@ -64,12 +64,15 @@ public partial class FishingManager {
         var (swapPresetEnabled, _) = lastCatchCfg.SwapPresetLimit.Value;
 
         if (swapPresetEnabled && lastCatchCfg.SwapPresetLimit.BackingSet.HasGroups()
-            && Presets.SelectedPreset?.PresetName == lastCatchCfg.PresetToSwap)
+            && Presets.CurrentPreset.PresetName == lastCatchCfg.PresetToSwap)
             FishingHelper.RemovePresetSwap(guid);
 
         if (swapPresetEnabled && lastCatchCfg.SwapPresetLimit.BackingSet.Passes() && !FishingHelper.SwappedPreset(guid) && !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
-            if (lastCatchCfg.PresetToSwap != Presets.SelectedPreset?.PresetName) {
-                var preset = Presets.CustomPresets.FirstOrDefault(preset => preset.PresetName == lastCatchCfg.PresetToSwap);
+            if (lastCatchCfg.PresetToSwap == Presets.CurrentPreset.PresetName) {
+                FindPresetByName(lastCatchCfg.PresetToSwap)?.TryResetCounter();
+            }
+            else if (lastCatchCfg.PresetToSwap != Presets.CurrentPreset.PresetName) {
+                var preset = FindPresetByName(lastCatchCfg.PresetToSwap);
 
                 FishingHelper.AddPresetSwap(guid);
                 Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));

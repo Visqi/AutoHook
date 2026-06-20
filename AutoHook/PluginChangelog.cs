@@ -5,6 +5,15 @@ namespace AutoHook;
 public static class PluginChangelog {
     public static readonly List<Version> Versions =
     [
+        new Version("6.0.0.46")
+        {
+            Minor =
+            {
+                "Selecting the global preset should now reset the fish caught counter if the last preset had that option enabled",
+                "Presets that swap into themselves should now reset the fish caught counter when that option is enabled",
+                "Added reset fish caught counter to extra options",
+            }
+        },
         new Version("6.0.0.45")
         {
             Minor =

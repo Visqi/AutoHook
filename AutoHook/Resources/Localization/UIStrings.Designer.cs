@@ -169,7 +169,7 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Reduce fish (aetherial reduction).
+        ///   Looks up a localized string similar to Reduce Fish (Aetherial Reduction).
         /// </summary>
         internal static string AetherialReduction_ReduceFish {
             get {
@@ -3367,11 +3367,20 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Reset hook/fish counter after swapping presets.
+        ///   Looks up a localized string similar to Reset Hook/Fish Counter After Swapping Presets.
         /// </summary>
         internal static string Reset_counter_after_swapping_presets {
             get {
                 return ResourceManager.GetString("Reset_counter_after_swapping_presets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset Fish Caught Counter.
+        /// </summary>
+        internal static string Reset_fish_caught_counter {
+            get {
+                return ResourceManager.GetString("Reset_fish_caught_counter", resourceCulture);
             }
         }
         

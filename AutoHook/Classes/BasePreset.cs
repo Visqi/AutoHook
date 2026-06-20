@@ -10,12 +10,15 @@ public abstract class BasePreset {
         get => PresetList.FirstOrDefault(p => p.UniqueId.ToString() == SelectedGuid);
         set {
             Service.Status = string.Empty;
+            var oldPreset = SelectedPreset;
             if (value != null) {
-                OnSelectedPreset(value, SelectedPreset);
+                OnSelectedPreset(value, oldPreset);
                 SelectedGuid = value.UniqueId.ToString();
             }
-            else
+            else {
+                OnSelectedPreset(null, oldPreset);
                 SelectedGuid = "";
+            }
         }
     }
 
@@ -36,7 +39,7 @@ public abstract class BasePreset {
         Service.Save();
     }
 
-    public virtual void OnSelectedPreset(BasePresetConfig newPreset, BasePresetConfig? oldPreset) {
+    public virtual void OnSelectedPreset(BasePresetConfig? newPreset, BasePresetConfig? oldPreset) {
         Service.Save();
     }
 

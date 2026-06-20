@@ -45,12 +45,9 @@ public class FishingPresets : BasePreset {
         Service.Save();
     }
 
-    public override void OnSelectedPreset(BasePresetConfig newPreset, BasePresetConfig? oldPreset) {
-        if (oldPreset is not CustomPresetConfig old)
-            return;
-
-        if (old is { ExtraCfg: { Enabled: true, ResetCounterPresetSwap: true } })
-            old.ResetCounter();
+    public override void OnSelectedPreset(BasePresetConfig? newPreset, BasePresetConfig? oldPreset) {
+        if (oldPreset is CustomPresetConfig old)
+            old.TryResetCounter();
 
         Service.Save();
     }

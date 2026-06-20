@@ -981,7 +981,10 @@ Check the Guide Tab for Guides.</value>
     <value>Reset the counter</value>
   </data>
   <data name="Reset_counter_after_swapping_presets" xml:space="preserve">
-    <value>Reset hook/fish counter after swapping presets</value>
+    <value>Reset Hook/Fish Counter After Swapping Presets</value>
+  </data>
+  <data name="Reset_fish_caught_counter" xml:space="preserve">
+    <value>Reset Fish Caught Counter</value>
   </data>
   <data name="Only_use_when_Cordial_is_available" xml:space="preserve">
     <value>Only use when Cordial is available</value>
@@ -1631,7 +1634,7 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
     <value>Swap/Stop Rules:</value>
   </data>
   <data name="AetherialReduction_ReduceFish" xml:space="preserve">
-    <value>Reduce fish (aetherial reduction)</value>
+    <value>Reduce Fish (Aetherial Reduction)</value>
   </data>
   <data name="AetherialReduction_ReduceFishHelp" xml:space="preserve">
     <value>Will stop fishing to reduce all reducible fish in your inventory before resuming fishing.</value>
