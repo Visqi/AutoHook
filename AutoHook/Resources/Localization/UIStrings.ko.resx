@@ -968,9 +968,6 @@
   <data name="Reset_the_counter" xml:space="preserve">
     <value>카운터 초기화</value>
   </data>
-  <data name="Reset_counter_after_swapping_presets" xml:space="preserve">
-    <value>프리셋 변경 후 낚기/물고기 카운터 초기화</value>
-  </data>
   <data name="Only_use_when_Cordial_is_available" xml:space="preserve">
     <value>강장제를 사용 가능한 경우에만 사용</value>
   </data>
@@ -1524,9 +1521,6 @@
   </data>
   <data name="SwapStopRules" xml:space="preserve">
     <value>교체/중단 규칙:</value>
-  </data>
-  <data name="AetherialReduction_ReduceFish" xml:space="preserve">
-    <value>소지품 비우기(정제)</value>
   </data>
   <data name="AetherialReduction_ReduceFishHelp" xml:space="preserve">
     <value>낚시를 하기 전에 소지품에 정제가 가능한 물고기를 정제합니다. 정제가 끝날 때까지 낚시를 일시중단합니다.</value>
