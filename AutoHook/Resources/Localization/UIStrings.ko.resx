@@ -749,7 +749,7 @@
     <value>낚시 중단하기</value>
   </data>
   <data name="Auto_Cast_Stopped" xml:space="preserve">
-    <value>자동 낚싯대 던지기는 중단되지만, 낚시는 계속 진행됩니다.</value>
+    <value>자동 낚시를 중지하지만, 낚시를 끝내진 않습니다</value>
   </data>
   <data name="Quit_Fishing" xml:space="preserve">
     <value>낚시 끝내기</value>
@@ -1456,6 +1456,9 @@
   </data>
   <data name="Status_PrizeCatchNotRequired" xml:space="preserve">
     <value>입질 건너뛰기 - 대물 낚시가 활성화 되어 있지만, 해당 입질에선 필요하지 않음</value>
+  </data>
+  <data name="StellarHookset" xml:space="preserve">
+    <value>화려한 낚아채기</value>
   </data>
   <data name="ExportFolderClipboard" xml:space="preserve">
     <value>폴더를 클립보드에 복사</value>
