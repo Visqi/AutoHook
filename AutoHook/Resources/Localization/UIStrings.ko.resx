@@ -714,10 +714,10 @@
     <value>생미끼 낚시 설정</value>
   </data>
   <data name="Swap_Preset" xml:space="preserve">
-    <value>프리셋 바꾸기</value>
+    <value>프리셋 교체</value>
   </data>
   <data name="Swap_Bait" xml:space="preserve">
-    <value>미끼 바꾸기</value>
+    <value>미끼 교체</value>
   </data>
   <data name="IdenticalCast_HelpText" xml:space="preserve">
     <value>비활성화하면 생미끼 낚시 기회를 잃게 됩니다.</value>
@@ -749,7 +749,7 @@
     <value>낚시 중단하기</value>
   </data>
   <data name="Auto_Cast_Stopped" xml:space="preserve">
-    <value>자동 낚시를 중지하지만, 낚시를 끝내진 않습니다</value>
+    <value>자동 낚시를 중단하지만, 낚시를 끝내진 않습니다</value>
   </data>
   <data name="Quit_Fishing" xml:space="preserve">
     <value>낚시 끝내기</value>
@@ -939,7 +939,13 @@
     <value>소장품</value>
   </data>
   <data name="CollectHelpText" xml:space="preserve">
-    <value>소장품 수집은 낚시를 시작할 때 활성화됩니다</value>
+    <value>낚시를 시작할 때 소장품 수집을 활성화합니다</value>
+  </data>
+  <data name="Snagging" xml:space="preserve">
+    <value>갈고리 낚시</value>
+  </data>
+  <data name="SnaggingHelpText" xml:space="preserve">
+    <value>낚시를 시작할 때 갈고리 낚시를 활성화합니다</value>
   </data>
   <data name="RefreshWhenTimeIsLessThanOrEqual" xml:space="preserve">
     <value>버프 타이머가 특정 시간 이하일 때 갱신</value>
