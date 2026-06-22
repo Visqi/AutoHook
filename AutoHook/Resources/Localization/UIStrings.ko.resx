@@ -749,7 +749,7 @@
     <value>낚시 중단하기</value>
   </data>
   <data name="Auto_Cast_Stopped" xml:space="preserve">
-    <value>자동 낚시를 중단하지만, 낚시를 끝내진 않습니다</value>
+    <value>자동 낚시를 중지하지만, 낚시를 끝내진 않습니다</value>
   </data>
   <data name="Quit_Fishing" xml:space="preserve">
     <value>낚시 끝내기</value>
