@@ -3,6 +3,7 @@ using AutoHook.Conditions.Definitions;
 using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
+using Lumina.Excel.Sheets;
 
 namespace AutoHook;
 
@@ -154,7 +155,7 @@ public class PresetCreator {
             ac.EnableAll = true;
             ac.CastLine.Enabled = true;
             ac.CastCordial.Enabled = true;
-            ac.CastCollect.Enabled = true;
+            ac.CastCollect.Enabled = Item.GetRow((uint)_selectedTargetFish.ItemId).IsCollectable;
 
             if (moochList.Count > 0) {
                 ac.CastPatience.Enabled = true;
@@ -375,7 +376,7 @@ public class PresetCreator {
         ac.EnableAll = true;
         ac.CastLine.Enabled = true;
         ac.CastCordial.Enabled = true;
-        ac.CastCollect.Enabled = true;
+        ac.CastCollect.Enabled = Item.GetRow((uint)_selectedTargetFish.ItemId).IsCollectable;
 
         var fishConfig = new FishConfig(_selectedTargetFish.ItemId);
 
