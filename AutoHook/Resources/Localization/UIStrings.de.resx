@@ -974,9 +974,6 @@ Schau in den Guide Tab für Erklärungen.</value>
   <data name="Reset_the_counter" xml:space="preserve">
     <value>Den Zähler zurücksetzen</value>
   </data>
-  <data name="Reset_counter_after_swapping_presets" xml:space="preserve">
-    <value>Setze Anschlag/Fisch-Zähler zurück, nach Preset Wechsel</value>
-  </data>
   <data name="Only_use_when_Cordial_is_available" xml:space="preserve">
     <value>Nur nutzen, wenn Kräutertrunk verfügbar ist</value>
   </data>

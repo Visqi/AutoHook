@@ -714,10 +714,10 @@
     <value>생미끼 낚시 설정</value>
   </data>
   <data name="Swap_Preset" xml:space="preserve">
-    <value>프리셋 바꾸기</value>
+    <value>프리셋 교체</value>
   </data>
   <data name="Swap_Bait" xml:space="preserve">
-    <value>미끼 바꾸기</value>
+    <value>미끼 교체</value>
   </data>
   <data name="IdenticalCast_HelpText" xml:space="preserve">
     <value>비활성화하면 생미끼 낚시 기회를 잃게 됩니다.</value>
@@ -749,7 +749,7 @@
     <value>낚시 중단하기</value>
   </data>
   <data name="Auto_Cast_Stopped" xml:space="preserve">
-    <value>자동 낚싯대 던지기는 중단되지만, 낚시는 계속 진행됩니다.</value>
+    <value>자동 낚시를 중단하지만, 낚시를 끝내진 않습니다</value>
   </data>
   <data name="Quit_Fishing" xml:space="preserve">
     <value>낚시 끝내기</value>
@@ -939,7 +939,13 @@
     <value>소장품</value>
   </data>
   <data name="CollectHelpText" xml:space="preserve">
-    <value>소장품 수집은 낚시를 시작할 때 활성화됩니다</value>
+    <value>낚시를 시작할 때 소장품 수집을 활성화합니다</value>
+  </data>
+  <data name="Snagging" xml:space="preserve">
+    <value>갈고리 낚시</value>
+  </data>
+  <data name="SnaggingHelpText" xml:space="preserve">
+    <value>낚시를 시작할 때 갈고리 낚시를 활성화합니다</value>
   </data>
   <data name="RefreshWhenTimeIsLessThanOrEqual" xml:space="preserve">
     <value>버프 타이머가 특정 시간 이하일 때 갱신</value>
@@ -967,9 +973,6 @@
   </data>
   <data name="Reset_the_counter" xml:space="preserve">
     <value>카운터 초기화</value>
-  </data>
-  <data name="Reset_counter_after_swapping_presets" xml:space="preserve">
-    <value>프리셋 변경 후 낚기/물고기 카운터 초기화</value>
   </data>
   <data name="Only_use_when_Cordial_is_available" xml:space="preserve">
     <value>강장제를 사용 가능한 경우에만 사용</value>
@@ -1460,6 +1463,9 @@
   <data name="Status_PrizeCatchNotRequired" xml:space="preserve">
     <value>입질 건너뛰기 - 대물 낚시가 활성화 되어 있지만, 해당 입질에선 필요하지 않음</value>
   </data>
+  <data name="StellarHookset" xml:space="preserve">
+    <value>화려한 낚아채기</value>
+  </data>
   <data name="ExportFolderClipboard" xml:space="preserve">
     <value>폴더를 클립보드에 복사</value>
   </data>
@@ -1524,9 +1530,6 @@
   </data>
   <data name="SwapStopRules" xml:space="preserve">
     <value>교체/중단 규칙:</value>
-  </data>
-  <data name="AetherialReduction_ReduceFish" xml:space="preserve">
-    <value>소지품 비우기(정제)</value>
   </data>
   <data name="AetherialReduction_ReduceFishHelp" xml:space="preserve">
     <value>낚시를 하기 전에 소지품에 정제가 가능한 물고기를 정제합니다. 정제가 끝날 때까지 낚시를 일시중단합니다.</value>

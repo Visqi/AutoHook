@@ -971,9 +971,6 @@
   <data name="Reset_the_counter" xml:space="preserve">
     <value>重置计时器</value>
   </data>
-  <data name="Reset_counter_after_swapping_presets" xml:space="preserve">
-    <value>交换预设后重置钩/鱼计数器</value>
-  </data>
   <data name="Only_use_when_Cordial_is_available" xml:space="preserve">
     <value>仅在强心剂可用时使用</value>
   </data>

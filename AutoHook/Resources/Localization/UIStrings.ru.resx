@@ -968,9 +968,6 @@
   <data name="Reset_the_counter" xml:space="preserve">
     <value>Сброс счётчика</value>
   </data>
-  <data name="Reset_counter_after_swapping_presets" xml:space="preserve">
-    <value>Сбросить таймер рыбы/подсечек в случае смены шаблона</value>
-  </data>
   <data name="Only_use_when_Cordial_is_available" xml:space="preserve">
     <value>Использовать лишь в случае, если Настойки активированы</value>
   </data>
