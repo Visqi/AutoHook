@@ -117,4 +117,31 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DrawHeader_Testing" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="DefaultSubTab" xml:space="preserve">
+    <value>Predefinito</value>
+  </data>
+  <data name="DrawImportExport_Cancel" xml:space="preserve">
+    <value>Annulla</value>
+  </data>
+  <data name="ImportPresetFromClipboard" xml:space="preserve">
+    <value>Importa il preset dagli appunti.</value>
+  </data>
+  <data name="Import" xml:space="preserve">
+    <value>Importa</value>
+  </data>
+  <data name="PresetName" xml:space="preserve">
+    <value>Nome Preset</value>
+  </data>
+  <data name="ImportThisPreset" xml:space="preserve">
+    <value>Importare questo preset?</value>
+  </data>
+  <data name="AutoMooch" xml:space="preserve">
+    <value>Auto Mooch</value>
+  </data>
+  <data name="BaitAlreadyExists" xml:space="preserve">
+    <value>L'esca esiste già</value>
+  </data>
 </root>
