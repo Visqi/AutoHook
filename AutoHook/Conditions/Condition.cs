@@ -32,6 +32,13 @@ public class Condition {
             UiId = Interlocked.Increment(ref _nextUiId);
     }
 
-    public bool Evaluate(WorldState world, ConditionRegistry registry)
-        => Enabled && registry.Get(TypeId) is { } def && def.Evaluate(world, Params);
+    public bool Evaluate(WorldState world, ConditionRegistry registry) {
+        if (!Enabled)
+            return false;
+
+        if (PresetConditionHelper.IsPresetType(TypeId))
+            return PresetConditionHelper.EvaluateFromTypeId(TypeId, world, Params);
+
+        return registry.Get(TypeId) is { } def && def.Evaluate(world, Params);
+    }
 }

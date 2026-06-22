@@ -4,7 +4,6 @@ using AutoHook.Configurations.Legacy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IO;
-using System.Text;
 using static AutoHook.Conditions.ConditionRegistry;
 
 namespace AutoHook.Configurations;

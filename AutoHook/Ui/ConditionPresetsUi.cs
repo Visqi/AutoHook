@@ -23,6 +23,10 @@ public static class ConditionPresetsUi {
             case ConditionScope.AutoCast:
                 DrawAutoCastPresets(set, group);
                 break;
+            case ConditionScope.PresetDefinition:
+                DrawHookPresets(set, group);
+                DrawAutoCastPresets(set, group);
+                break;
         }
     }
 

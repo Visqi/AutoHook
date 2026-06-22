@@ -321,7 +321,7 @@ namespace AutoHook.Resources.Localization {
                 return ResourceManager.GetString("AnimationCanceling", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Temporary presets ({0}).
         /// </summary>
@@ -330,7 +330,7 @@ namespace AutoHook.Resources.Localization {
                 return ResourceManager.GetString("AnonymousPresets_Header", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Anti-Afk while fishing.
         /// </summary>
@@ -3160,6 +3160,42 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Defined in Conditions tab.
+        /// </summary>
+        internal static string PresetConditions_DefinedInTab {
+            get {
+                return ResourceManager.GetString("PresetConditions_DefinedInTab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reusable named conditions for this preset. Reference them within any condition set.
+        /// </summary>
+        internal static string PresetConditions_HelpText {
+            get {
+                return ResourceManager.GetString("PresetConditions_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to (condition missing).
+        /// </summary>
+        internal static string PresetConditions_Missing {
+            get {
+                return ResourceManager.GetString("PresetConditions_Missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New condition.
+        /// </summary>
+        internal static string PresetConditions_NewName {
+            get {
+                return ResourceManager.GetString("PresetConditions_NewName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Preset copied to clipboard.
         /// </summary>
         internal static string PresetCopied {
@@ -3376,20 +3412,20 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Reset Fish Caught Counter.
-        /// </summary>
-        internal static string Reset_fish_caught_counter {
-            get {
-                return ResourceManager.GetString("Reset_fish_caught_counter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Reset counter after swapping baits.
         /// </summary>
         internal static string Reset_Counter_Bait_Swap {
             get {
                 return ResourceManager.GetString("Reset_Counter_Bait_Swap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset Fish Caught Counter.
+        /// </summary>
+        internal static string Reset_fish_caught_counter {
+            get {
+                return ResourceManager.GetString("Reset_fish_caught_counter", resourceCulture);
             }
         }
         

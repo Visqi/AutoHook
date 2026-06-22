@@ -1702,4 +1702,16 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="AutoHandleCollectables_Preset_HelpText" xml:space="preserve">
     <value>Will override the global auto collectables setting and only fire when this rule's conditions are met.</value>
   </data>
+  <data name="PresetConditions_HelpText" xml:space="preserve">
+    <value>Reusable named conditions for this preset. Reference them within any condition set</value>
+  </data>
+  <data name="PresetConditions_DefinedInTab" xml:space="preserve">
+    <value>Defined in Conditions tab</value>
+  </data>
+  <data name="PresetConditions_Missing" xml:space="preserve">
+    <value>(condition missing)</value>
+  </data>
+  <data name="PresetConditions_NewName" xml:space="preserve">
+    <value>New condition</value>
+  </data>
 </root>

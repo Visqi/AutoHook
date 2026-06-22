@@ -41,6 +41,8 @@ public class CustomPresetConfig : BasePresetConfig {
 
     public ExtraConfig ExtraCfg = new();
 
+    public List<NamedConditionConfig> NamedConditions { get; set; } = [];
+
     public CustomPresetConfig(string name) {
         PresetName = name;
     }
@@ -142,31 +144,44 @@ public class CustomPresetConfig : BasePresetConfig {
                             ImGui.CalcTextSize(PresetName).X / 2);
         ImGui.TextColored(ImGuiColors.DalamudOrange, $" {PresetName}");
 
-        using var mainTab = ImRaii.TabBar(@"TabBarsPreset", ImGuiTabBarFlags.NoTooltip);
-        if (!mainTab)
-            return;
+        ConditionUi.EvaluationPreset = this;
+        try {
+            using var mainTab = ImRaii.TabBar(@"TabBarsPreset", ImGuiTabBarFlags.NoTooltip);
+            if (!mainTab)
+                return;
 
-        using (var tabHook = ImRaii.TabItem(UIStrings.Hooking)) {
-            DrawUtil.HoveredTooltip(UIStrings.BaitTabHelpText);
-            if (tabHook)
-                SubTabBaitMooch.DrawHookTab(this);
+            using (var tabHook = ImRaii.TabItem(UIStrings.Hooking)) {
+                DrawUtil.HoveredTooltip(UIStrings.BaitTabHelpText);
+                if (tabHook)
+                    SubTabBaitMooch.DrawHookTab(this);
+            }
+
+            using (var tabFish = ImRaii.TabItem(UIStrings.FishCaught)) {
+                DrawUtil.HoveredTooltip(UIStrings.FishCaughtHelp);
+                if (tabFish)
+                    SubTabFish.DrawFishTab(this);
+            }
+
+            using (var tabExtra = ImRaii.TabItem(UIStrings.ExtraOptions)) {
+                DrawUtil.HoveredTooltip(UIStrings.ExtraOptionsHelp);
+                if (tabExtra)
+                    SubTabExtra.DrawExtraTab(this);
+            }
+
+            using (var tabAutoCast = ImRaii.TabItem(UIStrings.Auto_Casts)) {
+                DrawUtil.HoveredTooltip(UIStrings.AutoCastsHelp);
+                if (tabAutoCast)
+                    SubTabAutoCast.DrawAutoCastTab(this);
+            }
+
+            using (var tabConditions = ImRaii.TabItem(UIStrings.Conditions)) {
+                DrawUtil.HoveredTooltip(UIStrings.PresetConditions_HelpText);
+                if (tabConditions)
+                    SubTabConditions.DrawConditionsTab(this);
+            }
         }
-
-        using (var tabFish = ImRaii.TabItem(UIStrings.FishCaught)) {
-            DrawUtil.HoveredTooltip(UIStrings.FishCaughtHelp);
-            if (tabFish)
-                SubTabFish.DrawFishTab(this);
+        finally {
+            ConditionUi.EvaluationPreset = null;
         }
-
-        using (var tabExtra = ImRaii.TabItem(UIStrings.ExtraOptions)) {
-            DrawUtil.HoveredTooltip(UIStrings.ExtraOptionsHelp);
-            if (tabExtra)
-                SubTabExtra.DrawExtraTab(this);
-        }
-
-        using var tabAutoCast = ImRaii.TabItem(UIStrings.Auto_Casts);
-        DrawUtil.HoveredTooltip(UIStrings.AutoCastsHelp);
-        if (tabAutoCast)
-            SubTabAutoCast.DrawAutoCastTab(this);
     }
 }

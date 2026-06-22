@@ -6,7 +6,6 @@ using Dalamud.Interface.Windowing;
 using ECommons.Automation;
 using ECommons.Automation.NeoTaskManager;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using System.Numerics;
 
 namespace AutoHook.Spearfishing;
