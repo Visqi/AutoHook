@@ -5,7 +5,7 @@ namespace AutoHook;
 public static class PluginChangelog {
     public static readonly List<Version> Versions =
     [
-        new Version("6.0.0.47")
+        new Version("6.0.0.48")
         {
             Main =
             {
