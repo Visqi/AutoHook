@@ -4,10 +4,10 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(bool Enabled, TimeOnly Start, TimeOnly End)> {
-    public string Id => nameof(TimeWindowCD);
-    public string Name => "Time window";
-    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.All;
+public sealed class TimeWindowCD : SnapshottableConditionDefinition, ISimpleConditionValue<(bool Enabled, TimeOnly Start, TimeOnly End)> {
+    public override string Id => nameof(TimeWindowCD);
+    public override string Name => "Time window";
+    public override ConditionScopeFlags AllowedScopes => ConditionScopeFlags.All;
 
     public readonly record struct TimeWindowParams(TimeOnly Start, TimeOnly End, bool Invert) {
         public bool Apply(bool result) => Invert ? !result : result;
@@ -15,7 +15,7 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
         public Dictionary<string, object> ToParams() {
             var dict = new Dictionary<string, object>();
 
-            // Store minutes-since-midnight for start/end
+            // use minutes-since-midnight for start/end
             var startMinutes = Start.Hour * 60 + Start.Minute;
             var endMinutes = End.Hour * 60 + End.Minute;
 
@@ -31,28 +31,27 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
         }
     }
 
-    public unsafe bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
-        var args = GetParams(parameters);
+    protected override unsafe bool EvaluateLive(WorldState world, IReadOnlyDictionary<string, object> parameters)
+        => Evaluate(GetParams(parameters), TimeOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(Framework.Instance()->ClientTime.EorzeaTime).DateTime));
 
+    protected override bool EvaluateSnapshot(CastInfoSnapshot snapshot, IReadOnlyDictionary<string, object> parameters)
+        => Evaluate(GetParams(parameters), snapshot.EorzeaTime);
+
+    private static bool Evaluate(TimeWindowParams args, TimeOnly eorzeaTime) {
         // If no window configured, treat as always-true (unless inverted).
         if (args.Start == default && args.End == default)
             return !args.Invert;
 
-        var clientTime = Framework.Instance()->ClientTime.EorzeaTime;
-        var eorzeaTime = TimeOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(clientTime).DateTime);
-
-        // Use same inclusive semantics as the existing time-window helper:
         // - If start <= end: simple range
         // - If start > end: window wraps over midnight
-        bool inWindow = args.Start <= args.End
+        var inWindow = args.Start <= args.End
             ? eorzeaTime >= args.Start && eorzeaTime <= args.End
             : eorzeaTime >= args.Start || eorzeaTime <= args.End;
 
-        var result = inWindow;
-        return args.Apply(result);
+        return args.Apply(inWindow);
     }
 
-    public void DrawParams(Condition condition) {
+    public override void DrawParams(Condition condition) {
         var args = GetParams(condition.Params);
         var start = args.Start;
         var end = args.End;
@@ -102,4 +101,3 @@ public sealed class TimeWindowCD : IConditionDefinition, ISimpleConditionValue<(
     IReadOnlyDictionary<string, object>? ISimpleConditionValue<(bool Enabled, TimeOnly Start, TimeOnly End)>.ToParams((bool Enabled, TimeOnly Start, TimeOnly End) value, object? context)
         => value.Enabled ? new TimeWindowParams(value.Start, value.End, false).ToParams() : null;
 }
-

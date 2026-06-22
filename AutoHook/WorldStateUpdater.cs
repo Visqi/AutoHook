@@ -53,6 +53,7 @@ public sealed class WorldStateUpdater : IDisposable {
     public void Update() {
         if (Player.ClassJob.RowId is not 18 || Svc.Objects.LocalPlayer is null) return;
         var ws = Service.WorldState;
+        var previousFishingState = ws.Fishing.FishingState;
         ws.Execute(new PlayerInfo.OpGp(Svc.Objects.LocalPlayer?.CurrentGp ?? 0, Svc.Objects.LocalPlayer?.MaxGp ?? 0));
         ws.Execute(new PlayerInfo.OpLevel(Svc.Objects.LocalPlayer?.Level ?? 0));
         ws.Execute(CollectStatuses());
@@ -82,6 +83,7 @@ public sealed class WorldStateUpdater : IDisposable {
 
         ws.Execute(new FishingInfo.OpBiteContext(biteContext.BiteTimeSeconds, biteContext.ChumActive));
         ws.Execute(new FishingInfo.OpIntuition(new IntuitionInfo(biteContext.IntuitionStatus, biteContext.IntuitionTimeRemaining)));
+        ws.Execute(new FishingInfo.OpUpdateCastSnapshot(previousFishingState));
     }
 
     /// <summary>

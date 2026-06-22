@@ -77,6 +77,8 @@ public sealed class FishingInfo {
     public readonly Dictionary<uint, int> FishCaughtCounts = [];
     public readonly List<uint> SwimbaitIds = [];
 
+    public CastInfoSnapshot CastSnapshot = new();
+
     public int GetFishCaughtCount(uint fishId) => FishCaughtCounts.TryGetValue(fishId, out var c) ? c : 0;
 
     public IEnumerable<WorldState.Operation> CompareToInitial() {
@@ -115,8 +117,11 @@ public sealed class FishingInfo {
 
     public sealed record OpFishingState(FishingState State, BaitInfo Bait) : WorldState.Operation {
         protected override void Exec(WorldState ws) {
+            var prevState = ws.Fishing.FishingState;
             ws.Fishing.FishingState = State;
             ws.Fishing.BaitInfo = Bait;
+            if (prevState == FishingState.LineInWater && State != FishingState.LineInWater)
+                ws.Fishing.CastSnapshot.Invalidate();
         }
     }
 
@@ -214,6 +219,16 @@ public sealed class FishingInfo {
         protected override void Exec(WorldState ws) {
             ws.Fishing.SwimbaitIds.Clear();
             ws.Fishing.SwimbaitIds.AddRange(Ids);
+        }
+    }
+
+    public sealed record OpUpdateCastSnapshot(FishingState PreviousState) : WorldState.Operation {
+        protected override void Exec(WorldState ws) {
+            var newState = ws.Fishing.FishingState;
+            if (PreviousState != FishingState.LineInWater && newState == FishingState.LineInWater)
+                ws.Fishing.CastSnapshot.Capture(ws);
+            else if (PreviousState == FishingState.LineInWater && newState != FishingState.LineInWater)
+                ws.Fishing.CastSnapshot.Invalidate();
         }
     }
 }

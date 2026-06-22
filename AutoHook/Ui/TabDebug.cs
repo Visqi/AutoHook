@@ -74,6 +74,14 @@ public class TabDebug : BaseTab {
                 ImGui.Text($"PreviousFishingState: {ws.PreviousFishingState}");
                 ImGui.Text($"FishingStep: {ws.FishingStep} (0x{(uint)ws.FishingStep:X})");
                 ImGui.Text($"BaitInfo: BaitId={f.BaitInfo.BaitId} SwimbaitId={f.BaitInfo.SelectedSwimbaitId} MoochId={f.BaitInfo.MoochId} IsMooching={f.BaitInfo.IsMooching}");
+                var snap = f.CastSnapshot;
+                ImGui.Text($"CastSnapshot active: {snap.Active}");
+                if (snap.Active) {
+                    ImGui.Text($"  Intuition: {snap.IntuitionStatus}");
+                    ImGui.Text($"  Weather: current={snap.CurrentWeatherId} prev={snap.PreviousWeatherId} next={snap.NextWeatherId}");
+                    ImGui.Text($"  Eorzea time: {snap.EorzeaTime:HH:mm}");
+                    ImGui.Text($"  Spectral current: {snap.SpectralCurrentStatus}");
+                }
             }
 
             // Bite / context

@@ -5,24 +5,19 @@ using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class WeatherCD : IConditionDefinition {
-    public string Id => nameof(WeatherCD);
-    public string Name => "Weather";
-    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
+public sealed class WeatherCD : SnapshottableConditionDefinition {
+    public override string Id => nameof(WeatherCD);
+    public override string Name => "Weather";
+    public override ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
+    protected override bool EvaluateLive(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var ids = GetWeatherIds(parameters);
         if (ids.Count == 0) return false;
 
         var slot = GetOp(parameters, "slot", "current");
         var invert = GetBool(parameters, "inv", false);
 
-        byte targetWeatherId;
-
-        var territorySheet = Svc.Data.GetExcelSheet<TerritoryType>();
-        var weatherSheet = Svc.Data.GetExcelSheet<Weather>();
-
-        if (world.TerritoryId == 0 || !territorySheet.TryGetRow(world.TerritoryId, out var territory))
+        if (world.TerritoryId == 0 || !TerritoryType.TryGetRow(world.TerritoryId, out var territory))
             return invert;
 
         var weather = slot switch {
@@ -30,32 +25,43 @@ public sealed class WeatherCD : IConditionDefinition {
             "next" => territory.GetNextWeather(),
             _ => territory.GetCurrentWeather(),
         };
-        targetWeatherId = (byte)weather.RowId;
+        return EvaluateWeather(ids, (byte)weather.RowId, invert);
+    }
 
-        if (!weatherSheet.TryGetRow(targetWeatherId, out var current))
+    protected override bool EvaluateSnapshot(CastInfoSnapshot snapshot, IReadOnlyDictionary<string, object> parameters) {
+        var ids = GetWeatherIds(parameters);
+        if (ids.Count == 0) return false;
+
+        var slot = GetOp(parameters, "slot", "current");
+        var invert = GetBool(parameters, "inv", false);
+        var targetWeatherId = slot switch {
+            "prev" => snapshot.PreviousWeatherId,
+            "next" => snapshot.NextWeatherId,
+            _ => snapshot.CurrentWeatherId,
+        };
+        return EvaluateWeather(ids, targetWeatherId, invert);
+    }
+
+    private static bool EvaluateWeather(List<byte> ids, byte targetWeatherId, bool invert) {
+        if (targetWeatherId == 0)
+            return invert;
+
+        if (!Weather.TryGetRow(targetWeatherId, out var current))
             return invert;
         var currentName = current.Name.ToString();
         if (string.IsNullOrEmpty(currentName))
             return invert;
 
-        var match = false;
-        foreach (var id in ids) {
-            if (weatherSheet.TryGetRow(id, out var row) && row.Name.ToString() == currentName) {
-                match = true;
-                break;
-            }
-        }
+        var match = ids.Any(id => Weather.TryGetRow(id, out var row) && row.Name.ToString() == currentName);
         return invert ? !match : match;
     }
 
-    public void DrawParams(Condition condition) {
+    public override void DrawParams(Condition condition) {
         condition.EnsureUiId();
         using var idScope = ImRaii.PushId($"weather{condition.UiId}");
 
         var ids = GetWeatherIds(condition.Params);
         var currentId = ids.Count > 0 ? ids[0] : (byte)0;
-
-        var sheet = Svc.Data.GetExcelSheet<Weather>();
 
         var slot = condition.Params.TryGetValue("slot", out var s) ? s?.ToString() ?? "current" : "current";
         var slotLabel = slot switch {
@@ -76,23 +82,9 @@ public sealed class WeatherCD : IConditionDefinition {
 
         ImGui.SameLine();
 
-        var unique = new Dictionary<string, byte>();
-        foreach (var row in sheet) {
-            var name = row.Name.ToString();
-            if (string.IsNullOrEmpty(name)) continue;
-            if (!unique.ContainsKey(name))
-                unique[name] = (byte)row.RowId;
-        }
-
-        var weathers = unique
-            .OrderBy(k => k.Key)
-            .Select(k => (Id: k.Value, Name: k.Key))
-            .ToList();
-
-        var label = currentId != 0 && sheet.TryGetRow(currentId, out var currentRow)
-            ? currentRow.Name.ToString()
-            : "Any weather";
-
+        var unique = Weather.Select(row => (Name: row.Name.ToString(), Id: (byte)row.RowId)).Where(x => !string.IsNullOrEmpty(x.Name)).DistinctBy(x => x.Name).ToDictionary(x => x.Name, x => x.Id);
+        var weathers = unique.OrderBy(k => k.Key).Select(k => (Id: k.Value, Name: k.Key)).ToList();
+        var label = currentId != 0 && Weather.TryGetRow(currentId, out var currentRow) ? currentRow.Name.ToString() : "Any weather";
         DrawUtil.DrawComboSelector(
             weathers,
             w => w.Name,
