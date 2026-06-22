@@ -174,7 +174,7 @@ public class SubTabBaitMooch {
 
         var useSwimbait = config.UseSwimbait;
         DrawUtil.DrawCheckboxTree(headerLabel, ref useSwimbait, () => {
-            config.ConditionSet = ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, config.ConditionSet, ConditionScope.Hook, showAdvanced: true);
+            config.ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, config.ConditionSet, ConditionScope.Hook, showAdvanced: true);
         }, helpText);
         config.UseSwimbait = useSwimbait;
     }

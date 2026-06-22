@@ -109,7 +109,7 @@ public class SubTabExtra {
                 }
             }
 
-            config.AutoOceanFishConditionSet = ConditionUi.DrawConditionSetSlim(UIStrings.When, config.AutoOceanFishConditionSet, ConditionScope.Hook, showAdvanced: true);
+            config.AutoOceanFishConditionSet = ConditionUi.DrawConditionSet(UIStrings.When, config.AutoOceanFishConditionSet, ConditionScope.Hook, showAdvanced: true);
         })) {
             config.AutoOceanFishEnabled = enabled;
             Service.Save();
@@ -144,7 +144,7 @@ public class SubTabExtra {
             var removed = false;
 
             if (DrawUtil.DrawCheckboxHeader(headerLabel, ref enabled, ImGuiTreeNodeFlags.DefaultOpen, () => {
-                trig.ConditionSet = ConditionUi.DrawConditionSetSlim(UIStrings.When, trig.ConditionSet, ConditionScope.Hook, showAdvanced: true, drawHeaderExtras: () => {
+                trig.ConditionSet = ConditionUi.DrawConditionSet(UIStrings.When, trig.ConditionSet, ConditionScope.Hook, showAdvanced: true, drawHeaderExtras: () => {
                     ImGui.SameLine(0, 3.Scaled());
                     if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
                         config.Triggers.RemoveAt(i);

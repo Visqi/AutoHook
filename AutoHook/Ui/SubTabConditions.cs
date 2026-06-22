@@ -54,7 +54,7 @@ public static class SubTabConditions {
                 ImGui.Spacing();
                 var previousExclude = ConditionUi.ExcludeNamedConditionId;
                 ConditionUi.ExcludeNamedConditionId = named.UniqueId;
-                named.ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, named.ConditionSet, ConditionScope.PresetDefinition, showPresets: true) ?? named.ConditionSet;
+                named.ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, named.ConditionSet, ConditionScope.PresetDefinition, showAdvanced: true) ?? named.ConditionSet;
                 ConditionUi.ExcludeNamedConditionId = previousExclude;
             }
         }

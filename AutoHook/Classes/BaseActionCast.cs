@@ -48,7 +48,7 @@ public abstract class BaseActionCast {
         => ConditionSet.PassesOrUnconfigured();
 
     protected void DrawAutoCastConditions(bool showSubPrefix = true)
-        => ConditionSet = ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showAdvanced: true, showSubPrefix: showSubPrefix);
+        => ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showAdvanced: true, showSubPrefix: showSubPrefix);
 
     public void DrawFishCaughtActionOptions()
         => DrawAutoCastConditions(showSubPrefix: false);

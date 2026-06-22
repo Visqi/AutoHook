@@ -59,7 +59,7 @@ public class SubTabFish {
                     fish.NotifyOnSuccess.DrawConfig($"Fish caught: {fish.Fish.Name}!");
                     ImGui.Spacing();
 
-                    fish.IgnoreConditionSet = ConditionUi.DrawConditionSetSlim(UIStrings.IgnoreFishSettingWhen, fish.IgnoreConditionSet, ConditionScope.FishIgnore, showAdvanced: true, showSubPrefix: true);
+                    fish.IgnoreConditionSet = ConditionUi.DrawConditionSet(UIStrings.IgnoreFishSettingWhen, fish.IgnoreConditionSet, ConditionScope.FishIgnore, showAdvanced: true, showSubPrefix: true);
 
                 }
             }

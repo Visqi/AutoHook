@@ -45,7 +45,7 @@ public class BaseBiteConfig(HookType type) {
 
         DrawUtil.DrawCheckboxTree(biteName, ref HooksetEnabled,
             () => {
-                ConditionSet = Ui.ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, ConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: false);
+                ConditionSet = Ui.ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: false);
 
                 if (EnableHooksetSwap)
                     DrawUtil.DrawTreeNodeEx(UIStrings.HookType, DrawBite, UIStrings.HookWillBeUsedIfPatienceIsNotUp);
@@ -78,7 +78,7 @@ public class BaseBiteConfig(HookType type) {
                 Service.Save();
             }
 
-            HookTypeConditionSet = Ui.ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, HookTypeConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
+            HookTypeConditionSet = Ui.ConditionUi.DrawConditionSet(UIStrings.Conditions, HookTypeConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
         }
         else {
             NormalHookTypeConditionSet = DrawTimedHookTypeOption(UIStrings.Normal_Hook, HookType.Normal,
@@ -108,7 +108,7 @@ public class BaseBiteConfig(HookType type) {
             using var innerIndent = ImRaii.PushIndent();
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.SetZeroToIgnore);
             SetupTimer(ref minTime, ref maxTime);
-            conditionSet = Ui.ConditionUi.DrawConditionSetSlim(UIStrings.Conditions, conditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
+            conditionSet = Ui.ConditionUi.DrawConditionSet(UIStrings.Conditions, conditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
         }
 
         return conditionSet;

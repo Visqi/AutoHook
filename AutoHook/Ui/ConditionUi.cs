@@ -36,52 +36,9 @@ public static class ConditionUi {
            && group.Conditions.Any(c => c.Enabled)
            && group.Evaluate(Service.WorldState, Registry);
 
-    public static ConditionSet? DrawConditionSet(string label, ConditionSet? set, ConditionScope scope, bool showPresets = true) {
-        using var tree = ImRaii.TreeNode(label, ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.SpanAvailWidth);
-        if (!tree)
-            return set;
-
-        set ??= new ConditionSet();
-
-        using var id = ImRaii.PushId(label);
-        {
-            DrawSetHeader(set);
-            ImGui.Spacing();
-
-            for (var gi = 0; gi < set.Groups.Count; gi++) {
-                var group = set.Groups[gi];
-                var groupLetter = (char)('A' + gi);
-                using var _ = ImRaii.PushId($"grp{gi}");
-
-                var deleteGroup = false;
-                using (IsGroupCurrentlyTrue(group) ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
-                    if (ImGui.CollapsingHeader($"Group {groupLetter}###grp_header", ImGuiTreeNodeFlags.DefaultOpen)) {
-                        deleteGroup = DrawGroupHeader(set, group, gi, scope);
-                        ImGui.Spacing();
-
-                        // Presets apply to this specific group
-                        if (showPresets) {
-                            ConditionPresetsUi.DrawScopePresets(scope, set, group);
-                            ImGui.Spacing();
-                        }
-
-                        DrawConditions(group, scope);
-                    }
-
-                if (deleteGroup) {
-                    set.Groups.RemoveAt(gi);
-                    gi--;
-                    continue;
-                }
-            }
-        }
-
-        return set;
-    }
-
     private static bool RequiresComplexConditionUi(ConditionSet set) => set.Groups.Count > 1;
 
-    public static ConditionSet? DrawConditionSetSlim(string label, ConditionSet? set, ConditionScope scope, bool showAdvanced = true, IReadOnlyList<string>? allowedTypeIds = null, bool showSubPrefix = false, Action? drawHeaderExtras = null) {
+    public static ConditionSet? DrawConditionSet(string label, ConditionSet? set, ConditionScope scope, bool showAdvanced = true, IReadOnlyList<string>? allowedTypeIds = null, bool showSubPrefix = false, Action? drawHeaderExtras = null) {
         set ??= new ConditionSet();
         if (set.Groups.Count == 0)
             set.Groups.Add(new ConditionGroup());
@@ -320,9 +277,6 @@ public static class ConditionUi {
 
         return false;
     }
-
-    private static void DrawConditions(ConditionGroup group, ConditionScope scope)
-        => DrawConditionsWithTypes(group, scope, GetTypesForScope(scope));
 
     private static bool DrawConditionContent(Condition cond, ConditionScope scope, IReadOnlyList<ConditionTypeDef> defs) {
         var typeChanged = false;
