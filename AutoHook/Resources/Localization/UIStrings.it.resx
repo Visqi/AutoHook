@@ -117,4 +117,161 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DrawHeader_Testing" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="DefaultSubTab" xml:space="preserve">
+    <value>Predefinito</value>
+  </data>
+  <data name="DrawImportExport_Cancel" xml:space="preserve">
+    <value>Annulla</value>
+  </data>
+  <data name="ImportPresetFromClipboard" xml:space="preserve">
+    <value>Importa il preset dagli appunti.</value>
+  </data>
+  <data name="Import" xml:space="preserve">
+    <value>Importa</value>
+  </data>
+  <data name="PresetName" xml:space="preserve">
+    <value>Nome Preset</value>
+  </data>
+  <data name="ImportThisPreset" xml:space="preserve">
+    <value>Importare questo preset?</value>
+  </data>
+  <data name="AutoMooch" xml:space="preserve">
+    <value>Auto Mooch</value>
+  </data>
+  <data name="AddLastCatch" xml:space="preserve">
+    <value>Aggiungi Last Catch:</value>
+  </data>
+  <data name="ExportPresetToClipboard" xml:space="preserve">
+    <value>Esporta il preset negli appunti.</value>
+  </data>
+  <data name="PresetExportedToTheClipboard" xml:space="preserve">
+    <value>Preset esportato negli appunti</value>
+  </data>
+  <data name="APresetWithTheSameNameAlreadyExists" xml:space="preserve">
+    <value>Esiste già un set con questo nome</value>
+  </data>
+  <data name="PresetAlreadyExist" xml:space="preserve">
+    <value>Questo preset esiste già</value>
+  </data>
+  <data name="CurrentBaitMooch" xml:space="preserve">
+    <value>Esca corrente/mooch:</value>
+  </data>
+  <data name="AddCurrentBaitMooch" xml:space="preserve">
+    <value>Aggiungi Esca Attuale/Mooch</value>
+  </data>
+  <data name="TabPresets_DrawHeader_IsEnabledByDefault" xml:space="preserve">
+    <value>è abilitato di default quando viene aggiunta una nuova esca/mooch </value>
+  </data>
+  <data name="TabPresets_DrawHeader_CorrectlyEditTheBaitMoochName" xml:space="preserve">
+    <value>"Tutte le esche" e "Tutti i mooch" hanno la priorità più bassa</value>
+  </data>
+  <data name="NewBaitMooch" xml:space="preserve">
+    <value>Esca/mooch nuove</value>
+  </data>
+  <data name="EditMe" xml:space="preserve">
+    <value>Modifica</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Aggiungi</value>
+  </data>
+  <data name="HoldShiftToDelete" xml:space="preserve">
+    <value>Tieni premuto MAIUSC per eliminare.</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Chiudi</value>
+  </data>
+  <data name="RightClickToRename" xml:space="preserve">
+    <value>Click destro per rinominare</value>
+  </data>
+  <data name="EnterToConfirm" xml:space="preserve">
+    <value>Modifica nome preset (premi Enter per confermare)</value>
+  </data>
+  <data name="HookPresets" xml:space="preserve">
+    <value>Preset Hook</value>
+  </data>
+  <data name="AddNewPreset" xml:space="preserve">
+    <value>Aggiungi un nuovo preset</value>
+  </data>
+  <data name="TabPresets_DrawHeader_TabDescription" xml:space="preserve">
+    <value>Qui è possibile personalizzare quale Hook utilizzare in base all'esca corrente o mooch.
+Se un'esca/mooch non è specificata, verrà utilizzata invece la Preimpostazione Globale.</value>
+  </data>
+  <data name="TabPresets_DrawHeader_NewTabDescription" xml:space="preserve">
+    <value>Qui è possibile personalizzare quale Hook utilizzare in base all'esca corrente o mooch.
+Se un'esca/mooch non è specificata, verrà utilizzata invece la Preimpostazione Globale.</value>
+  </data>
+  <data name="NewPreset" xml:space="preserve">
+    <value>Nuova preimpostazione</value>
+  </data>
+  <data name="TabNameCustomPresets" xml:space="preserve">
+    <value>Preimpostazioni Personalizzate</value>
+  </data>
+  <data name="TabNameGPConfig" xml:space="preserve">
+    <value>Configurazione GP</value>
+  </data>
+  <data name="TabGPConfig_TabDescription" xml:space="preserve">
+    <value>Qui puoi personalizzare la soglia GP per le azioni e gli oggetti utilizzati dalla funzione AutoCast.</value>
+  </data>
+  <data name="GP" xml:space="preserve">
+    <value>GP</value>
+  </data>
+  <data name="Above" xml:space="preserve">
+    <value>Sopra</value>
+  </data>
+  <data name="Below" xml:space="preserve">
+    <value>Sotto</value>
+  </data>
+  <data name="WillBeUsedWhenYourGPIsEqualOr" xml:space="preserve">
+    <value>sarà usato quando il tuo GP è uguale o</value>
+    <comment>Action will be used when your GP is Equal or Above/Below</comment>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>Vuoto</value>
+  </data>
+  <data name="TabnameGeneral" xml:space="preserve">
+    <value>Generale</value>
+  </data>
+  <data name="DrawHeader_GeneralSettings" xml:space="preserve">
+    <value>Impostazioni generali</value>
+  </data>
+  <data name="DrawHeader_CheckChangelog" xml:space="preserve">
+    <value>Controlla le nuove modifiche nel Changelog qui sotto</value>
+  </data>
+  <data name="DrawHeader_ClickToReportAnIssue" xml:space="preserve">
+    <value>Clicca qui per segnalare un problema o fare un suggerimento</value>
+  </data>
+  <data name="Changelog" xml:space="preserve">
+    <value>Changelog</value>
+  </data>
+  <data name="HookWeakExclamation" xml:space="preserve">
+    <value>Hook Debole (!)</value>
+  </data>
+  <data name="HookStrongExclamation" xml:space="preserve">
+    <value>Hook Forte (!!)</value>
+  </data>
+  <data name="HookLegendaryExclamation" xml:space="preserve">
+    <value>Hook Leggendario (!!!)</value>
+  </data>
+  <data name="HookWillBeUsedIfPatienceIsNotUp" xml:space="preserve">
+    <value>"Hook" verrà usato se "Patience" non è attivo</value>
+  </data>
+  <data name="PrecisionHookset" xml:space="preserve">
+    <value>Precision Hookset</value>
+  </data>
+  <data name="PowerfulHookset" xml:space="preserve">
+    <value>Powerful Hookset</value>
+  </data>
+  <data name="MoochBaitName" xml:space="preserve">
+    <value>Nome Mooch/Esca</value>
+  </data>
+  <data name="BaitAlreadyExists" xml:space="preserve">
+    <value>L'esca esiste già</value>
+  </data>
+  <data name="MaxWait" xml:space="preserve">
+    <value>Attendi</value>
+    <comment>Maximum time to wait</comment>
+  </data>
 </root>
