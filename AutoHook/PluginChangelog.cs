@@ -5,6 +5,13 @@ namespace AutoHook;
 public static class PluginChangelog {
     public static readonly List<Version> Versions =
     [
+        new Version("6.0.0.47")
+        {
+            Main =
+            {
+                "Added preset wide conditions",
+            }
+        },
         new Version("6.0.0.46")
         {
             Minor =
