@@ -39,28 +39,25 @@ public class AutoHookIPC {
 
     [EzIPC]
     public void SetPreset(string preset) {
-        WriteConfig(() => _cfg.HookPresets.SelectedPreset =
-            _cfg.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == preset));
+        WriteConfig(() => _cfg.HookPresets.SelectedPreset = _cfg.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == preset));
         Service.Save();
     }
 
     public void SetPresetAutogig(string preset) {
-        WriteConfig(() => _cfg.AutoGigConfig.SelectedPreset =
-            _cfg.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == preset));
+        WriteConfig(() => _cfg.AutoGigConfig.SelectedPreset = _cfg.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == preset));
         Service.Save();
     }
 
     [EzIPC]
     public void CreateAndSelectAnonymousPreset(string preset) {
-        var import = Configuration.ImportPreset(preset);
-        if (import == null) return;
+        if (Configuration.ImportPreset(preset) is not CustomPresetConfig customPreset) return;
 
         WriteConfig(() => {
-            var name = $"anon_{import.PresetName}";
-            import.RenamePreset(name);
-            _cfg.HookPresets.AddNewPreset(import);
-            _cfg.HookPresets.SelectedPreset =
-                _cfg.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == name);
+            var nameMap = CustomPresetConfig.BuildAnonymousNameMap([customPreset]);
+            customPreset.RenamePreset(nameMap[customPreset.PresetName]);
+            CustomPresetConfig.RemapPresetSwapReferences(customPreset, nameMap);
+            _cfg.HookPresets.AddNewPreset(customPreset);
+            _cfg.HookPresets.SelectedPreset = _cfg.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == nameMap.Values.First());
         });
         Service.Save();
     }
@@ -82,6 +79,20 @@ public class AutoHookIPC {
     }
 
     [EzIPC]
+    public void ImportAndSelectFolder(string folder) {
+        if (Configuration.ImportFolder(folder) is { } import) {
+            WriteConfig(() => ImportFolder(import, anonymous: false));
+        }
+    }
+
+    [EzIPC]
+    public void CreateAndSelectAnonymousFolder(string folder) {
+        if (Configuration.ImportFolder(folder) is { } import) {
+            WriteConfig(() => ImportFolder(import, anonymous: true));
+        }
+    }
+
+    [EzIPC]
     public void DeleteSelectedPreset() {
         WriteConfig(() => {
             var selected = _cfg.HookPresets.SelectedPreset;
@@ -94,7 +105,7 @@ public class AutoHookIPC {
 
     [EzIPC]
     public void DeleteAllAnonymousPresets() {
-        WriteConfig(() => _cfg.HookPresets.CustomPresets.RemoveAll(p => p.PresetName.StartsWith("anon_")));
+        WriteConfig(() => _cfg.HookPresets.CustomPresets.RemoveAll(p => p.IsAnonymous));
         Service.Save();
     }
 
@@ -118,10 +129,30 @@ public class AutoHookIPC {
         return FishingManager.ChangeBait((uint)bait.Id) is FishingManager.ChangeBaitReturn.Success or FishingManager.ChangeBaitReturn.AlreadyEquipped;
     }
 
-    // Swaps the current swimbait slot by index (0,1,2).
     [EzIPC]
     public bool SwapSwimbaitByIndex(byte index)
         => FishingManager.ChangeSwimbait(index) is FishingManager.ChangeBaitReturn.Success or FishingManager.ChangeBaitReturn.AlreadyEquipped;
+
+    private void ImportFolder((PresetFolder Folder, List<PresetFolder> Folders, List<CustomPresetConfig> Presets) folderImport, bool anonymous) {
+        if (anonymous) {
+            var nameMap = CustomPresetConfig.BuildAnonymousNameMap(folderImport.Presets);
+            foreach (var preset in folderImport.Presets)
+                preset.RenamePreset(nameMap[preset.PresetName]);
+            CustomPresetConfig.RemapPresetSwapReferences(folderImport.Presets, nameMap);
+
+            foreach (var preset in folderImport.Presets)
+                _cfg.HookPresets.CustomPresets.Add(preset);
+        }
+        else {
+            foreach (var preset in folderImport.Presets)
+                _cfg.HookPresets.CustomPresets.Add(preset);
+            foreach (var importedFolder in folderImport.Folders)
+                _cfg.HookPresets.Folders.Add(importedFolder);
+        }
+
+        if (folderImport.Presets.FirstOrDefault() is { } first)
+            _cfg.HookPresets.SelectedPreset = first;
+    }
 
     private static void WriteConfig(Action action) {
         lock (Configuration.SerializationSync)

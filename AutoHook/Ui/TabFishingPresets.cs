@@ -65,13 +65,11 @@ public class TabFishingPresets : BaseTab {
 
     private static BasePresetConfig? displayed = _basePreset.SelectedPreset ?? _basePreset.DefaultPreset;
 
-    private const string AnonymousPresetPrefix = "anon_";
-
     private static bool IsAnonymousPreset(CustomPresetConfig preset)
-        => preset.PresetName.StartsWith(AnonymousPresetPrefix, StringComparison.Ordinal);
+        => preset.IsAnonymous;
 
     private static string GetAnonymousPresetDisplayName(string presetName)
-        => presetName.StartsWith(AnonymousPresetPrefix, StringComparison.Ordinal) ? presetName[AnonymousPresetPrefix.Length..] : presetName;
+        => presetName.StartsWith(CustomPresetConfig.AnonymousPresetPrefix, StringComparison.Ordinal) ? presetName[CustomPresetConfig.AnonymousPresetPrefix.Length..] : presetName;
 
     private void DrawList() {
         using var table = ImRaii.Table($"###PresetTable", 2, ImGuiTableFlags.Resizable);
@@ -185,10 +183,8 @@ public class TabFishingPresets : BaseTab {
         using var id = ImRaii.PushId(preset.UniqueId.ToString());
         var selected = _basePreset.SelectedGuid == preset.UniqueId.ToString();
         var color = selected ? ImGuiColors.DalamudOrange : ImGuiColors.DalamudWhite;
-        var displayName = GetAnonymousPresetDisplayName(preset.PresetName);
-
         using (var a = ImRaii.PushColor(ImGuiCol.Text, color)) {
-            if (ImGui.Selectable((selected ? "> " : "") + displayName,
+            if (ImGui.Selectable((selected ? "> " : "") + preset.PresetName,
                     displayed?.UniqueId == preset.UniqueId,
                     ImGuiSelectableFlags.AllowDoubleClick)) {
                 displayed = preset;

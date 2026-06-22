@@ -7,6 +7,32 @@ using System.Text.Json.Serialization;
 namespace AutoHook.Configurations;
 
 public class CustomPresetConfig : BasePresetConfig {
+    public const string AnonymousPresetPrefix = "anon_";
+
+    [JsonIgnore]
+    public bool IsAnonymous => PresetName.StartsWith(AnonymousPresetPrefix, StringComparison.Ordinal);
+    public string GetAnonymousName() => AnonymousPresetPrefix + PresetName;
+
+    public static Dictionary<string, string> BuildAnonymousNameMap(IEnumerable<CustomPresetConfig> presets)
+        => presets.ToDictionary(p => p.PresetName, p => p.GetAnonymousName());
+
+    public static void RemapPresetSwapReferences(IEnumerable<CustomPresetConfig> presets, IReadOnlyDictionary<string, string> nameMap) {
+        foreach (var preset in presets)
+            RemapPresetSwapReferences(preset, nameMap);
+    }
+
+    public static void RemapPresetSwapReferences(CustomPresetConfig preset, IReadOnlyDictionary<string, string> nameMap) {
+        foreach (var fish in preset.ListOfFish) {
+            if (fish.PresetToSwap != "-" && nameMap.TryGetValue(fish.PresetToSwap, out var newName))
+                fish.PresetToSwap = newName;
+        }
+
+        foreach (var trig in preset.ExtraCfg.Triggers) {
+            if (trig.PresetToSwap != "-" && nameMap.TryGetValue(trig.PresetToSwap, out var newName))
+                trig.PresetToSwap = newName;
+        }
+    }
+
     public List<HookConfig> ListOfBaits { get; set; } = [];
     public List<HookConfig> ListOfMooch { get; set; } = [];
     public List<FishConfig> ListOfFish { get; set; } = [];
