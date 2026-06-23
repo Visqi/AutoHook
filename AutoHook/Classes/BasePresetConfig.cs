@@ -3,7 +3,10 @@
 namespace AutoHook.Classes;
 
 public abstract class BasePresetConfig() {
-    public string PresetName { get; set; } = "";
+    public string PresetName {
+        get => field ?? "";
+        set => field = value ?? "";
+    } = "";
 
     [JsonIgnore] public string GroupName { get; set; } = "";
 
