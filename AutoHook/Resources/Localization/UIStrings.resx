@@ -1714,4 +1714,10 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="PresetConditions_NewName" xml:space="preserve">
     <value>New condition</value>
   </data>
+  <data name="Extra_PresetSwapLoop_Bailout" xml:space="preserve">
+    <value>Disabled plugin: extra rules created a preset swap loop ({0}).</value>
+  </data>
+  <data name="UnknownPresets" xml:space="preserve">
+    <value>Unknown Presets</value>
+  </data>
 </root>

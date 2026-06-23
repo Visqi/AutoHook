@@ -1690,6 +1690,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Disabled plugin: extra rules created a preset swap loop ({0})..
+        /// </summary>
+        internal static string Extra_PresetSwapLoop_Bailout {
+            get {
+                return ResourceManager.GetString("Extra_PresetSwapLoop_Bailout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &gt;Make sure &apos;Use Mooch II&apos; is enabled or else it wont work&lt;
         ///This could save you 100gp if going only for mooches.
         /// </summary>
@@ -4407,6 +4416,15 @@ namespace AutoHook.Resources.Localization {
         internal static string UIUseCurrentBait {
             get {
                 return ResourceManager.GetString("UIUseCurrentBait", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown Presets.
+        /// </summary>
+        internal static string UnknownPresets {
+            get {
+                return ResourceManager.GetString("UnknownPresets", resourceCulture);
             }
         }
         

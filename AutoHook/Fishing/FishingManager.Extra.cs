@@ -7,10 +7,10 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 namespace AutoHook.Fishing;
 
 public partial class FishingManager {
+    private const int _presetSwapCap = 8;
+
     public ExtraConfig GetExtraCfg()
-        => Presets.SelectedPreset?.ExtraCfg.Enabled ?? false
-            ? Presets.SelectedPreset.ExtraCfg
-            : Presets.DefaultPreset.ExtraCfg;
+        => Presets.SelectedPreset?.ExtraCfg.Enabled ?? false ? Presets.SelectedPreset.ExtraCfg : Presets.DefaultPreset.ExtraCfg;
 
     /// <summary>
     /// When <see cref="Configuration.AutoOceanFish"/> is on, select the first preset whose Extra config
@@ -76,14 +76,9 @@ public partial class FishingManager {
         => Presets.SelectedPreset?.ExtraCfg.Enabled == true ? Presets.SelectedPreset : Presets.DefaultPreset;
 
     private bool ExtraSwapStillNeeded(ExtraTrigger trig) {
-        if (trig.SwapPreset && !string.IsNullOrEmpty(trig.PresetToSwap) && trig.PresetToSwap != @"-"
-            && Presets.SelectedPreset?.PresetName != trig.PresetToSwap)
+        if (trig.SwapPreset && !string.IsNullOrEmpty(trig.PresetToSwap) && trig.PresetToSwap != @"-" && Presets.SelectedPreset?.PresetName != trig.PresetToSwap)
             return true;
-
-        if (trig.SwapBait && trig.BaitToSwap.Id > 0 && Ws.Fishing.BaitInfo.BaitId != trig.BaitToSwap.Id)
-            return true;
-
-        return false;
+        return trig.SwapBait && trig.BaitToSwap.Id > 0 && Ws.Fishing.BaitInfo.BaitId != trig.BaitToSwap.Id;
     }
 
     private void QueueResolveCollectables() {
@@ -102,10 +97,19 @@ public partial class FishingManager {
 
     private void CheckExtraActions() {
         var anyPresetSwapped = false;
+        var involvedPresetIds = new HashSet<Guid>();
+        var iterations = 0;
 
         while (true) {
+            if (++iterations > _presetSwapCap) {
+                SwapLoopBailout(involvedPresetIds);
+                break;
+            }
+
             Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.PresetSwapped));
             Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.BaitSwapped));
+
+            involvedPresetIds.Add(GetExtraOwnerPreset().UniqueId);
 
             var presetBefore = Presets.SelectedPreset?.UniqueId;
             var extraCfg = GetExtraCfg();
@@ -118,10 +122,22 @@ public partial class FishingManager {
                 break;
 
             anyPresetSwapped = true;
+            involvedPresetIds.Add(GetExtraOwnerPreset().UniqueId);
         }
 
         if (anyPresetSwapped)
-                    Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
+            Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
+    }
+
+    private void SwapLoopBailout(HashSet<Guid> involvedPresetIds) {
+        var involvedNames = EnumerateHookPresets().Where(p => involvedPresetIds.Contains(p.UniqueId)).Select(p => p.PresetName).ToList();
+
+        Service.Configuration.PluginEnabled = false;
+        Service.Save();
+
+        var presetList = involvedNames.Count > 0 ? string.Join(", ", involvedNames) : UIStrings.UnknownPresets;
+        Service.PrintChat(string.Format(UIStrings.Extra_PresetSwapLoop_Bailout, presetList));
+        Service.PrintDebug($"[Extra.{nameof(SwapLoopBailout)}] {_presetSwapCap} iterations; involved: {presetList}");
     }
 
     private void RunExtraTriggers(ExtraConfig extraCfg) {
