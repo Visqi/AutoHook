@@ -5,6 +5,13 @@ namespace AutoHook;
 public static class PluginChangelog {
     public static readonly List<Version> Versions =
     [
+        new Version("6.0.0.52")
+        {
+            Main =
+            {
+                "Added ocean zone time remaining condition",
+            }
+        },
         new Version("6.0.0.48")
         {
             Main =
