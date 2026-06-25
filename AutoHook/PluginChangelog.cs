@@ -5,6 +5,13 @@ namespace AutoHook;
 public static class PluginChangelog {
     public static readonly List<Version> Versions =
     [
+        new Version("6.0.0.53")
+        {
+            Main =
+            {
+                "Added a global option to rest if a spectral occurs mid cast",
+            }
+        },
         new Version("6.0.0.52")
         {
             Main =
