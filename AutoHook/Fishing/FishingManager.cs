@@ -14,9 +14,8 @@ public partial class FishingManager : IDisposable {
     private static readonly FishingPresets Presets = Service.Configuration.HookPresets;
     private readonly Stopwatch _fishingTimer = new();
     private readonly Random _rng = new();
-    private readonly EventSubscriptions _oceanEventSubs;
+    private readonly EventSubscriptions _eventSubs;
     private StopAfterState _stopAfterNextFish;
-
     private double FishTimerSecs => Math.Truncate(_fishingTimer.ElapsedMilliseconds / 1000.0 * 100) / 100;
 
     private enum StopAfterState {
@@ -48,7 +47,9 @@ public partial class FishingManager : IDisposable {
     }
 
     public FishingManager() {
-        _oceanEventSubs = new(Ws.OceanZoneStarted.Subscribe(OnOceanZoneStarted));
+        _eventSubs = new(
+            Ws.OceanZoneStarted.Subscribe(OnOceanZoneStarted),
+            Ws.SpectralCurrentChanged.Subscribe(OnSpectralCurrentChanged));
         try {
             Svc.Framework.Update += OnFrameworkUpdate;
             Svc.Chat.ChatMessage += OnMessageDelegate;
@@ -60,7 +61,7 @@ public partial class FishingManager : IDisposable {
     }
 
     public void Dispose() {
-        _oceanEventSubs.Dispose();
+        _eventSubs.Dispose();
         Svc.Framework.Update -= OnFrameworkUpdate;
         Svc.Chat.ChatMessage -= OnMessageDelegate;
         Ws.Modified -= OnWorldStateModified;
@@ -87,6 +88,25 @@ public partial class FishingManager : IDisposable {
 
         Svc.Automation.Start(new AutoOceanFish(this, op.ZoneIndex));
         Service.PrintDebug($"[AutoOceanFish] Task started for zone {op.ZoneIndex + 1}");
+    }
+
+    private void OnSpectralCurrentChanged(WorldState.OpSpectralCurrentChanged op) {
+        if (op.Change is not SpectralCurrentChange.Gained) return;
+        if (!Service.Configuration.PluginEnabled || !Service.Configuration.SpectralRest) return;
+        if (Ws.Fishing.FishingState is not (FishingState.LineInWater or FishingState.AmbitiousLure)) return;
+        if (Ws.Fishing.FishingStep.HasFlag(FishingSteps.Reeling | FishingSteps.TimeOut)) return;
+        if (Ws.Player.BlockCasting || Service.TaskManager.IsBusy) return;
+        if (!EzThrottler.Throttle("SpectralRestMidCast", 1000)) return;
+
+        Service.Status = UIStrings.SpectralRestOnGain;
+        Service.PrintDebug("Spectral gained mid-cast; resting");
+
+        var delay = _rng.Next(Service.Configuration.DelayBeforeCancelMin, Service.Configuration.DelayBeforeCancelMax);
+        Service.TaskManager.EnqueueDelay(delay);
+        Service.TaskManager.Enqueue(() => {
+            PlayerRes.CastActionDelayed(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook);
+            Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.Reeling));
+        });
     }
 
     private void OnWorldStateModified(WorldState.Operation op) {

@@ -100,10 +100,7 @@ public sealed class WorldState {
                 return IDs.Actions.StellarHookMaster;
         }
 
-        if (ActionAvailable(IDs.Actions.StellarHook))
-            return IDs.Actions.StellarHook;
-
-        return null;
+        return ActionAvailable(IDs.Actions.StellarHook) ? IDs.Actions.StellarHook : null;
     }
 
     public OceanFishingState OceanFishing => Ocean.OceanFishing;
@@ -185,5 +182,10 @@ public sealed class WorldState {
     public Event<OpOceanZoneStarted> OceanZoneStarted = new();
     public sealed record OpOceanZoneStarted(uint ZoneIndex) : Operation {
         protected override void Exec(WorldState ws) => ws.OceanZoneStarted.Fire(this);
+    }
+
+    public Event<OpSpectralCurrentChanged> SpectralCurrentChanged = new();
+    public sealed record OpSpectralCurrentChanged(SpectralCurrentChange Change) : Operation {
+        protected override void Exec(WorldState ws) => ws.SpectralCurrentChanged.Fire(this);
     }
 }

@@ -62,7 +62,7 @@ public sealed class OceanFishInfo {
             yield return new OpSpectralTimer(SpectralTimer);
     }
 
-    private void TickSpectralTimer(OceanFishingState state, float zoneTimeLeft) {
+    private IEnumerable<WorldState.Operation> TickSpectralTimer(OceanFishingState state, float zoneTimeLeft) {
         var now = DateTime.UtcNow;
         var delta = _spectralLastUtc == DateTime.MinValue ? 0f : (float)(now - _spectralLastUtc).TotalSeconds;
         _spectralLastUtc = now;
@@ -86,6 +86,7 @@ public sealed class OceanFishInfo {
             else
                 EndSpectral();
             _spectralWasActive = active;
+            yield return new WorldState.OpSpectralCurrentChanged(active ? SpectralCurrentChange.Gained : SpectralCurrentChange.Lost);
         }
         else if (active && delta > 0f) {
             _spectralSeconds = Math.Max(0f, _spectralSeconds - delta);
@@ -158,7 +159,8 @@ public sealed class OceanFishInfo {
                 return;
             }
 
-            ws.Ocean.TickSpectralTimer(s, s.TimeLeftInZone);
+            foreach (var op in ws.Ocean.TickSpectralTimer(s, s.TimeLeftInZone))
+                op.Execute(ws);
             foreach (var op in ws.Ocean.TickZoneStarted(s))
                 op.Execute(ws);
         }

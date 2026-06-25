@@ -3691,6 +3691,24 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Spectral Rest.
+        /// </summary>
+        internal static string SpectralRestOnGain {
+            get {
+                return ResourceManager.GetString("SpectralRestOnGain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rest and re-cast when a spectral current starts mid-cast.
+        /// </summary>
+        internal static string SpectralRestOnGainHelpText {
+            get {
+                return ResourceManager.GetString("SpectralRestOnGainHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Speed.
         /// </summary>
         internal static string Speed {
