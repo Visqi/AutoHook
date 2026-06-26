@@ -1522,6 +1522,9 @@
     <value>폴더 이동:</value>
     <comment>Moving folder: FolderName</comment>
   </data>
+  <data name="GPlabel" xml:space="preserve">
+    <value>GP</value>
+  </data>
   <data name="Dtr_Show" xml:space="preserve">
     <value>Dtr 바에 표시</value>
   </data>
@@ -1540,14 +1543,35 @@
   <data name="SwapStopRules" xml:space="preserve">
     <value>교체/중단 규칙:</value>
   </data>
+  <data name="AetherialReduction_ReduceFish" xml:space="preserve">
+    <value>물고기 비우기(정제)</value>
+  </data>
   <data name="AetherialReduction_ReduceFishHelp" xml:space="preserve">
     <value>낚시를 하기 전에 소지품에 정제가 가능한 물고기를 정제합니다. 정제가 끝날 때까지 낚시를 일시중단합니다.</value>
   </data>
   <data name="AetherialReduction_NotUnlocked" xml:space="preserve">
     <value>해당 캐릭터는 정제를 배우지 않았습니다</value>
   </data>
+  <data name="AetherialReduction_Started" xml:space="preserve">
+    <value>물고기 비우는 중...</value>
+  </data>
+  <data name="AetherialReduction_Complete" xml:space="preserve">
+    <value>정제 완료. 낚시를 재개합니다</value>
+  </data>
+  <data name="AetherialReduction_Status_Quitting" xml:space="preserve">
+    <value>낚시를 중단하는 중...</value>
+  </data>
+  <data name="AetherialReduction_Status_Reducing" xml:space="preserve">
+    <value>물고기 비우는 중...</value>
+  </data>
+  <data name="AetherialReduction_Status_Resuming" xml:space="preserve">
+    <value>낚시를 다시 시작하는 중...</value>
+  </data>
   <data name="Previous" xml:space="preserve">
     <value>이전</value>
+  </data>
+  <data name="Current" xml:space="preserve">
+    <value>현재</value>
   </data>
   <data name="Next" xml:space="preserve">
     <value>다음</value>
@@ -1569,6 +1593,12 @@
   </data>
   <data name="AutoOceanFishHelpText" xml:space="preserve">
     <value>먼바다 낚시에서 이뤄지는 모든 작업을 실행합니다: 자리이동, 낚싯대 던지기, 프리셋 실행.</value>
+  </data>
+  <data name="SpectralRestOnGain" xml:space="preserve">
+    <value>환해류 출현시 다시 낚싯대 던지기</value>
+  </data>
+  <data name="SpectralRestOnGainHelpText" xml:space="preserve">
+    <value>먼바다 낚시 중에 환해류가 출현하면 진행 중인 낚시를 취소하고 다시 던집니다</value>
   </data>
   <data name="AutoHandleCollectables" xml:space="preserve">
     <value>소장품 획득 자동 수락</value>
