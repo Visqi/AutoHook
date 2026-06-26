@@ -815,7 +815,7 @@
     <value>모든 작업이 비활성화됨</value>
   </data>
   <data name="SubExtra_Disabled" xml:space="preserve">
-    <value>추가 옵션이 비활성화되었습니다.</value>
+    <value>추가 설정이 비활성 상태입니다</value>
   </data>
   <data name="Default_AutoCast_Being_Used" xml:space="preserve">
     <value>[기본값] 자동 낚싯대 던지기가 대신 사용됩니다.</value>
@@ -945,7 +945,7 @@
     <value>한결같은 챔질이 비활성화된 경우에만 낚아채기</value>
   </data>
   <data name="Collect" xml:space="preserve">
-    <value>소장품</value>
+    <value>소장품 채집</value>
   </data>
   <data name="CollectHelpText" xml:space="preserve">
     <value>낚시를 시작할 때 소장품 수집을 활성화합니다</value>
@@ -1150,7 +1150,7 @@
     <value>비활성화된 경우, 생미끼 낚시 시도가 취소되지 않으며 자동 생미끼 낚시 옵션도 무시됩니다.</value>
   </data>
   <data name="NeverMoochHelpText" xml:space="preserve">
-    <value>활성화된 경우, 작업이 해당 물고기의 생미끼 낚시 시도도 취소합니다.</value>
+    <value>활성화시, 해당 물고기의 생미끼 낚시를 사용하지 않습니다</value>
   </data>
   <data name="OnlyWhenMakeshiftOrPatience" xml:space="preserve">
     <value>숙련 낚시꾼 또는 인내가 활성화된 경우에만 사용합니다.</value>
@@ -1159,7 +1159,7 @@
     <value>물고기의 눈이 사용되며 생미끼 낚시 시도가 취소됩니다.</value>
   </data>
   <data name="StartActions" xml:space="preserve">
-    <value>작업 시작</value>
+    <value>낚시 시작</value>
   </data>
   <data name="StartActionHelpText" xml:space="preserve">
     <value>자동 낚시를 시작하세요! 추가 탭에서 낚시에 사용할 미끼 교체도 설정할 수 있습니다.
@@ -1167,13 +1167,13 @@
 또한 /ahstart 명령어를 사용해 시작할 수 있습니다. 매크로로 만들어 보세요!</value>
   </data>
   <data name="ForceBaitSwap" xml:space="preserve">
-    <value>"작업 시작" 사용 시 미끼 강제 교체</value>
+    <value>"낚시 시작" 사용 시 미끼 강제 교체</value>
   </data>
   <data name="SelectBaitStartFishing" xml:space="preserve">
     <value>낚시를 시작할 미끼 선택:</value>
   </data>
   <data name="BaitPresetPriorityWarning" xml:space="preserve">
-    <value>여기에서 미끼 및 프리셋 교체는 포획된 물고기 교체보다 우선합니다.</value>
+    <value>'추가 설정' 탭의 미끼 및 프리셋 교체는 '잡은 물고기' 탭보다 우선 적용됩니다</value>
   </data>
   <data name="WhenAnglersAt" xml:space="preserve">
     <value>월척 낚시꾼 스택이 특정 값에 도달했을 때...</value>
@@ -1404,7 +1404,7 @@
     <value>물고기를 낚았을 경우에는 작동하지 않으며 실패/취소된 시도에서 다시 던질 때만 작동</value>
   </data>
   <data name="TurnCollectOff" xml:space="preserve">
-    <value>자동 수집이 비활성화된 경우 소장품 채집을 끔</value>
+    <value>'소장품 채집 설정'을 비활성화하면 게임내 소장품 채집을 끔</value>
   </data>
   <data name="TurnCollectOffHelp" xml:space="preserve">
     <value>애니메이션 캔슬은 낚싯대 던지기 전에 수집가의 장갑을 켜야 하며, 이 옵션은 낚시 중 소장품 채집을 끈 상태로 유지합니다.</value>
@@ -1416,16 +1416,16 @@
     <value>실험적이며 일관성이 없을 수 있음(핑 때문일 가능성 있음). 작업 '구조'가 활성화됩니다.</value>
   </data>
   <data name="TurnCollectOffWithoutAnimCancel" xml:space="preserve">
-    <value>낚시대를 회수하면 자동으로 소장품 채집 끄기</value>
+    <value>'소장품 채집 설정'을 비활성화하면 게임내 소장품 채집을 끔</value>
   </data>
   <data name="TurnCollectOffWithoutAnimCancelHelp" xml:space="preserve">
-    <value>애니메이션 캔슬 설정과 무관하게, 던진 낚싯대를 회수하면 소장품 채집을 자동으로 끕니다</value>
+    <value>애니메이션 캔슬 설정 여부와 상관없이, 자동 낚시 설정의 소장품 채집이 비활성 상태라면 게임내 소장품 채집을 자동으로 끕니다</value>
   </data>
   <data name="FishCaughtHelp" xml:space="preserve">
-    <value>물고기를 잡았을 때의 옵션</value>
+    <value>물고기를 낚았을 때의 행동을 설정할 수 있습니다</value>
   </data>
   <data name="ExtraOptionsHelp" xml:space="preserve">
-    <value>추가 옵션</value>
+    <value>다양한 옵션을 설정할 수 있습니다</value>
   </data>
   <data name="AutoCastsHelp" xml:space="preserve">
     <value>자동 낚시 사용 스킬 설정</value>
