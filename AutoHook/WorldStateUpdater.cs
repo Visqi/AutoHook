@@ -106,9 +106,9 @@ public sealed class WorldStateUpdater : IDisposable {
         var biteContext = CollectBiteContext(ws);
         UpdateFishingState(ws, biteContext);
 
-        if (ws.Fishing is { PreviousFishingState: FishingState.None, FishingState: not FishingState.None })
+        if (previousFishingState == FishingState.None && ws.Fishing.FishingState != FishingState.None)
             ws.Execute(new WorldState.OpBeganSession());
-        else if (ws.Fishing is { PreviousFishingState: not FishingState.None, FishingState: FishingState.None })
+        else if (previousFishingState != FishingState.None && ws.Fishing.FishingState == FishingState.None)
             ws.Execute(new WorldState.OpEndedSession());
 
         if (_needInventoryUpdate) {
