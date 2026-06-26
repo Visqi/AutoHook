@@ -341,7 +341,7 @@ public partial class FishingManager : IDisposable {
 
         CheckExtraActions();
 
-        var lastCatchCfg = GetLastCatchConfig();
+        var lastCatchCfg = GetEffectiveCatchConfig();
 
         var casted = false;
         if (Ws.FishingStep.HasFlag(FishingSteps.FishCaught) && !Ws.FishingStep.HasFlag(FishingSteps.Quitting)) {
@@ -475,7 +475,7 @@ public partial class FishingManager : IDisposable {
     }
 
     private void CheckStopCondition() {
-        if (GetLastCatchConfig() is { } lastFishCatchCfg)
+        if (GetEffectiveCatchConfig() is { } lastFishCatchCfg)
             TryApplyStopLimit(lastFishCatchCfg.StopAfterCaughtLimit, lastFishCatchCfg.StopFishingStep,
                 lastFishCatchCfg.StopAfterResetCount, lastFishCatchCfg.UniqueId,
                 UIStrings.Caught_Limited_Reached_Chat_Message, lastFishCatchCfg.Fish.Name);

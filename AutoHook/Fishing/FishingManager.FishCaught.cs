@@ -10,15 +10,25 @@ public partial class FishingManager {
         return Presets.SelectedPreset?.GetFishById(lc.FishId) ?? Presets.DefaultPreset.GetFishById(lc.FishId);
     }
 
-    private bool UseFishCaughtActions(FishConfig? lastFishCatchCfg) {
-        BaseActionCast? cast = null;
+    // returns null when ignore condition is active, otherwise the config
+    private FishConfig? GetEffectiveCatchConfig() {
+        var cfg = GetLastCatchConfig();
+        return ShouldIgnoreFishSettings(cfg) ? null : cfg;
+    }
 
-        if (lastFishCatchCfg == null || !lastFishCatchCfg.Enabled || Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped))
+    private static bool ShouldIgnoreFishSettings(FishConfig? cfg) {
+        if (cfg is not { Enabled: true })
             return false;
 
         // Treat an "empty" ignore set (only empty groups, no conditions) as if it wasn't configured at all.
         // Can't delete all groups in advanced mode because slim mode always ensures there's a group, even if empty
-        if (lastFishCatchCfg.IgnoreConditionSet is { } ignoreSet && ignoreSet.HasAnyCondition() && ignoreSet.PassesOrUnconfigured())
+        return cfg.IgnoreConditionSet is { } ignoreSet && ignoreSet.HasAnyCondition() && ignoreSet.PassesOrUnconfigured();
+    }
+
+    private bool UseFishCaughtActions(FishConfig? lastFishCatchCfg) {
+        BaseActionCast? cast = null;
+
+        if (lastFishCatchCfg == null || !lastFishCatchCfg.Enabled || Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped))
             return false;
 
         if (Ws.Fishing.LastCatch is { } lc && lc.FishId > 0)
@@ -56,7 +66,7 @@ public partial class FishingManager {
     }
 
     private void CheckFishCaughtSwap(FishConfig? lastCatchCfg) {
-        if (lastCatchCfg == null || !lastCatchCfg.Enabled)
+        if (lastCatchCfg == null || !lastCatchCfg.Enabled || ShouldIgnoreFishSettings(lastCatchCfg))
             return;
 
         var guid = lastCatchCfg.UniqueId;

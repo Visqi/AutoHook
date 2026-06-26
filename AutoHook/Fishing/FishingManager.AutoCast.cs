@@ -55,7 +55,7 @@ public partial class FishingManager {
             return;
 
         Service.TaskManager.Enqueue(() => {
-            var lastFishCatchCfg = GetLastCatchConfig();
+            var lastFishCatchCfg = GetEffectiveCatchConfig();
             var acCfg = GetAutoCastCfg();
             var ignoreMooch = lastFishCatchCfg?.NeverMooch ?? false;
             var autoCast = acCfg.GetNextAutoCast(ignoreMooch);
