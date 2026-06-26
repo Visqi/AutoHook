@@ -1407,7 +1407,7 @@
     <value>'소장품 채집 설정'을 비활성화하면 게임내 소장품 채집을 끔</value>
   </data>
   <data name="TurnCollectOffHelp" xml:space="preserve">
-    <value>애니메이션 캔슬은 낚싯대 던지기 전에 수집가의 장갑을 켜야 하며, 이 옵션은 낚시 중 소장품 채집을 끈 상태로 유지합니다.</value>
+    <value>애니메이션 캔슬은 자동 낚시 전에 소장품 채집 설정을 활성해야 합니다. 이 설정을 활성화하면 자동 낚시 설정의 소장품 채집을 끄면 게임내 소장품 채집도 끕니다</value>
   </data>
   <data name="EnableChumCancel" xml:space="preserve">
     <value>밑밥 애니메이션 캔슬 활성화</value>
@@ -1419,7 +1419,7 @@
     <value>'소장품 채집 설정'을 비활성화하면 게임내 소장품 채집을 끔</value>
   </data>
   <data name="TurnCollectOffWithoutAnimCancelHelp" xml:space="preserve">
-    <value>애니메이션 캔슬 설정 여부와 상관없이, 자동 낚시 설정의 소장품 채집이 비활성 상태라면 게임내 소장품 채집을 자동으로 끕니다</value>
+    <value>애니메이션 캔슬 설정 여부와 상관없이, 자동 낚시 설정의 소장품 채집을 끄면 게임내 소장품 채집도 끕니다</value>
   </data>
   <data name="FishCaughtHelp" xml:space="preserve">
     <value>물고기를 낚았을 때의 행동을 설정할 수 있습니다</value>
