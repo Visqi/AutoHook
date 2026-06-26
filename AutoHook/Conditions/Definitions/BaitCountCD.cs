@@ -1,4 +1,5 @@
 using Dalamud.Bindings.ImGui;
+using Lumina.Excel.Sheets;
 using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
@@ -29,5 +30,11 @@ public sealed class BaitCountCD : IConditionDefinition {
 
         ImGui.SameLine();
         DrawIntCompareParams(condition, "##baitcount_op", "Count", clamp: v => Math.Max(0, v));
+    }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters) {
+        var baitId = GetInt(parameters, "id", 0);
+        var bait = baitId > 0 ? Item.GetRow((uint)baitId).Name.ToString() : "any bait";
+        return $"{bait} {ConditionParameterFormat.FormatIntCompare(parameters)}";
     }
 }

@@ -21,4 +21,7 @@ public sealed class ChumTimerCD : IConditionDefinition {
 
     public void DrawParams(Condition condition)
         => DrawSingleRangeParams(condition);
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatRanges(parameters);
 }

@@ -82,7 +82,7 @@ public static class DrawUtil {
 
     public static void TextV(string s) {
         ImGui.AlignTextToFramePadding();
-        ImGui.TextUnformatted(s);
+        ImGui.Text(s);
     }
 
     public static void Info(string text) {

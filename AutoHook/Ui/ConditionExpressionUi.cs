@@ -119,10 +119,10 @@ public static class ConditionExpressionUi {
         for (var i = 0; i < set.Groups.Count && i < 26; i++) {
             var label = ((char)('A' + i)).ToString();
             using (ConditionUi.IsGroupCurrentlyTrue(set.Groups[i]) ? ImRaii.PushColor(ImGuiCol.Button, ImGuiColors.ParsedGreen) : null)
-            if (ImGui.SmallButton(label)) {
-                tokens.Add(new ExprToken(ExprTokenKind.Group, i));
-                changed = true;
-            }
+                if (ImGui.SmallButton(label)) {
+                    tokens.Add(new ExprToken(ExprTokenKind.Group, i));
+                    changed = true;
+                }
             ImGui.SameLine();
         }
 

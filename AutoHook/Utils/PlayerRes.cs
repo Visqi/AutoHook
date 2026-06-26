@@ -31,18 +31,12 @@ public static class PlayerRes {
     public static uint CastActionCost(uint id, ActionType actionType = ActionType.Action)
         => (uint)ActionManager.GetActionCost(actionType, id, 0, 0, 0, 0);
 
-    public static unsafe bool ActionOnCoolDown(uint id, ActionType actionType = ActionType.Action) {
-        var group = GetRecastGroups(id, actionType);
-        if (group == -1) return false;
-        var recastDetail = ActionManager.Instance()->GetRecastGroupDetail(group);
-        return recastDetail->Total - recastDetail->Elapsed > 0;
-    }
+    public static bool ActionOnCoolDown(uint id, ActionType actionType = ActionType.Action)
+        => WS.ActionOnCooldown(id, actionType);
 
-    public static unsafe float GetCooldown(uint id, ActionType actionType) {
-        var group = GetRecastGroups(id, actionType);
-        if (group == -1) return 0;
-        var recast = ActionManager.Instance()->GetRecastGroupDetail(group);
-        return recast->Total - recast->Elapsed;
+    public static float GetCooldown(uint id, ActionType actionType) {
+        var remaining = WS.GetCooldownRemaining(id, actionType);
+        return remaining <= 0f ? 0f : remaining;
     }
 
     public static void CastActionDelayed(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {

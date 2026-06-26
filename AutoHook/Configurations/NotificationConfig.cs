@@ -40,7 +40,7 @@ public record class NotificationConfig {
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && !hasPlugin) {
             using var tooltip = ImRaii.Tooltip();
             if (tooltip.Alive) {
-                ImGui.TextUnformatted("NotificationMaster not installed. NotificationMaster-specific options below will have no effect");
+                ImGui.Text("NotificationMaster not installed. NotificationMaster-specific options below will have no effect");
             }
         }
     }

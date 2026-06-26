@@ -3,6 +3,8 @@ using Dalamud.Game.Text;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using Lumina.Excel.Sheets;
+using LuminaAction = Lumina.Excel.Sheets.Action;
 using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
@@ -42,7 +44,7 @@ public sealed class ActionCooldownCD : IConditionDefinition {
             return false;
 
         var actionType = GetActionType(args.Type, args.Id);
-        var lhs = GetCooldownSeconds(args.Id, actionType);
+        var lhs = GetCooldownSeconds(world, args.Id, actionType);
         var rhs = args.Seconds;
         var result = CompareInt(lhs, rhs, args.Op);
         return args.Apply(result);
@@ -76,7 +78,7 @@ public sealed class ActionCooldownCD : IConditionDefinition {
                 .Where(id => id != 0)
                 .Select(id => {
                     var (baseId, itemKind) = ItemUtil.GetBaseId(id);
-                    var name = MultiString.GetItemName(baseId);
+                    var name = Item.GetRow(baseId).Name.ToString();
                     var hq = itemKind is ItemKind.Hq ? $" {SeIconChar.HighQuality.ToIconString()}" : string.Empty;
                     return (Id: id, Name: $"{id}: {name}{hq}");
                 })
@@ -99,7 +101,7 @@ public sealed class ActionCooldownCD : IConditionDefinition {
                 .Select(f => f.GetValue(null))
                 .OfType<uint>()
                 .Where(id => id != 0)
-                .Select(id => (Id: id, Name: $"{id}: {MultiString.GetActionName(id)}"))
+                .Select(id => (Id: id, Name: $"{id}: {LuminaAction.GetRow(id).Name}"))
                 .Where(x => !string.IsNullOrEmpty(x.Name))
                 .OrderBy(x => x.Name)
                 .ToList();
@@ -153,8 +155,8 @@ public sealed class ActionCooldownCD : IConditionDefinition {
     private static string GetIdLabel(int type, uint id) => type switch {
         1 when id is 0 => "Select item",
         _ when id is 0 => "Select action",
-        1 => $"{id}: {MultiString.GetItemName(ItemUtil.GetBaseId(id).ItemId)}",
-        _ => $"{id}: {MultiString.GetActionName(id)}",
+        1 => $"{id}: {Item.GetRow(ItemUtil.GetBaseId(id).ItemId).Name}",
+        _ => $"{id}: {LuminaAction.GetRow(id).Name}",
     };
 
     private static ActionType GetActionType(int type, uint id) {
@@ -163,16 +165,15 @@ public sealed class ActionCooldownCD : IConditionDefinition {
         return ActionType.Action;
     }
 
-    private static int GetCooldownSeconds(uint id, ActionType type) {
+    private static int GetCooldownSeconds(WorldState world, uint id, ActionType type) {
         try {
-            if (!PlayerRes.ActionOnCoolDown(id, type))
-                return 0;
-
-            var cd = PlayerRes.GetCooldown(id, type);
-            return cd <= 0 ? 0 : (int)Math.Ceiling(cd);
+            return world.GetCooldownSeconds(id, type);
         }
         catch {
             return int.MaxValue;
         }
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatActionCooldown(parameters);
 }

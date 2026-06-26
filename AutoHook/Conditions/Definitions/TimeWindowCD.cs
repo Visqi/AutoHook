@@ -1,5 +1,4 @@
 using Dalamud.Bindings.ImGui;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
@@ -31,8 +30,8 @@ public sealed class TimeWindowCD : SnapshottableConditionDefinition, ISimpleCond
         }
     }
 
-    protected override unsafe bool EvaluateLive(WorldState world, IReadOnlyDictionary<string, object> parameters)
-        => Evaluate(GetParams(parameters), TimeOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(Framework.Instance()->ClientTime.EorzeaTime).DateTime));
+    protected override bool EvaluateLive(WorldState world, IReadOnlyDictionary<string, object> parameters)
+        => Evaluate(GetParams(parameters), world.EorzeaTime);
 
     protected override bool EvaluateSnapshot(CastInfoSnapshot snapshot, IReadOnlyDictionary<string, object> parameters)
         => Evaluate(GetParams(parameters), snapshot.EorzeaTime);
@@ -100,4 +99,11 @@ public sealed class TimeWindowCD : SnapshottableConditionDefinition, ISimpleCond
 
     IReadOnlyDictionary<string, object>? ISimpleConditionValue<(bool Enabled, TimeOnly Start, TimeOnly End)>.ToParams((bool Enabled, TimeOnly Start, TimeOnly End) value, object? context)
         => value.Enabled ? new TimeWindowParams(value.Start, value.End, false).ToParams() : null;
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters) {
+        var (start, end) = GetTimeWindowFromParams(parameters);
+        if (start == default && end == default)
+            return "no window";
+        return $"{start:HH:mm}–{end:HH:mm}";
+    }
 }

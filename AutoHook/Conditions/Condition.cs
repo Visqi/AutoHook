@@ -41,4 +41,35 @@ public class Condition {
 
         return registry.Get(TypeId) is { } def && def.Evaluate(world, Params);
     }
+
+    public (bool Result, List<(string Id, bool Result)> Trace) EvaluateWithTrace(WorldState world, ConditionRegistry registry) {
+        if (!Enabled)
+            return (false, []);
+
+        if (PresetConditionHelper.IsPresetType(TypeId)) {
+            var r = PresetConditionHelper.EvaluateFromTypeId(TypeId, world, Params);
+            return (r, [(TypeId, r)]);
+        }
+
+        var result = registry.Get(TypeId) is { } def && def.Evaluate(world, Params);
+        return (result, [(TypeId, result)]);
+    }
+
+    public string Describe(ConditionRegistry registry) {
+        if (string.IsNullOrEmpty(TypeId))
+            return "(empty)";
+
+        var name = PresetConditionHelper.IsPresetType(TypeId)
+            ? PresetConditionHelper.ResolveDisplayName(TypeId, PresetConditionHelper.GetEvaluationPreset()) ?? TypeId
+            : registry.Get(TypeId)?.Name ?? TypeId;
+
+        if (!Enabled)
+            return $"{name} [disabled]";
+
+        if (PresetConditionHelper.IsPresetType(TypeId))
+            return name;
+
+        var detail = registry.Get(TypeId)?.Definition?.DescribeParameters(Params) ?? ConditionParameterFormat.FormatGenericParams(Params);
+        return string.IsNullOrEmpty(detail) ? name : $"{name}: {detail}";
+    }
 }

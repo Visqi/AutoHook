@@ -1,5 +1,6 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
+using AutoHook.Replay;
 using Newtonsoft.Json;
 
 namespace AutoHook.Configurations;
@@ -82,6 +83,7 @@ public class AutoCastsConfig {
 
         if (action.Id == IDs.Actions.Chum && ChumAnimationCancel) {
             TryChumAnimationCancel();
+            ReplayDecisions.AutoCast(action, this);
             return true;
         }
 
@@ -90,6 +92,7 @@ public class AutoCastsConfig {
         else
             PlayerRes.CastActionDelayed(action.Id, action.ActionType, action.GetName());
 
+        ReplayDecisions.AutoCast(action, this);
         return true;
     }
 

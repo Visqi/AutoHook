@@ -66,4 +66,7 @@ public sealed class LureElapsedCD : IConditionDefinition {
         var inv = GetBool(p, "inv", false);
         return new LureElapsedParams(sec, op, inv);
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatDoubleCompare(parameters, valueKey: "sec", defaultOp: ">=");
 }

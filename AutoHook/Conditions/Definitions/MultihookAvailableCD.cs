@@ -8,5 +8,5 @@ public sealed class MultihookAvailableCD : BoolInvertConditionDefinition {
     public override ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast;
 
     protected override bool ReadValue(WorldState world)
-        => world.ActionAvailable(IDs.Actions.MultiHook, ActionType.Action);
+        => world.IsSlottedDutyActionReady(IDs.Actions.MultiHook, ActionType.Action);
 }

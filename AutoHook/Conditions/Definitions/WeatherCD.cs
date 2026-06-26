@@ -17,15 +17,12 @@ public sealed class WeatherCD : SnapshottableConditionDefinition {
         var slot = GetOp(parameters, "slot", "current");
         var invert = GetBool(parameters, "inv", false);
 
-        if (world.TerritoryId == 0 || !TerritoryType.TryGetRow(world.TerritoryId, out var territory))
-            return invert;
-
-        var weather = slot switch {
-            "prev" => territory.GetPreviousWeather(),
-            "next" => territory.GetNextWeather(),
-            _ => territory.GetCurrentWeather(),
+        var weatherId = slot switch {
+            "prev" => world.PreviousWeatherId,
+            "next" => world.NextWeatherId,
+            _ => world.CurrentWeatherId,
         };
-        return EvaluateWeather(ids, (byte)weather.RowId, invert);
+        return EvaluateWeather(ids, weatherId, invert);
     }
 
     protected override bool EvaluateSnapshot(CastInfoSnapshot snapshot, IReadOnlyDictionary<string, object> parameters) {
@@ -93,4 +90,7 @@ public sealed class WeatherCD : SnapshottableConditionDefinition {
                 condition.Params["ids"] = new List<object> { (long)w.Id };
             });
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatWeather(parameters);
 }

@@ -59,11 +59,11 @@ public static class ConditionUi {
         // Header: (optional) sub marker + label + add + small advanced icon + optional extras.
         if (!label.IsNullOrEmpty()) {
             if (showSubPrefix) {
-                ImGui.TextUnformatted(" └");
+                ImGui.Text(" └");
                 ImGui.SameLine();
             }
 
-            ImGui.TextUnformatted(label);
+            ImGui.Text(label);
             ImGui.SameLine();
         }
 

@@ -1,3 +1,4 @@
+using Lumina.Excel.Sheets;
 using static AutoHook.Conditions.IConditionDefinition;
 
 namespace AutoHook.Conditions.Definitions;
@@ -35,14 +36,12 @@ public sealed class StatusActiveCD : IConditionDefinition {
             .Select(f => f.GetValue(null))
             .OfType<uint>()
             .Where(id => id != 0)
-            .Select(id => (Id: id, Name: MultiString.GetStatusName(id)))
+            .Select(id => (Id: id, Name: Status.GetRow(id).Name.ToString()))
             .Where(x => !string.IsNullOrEmpty(x.Name))
             .OrderBy(x => x.Name)
             .ToList();
 
-        var selectedLabel = currentId != 0
-            ? $"{currentId}: {MultiString.GetStatusName(currentId)}"
-            : "Select status";
+        var selectedLabel = currentId != 0 ? $"{currentId}: {Status.GetRow(currentId).Name}" : "Select status";
 
         DrawUtil.DrawComboSelector(
             statuses,
@@ -53,6 +52,9 @@ public sealed class StatusActiveCD : IConditionDefinition {
                 condition.Params = newArgs.ToParams();
             });
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatStatusNames(GetStatusIds(parameters));
 
     private static StatusActiveParams GetParams(IReadOnlyDictionary<string, object> p) {
         var ids = GetStatusIds(p);

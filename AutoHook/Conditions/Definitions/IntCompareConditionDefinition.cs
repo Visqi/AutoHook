@@ -29,4 +29,7 @@ public abstract class IntCompareConditionDefinition : IConditionDefinition {
 
     public virtual void DrawParams(Condition condition)
         => DrawIntCompareParams(condition, ComboId, ValueLabel, valueKey: ValueKey, defaultValue: DefaultValue, defaultOp: DefaultOp, clamp: Clamp, valueWidth: ValueWidth);
+
+    public virtual string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatIntCompare(parameters, ValueKey, DefaultValue, DefaultOp);
 }

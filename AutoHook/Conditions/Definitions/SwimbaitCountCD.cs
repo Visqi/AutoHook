@@ -47,4 +47,7 @@ public sealed class SwimbaitCountCD : IConditionDefinition {
 
         return ">=";
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatSwimbaitCount(parameters);
 }

@@ -1,4 +1,5 @@
 ﻿using AutoHook.Spearfishing.Enums;
+using Lumina.Excel.Sheets;
 
 namespace AutoHook.Classes;
 
@@ -32,12 +33,11 @@ public class ImportedFish {
     public double BiteTimeMin { get; set; }
     public double BiteTimeMax { get; set; }
 
-    public string Name => MultiString.GetItemName(ItemId);
+    public string Name => Item.GetRow((uint)ItemId).Name.ToString();
 
     public bool IsLureFish => GameRes.LureFishes.Any(f => f.Id == ItemId);
 
-    public class FishPredator
-    {
+    public class FishPredator {
         public int ItemId { get; set; }
         public int Quantity { get; set; }
     }

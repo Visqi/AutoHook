@@ -6,6 +6,7 @@ using Dalamud.Interface.Windowing;
 using ECommons.Automation;
 using ECommons.Automation.NeoTaskManager;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using LuminaAction = Lumina.Excel.Sheets.Action;
 using System.Numerics;
 
 namespace AutoHook.Spearfishing;
@@ -38,7 +39,7 @@ internal class AutoGig : Window, IDisposable {
         Service.WindowSystem.AddWindow(this);
         IsOpen = true;
         Svc.Condition.ConditionChange += Condition_ConditionChange;
-        Gig = MultiString.GetActionName(IDs.Actions.Gig);
+        Gig = LuminaAction.GetRow(IDs.Actions.Gig).Name.ToString();
     }
 
     private void Condition_ConditionChange(Dalamud.Game.ClientState.Conditions.ConditionFlag flag, bool value) {

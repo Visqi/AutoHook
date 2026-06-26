@@ -51,4 +51,7 @@ public sealed class HookCountCD : IConditionDefinition, ISimpleConditionValue<(b
         var guid = GetGuid(parameters);
         return guid == Guid.Empty ? string.Empty : guid.ToString();
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatIntCompare(parameters, defaultValue: 1);
 }

@@ -31,5 +31,11 @@ public sealed class WKSInfo {
             ws.WKS.CollectedTotal = CollectedTotal;
             ws.WKS.CollectedIndividual = CollectedIndividual;
         }
+
+        public override void Write(Replay.ReplayOutput output)
+            => output.EmitFourCC("WKST")
+                .Emit(DevGrade).Emit(CurrentFateControlRowId).Emit(CurrentFateId)
+                .Emit(CurrentMissionUnitRowId).Emit(CurrentScore).Emit((byte)CurrentRank)
+                .Emit(CollectedTotal).Emit(CollectedIndividual);
     }
 }

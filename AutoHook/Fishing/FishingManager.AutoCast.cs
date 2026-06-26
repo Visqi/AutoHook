@@ -1,5 +1,7 @@
 using AutoHook.Conditions;
+using AutoHook.Replay;
 using ECommons.Throttlers;
+using Lumina.Excel.Sheets;
 
 namespace AutoHook.Fishing;
 
@@ -167,6 +169,7 @@ public partial class FishingManager {
             Ws.SwimbaitEvaluationFishId = fishId;
             try {
                 if (activeSwimbaitCfg.ConditionSet.Fails()) {
+                    ReplayDecisions.SwimbaitSlotFailed(fishId, activeSwimbaitCfg.ConditionSet, presetName);
                     Service.PrintDebug($"[Swimbait] Fish {fishId}: conditions failed (source={configSource}), trying next slot");
                     continue;
                 }
@@ -176,10 +179,11 @@ public partial class FishingManager {
             }
 
             if (ChangeSwimbait((uint)slotIndex) == ChangeBaitReturn.Success) {
+                ReplayDecisions.SwimbaitSlotSelected(slotIndex, fishId, activeSwimbaitCfg.ConditionSet, presetName);
                 Service.WorldStateUpdater?.RefreshFishingStateSnapshot();
                 UpdateStatusAndTimer();
                 Service.PrintDebug($"[Swimbait] Using slot {slotIndex} (fish ID: {fishId}, source={configSource})");
-                Service.Status = $"Using swimbait: {MultiString.GetItemName((int)fishId)}";
+                Service.Status = $"Using swimbait: {Item.GetRow(fishId).Name}";
                 return true;
             }
 

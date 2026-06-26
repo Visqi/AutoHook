@@ -164,10 +164,34 @@ public sealed class OceanFishInfo {
             foreach (var op in ws.Ocean.TickZoneStarted(s))
                 op.Execute(ws);
         }
+
+        public override void Write(Replay.ReplayOutput output) {
+            output.EmitFourCC("OCNF");
+            if (State is null) {
+                output.Emit(0);
+                return;
+            }
+
+            var s = State;
+            output.Emit(1)
+                .Emit(s.SpectralCurrentActive).Emit(s.CurrentRoute).Emit((byte)s.TimeOfDay)
+                .Emit(s.CurrentZone).Emit(s.CurrentSpotId).Emit(s.CurrentTimeId)
+                .Emit(s.TimeLeftInZone).Emit(s.ZoneTimeMax)
+                .Emit(s.Mission1.Type).Emit(s.Mission1.Progress)
+                .Emit(s.Mission2.Type).Emit(s.Mission2.Progress)
+                .Emit(s.Mission3.Type).Emit(s.Mission3.Progress)
+                .Emit((byte)s.Status)
+                .Emit((ushort)s.FishData.Count);
+            foreach (var f in s.FishData)
+                output.Emit(f.ItemId).Emit(f.FishParamId).Emit(f.NqAmount).Emit(f.HqAmount).Emit(f.TotalPoints);
+        }
     }
 
     public sealed record OpSpectralTimer(OceanSpectralTimerInfo Value) : WorldState.Operation {
         protected override void Exec(WorldState ws) => ws.Ocean.SpectralTimer = Value;
+
+        public override void Write(Replay.ReplayOutput output)
+            => output.EmitFourCC("SPTM").Emit(Value.TimeRemaining).Emit(Value.IsActive).Emit(Value.NextSpectralDuration);
     }
 }
 
@@ -183,4 +207,30 @@ public readonly record struct ZoneSpectralRecord(
 
 public readonly record struct OceanSpectralTimerInfo(float TimeRemaining, bool IsActive, float NextSpectralDuration) {
     public static OceanSpectralTimerInfo Inactive { get; } = new(0f, false, OceanFishInfo.SpectralDefaultDurationSeconds);
+}
+
+public static class OceanFishingExtensions {
+    public static bool SameAs(this OceanFishingState a, OceanFishingState b) {
+        if (a.SpectralCurrentActive != b.SpectralCurrentActive) return false;
+        if (a.CurrentRoute != b.CurrentRoute) return false;
+        if (a.TimeOfDay != b.TimeOfDay) return false;
+        if (a.CurrentZone != b.CurrentZone) return false;
+        if (a.CurrentSpotId != b.CurrentSpotId) return false;
+        if (a.CurrentTimeId != b.CurrentTimeId) return false;
+        if (Math.Abs(a.TimeLeftInZone - b.TimeLeftInZone) > 0.05f) return false;
+        if (Math.Abs(a.ZoneTimeMax - b.ZoneTimeMax) > 0.05f) return false;
+        if (a.Mission1 != b.Mission1) return false;
+        if (a.Mission2 != b.Mission2) return false;
+        if (a.Mission3 != b.Mission3) return false;
+        if (a.Status != b.Status) return false;
+        if (a.FishData.Count != b.FishData.Count) return false;
+        for (var i = 0; i < a.FishData.Count; i++) {
+            if (!SameFish(a.FishData[i], b.FishData[i]))
+                return false;
+        }
+        return true;
+    }
+
+    private static bool SameFish(InstanceContentOceanFishing.FishDataStruct a, InstanceContentOceanFishing.FishDataStruct b)
+        => a.ItemId == b.ItemId && a.FishParamId == b.FishParamId && a.NqAmount == b.NqAmount && a.HqAmount == b.HqAmount && a.TotalPoints == b.TotalPoints;
 }

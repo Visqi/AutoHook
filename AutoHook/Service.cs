@@ -1,4 +1,6 @@
 using AutoHook.IPC;
+using AutoHook.Ui;
+using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using ECommons.Automation.NeoTaskManager;
@@ -23,9 +25,14 @@ public class Service {
     public static FishingManager FishManager { get; set; } = null!;
     public static AutoHookIPC Ipc { get; set; } = null!;
     public static NotificationMasterAPI.NotificationMasterApi NotificationMaster { get; set; } = null!;
+    public static ReplayManager ReplayManager { get; set; } = null!;
+    public static ReplayManagementWindow ReplayManagement { get; set; } = null!;
+    public static FileDialogManager FileDialog { get; } = new();
 
     public static async ValueTask InitAsync() {
-        WorldState = new WorldState();
+        unsafe {
+            WorldState = new WorldState((ulong)FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->PerformanceCounterFrequency, Svc.Data.GameData.Repositories["ffxiv"].Version);
+        }
         Configuration = await Configuration.LoadAsync();
         UIStrings.Culture = new CultureInfo(Configuration.CurrentLanguage);
         AutoCollectables = new AutoCollectables();
@@ -33,10 +40,12 @@ public class Service {
         WorldStateUpdater = new WorldStateUpdater();
         FishManager = new FishingManager();
         Ipc = new AutoHookIPC();
+        ReplayManager = new ReplayManager();
     }
 
     public static async ValueTask DisposeAsync() {
         FishManager.Dispose();
+        ReplayManager.Dispose();
         await Configuration.FlushAsync();
         WorldStateUpdater.Dispose();
         AutoCollectables.Dispose();
@@ -90,28 +99,30 @@ public static class NotificationMasterApiExtensions {
             var gameToastMessage = ResolveMessage(cfg.GameToastText, fallbackText);
             var trayMessage = ResolveMessage(cfg.ToastText, fallbackText);
 
-            if (cfg.EchoChatMessage && !string.IsNullOrWhiteSpace(chatMessage)) {
-                Svc.Chat.Print(new Dalamud.Game.Text.XivChatEntry() { Message = $"[AutoHook] {chatMessage}", Type = Dalamud.Game.Text.XivChatType.Echo });
-                success = true;
+            try {
+                if (cfg.EchoChatMessage && !string.IsNullOrWhiteSpace(chatMessage)) {
+                    Svc.Chat.Print(new Dalamud.Game.Text.XivChatEntry() { Message = $"[AutoHook] {chatMessage}", Type = Dalamud.Game.Text.XivChatType.Echo });
+                    success = true;
+                }
+
+                if (cfg.DisplayGameToast && !string.IsNullOrWhiteSpace(gameToastMessage)) {
+                    Svc.Toasts.ShowQuest(gameToastMessage);
+                    success = true;
+                }
+
+                if (Service.NotificationMaster.IsIPCReady()) {
+                    if (cfg.DisplayToastNotification && !string.IsNullOrWhiteSpace(trayMessage) && Service.NotificationMaster.DisplayTrayNotification("AutoHook", trayMessage))
+                        success = true;
+
+                    if (cfg.FlashTaskbarIcon && Service.NotificationMaster.FlashTaskbarIcon())
+                        success = true;
+
+                    if (cfg.BringGameForeground && Service.NotificationMaster.TryBringGameForeground())
+                        success = true;
+                }
             }
-
-            if (cfg.DisplayGameToast && !string.IsNullOrWhiteSpace(gameToastMessage)) {
-                Svc.Toasts.ShowQuest(gameToastMessage);
-                success = true;
-            }
-
-            if (Service.NotificationMaster.IsIPCReady()) {
-                if (cfg.DisplayToastNotification && !string.IsNullOrWhiteSpace(trayMessage) && Service.NotificationMaster.DisplayTrayNotification("AutoHook", trayMessage)) {
-                    success = true;
-                }
-
-                if (cfg.FlashTaskbarIcon && Service.NotificationMaster.FlashTaskbarIcon()) {
-                    success = true;
-                }
-
-                if (cfg.BringGameForeground && Service.NotificationMaster.TryBringGameForeground()) {
-                    success = true;
-                }
+            catch (Exception e) {
+                Svc.Log.Warning($"[AutoHook] Notification failed: {e.Message}");
             }
 
             if (cfg.BeepOnSuccess) {

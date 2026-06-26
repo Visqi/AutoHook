@@ -1,8 +1,10 @@
 using AutoHook.Conditions;
+using AutoHook.Replay;
 using AutoHook.Tasks;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using StatusSheet = Lumina.Excel.Sheets.Status;
 
 namespace AutoHook.Fishing;
 
@@ -156,6 +158,7 @@ public partial class FishingManager {
             if (!fire)
                 continue;
 
+            ReplayDecisions.ExtraTrigger(i, trig, GetExtraOwnerPreset().PresetName);
             ExecuteExtraTriggerActions(extraCfg, trig);
         }
     }
@@ -211,7 +214,7 @@ public partial class FishingManager {
 
         if (trig.RemoveStatus && trig.StatusToRemove != 0 && Ws.HasStatus(trig.StatusToRemove) && EzThrottler.Throttle("ExtraRemoveStatus", 500)) {
             if (StatusManager.ExecuteStatusOff(trig.StatusToRemove)) {
-                Service.PrintChat(@$"[Extra] Trigger: Removed {MultiString.GetStatusName(trig.StatusToRemove)}");
+                Service.PrintChat(@$"[Extra] Trigger: Removed {StatusSheet.GetRow(trig.StatusToRemove).Name}");
             }
         }
 

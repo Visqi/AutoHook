@@ -19,4 +19,6 @@ public abstract class BoolInvertConditionDefinition : IConditionDefinition {
     }
 
     public void DrawParams(Condition condition) { }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters) => string.Empty;
 }

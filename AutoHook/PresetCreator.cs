@@ -61,7 +61,7 @@ public class PresetCreator {
 
             DrawUtil.SpacingSeparator();
             var tackleBait = ResolveTackleBait(_selectedTargetFish, _presetMoochList);
-            ImGui.TextWrapped($"Initial Bait: {MultiString.GetItemName(tackleBait)}");
+            ImGui.TextWrapped($"Initial Bait: {Item.GetRow((uint)tackleBait).Name}");
 
             if (_selectedTargetFish.Mooches.Count > 0) {
                 if (_presetMoochList.Count == 0) {
@@ -86,7 +86,7 @@ public class PresetCreator {
                 }
 
                 if (_includeIntPrep) {
-                    DrawUtil.TextV($"Intuition Prep:\n{string.Join("\n", _presetPrepList.Select(fish => $"{fish.Item2}x {fish.Item1.Name} {GetBiteType(fish.Item1.BiteType)} ({MultiString.GetItemName(ResolveTackleBait(fish.Item1, ResolveMoochFish(fish.Item1.Mooches)))})"))}");
+                    DrawUtil.TextV($"Intuition Prep:\n{string.Join("\n", _presetPrepList.Select(fish => $"{fish.Item2}x {fish.Item1.Name} {GetBiteType(fish.Item1.BiteType)} ({Item.GetRow((uint)ResolveTackleBait(fish.Item1, ResolveMoochFish(fish.Item1.Mooches))).Name})"))}");
                 }
             }
 

@@ -8,6 +8,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Utility;
 using ECommons.ImGuiMethods;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using Lumina.Excel.Sheets;
 using PunishLib.ImGuiMethods;
 using System.ComponentModel;
 using System.Numerics;
@@ -187,7 +188,7 @@ public class PluginUi : Window, IDisposable {
                     }
                     else {
                         var baitId = Service.WorldState.Fishing.BaitInfo.BaitId;
-                        var baitName = MultiString.GetItemName(baitId);
+                        var baitName = baitId == 0 ? UIStrings.None : Item.GetRow(baitId).Name.ToString();
 
                         var hasBait = preset != null && preset.HasBaitOrMooch(baitId);
                         var presetName = hasBait ? _presets.SelectedPreset?.PresetName : _presets.DefaultPreset.PresetName;

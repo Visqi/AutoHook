@@ -37,4 +37,7 @@ public sealed class OceanMissionProgressCD : IConditionDefinition {
         ImGui.SameLine();
         DrawIntCompareParams(condition, "##mission_op", "Progress", clamp: v => Math.Max(0, v), valueWidth: 70);
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatIntCompare(parameters);
 }

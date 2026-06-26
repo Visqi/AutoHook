@@ -36,4 +36,7 @@ public sealed class FishCaughtCounterCD : IConditionDefinition {
         ImGui.SameLine();
         DrawIntCompareParams(condition, "##fishcount_op", "Count", clamp: v => Math.Max(0, v));
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatFishCount(parameters);
 }

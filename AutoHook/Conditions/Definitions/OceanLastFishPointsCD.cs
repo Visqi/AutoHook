@@ -34,4 +34,7 @@ public sealed class OceanLastFishPointsCD : IConditionDefinition {
         }
         return null;
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatIntCompare(parameters, defaultValue: 300);
 }

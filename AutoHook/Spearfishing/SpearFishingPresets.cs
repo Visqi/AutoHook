@@ -22,7 +22,8 @@ public class SpearFishingPresets : BasePreset {
     [JsonIgnore] private List<BasePresetConfig>? _presetListCache;
     [JsonIgnore] private int _presetListCacheCount = -1;
 
-    [JsonIgnore] public override List<BasePresetConfig> PresetList {
+    [JsonIgnore]
+    public override List<BasePresetConfig> PresetList {
         get {
             if (_presetListCache == null || _presetListCacheCount != Presets.Count) {
                 _presetListCache = [.. Presets.Cast<BasePresetConfig>()];

@@ -1726,4 +1726,7 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="UnknownPresets" xml:space="preserve">
     <value>Unknown Presets</value>
   </data>
+  <data name="Opens_Replay_Window" xml:space="preserve">
+    <value>Opens Replay Window</value>
+  </data>
 </root>

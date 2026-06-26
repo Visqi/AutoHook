@@ -36,4 +36,14 @@ public sealed class OceanZoneCD : IConditionDefinition {
         if (ImGui.Selectable("Zone 2", zone == 1)) { zone = 1; condition.Params["zone"] = (long)1; }
         if (ImGui.Selectable("Zone 3", zone == 2)) { zone = 2; condition.Params["zone"] = (long)2; }
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters) {
+        var zone = GetInt(parameters, "zone", 0);
+        return zone switch {
+            0 => "zone 1",
+            1 => "zone 2",
+            2 => "zone 3",
+            _ => $"zone {zone}",
+        };
+    }
 }

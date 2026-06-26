@@ -56,4 +56,6 @@ public sealed class MoochAvailableCD : IConditionDefinition {
         var prev = world.Fishing.PreviousCatch;
         return (m1 && prev.CanMoochPreviousCatch) || (m2 && prev.CanMooch2PreviousCatch);
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters) => string.Empty;
 }

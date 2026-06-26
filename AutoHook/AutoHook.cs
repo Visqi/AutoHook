@@ -1,4 +1,5 @@
 using AutoHook.Spearfishing;
+using AutoHook.Ui;
 using clib;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui.Dtr;
@@ -36,6 +37,7 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
     private const string CmdAhBait = "/ahbait";
     private const string CmdBait = "/bait";
     private const string CmdAgPreset = "/agpreset";
+    private const string CmdAhReplay = "/ahreplay";
 
     private static readonly Dictionary<string, string> CommandHelp = new()
     {
@@ -48,11 +50,13 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
         { CmdAhStart, UIStrings.Starts_AutoHook },
         { CmdAhBait, UIStrings.SwitchFishBait },
         { CmdBait, UIStrings.SwitchFishBait },
-        { CmdAgPreset, UIStrings.Set_agpreset_command }
+        { CmdAgPreset, UIStrings.Set_agpreset_command },
+        { CmdAhReplay, UIStrings.Opens_Replay_Window }
     };
 
     private static PluginUi _pluginUi = null!;
     private static AutoGig _autoGig = null!;
+    private static ReplayManagementWindow _replayManagement = null!;
 
     public async Task LoadAsync(CancellationToken cancellationToken) {
         ECommonsMain.Init(pluginInterface, this, Module.DalamudReflector, Module.ObjectFunctions);
@@ -66,6 +70,7 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
         Plugin = this;
         _pluginUi = new PluginUi();
         _autoGig = new AutoGig();
+        _replayManagement = new ReplayManagementWindow();
 
         foreach (var (command, help) in CommandHelp) {
             Svc.Commands.AddHandler(command, new CommandInfo(OnCommand) {
@@ -90,6 +95,7 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
     public async ValueTask DisposeAsync() {
         _pluginUi.Dispose();
         _autoGig.Dispose();
+        _replayManagement.Dispose();
         Svc.Interface.UiBuilder.Draw -= DrawUi;
         Svc.Interface.UiBuilder.OpenConfigUi -= _pluginUi.Toggle;
         Svc.Interface.UiBuilder.OpenMainUi -= _pluginUi.Toggle;
@@ -136,6 +142,10 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
                 break;
             case CmdAgPreset:
                 SetGigPreset(args);
+                Service.ReplayManagement.Toggle();
+                break;
+            case CmdAhReplay:
+                _replayManagement.Toggle();
                 break;
         }
     }
@@ -174,7 +184,10 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
         }
     }
 
-    private static void DrawUi() => Service.WindowSystem.Draw();
+    private static void DrawUi() {
+        Service.WindowSystem.Draw();
+        Service.FileDialog.Draw();
+    }
 
     private void SetupDtr() {
         _ = new EzDtr(() => $"{((SeIconChar)0xE05E).ToIconString()} {(Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled)}",

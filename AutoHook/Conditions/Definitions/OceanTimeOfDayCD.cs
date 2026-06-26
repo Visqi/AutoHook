@@ -42,4 +42,14 @@ public sealed class OceanTimeOfDayCD : IConditionDefinition {
             condition.Params["tod"] = (long)TimeOfDay.Night;
         }
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters) {
+        var tod = (TimeOfDay)GetInt(parameters, "tod", 0);
+        return tod switch {
+            TimeOfDay.Day => "day",
+            TimeOfDay.Sunset => "sunset",
+            TimeOfDay.Night => "night",
+            _ => "day",
+        };
+    }
 }

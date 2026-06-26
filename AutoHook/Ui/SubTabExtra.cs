@@ -60,7 +60,9 @@ public class SubTabExtra {
             DrawUtil.DrawCheckboxTree(UIStrings.ForceBaitSwap, ref config.ForceBaitSwap,
                 () => {
                     DrawUtil.TextV(UIStrings.SelectBaitStartFishing);
-                    DrawUtil.DrawComboSelector(GameRes.Baits, bait => $"[#{bait.Id}] {bait.Name}", $"{MultiString.GetItemName(config.ForcedBaitId)}", bait => config.ForcedBaitId = bait.Id);
+                    DrawUtil.DrawComboSelector(GameRes.Baits, bait => $"[#{bait.Id}] {bait.Name}",
+                        config.ForcedBaitId <= 0 ? UIStrings.None : Lumina.Excel.Sheets.Item.GetRow((uint)config.ForcedBaitId).Name.ToString(),
+                        bait => config.ForcedBaitId = bait.Id);
                 }
             );
 
@@ -138,7 +140,7 @@ public class SubTabExtra {
             trig.EnsureUiId();
             using var id = ImRaii.PushId(trig.UiId);
 
-            var headerLabel = GetTriggerHeaderLabel(i, trig);
+            var headerLabel = trig.GetTriggerHeaderLabel(i);
             var enabled = trig.Enabled;
             var forceOpen = i == newlyAddedIndex;
             var removed = false;
@@ -239,96 +241,6 @@ public class SubTabExtra {
         }
     }
 
-    private static string GetTriggerHeaderLabel(int index, ExtraTrigger trig) {
-        var summary = SummarizeTrigger(trig);
-        return string.IsNullOrEmpty(summary)
-            ? $"Rule {index + 1}"
-            : $"Rule {index + 1} – {summary}";
-    }
-
-    private static string SummarizeTrigger(ExtraTrigger trig) {
-        if (trig.ResetFishCaughtCounter)
-            return UIStrings.Reset_fish_caught_counter;
-
-        if (trig.ReduceFish)
-            return UIStrings.AetherialReduction_ReduceFish;
-
-        if (trig.RemoveStatus && trig.StatusToRemove != 0)
-            return $"Remove {MultiString.GetStatusName(trig.StatusToRemove)}";
-
-        if (!trig.ConditionSet.HasGroups())
-            return string.Empty;
-
-        if (trig.ConditionSet.Groups.Count != 1)
-            return string.Empty;
-
-        var group = trig.ConditionSet.Groups[0];
-        if (group.Conditions.Count != 1)
-            return string.Empty;
-
-        var cond = group.Conditions[0];
-        var core = SummarizeCondition(cond);
-        if (string.IsNullOrEmpty(core))
-            return string.Empty;
-
-        // For simple state-like conditions, infer OnGain / OnLose from "inv"
-        var hasInv = cond.Params.TryGetValue("inv", out var invObj);
-        var inv = false;
-        if (hasInv) {
-            if (invObj is bool b) inv = b;
-            else if (invObj is long l) inv = l != 0;
-        }
-
-        var prefix = inv ? "On Lose " : "On Gain ";
-
-        return prefix + core;
-    }
-
-    private static string SummarizeCondition(Condition cond) {
-        switch (cond.TypeId) {
-            case "IntuitionActive":
-                return "Fisher's Intuition";
-            case "SpectralActive":
-                return "Spectral Current";
-            case "StatusStacks": {
-                    if (cond.Params.TryGetValue("ids", out var idsObj) && idsObj is List<object> list && list.Count == 1) {
-                        var id = Convert.ToUInt32(list[0]);
-                        if (id == IDs.Status.AnglersArt) {
-                            var stacks = 1;
-                            if (cond.Params.TryGetValue("minStacks", out var msObj))
-                                stacks = Convert.ToInt32(msObj);
-                            return $"Angler's Art ≥ {stacks} Stacks";
-                        }
-                    }
-                    return "Status Stacks";
-                }
-            case "SwimbaitCount": {
-                    var v = 0;
-                    if (cond.Params.TryGetValue("val", out var vObj))
-                        v = Convert.ToInt32(vObj);
-                    var op = cond.Params.TryGetValue("op", out var opObj) ? opObj?.ToString() ?? ">=" : ">=";
-                    if (!cond.Params.ContainsKey("op") && cond.Params.TryGetValue("above", out var aObj)) {
-                        var above = aObj is bool b ? b : Convert.ToInt32(aObj) != 0;
-                        op = above ? ">=" : "<=";
-                    }
-                    var cmp = op switch {
-                        ">" => ">",
-                        "<" => "<",
-                        "<=" => "≤",
-                        "=" => "=",
-                        _ => "≥",
-                    };
-                    var fishId = 0;
-                    if (cond.Params.TryGetValue("id", out var idObj))
-                        fishId = Convert.ToInt32(idObj);
-                    var fishLabel = fishId == 0 ? "Slot Fish" : MultiString.GetItemName(fishId);
-                    return $"Swimbaits ({fishLabel}) {cmp} {v}";
-                }
-            default:
-                return string.Empty;
-        }
-    }
-
     private static void DrawPresetSwap(ref bool enable, ref string presetName) {
         using var _ = ImRaii.PushId(@$"{nameof(DrawPresetSwap)}");
 
@@ -351,8 +263,8 @@ public class SubTabExtra {
                 if (selectedId == 0 || GameRes.FishingStatuses.All(s => s != selectedId))
                     selectedId = GameRes.FishingStatuses[0];
 
-                var selectedLabel = $"{selectedId}: {MultiString.GetStatusName(selectedId)}";
-                DrawUtil.DrawComboSelector(GameRes.FishingStatuses, s => $"{s}: {MultiString.GetStatusName(s)}", selectedLabel, s => selectedId = s);
+                var selectedLabel = $"{selectedId}: {Lumina.Excel.Sheets.Status.GetRow(selectedId).Name}";
+                DrawUtil.DrawComboSelector(GameRes.FishingStatuses, s => $"{s}: {Lumina.Excel.Sheets.Status.GetRow(s).Name}", selectedLabel, s => selectedId = s);
             });
 
         statusId = selectedId;

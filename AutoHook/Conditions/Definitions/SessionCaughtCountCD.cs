@@ -31,6 +31,9 @@ public sealed class SessionCaughtCountCD : IConditionDefinition, ISimpleConditio
         DrawIntCompareParams(condition, "##session_caught_op", "Count", defaultValue: 1, clamp: v => Math.Max(1, v), valueWidth: 60);
     }
 
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatFishCount(parameters);
+
     (bool Enabled, int Limit) ISimpleConditionValue<(bool Enabled, int Limit)>.FromParams(IReadOnlyDictionary<string, object> p)
         => (true, Math.Max(1, GetInt(p, "val", 1)));
 

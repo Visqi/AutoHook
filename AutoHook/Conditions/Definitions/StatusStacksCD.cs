@@ -22,4 +22,10 @@ public sealed class StatusStacksCD : IConditionDefinition {
         ImGui.SameLine();
         DrawIntCompareParams(condition, "##stacks_op", "Stacks", valueKey: "minStacks", defaultValue: 1, clamp: v => Math.Max(1, v), valueWidth: 60);
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters) {
+        var names = ConditionParameterFormat.FormatStatusNames(GetStatusIds(parameters));
+        var stacks = GetInt(parameters, "minStacks", 1);
+        return $"{names} stacks {ConditionParameterFormat.FormatIntCompare(parameters, "minStacks", stacks)}";
+    }
 }

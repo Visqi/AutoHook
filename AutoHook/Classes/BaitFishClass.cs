@@ -10,7 +10,8 @@ public class BaitFishClass : IComparable<BaitFishClass> {
     public string Name => Id switch {
         GameRes.AllMoochesId => UIStrings.All_Mooches,
         GameRes.AllBaitsId => UIStrings.All_Baits,
-        _ => MultiString.GetItemName((uint)Id)
+        <= 0 => UIStrings.None,
+        _ => ItemRow.GetRow((uint)Id).Name.ToString()
     };
 
     public int Id;
@@ -19,12 +20,7 @@ public class BaitFishClass : IComparable<BaitFishClass> {
 
     // check the bait type
     [JsonIgnore]
-    public BaitType BaitType {
-        get {
-            return GameRes.Baits.Any(b => b.Id == Id) ? BaitType.Bait :
-                GameRes.Fishes.Any(f => f.Id == Id) ? BaitType.Mooch : BaitType.Unknown;
-        }
-    }
+    public BaitType BaitType => GameRes.Baits.Any(b => b.Id == Id) ? BaitType.Bait : GameRes.Fishes.Any(f => f.Id == Id) ? BaitType.Mooch : BaitType.Unknown;
 
     public BaitFishClass(ItemRow data) {
         Id = (int)data.RowId;

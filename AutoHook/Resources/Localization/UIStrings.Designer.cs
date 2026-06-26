@@ -3034,6 +3034,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Opens Replay Window.
+        /// </summary>
+        internal static string Opens_Replay_Window {
+            get {
+                return ResourceManager.GetString("Opens_Replay_Window", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Overrides Identical Cast.
         /// </summary>
         internal static string OverridesIdenticalCast {

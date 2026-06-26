@@ -36,4 +36,14 @@ public sealed class OceanRouteCD : IConditionDefinition {
 
         DrawUtil.DrawComboSelector(routes, r => $"{r.Id}: {r.Name}", label, r => { condition.Params["ids"] = new List<object> { (long)r.Id }; });
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters) {
+        var ids = GetIds(parameters);
+        if (ids.Count == 0)
+            return "any route";
+        var id = ids[0];
+        return Svc.Data.GetExcelSheet<IKDRoute>().TryGetRow(id, out var row)
+            ? $"{row.RowId}: {row.Name}"
+            : $"route {id}";
+    }
 }

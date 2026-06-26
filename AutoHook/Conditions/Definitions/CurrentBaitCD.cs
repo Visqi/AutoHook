@@ -31,4 +31,9 @@ public sealed class CurrentBaitCD : IConditionDefinition {
             label,
             bait => condition.Params["ids"] = new List<object> { (long)bait.Id });
     }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters) {
+        var ids = GetIds(parameters);
+        return ids.Count == 0 ? "any bait" : ConditionParameterFormat.FormatBaitId(ids[0]);
+    }
 }

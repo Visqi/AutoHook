@@ -29,13 +29,13 @@ public sealed class OceanMissionTypeCD : IConditionDefinition {
         string LabelForRow(uint rowId) {
             if (rowId == 0) return "Select mission";
             if (!sheet.TryGetRow(rowId, out var row)) return $"{rowId}";
-            var name = MultiString.ParseSeString(row.Unknown0);
+            var name = row.Unknown0.ToString();
             return string.IsNullOrEmpty(name) ? $"{rowId}" : $"{rowId}: {name}";
         }
 
         var missions = sheet
-            .Where(row => !string.IsNullOrEmpty(MultiString.ParseSeString(row.Unknown0)))
-            .Select(row => (Id: row.RowId, Name: MultiString.ParseSeString(row.Unknown0)))
+            .Where(row => !string.IsNullOrEmpty(row.Unknown0.ToString()))
+            .Select(row => (Id: row.RowId, Name: row.Unknown0.ToString()))
             .OrderBy(x => x.Name)
             .ToList();
 
@@ -48,5 +48,18 @@ public sealed class OceanMissionTypeCD : IConditionDefinition {
             m => {
                 condition.Params["ids"] = new List<object> { (long)m.Id };
             });
+    }
+
+    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters) {
+        var ids = GetIds(parameters);
+        if (ids.Count == 0)
+            return "any mission";
+        var id = ids[0];
+        var sheet = Svc.Data.GetExcelSheet<IKDPlayerMissionCondition>();
+        if (sheet != null && sheet.TryGetRow(id, out var row)) {
+            var name = row.Unknown0.ToString();
+            return string.IsNullOrEmpty(name) ? $"mission type {id}" : $"{id}: {name}";
+        }
+        return $"mission type {id}";
     }
 }

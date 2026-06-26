@@ -18,6 +18,9 @@ public interface IConditionDefinition {
 
     void DrawParams(Condition condition);
 
+    string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
+        => ConditionParameterFormat.FormatGenericParams(parameters);
+
     public static List<uint> GetIds(IReadOnlyDictionary<string, object> p) {
         if (!p.TryGetValue("ids", out var o)) return [];
         if (o is List<object> list)
