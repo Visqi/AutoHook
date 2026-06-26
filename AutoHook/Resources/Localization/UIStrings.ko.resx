@@ -165,6 +165,9 @@
   <data name="TabPresets_DrawHeader_IsEnabledByDefault" xml:space="preserve">
     <value>가 새로운 미끼/생미끼 추가 시 기본으로 활성화 됨 </value>
   </data>
+  <data name="TabPresets_DrawHeader_CorrectlyEditTheBaitMoochName" xml:space="preserve">
+    <value>'모든 미끼'와 '모든 생미끼'는 우선순위가 가장 낮게 적용됩니다</value>
+  </data>
   <data name="NewBaitMooch" xml:space="preserve">
     <value>새로운 미끼/생미끼</value>
   </data>
@@ -253,7 +256,7 @@
     <value>대형 입질 (!!!)</value>
   </data>
   <data name="HookWillBeUsedIfPatienceIsNotUp" xml:space="preserve">
-    <value>"인내" 스킬이 없을 시 "낚싯대 던지기" 가 사용됩니다.</value>
+    <value>인내를 사용하지 않았다면 "낚아채기"를 사용합니다</value>
   </data>
   <data name="PrecisionHookset" xml:space="preserve">
     <value>섬세한 낚아채기</value>
@@ -569,7 +572,7 @@
     <value>새로운 프리셋</value>
   </data>
   <data name="Auto_Casts" xml:space="preserve">
-    <value>자동 낚싯대 던지기</value>
+    <value>자동 낚시 설정</value>
   </data>
   <data name="TabAutoCasts_DrawAutoCast_HelpText" xml:space="preserve">
     <value>입질이 오면 낚싯대 던지기 (어부 기술) 가 사용됩니다.
@@ -686,7 +689,7 @@
     <value>글로벌 프리셋</value>
   </data>
   <data name="Bait" xml:space="preserve">
-    <value>미끼</value>
+    <value>일반 낚시</value>
   </data>
   <data name="All_Baits" xml:space="preserve">
     <value>모든 미끼</value>
@@ -978,7 +981,10 @@
     <value>직감이 활성화된 경우 물고기 설정 무시</value>
   </data>
   <data name="Reset_the_counter" xml:space="preserve">
-    <value>카운터 초기화</value>
+    <value>카운팅 초기화</value>
+  </data>
+  <data name="Reset_counter_after_swapping_presets" xml:space="preserve">
+    <value>프리셋 변경 시 낚아채기/물고기 카운팅 초기화</value>
   </data>
   <data name="Reset_fish_caught_counter" xml:space="preserve">
     <value>잡은 물고기 카운터 초기화</value>
@@ -1053,16 +1059,16 @@
     <value>낚기</value>
   </data>
   <data name="Hooking" xml:space="preserve">
-    <value>낚아채기</value>
+    <value>낚시 설정</value>
   </data>
   <data name="HookingTabHelpText" xml:space="preserve">
     <value>미끼나 생미끼 낚시 일때의 낚아채기 설정</value>
   </data>
   <data name="BaitTabHelpText" xml:space="preserve">
-    <value>미끼 낚시 시의 낚아채기 설정</value>
+    <value>일반 낚시의 낚아채기 설정</value>
   </data>
   <data name="MoochTabHelpText" xml:space="preserve">
-    <value>생미끼 낚시 시의 낚아채기 설정</value>
+    <value>생미끼 낚시의 낚아채기 설정</value>
   </data>
   <data name="RequiredStatusSettingHelpText" xml:space="preserve">
     <value>비활성화된 경우 기본 훅이 대신 사용됩니다.</value>
@@ -1087,7 +1093,7 @@
     <comment>{0} Represents a status effect. For Example: Use this setting when Fisher's Intuition is active</comment>
   </data>
   <data name="NormalPatienceHookset" xml:space="preserve">
-    <value>낚기 / 인내 낚기설정</value>
+    <value>일반 낚기 / 인내 중 낚기 설정</value>
   </data>
   <data name="AutoCastOnlyUnderFishEyesHelpText" xml:space="preserve">
     <value>시간 필터가 활성화된 경우, 시간 창 동안은 무시됩니다.</value>
@@ -1295,8 +1301,20 @@
   <data name="OnlyUseIfSwimbaitCountLessThan" xml:space="preserve">
     <value>보관된 생미끼가 해당 수치 미만일 경우 사용:</value>
   </data>
+  <data name="OnlyUseIfSwimbaitCountLessThanHelpText" xml:space="preserve">
+    <value>보관된 생미끼가 설정한 개수(0~3) 미만일 때만 '낚시꾼의 묘안' 사용</value>
+  </data>
   <data name="UseSwimbait" xml:space="preserve">
     <value>보관된 생미끼 사용</value>
+  </data>
+  <data name="UseSwimbaitHelpText" xml:space="preserve">
+    <value>활성화시 보관된 생미끼를 사용합니다. 생미끼 낚시에 설정된 낚아채기가 적용됩니다.</value>
+  </data>
+  <data name="EnableUsingSwimbaitGlobal" xml:space="preserve">
+    <value>보관된 생미끼 사용</value>
+  </data>
+  <data name="UseSwimbaitHelpTextGlobal" xml:space="preserve">
+    <value>활성화하면 현재 잡은 물고기를 생미끼로 사용하지 않고, 보관된 생미끼를 사용합니다. 생미끼로 사용되는 해당 물고기의 생미끼 낚시 설정을 따릅니다.</value>
   </data>
   <data name="DelayBeforeCancel" xml:space="preserve">
     <value>낚시 시도 취소 전 지연 시간(ms)</value>
@@ -1376,6 +1394,9 @@
   <data name="AnimationCanceling" xml:space="preserve">
     <value>애니메이션 캔슬</value>
   </data>
+  <data name="AnonymousPresets_Header" xml:space="preserve">
+    <value>임시 프리셋 ({0})</value>
+  </data>
   <data name="EnableRecastCancel" xml:space="preserve">
     <value>낚싯대 다시던지기 애니메이션 캔슬 활성화</value>
   </data>
@@ -1407,7 +1428,7 @@
     <value>추가 옵션</value>
   </data>
   <data name="AutoCastsHelp" xml:space="preserve">
-    <value>자동 낚시 작업 옵션</value>
+    <value>자동 낚시 사용 스킬 설정</value>
   </data>
   <data name="GetWikiPresets" xml:space="preserve">
     <value>위키 프리셋 가져오기</value>
@@ -1475,6 +1496,12 @@
   <data name="StellarHookset" xml:space="preserve">
     <value>화려한 낚아채기</value>
   </data>
+  <data name="FolderMostBeEmpty" xml:space="preserve">
+    <value>삭제하려면 폴더를 비워야 합니다</value>
+  </data>
+  <data name="FolderExported" xml:space="preserve">
+    <value>폴더를 클립보드에 복사했습니다</value>
+  </data>
   <data name="ExportFolderClipboard" xml:space="preserve">
     <value>폴더를 클립보드에 복사</value>
   </data>
@@ -1522,6 +1549,9 @@
     <value>폴더 이동:</value>
     <comment>Moving folder: FolderName</comment>
   </data>
+  <data name="Reset_Counter_Bait_Swap" xml:space="preserve">
+    <value>미끼 교체 시 카운팅 초기화</value>
+  </data>
   <data name="GPlabel" xml:space="preserve">
     <value>GP</value>
   </data>
@@ -1539,6 +1569,9 @@
   </data>
   <data name="Dtr_Help" xml:space="preserve">
     <value>달라무드 설정에서 Dtr 바의 표시 순서를 변경할 수 있습니다.</value>
+  </data>
+  <data name="UseMultipleHooksByTimer" xml:space="preserve">
+    <value>경과 시간에 따라 여러 유형의 낚아채기를 사용</value>
   </data>
   <data name="SwapStopRules" xml:space="preserve">
     <value>교체/중단 규칙:</value>
@@ -1567,6 +1600,9 @@
   <data name="AetherialReduction_Status_Resuming" xml:space="preserve">
     <value>낚시를 다시 시작하는 중...</value>
   </data>
+  <data name="OnlyUseWhenMakeshiftBaitActive" xml:space="preserve">
+    <value>숙련 낚시꾼 활성화 시에만 사용</value>
+  </data>
   <data name="Previous" xml:space="preserve">
     <value>이전</value>
   </data>
@@ -1575,6 +1611,12 @@
   </data>
   <data name="Next" xml:space="preserve">
     <value>다음</value>
+  </data>
+  <data name="IgnoreFishSettingWhen" xml:space="preserve">
+    <value>다음 조건일 때 낚시 설정 무시</value>
+  </data>
+  <data name="BlockMovementWhileFishingOption" xml:space="preserve">
+    <value>낚시 중 이동 차단</value>
   </data>
   <data name="UseWithOceanFishing" xml:space="preserve">
     <value>먼바다 낚시 설정 사용</value>
@@ -1609,6 +1651,12 @@
   <data name="AutoHandleCollectables_Preset_HelpText" xml:space="preserve">
     <value>설정 탭에서 적용한 소장품 획득 자동 수락 설정을 무시하고, 해당 프리셋의 규칙 조건을 따라 수락을 결정합니다.</value>
   </data>
+  <data name="PresetConditions_HelpText" xml:space="preserve">
+    <value>이 프리셋 안에서 사용할 조건부를 생성하는 공간입니다. 특정 행동에 조건부를 설정할 때 이 곳에 생성한 조건을 사용할 수 있습니다</value>
+  </data>
+  <data name="PresetConditions_DefinedInTab" xml:space="preserve">
+    <value>조건부 탭에서 설정</value>
+  </data>
   <data name="PresetConditions_Missing" xml:space="preserve">
     <value>(알 수 없는 조건)</value>
   </data>
@@ -1617,5 +1665,8 @@
   </data>
   <data name="UnknownPresets" xml:space="preserve">
     <value>알 수 없는 프리셋</value>
+  </data>
+  <data name="Opens_Replay_Window" xml:space="preserve">
+    <value>리플레이 창 열기</value>
   </data>
 </root>
