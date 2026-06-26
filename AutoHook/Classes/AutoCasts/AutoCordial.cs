@@ -60,9 +60,11 @@ public sealed class AutoCordial : BaseActionCast {
                 continue;
             }
 
-            Id = id;
+            if (!CheckNotOvercaped(recovery))
+                continue;
 
-            return CheckNotOvercaped(recovery);
+            Id = id;
+            return true;
         }
 
         return false;

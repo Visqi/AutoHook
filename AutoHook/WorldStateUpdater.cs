@@ -31,6 +31,14 @@ public sealed class WorldStateUpdater : IDisposable {
     private readonly Hook<FishingEventHandler.Delegates.PlayAnimation>? _playAnimationHook;
     private static IReadOnlyList<Lumina.Excel.Sheets.Action> FshActions = [];
     private static readonly (uint Id, ActionType Type)[] TrackedFishingActions = BuildTrackedFishingActions();
+    private static readonly (uint Id, ActionType Type)[] TrackedAutoCastItems =
+    [
+        (IDs.Item.HiCordial, ActionType.Item),
+        (IDs.Item.HQCordial, ActionType.Item),
+        (IDs.Item.Cordial, ActionType.Item),
+        (IDs.Item.HQWateredCordial, ActionType.Item),
+        (IDs.Item.WateredCordial, ActionType.Item),
+    ];
 
     private readonly DateTime _startTime = DateTime.UtcNow;
     private readonly long _startQpc;
@@ -232,7 +240,7 @@ public sealed class WorldStateUpdater : IDisposable {
 
         _actionStatusScratch.Clear();
         _actionRecastScratch.Clear();
-        foreach (var (id, type) in TrackedFishingActions) {
+        foreach (var (id, type) in TrackedFishingActions.Concat(TrackedAutoCastItems)) {
             var key = PlayerInfo.ActionKey(type, id);
             _actionStatusScratch[key] = am->GetActionStatus(type, id);
             _actionRecastScratch[key] = am->GetRecastGroup((int)type, id);
