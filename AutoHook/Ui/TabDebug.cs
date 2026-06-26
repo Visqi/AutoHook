@@ -4,6 +4,7 @@ using AutoHook.Tasks;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Utility;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
@@ -255,15 +256,12 @@ public class TabDebug : BaseTab {
             ImGui.TableNextColumn();
             ImGui.Text(c.Amount.ToString());
             ImGui.TableNextColumn();
-            ImGui.Text($"size={c.Size} lvl={c.Level} ★{c.Stars} mooch={c.IsMoochable}");
+            ImGui.Text($"size={c.Size} lvl={c.Level} ★{c.Stars} moochable={c.IsMoochable}");
         }
     }
 
     private static void DrawKnownItems(WorldState ws) {
-        var rows = KnownItemIds
-            .Select(id => (id, Count: ws.GetItemCount(id)))
-            .Where(r => r.Count > 0)
-            .ToArray();
+        var rows = KnownItemIds.Select(id => (id, Count: ws.GetItemCount(id))).Where(r => r.Count > 0).ToArray();
         if (rows.Length == 0)
             return;
         ImGui.Spacing();
@@ -277,7 +275,7 @@ public class TabDebug : BaseTab {
         foreach (var (id, count) in rows) {
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
-            ImGui.Text(Item.GetRow(id).Name.ToString());
+            ImGui.Text(Item.GetRow(ItemUtil.GetBaseId(id).ItemId).Name.ToString());
             ImGui.TableNextColumn();
             ImGui.Text(count.ToString());
         }
@@ -320,10 +318,8 @@ public class TabDebug : BaseTab {
             return;
 
         using (ImRaii.PushIndent()) {
-            ImGui.TextDisabled("ActionStatus != 0 blocks use; cooldown from GetRecastGroupDetail.");
-            using var table = ImRaii.Table("fsh_action_info", 8,
-                ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Resizable,
-                new Vector2(0, 280.Scaled()));
+            ImGui.TextDisabled("Status != 0 blocks use");
+            using var table = ImRaii.Table("fsh_action_info", 8, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Resizable, new Vector2(0, 280.Scaled()));
             if (!table)
                 return;
 
@@ -360,7 +356,7 @@ public class TabDebug : BaseTab {
                 }
 
                 var name = LuminaAction.GetRow(id).Name.ToString();
-                var label = string.IsNullOrEmpty(name) ? field : $"{field} ({name})";
+                var label = string.IsNullOrEmpty(name) ? field : $"{name}";
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();

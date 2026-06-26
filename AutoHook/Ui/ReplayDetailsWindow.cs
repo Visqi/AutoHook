@@ -70,7 +70,7 @@ public sealed class ReplayDetailsWindow : Window, IDisposable {
             DrawTimelineLegend();
             DrawSummary();
 
-            if (ImGui.CollapsingHeader("Decisions", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader("Condition Evals", ImGuiTreeNodeFlags.DefaultOpen))
                 DrawDecisions();
             if (ImGui.CollapsingHeader("WorldState", ImGuiTreeNodeFlags.DefaultOpen))
                 DrawWorldStatePanel();
@@ -248,7 +248,7 @@ public sealed class ReplayDetailsWindow : Window, IDisposable {
             .ToList();
 
         if (decisions.Count == 0) {
-            ImGui.TextDisabled("(no decisions within 5s of scrub position)");
+            ImGui.TextDisabled("nothing happened within 5s of scrub position");
         }
         else {
             using var table = ImRaii.Table("replay_decisions", 5,

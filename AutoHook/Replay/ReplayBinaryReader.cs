@@ -8,7 +8,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.WKS;
 namespace AutoHook.Replay;
 
 internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, CancellationToken cancel) : IDisposable {
-    private readonly BinaryReader _reader = new BinaryReader(stream);
+    private readonly BinaryReader _reader = new(stream);
     private DateTime _tsStart;
     private ulong _qpcStart;
     private double _invQpf = 1.0 / TimeSpan.TicksPerSecond;
