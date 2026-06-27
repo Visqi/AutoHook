@@ -256,7 +256,7 @@
     <value>대형 입질 (!!!)</value>
   </data>
   <data name="HookWillBeUsedIfPatienceIsNotUp" xml:space="preserve">
-    <value>인내를 사용하지 않았다면 "낚아채기"를 사용합니다</value>
+    <value>"인내"를 사용하지 않았다면 "낚아채기"를 사용합니다</value>
   </data>
   <data name="PrecisionHookset" xml:space="preserve">
     <value>섬세한 낚아채기</value>
