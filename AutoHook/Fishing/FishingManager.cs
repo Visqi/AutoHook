@@ -7,8 +7,8 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using Lumina.Excel.Sheets;
-using StatusSheet = Lumina.Excel.Sheets.Status;
 using System.Diagnostics;
+using StatusSheet = Lumina.Excel.Sheets.Status;
 
 namespace AutoHook.Fishing;
 
@@ -55,7 +55,7 @@ public partial class FishingManager : IDisposable {
             Ws.SpectralCurrentChanged.Subscribe(OnSpectralCurrentChanged));
         try {
             Svc.Framework.Update += OnFrameworkUpdate;
-            Svc.Chat.ChatMessage += OnMessageDelegate;
+            Svc.Chat.LogMessage += OnLogMessage;
             Ws.Modified += OnWorldStateModified;
         }
         catch (Exception e) {
@@ -66,7 +66,7 @@ public partial class FishingManager : IDisposable {
     public void Dispose() {
         _eventSubs.Dispose();
         Svc.Framework.Update -= OnFrameworkUpdate;
-        Svc.Chat.ChatMessage -= OnMessageDelegate;
+        Svc.Chat.LogMessage -= OnLogMessage;
         Ws.Modified -= OnWorldStateModified;
     }
 

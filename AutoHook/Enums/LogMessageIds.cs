@@ -1,6 +1,6 @@
 ﻿namespace AutoHook.Enums;
 
-public static class XivChatLog {
+public static class LogMessageIds {
     public const uint
         CantFish = 3516,
         AmbLureSuccess = 5565,

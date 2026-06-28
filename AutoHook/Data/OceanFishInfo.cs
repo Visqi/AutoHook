@@ -195,12 +195,7 @@ public sealed class OceanFishInfo {
     }
 }
 
-public readonly record struct ZoneSpectralRecord(
-    int ZoneIndex,
-    DateTime Started,
-    DateTime? Ended,
-    float PlannedDurationSeconds,
-    float CarriedExtraSeconds) {
+public readonly record struct ZoneSpectralRecord(int ZoneIndex, DateTime Started, DateTime? Ended, float PlannedDurationSeconds, float CarriedExtraSeconds) {
     public float? ActualDurationSeconds
         => Ended is { } end ? (float)(end - Started).TotalSeconds : null;
 }

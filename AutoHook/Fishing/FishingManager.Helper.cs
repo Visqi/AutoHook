@@ -13,33 +13,21 @@ public partial class FishingManager {
             PlayerRes.CastAction(IDs.Actions.Salvage);
     }
 
-    private void OnMessageDelegate(IHandleableChatMessage message) {
-        try {
-            if (message.LogKind is not XivChatType.Gathering)
-                return;
+    private void OnLogMessage(ILogMessage message) {
+        var isSpecialLure = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == message.GameData.Value.Text.ToString()) != null;
+        var isGenericLure = message.LogMessageId is LogMessageIds.AmbLureSuccess or LogMessageIds.ModLureSuccess;
+        var success = GetHookCfg().GetHookset().CastLures.LureTarget switch {
+            LureTarget.Any => isSpecialLure || isGenericLure,
+            LureTarget.Special => isSpecialLure,
+            LureTarget.NotSpecial => isGenericLure,
+            _ => false
+        };
 
-            var text = message.Message.TextValue;
-            var logMessage = FindRow<LogMessage>(x => x.Text.ToString() == text);
+        if (success)
+            Ws.Execute(new FishingInfo.OpSetLureSuccess(true));
 
-            var isSpecialFishLure = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == text) != null;
-            var isGenericLureSuccess = logMessage is { RowId: XivChatLog.AmbLureSuccess or XivChatLog.ModLureSuccess };
-
-            var success = GetHookCfg().GetHookset().CastLures.LureTarget switch {
-                LureTarget.Any => isSpecialFishLure || isGenericLureSuccess,
-                LureTarget.Special => isSpecialFishLure,
-                LureTarget.NotSpecial => isGenericLureSuccess,
-                _ => false
-            };
-
-            if (success)
-                Ws.Execute(new FishingInfo.OpSetLureSuccess(true));
-
-            if (logMessage is { RowId: XivChatLog.CantFish })
-                Service.Status = UIStrings.CantFishHere;
-        }
-        catch (Exception e) {
-            Svc.Log.Error(e.Message);
-        }
+        if (message.LogMessageId is LogMessageIds.CantFish)
+            Service.Status = UIStrings.CantFishHere;
     }
 
     // This is my stupid way of handling the counter for stop/quit fishing and bait/preset swap
