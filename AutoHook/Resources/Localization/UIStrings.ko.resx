@@ -256,7 +256,7 @@
     <value>대형 입질 (!!!)</value>
   </data>
   <data name="HookWillBeUsedIfPatienceIsNotUp" xml:space="preserve">
-    <value>"인내"를 사용하지 않았다면 "낚아채기"를 사용합니다</value>
+    <value>인내를 사용하지 않았다면 "낚아채기"를 사용합니다</value>
   </data>
   <data name="PrecisionHookset" xml:space="preserve">
     <value>섬세한 낚아채기</value>
@@ -1404,10 +1404,10 @@
     <value>물고기를 낚았을 경우에는 작동하지 않으며 실패/취소된 시도에서 다시 던질 때만 작동</value>
   </data>
   <data name="TurnCollectOff" xml:space="preserve">
-    <value>'소장품 채집' 설정을 비활성화하면 소장품 채집 버프 끄기</value>
+    <value>'소장품 채집 설정'을 비활성화하면 게임내 소장품 채집을 끔</value>
   </data>
   <data name="TurnCollectOffHelp" xml:space="preserve">
-    <value>애니메이션 캔슬은 자동 낚시 전에 소장품 채집 설정을 켜야 합니다. 이 설정을 켜면 자동 낚시 설정의 소장품 채집 설정을 끄면 활성화돼 있는 소장품 채집 버프도 함께 끕니다</value>
+    <value>애니메이션 캔슬은 자동 낚시 전에 소장품 채집 설정을 활성해야 합니다. 이 설정을 활성화하면 자동 낚시 설정의 소장품 채집을 끄면 게임내 소장품 채집도 끕니다</value>
   </data>
   <data name="EnableChumCancel" xml:space="preserve">
     <value>밑밥 애니메이션 캔슬 활성화</value>
@@ -1416,10 +1416,10 @@
     <value>'인양' 스킬을 사용해 '밑밥'의 애니메이션을 캔슬합니다. 실험적인 기능이며 네트워크 지연(ping)의 영향으로 동작이 일정하지 않을 수 있습니다</value>
   </data>
   <data name="TurnCollectOffWithoutAnimCancel" xml:space="preserve">
-    <value>'소장품 채집' 설정을 비활성화하면 소장품 채집 버프 끄기</value>
+    <value>'소장품 채집 설정'을 비활성화하면 게임내 소장품 채집을 끔</value>
   </data>
   <data name="TurnCollectOffWithoutAnimCancelHelp" xml:space="preserve">
-    <value>애니메이션 캔슬 설정 여부와 상관없이, 자동 낚시 설정의 소장품 채집 설정을 끄면 활성화돼 있는 소장품 채집 버프도 함께 끕니다</value>
+    <value>애니메이션 캔슬 설정 여부와 상관없이, 자동 낚시 설정의 소장품 채집을 끄면 게임내 소장품 채집도 끕니다</value>
   </data>
   <data name="FishCaughtHelp" xml:space="preserve">
     <value>물고기를 낚았을 때의 행동을 설정할 수 있습니다</value>
