@@ -56,6 +56,7 @@ public partial class FishingManager : IDisposable {
         try {
             Svc.Framework.Update += OnFrameworkUpdate;
             Svc.Chat.LogMessage += OnLogMessage;
+            Svc.Chat.ChatMessage += CheckForSpecialLure;
             Ws.Modified += OnWorldStateModified;
         }
         catch (Exception e) {
@@ -66,6 +67,7 @@ public partial class FishingManager : IDisposable {
     public void Dispose() {
         _eventSubs.Dispose();
         Svc.Framework.Update -= OnFrameworkUpdate;
+        Svc.Chat.ChatMessage -= CheckForSpecialLure;
         Svc.Chat.LogMessage -= OnLogMessage;
         Ws.Modified -= OnWorldStateModified;
     }

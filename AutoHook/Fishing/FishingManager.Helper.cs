@@ -1,6 +1,5 @@
 using Dalamud.Game.Chat;
 using Dalamud.Game.Text;
-using Lumina.Excel.Sheets;
 
 namespace AutoHook.Fishing;
 
@@ -14,11 +13,9 @@ public partial class FishingManager {
     }
 
     private void OnLogMessage(ILogMessage message) {
-        var isSpecialLure = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == message.GameData.Value.Text.ToString()) != null;
         var isGenericLure = message.LogMessageId is LogMessageIds.AmbLureSuccess or LogMessageIds.ModLureSuccess;
         var success = GetHookCfg().GetHookset().CastLures.LureTarget switch {
-            LureTarget.Any => isSpecialLure || isGenericLure,
-            LureTarget.Special => isSpecialLure,
+            LureTarget.Any => isGenericLure,
             LureTarget.NotSpecial => isGenericLure,
             _ => false
         };
@@ -28,6 +25,19 @@ public partial class FishingManager {
 
         if (message.LogMessageId is LogMessageIds.CantFish)
             Service.Status = UIStrings.CantFishHere;
+    }
+
+    private void CheckForSpecialLure(IHandleableChatMessage message) {
+        if (message.LogKind is not XivChatType.Gathering) return;
+        var isSpecialLure = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == message.Message.TextValue) != null;
+        var success = GetHookCfg().GetHookset().CastLures.LureTarget switch {
+            LureTarget.Any => isSpecialLure,
+            LureTarget.Special => isSpecialLure,
+            _ => false
+        };
+
+        if (success)
+            Ws.Execute(new FishingInfo.OpSetLureSuccess(true));
     }
 
     // This is my stupid way of handling the counter for stop/quit fishing and bait/preset swap
