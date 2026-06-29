@@ -353,7 +353,7 @@ public class PresetCreator {
         => [.. moochIds.Select(id => GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == id)).OfType<ImportedFish>()];
 
     private static int ResolveTackleBait(ImportedFish target, List<ImportedFish> moochList)
-        => moochList.Count > 0 ? moochList[0].InitialBait : target.InitialBait;
+        => moochList.Count > 0 ? moochList[^1].InitialBait : target.InitialBait;
 
     private static string GetBiteType(BiteType bite)
         => bite switch {
