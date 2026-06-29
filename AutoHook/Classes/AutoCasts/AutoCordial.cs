@@ -59,10 +59,10 @@ public sealed class AutoCordial : BaseActionCast {
                 continue;
 
             // TODO log this in replay and remove
-            //if (!Service.WorldState.HaveCordialInInventory(id)) {
-            //    Svc.Log.Debug($"No cordial (#{id}) in inventory");
-            //    continue;
-            //}
+            if (!Service.WorldState.HaveCordialInInventory(id)) {
+                //Svc.Log.Debug($"No cordial (#{id}) in inventory");
+                continue;
+            }
 
             Id = id;
             return true;
