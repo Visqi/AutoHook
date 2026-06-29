@@ -31,7 +31,7 @@ public interface IConditionDefinition {
 
     public static List<uint> GetStatusIds(IReadOnlyDictionary<string, object> p) => GetIds(p);
 
-    public static List<byte> GetWeatherIds(IReadOnlyDictionary<string, object> p) {
+    public static List<uint> GetWeatherIds(IReadOnlyDictionary<string, object> p) {
         if (!p.TryGetValue("ids", out var o)) return [];
         if (o is List<object> list)
             return [.. list.Select(x => Convert.ToByte(x))];

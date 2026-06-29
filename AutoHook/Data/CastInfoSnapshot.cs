@@ -5,9 +5,9 @@ public sealed class CastInfoSnapshot {
     public bool Active { get; private set; }
 
     public IntuitionStatus IntuitionStatus { get; private set; }
-    public byte CurrentWeatherId { get; private set; }
-    public byte PreviousWeatherId { get; private set; }
-    public byte NextWeatherId { get; private set; }
+    public uint CurrentWeatherId { get; private set; }
+    public uint PreviousWeatherId { get; private set; }
+    public uint NextWeatherId { get; private set; }
     public TimeOnly EorzeaTime { get; private set; }
     public SpectralCurrentStatus SpectralCurrentStatus { get; private set; }
 

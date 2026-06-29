@@ -316,9 +316,9 @@ public sealed class WorldStateUpdater : IDisposable {
             ws.Execute(new WorldState.OpTerritory(territory));
     }
 
-    private static unsafe void UpdateWeather(WorldState ws) {
-        if (WeatherManager.Instance() is not (not null and var wm)) return;
-        (var current, var previous, var next) = (wm->GetCurrentWeather(), wm->GetWeatherForHour((ushort)ws.TerritoryId, -8), wm->GetWeatherForHour((ushort)ws.TerritoryId, 1));
+    private static void UpdateWeather(WorldState ws) {
+        var territory = TerritoryType.GetRow(ws.TerritoryId);
+        (var current, var previous, var next) = (territory.GetCurrentWeather().RowId, territory.GetPreviousWeather().RowId, territory.GetNextWeather().RowId);
 
         if (ws.CurrentWeatherId == current && ws.PreviousWeatherId == previous && ws.NextWeatherId == next)
             return;
@@ -327,9 +327,8 @@ public sealed class WorldStateUpdater : IDisposable {
     }
 
     private static void UpdateBiteContext(WorldState ws, BiteContext biteContext) {
-        var f = ws.Fishing;
-        var chumChanged = f.ChumActive != biteContext.ChumActive;
-        var timeDelta = Math.Abs(f.BiteInfo.BiteTimeSeconds - biteContext.BiteTimeSeconds);
+        var chumChanged = ws.Fishing.ChumActive != biteContext.ChumActive;
+        var timeDelta = Math.Abs(ws.Fishing.BiteInfo.BiteTimeSeconds - biteContext.BiteTimeSeconds);
         if (!chumChanged && timeDelta < BiteTimeLogThreshold)
             return;
         ws.Execute(new FishingInfo.OpBiteContext(biteContext.BiteTimeSeconds, biteContext.ChumActive));

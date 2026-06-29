@@ -1,5 +1,3 @@
-using System.Numerics;
-using System.Reflection;
 using AutoHook.Tasks;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
@@ -8,6 +6,8 @@ using Dalamud.Utility;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
+using System.Numerics;
+using System.Reflection;
 using LuminaAction = Lumina.Excel.Sheets.Action;
 using StatusSheet = Lumina.Excel.Sheets.Status;
 

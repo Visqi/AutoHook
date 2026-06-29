@@ -39,7 +39,7 @@ public sealed class WeatherCD : SnapshottableConditionDefinition {
         return EvaluateWeather(ids, targetWeatherId, invert);
     }
 
-    private static bool EvaluateWeather(List<byte> ids, byte targetWeatherId, bool invert) {
+    private static bool EvaluateWeather(List<uint> ids, uint targetWeatherId, bool invert) {
         if (targetWeatherId == 0)
             return invert;
 

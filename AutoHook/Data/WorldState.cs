@@ -15,9 +15,9 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
     public readonly OceanFishInfo Ocean = new();
     public readonly WKSInfo WKS = new();
 
-    public byte CurrentWeatherId;
-    public byte PreviousWeatherId;
-    public byte NextWeatherId;
+    public uint CurrentWeatherId;
+    public uint PreviousWeatherId;
+    public uint NextWeatherId;
     public uint TerritoryId;
 
     public DateTime CurrentTime => Frame.Timestamp;
@@ -193,7 +193,7 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
             => output.EmitFourCC("TRTY").Emit(TerritoryId);
     }
 
-    public sealed record OpWeather(byte Current, byte Previous, byte Next) : Operation {
+    public sealed record OpWeather(uint Current, uint Previous, uint Next) : Operation {
         protected override void Exec(WorldState ws) {
             ws.CurrentWeatherId = Current;
             ws.PreviousWeatherId = Previous;
