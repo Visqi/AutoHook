@@ -34,7 +34,7 @@ public static class WikiPresets {
                     var base64 = await ExtractBase64FromWikiPage($"{RawWiki}/{mdUrl}.md");
 
                     static (WikiFolderExport? Folder, List<CustomPresetConfig> Presets) selector(string x) {
-                        if (x.StartsWith(Configuration.ExportPrefixFolder)) {
+                        if (IsFolder(x)) {
                             var imported = Configuration.ImportFolder(x) ?? throw new Exception("Failed to import"); // Kill wiki shouldn't have broken presets
                             return (new WikiFolderExport {
                                 Root = imported.Folder,
@@ -66,6 +66,12 @@ public static class WikiPresets {
         }
     }
 
+    static bool IsFolder(string preset)
+        => preset.StartsWith(Configuration.ExportPrefixFolder) || preset.StartsWith(Configuration.ExportPrefixFolderV2);
+
+    static bool IsSpearfishing(string preset)
+        => preset.StartsWith(Configuration.ExportPrefixSf) || preset.StartsWith(Configuration.ExportPrefixSf2);
+
     static async Task<List<string>> GetWikiPageUrls(string url) {
         var pageUrls = new List<string>();
         var htmlDoc = new HtmlDocument();
@@ -85,8 +91,8 @@ public static class WikiPresets {
     static async Task<(List<string> presets, List<string> presetsSf)> ExtractBase64FromWikiPage(string url) {
         var wikiPageContent = await httpClient.GetStringAsync(url);
         var blocks = PresetBlockRegex.Value.Matches(wikiPageContent).Select(match => match.Groups[1].Value.Trim()).ToList();
-        var presets = blocks.Where(b => !b.StartsWith(Configuration.ExportPrefixSf)).ToList();
-        var presetsSf = blocks.Where(b => b.StartsWith(Configuration.ExportPrefixSf)).ToList();
+        var presets = blocks.Where(b => !IsSpearfishing(b)).ToList();
+        var presetsSf = blocks.Where(IsSpearfishing).ToList();
 
         return (presets, presetsSf);
     }
