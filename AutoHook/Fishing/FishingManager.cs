@@ -101,7 +101,7 @@ public partial class FishingManager : IDisposable {
     private void OnSpectralCurrentChanged(WorldState.OpSpectralCurrentChanged op) {
         if (op.Change is not SpectralCurrentChange.Gained) return;
         if (!Service.Configuration.PluginEnabled || !Service.Configuration.SpectralRest) return;
-        if (Ws.Fishing.FishingState is not (FishingState.LineInWater or FishingState.AmbitiousLure)) return;
+        if (Ws.Fishing.FishingState is not (FishingState.LineInWater or FishingState.AmbitiousLure or FishingState.ModestLure)) return;
         if (Ws.Fishing.FishingStep.HasFlag(FishingSteps.Reeling | FishingSteps.TimeOut)) return;
         if (Ws.Player.BlockCasting || Service.TaskManager.IsBusy) return;
         if (!EzThrottler.Throttle("SpectralRestMidCast", 1000)) return;
@@ -287,7 +287,7 @@ public partial class FishingManager : IDisposable {
         if (!Ws.Fishing.FishingStep.HasFlag(FishingSteps.Quitting) && currentState == FishingState.PoleReady)
             CheckPluginActions();
 
-        if (currentState is FishingState.AmbitiousLure or FishingState.LineInWater) {
+        if (currentState is FishingState.AmbitiousLure or FishingState.ModestLure or FishingState.LineInWater) {
             CheckWhileFishingActions();
             CheckTimeout();
         }
@@ -385,6 +385,7 @@ public partial class FishingManager : IDisposable {
 
         Ws.Execute(new FishingInfo.OpSetLureSuccess(false));
         Ws.Execute(new FishingInfo.OpSetLastLureCastBiteTime(null));
+        Ws.Execute(new FishingInfo.OpBiteContext(0, Ws.Player.HasStatus(IDs.Status.Chum)));
 
         var baitname = Item.GetRow(Ws.Fishing.BaitInfo.MoochId).Name.ToString();
         if (!mooching)

@@ -23,7 +23,7 @@ public sealed class AutoLures : BaseActionCast {
         if (Service.WorldState.GetStatusStacks(StatusId) >= LureStacks)
             return false;
 
-        if (Service.WorldState.FishingState is not (FishingState.AmbitiousLure or FishingState.LineInWater))
+        if (Service.WorldState.FishingState is not (FishingState.AmbitiousLure or FishingState.ModestLure or FishingState.LineInWater))
             return false;
 
         return EvaluateConditionSet();
