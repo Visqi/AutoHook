@@ -37,8 +37,7 @@ public static class CastDecisionPolicyBuilder {
                     Action = lure,
                 });
         }
-        else if (tactics.Archetype == StrategyArchetype.LureStack
-                 && PickMatchingLure(profile, player) is { } stackLure) {
+        else if (tactics.Archetype == StrategyArchetype.LureStack && PickMatchingLure(profile, player) is { } stackLure) {
             // Lure Stack: stack matching lure every cast (no early-cancel timer needed)
             rules.Add(new CastDecisionRule { Action = stackLure });
         }
@@ -66,12 +65,13 @@ public static class CastDecisionPolicyBuilder {
 
 // GP spend order when GP is tight
 // IC prep is hungry (IC + slap + chum) - reserve enough to still IC the last trigger
-// swimbait bank is cheaper (Spareful Hand free); default grind: slap -> chum -> Patience II -> Makeshift
+// swimbait bank is cheaper (free); single mooch: Mooch II first, Patience when M2 on CD
+// multi-mooch / collectable: Patience (or Prize Catch) primary, Mooch II mid-loop fallback
 // PatienceMinGp: don't cast P2 at bare cost — leave headroom for hookset (+ lure if in play)
 //
 // mid-window recovery (preset already loops these; not emitted as output):
 // - intuition drops -> rebuild triggers (IC zero-time: N-1 then re-IC)
-// - mooch dies -> recatch mooch fish (Patience II / Prize Catch help)
+// - mooch dies -> Mooch II if ready, else Patience II / Prize Catch
 // - swimbait empty -> back to mooch bait + Spareful Hand
 // - slap falls off -> recatch slap target
 public static class ResourcePolicyBuilder {
@@ -85,6 +85,10 @@ public static class ResourcePolicyBuilder {
             priority.AddRange([FisherSkill.SparefulHand, FisherSkill.PrizeCatch, FisherSkill.SurfaceSlap, FisherSkill.Chum]);
         else if (tactics.HoldMode == PrepHoldMode.IdenticalCastZeroTime)
             priority.AddRange([FisherSkill.IdenticalCast, FisherSkill.SurfaceSlap, FisherSkill.Chum]);
+        else if (PreferMooch2Primary(profile, tactics, player))
+            priority.AddRange([FisherSkill.SurfaceSlap, FisherSkill.Chum, FisherSkill.MoochII, FisherSkill.PatienceII, FisherSkill.MakeshiftBait]);
+        else if (profile.Acquisition.MoochChain.Count > 0)
+            priority.AddRange([FisherSkill.SurfaceSlap, FisherSkill.Chum, FisherSkill.PatienceII, FisherSkill.MoochII, FisherSkill.MakeshiftBait]);
         else
             priority.AddRange([FisherSkill.SurfaceSlap, FisherSkill.Chum, FisherSkill.PatienceII, FisherSkill.MakeshiftBait]);
 
@@ -122,5 +126,18 @@ public static class ResourcePolicyBuilder {
         if (tactics.EarlyCancelSec.HasValue && CastDecisionPolicyBuilder.PickMatchingLure(profile, player) != null)
             return true;
         return player.Skills.AmbitiousLure && profile.Eligibility.ALureEligible || player.Skills.ModestLure && profile.Eligibility.MLureEligible;
+    }
+
+    // single mooch w/o spareful hand: mooch 2 is more gp efficient
+    private static bool PreferMooch2Primary(FishProfile profile, InferredTactics tactics, PlayerProfile player) {
+        if (!player.Skills.MoochII)
+            return false;
+        if (tactics.HoldMode is PrepHoldMode.SwimbaitBank or PrepHoldMode.IdenticalCastZeroTime)
+            return false;
+        if (profile.Acquisition.MoochChain.Count != 1)
+            return false;
+        if (profile.Acquisition.Type is AcquisitionType.IntuitionStraight or AcquisitionType.IntuitionMooch)
+            return false;
+        return true;
     }
 }

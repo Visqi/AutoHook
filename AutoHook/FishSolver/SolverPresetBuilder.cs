@@ -347,20 +347,33 @@ public static class SolverPresetBuilder {
         }
         else {
             ac.CastChum.Enabled = plan.ResourcePolicy.UseChum;
-            if (moochList.Count > 0 || plan.HoldMode == PrepHoldMode.MoochHold) {
+            var isCollectable = Item.GetRow((uint)target.ItemId).IsCollectable;
+            var needsMooch = moochList.Count > 0 || plan.HoldMode is PrepHoldMode.MoochHold or PrepHoldMode.SwimbaitBank;
+            var multiMooch = moochList.Count > 1 || plan.Archetype == StrategyArchetype.MoochChain;
+            // single mooch, no collectability / Spareful Hand: try mooch2 first (more gp efficient). Patience only when M2 is on CD.
+            var mooch2Primary = needsMooch && !multiMooch && plan.HoldMode != PrepHoldMode.SwimbaitBank && !isCollectable && plan.PlayerProfileUsed.Skills.MoochII;
+            if (mooch2Primary) {
                 ac.CastPatience.Enabled = true;
                 ApplyPatienceMinGp(ac.CastPatience, plan);
+                ac.CastPatience.ConditionSet = Configuration.ConditionSetBuilder.All(Configuration.ConditionSetBuilder.ActionOnCooldown(IDs.Actions.Mooch2));
                 ac.CastMakeShiftBait.Enabled = true;
+                if (ac.CastChum.Enabled)
+                    ApplyChumMoochGate(ac.CastChum, plan, mooch2Primary: true);
             }
-            else if (Item.GetRow((uint)target.ItemId).IsCollectable) {
+            else if (needsMooch) {
+                // multi-mooch / collectable / swimbait: Patience or Prize Catch primary; mooch2 stays on fish as a mid-loop fallback
+                if (plan.HoldMode != PrepHoldMode.SwimbaitBank) {
+                    ac.CastPatience.Enabled = true;
+                    ApplyPatienceMinGp(ac.CastPatience, plan);
+                    ac.CastMakeShiftBait.Enabled = true;
+                }
+                if (ac.CastChum.Enabled)
+                    ApplyChumMoochGate(ac.CastChum, plan, mooch2Primary: false);
+            }
+            else if (isCollectable) {
                 ac.CastPatience.Enabled = true;
                 ApplyPatienceMinGp(ac.CastPatience, plan);
             }
-
-            // Chum at low GP prevents ever reaching Patience/Prize Catch (mooch needs one of those)
-            if (ac.CastChum.Enabled && (ac.CastPatience.Enabled || moochList.Count > 0
-                || plan.HoldMode is PrepHoldMode.MoochHold or PrepHoldMode.SwimbaitBank))
-                ApplyChumPatienceGate(ac.CastChum, plan);
         }
     }
 
@@ -372,26 +385,52 @@ public static class SolverPresetBuilder {
         patience.GpThreshold = plan.ResourcePolicy.PatienceMinGp;
     }
 
-    // Don't burn Chum while waiting to afford Patience/Prize Catch.
-    // Once Angler's Fortune or Prize Catch is up, Chum is fine at any GP.
-    private static void ApplyChumPatienceGate(AutoChum chum, SolverOutput plan) {
+    // gate chum behind any mooch tool (m2, patience, prize catch) so you don't get in a loop where you're too low on gp to mooch
+    private static void ApplyChumMoochGate(AutoChum chum, SolverOutput plan, bool mooch2Primary) {
+        const int mooch2Cost = 100;
         const int patienceIICost = 560;
         const int prizeCatchCost = 200;
-        var gpFloor = plan.ResourcePolicy.PatienceMinGp > 0
-            ? plan.ResourcePolicy.PatienceMinGp
-            : plan.HoldMode == PrepHoldMode.SwimbaitBank ? prizeCatchCost : patienceIICost;
+        var patienceFloor = plan.ResourcePolicy.PatienceMinGp > 0 ? plan.ResourcePolicy.PatienceMinGp : patienceIICost;
+        if (mooch2Primary) {
+            // M2 ready -> only need M2 GP; M2 on CD -> save for Patience fallback
+            chum.ConditionSet = new Conditions.ConditionSet {
+                CombineMode = Conditions.ConditionCombineMode.Any,
+                Groups = [
+                    new Conditions.ConditionGroup {
+                        CombineMode = Conditions.ConditionCombineMode.All,
+                        Conditions = [Configuration.ConditionSetBuilder.StatusActive(IDs.Status.AnglersFortune)],
+                    },
+                    new Conditions.ConditionGroup {
+                        CombineMode = Conditions.ConditionCombineMode.All,
+                        Conditions = [Configuration.ConditionSetBuilder.StatusActive(IDs.Status.PrizeCatch)],
+                    },
+                    new Conditions.ConditionGroup {
+                        CombineMode = Conditions.ConditionCombineMode.All,
+                        Conditions = [
+                            Configuration.ConditionSetBuilder.ActionReady(IDs.Actions.Mooch2),
+                            Configuration.ConditionSetBuilder.Gp(mooch2Cost),
+                        ],
+                    },
+                    new Conditions.ConditionGroup {
+                        CombineMode = Conditions.ConditionCombineMode.All,
+                        Conditions = [
+                            Configuration.ConditionSetBuilder.ActionOnCooldown(IDs.Actions.Mooch2),
+                            Configuration.ConditionSetBuilder.Gp(patienceFloor),
+                        ],
+                    },
+                ],
+            };
+            return;
+        }
 
+        var gpFloor = plan.HoldMode == PrepHoldMode.SwimbaitBank ? prizeCatchCost : patienceFloor;
         chum.ConditionSet = Configuration.ConditionSetBuilder.Any(
             Configuration.ConditionSetBuilder.StatusActive(IDs.Status.AnglersFortune),
             Configuration.ConditionSetBuilder.StatusActive(IDs.Status.PrizeCatch),
             Configuration.ConditionSetBuilder.Gp(gpFloor));
     }
 
-    private static void ConfigurePreWindowResourceCasts(
-        ref AutoCastsConfig ac,
-        ImportedFish target,
-        SolverOutput plan,
-        List<ImportedFish> moochList) {
+    private static void ConfigurePreWindowResourceCasts(ref AutoCastsConfig ac, ImportedFish target, SolverOutput plan, List<ImportedFish> moochList) {
         if (!TryParseFishingWindow(target.Time, out var windowStart, out var windowEnd))
             return;
         var gpMax = plan.PlayerProfileUsed.GpMax;

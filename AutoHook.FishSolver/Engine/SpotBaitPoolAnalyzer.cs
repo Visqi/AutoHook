@@ -60,7 +60,7 @@ public static class SpotBaitPoolAnalyzer {
         var same = pool.Where(p => p.Hookset == hookset).ToList();
         var opp = pool.Where(p => p.Hookset == opposite).ToList();
         if (same.Count == 0 || opp.Count == 0)
-            return false; // all one hookset → lure useless
+            return false; // all one hookset -> lure useless
 
         // ideally 0–2 others with the same hookset (target alone, or 1–2 siblings)
         if (same.Count > 3)
@@ -72,7 +72,7 @@ public static class SpotBaitPoolAnalyzer {
         if (same.Count > opp.Count)
             return false;
 
-        // equal counts → minority by summed bite-rate weight
+        // equal counts -> minority by summed bite-rate weight
         return RateWeightSum(same) < RateWeightSum(opp);
     }
 

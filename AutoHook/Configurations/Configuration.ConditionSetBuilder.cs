@@ -151,6 +151,18 @@ public partial class Configuration {
             };
         }
 
+        public static Condition ActionReady(uint actionId) {
+            return new Condition {
+                TypeId = Registry.GetId<ActionCooldownCD>(),
+                Params = new Dictionary<string, object> {
+                    ["id"] = (long)actionId,
+                    ["type"] = 0L,
+                    ["sec"] = 0L,
+                    ["op"] = "<=",
+                },
+            };
+        }
+
         public static Condition IntuitionActive(bool inverse = false) {
             var cond = new Condition {
                 TypeId = Registry.GetId<IntuitionActiveCD>(),
