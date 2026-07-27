@@ -130,4 +130,8 @@ public sealed class FishOverride {
     public int? SlapTargetFishId { get; set; }
     public double? EarlyCancelSec { get; set; }
     public int? IntuitionDurationSec { get; set; }
+    public int? BaitId { get; set; }
+    public bool? ALureEligible { get; set; }
+    public bool? MLureEligible { get; set; }
+    public bool ClearMoochChain { get; set; } // if you want to force treat it as a straight catch
 }

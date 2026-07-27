@@ -1,3 +1,4 @@
+using AutoHook.FishSolver.Import;
 using AutoHook.FishSolver.Models;
 using AutoHook.FishSolver.Rules;
 
@@ -13,6 +14,7 @@ public sealed class FishSolverEngine(FishKnowledgeBase knowledgeBase, BuffPersis
             return null;
 
         var tactics = FishArchetypeClassifier.Classify(baseProfile, request.Profile);
+        tactics = SolverOverridesMerger.ApplyForcedTactics(knowledgeBase, request.TargetFishId, tactics);
         var (variant, fallbacks) = RouteVariantSelector.Adapt(baseProfile, ref tactics, request.Profile);
         var profile = baseProfile with { Tactics = tactics };
 

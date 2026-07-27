@@ -87,7 +87,8 @@ public static class ResourcePolicyBuilder {
             priority.AddRange([FisherSkill.IdenticalCast, FisherSkill.SurfaceSlap, FisherSkill.Chum]);
         else if (PreferMooch2Primary(profile, tactics, player))
             priority.AddRange([FisherSkill.SurfaceSlap, FisherSkill.Chum, FisherSkill.MoochII, FisherSkill.PatienceII, FisherSkill.MakeshiftBait]);
-        else if (profile.Acquisition.MoochChain.Count > 0)
+        else if (tactics.HoldMode == PrepHoldMode.MoochHold || profile.Acquisition.MoochChain.Count > 0
+                 && tactics.Archetype is StrategyArchetype.PreMoochOpener or StrategyArchetype.MoochChain or StrategyArchetype.MoochLoop or StrategyArchetype.SwimbaitBank)
             priority.AddRange([FisherSkill.SurfaceSlap, FisherSkill.Chum, FisherSkill.PatienceII, FisherSkill.MoochII, FisherSkill.MakeshiftBait]);
         else
             priority.AddRange([FisherSkill.SurfaceSlap, FisherSkill.Chum, FisherSkill.PatienceII, FisherSkill.MakeshiftBait]);
@@ -132,7 +133,8 @@ public static class ResourcePolicyBuilder {
     private static bool PreferMooch2Primary(FishProfile profile, InferredTactics tactics, PlayerProfile player) {
         if (!player.Skills.MoochII)
             return false;
-        if (tactics.HoldMode is PrepHoldMode.SwimbaitBank or PrepHoldMode.IdenticalCastZeroTime)
+        // only when actually on a mooch plan
+        if (tactics.HoldMode is not PrepHoldMode.MoochHold)
             return false;
         if (profile.Acquisition.MoochChain.Count != 1)
             return false;

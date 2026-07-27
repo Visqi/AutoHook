@@ -11,7 +11,7 @@ public static class SolverPresetBuilder {
         if (target == null)
             return null;
 
-        var moochList = ResolveMoochFish(target.Mooches);
+        var moochList = UsesMoochRoute(plan) ? ResolveMoochFish(target.Mooches) : [];
         var tackleBait = moochList.Count > 0 ? moochList[^1].InitialBait : plan.BaitId;
         if (tackleBait <= 0)
             tackleBait = target.InitialBait;
@@ -50,6 +50,12 @@ public static class SolverPresetBuilder {
 
         return preset;
     }
+
+    // MoochHold/SwimbaitBank/Multimooch use the mooch list, the rest keept Mooches as an alternative but shouldn't be wired
+    private static bool UsesMoochRoute(SolverOutput plan)
+        => plan.HoldMode is PrepHoldMode.MoochHold or PrepHoldMode.SwimbaitBank
+           || plan.Archetype is StrategyArchetype.PreMoochOpener or StrategyArchetype.MoochChain
+               or StrategyArchetype.MoochLoop or StrategyArchetype.SwimbaitBank;
 
     private static void SetupFishCaughtActions(CustomPresetConfig preset, ImportedFish target, SolverOutput plan, ImportedFish? slapFish) {
         if (slapFish != null) {
@@ -530,6 +536,7 @@ public static class SolverPresetBuilder {
         cl.Enabled = true;
         cl.CancelAttempt = true; // early-cancel / reroll: Rest if stacks maxed without a bite
         cl.LureTarget = LureTarget.Special;
+        cl.ConditionSet = null; // LureStack / lure isolation should run uncondtionally
         cl.Id = lureRule.Action == HookActionKind.AmbitiousLure ? IDs.Actions.AmbitiousLure : IDs.Actions.ModestLure;
     }
 

@@ -92,15 +92,23 @@ public static class SpotBaitPoolIndexBuilder {
             .OrderBy(m => m.FishId)];
     }
 
-    public static int? PrimaryBaitAtSpot(int fishId, int spotId, Dictionary<int, List<FishingSourceEntry>>? sources, int fallbackBait) {
+    public static int? PrimaryBaitAtSpot(int fishId, int spotId, Dictionary<int, List<FishingSourceEntry>>? sources, int fallbackBait, IReadOnlySet<int>? knownFishIds = null, bool preferTackleBait = false) {
         if (sources == null || !sources.TryGetValue(fishId, out var entries))
             return fallbackBait > 0 ? fallbackBait : null;
 
         var atSpot = entries.Where(e => e.Spot == spotId).Select(e => e.Bait).Distinct().ToList();
-        return atSpot.Count switch {
-            0 => fallbackBait > 0 ? fallbackBait : null,
-            1 => atSpot[0],
-            _ => atSpot.Contains(fallbackBait) ? fallbackBait : atSpot[0],
-        };
+        if (atSpot.Count == 0)
+            return fallbackBait > 0 ? fallbackBait : null;
+        if (atSpot.Count == 1)
+            return atSpot[0];
+
+        // Lure-isolated fish: prefer real tackle over mooch-fish bait when both are listed
+        if (preferTackleBait && knownFishIds is { Count: > 0 }) {
+            var tackle = atSpot.Where(b => !knownFishIds.Contains(b)).ToList();
+            if (tackle.Count > 0)
+                return tackle.Contains(fallbackBait) ? fallbackBait : tackle[0];
+        }
+
+        return atSpot.Contains(fallbackBait) ? fallbackBait : atSpot[0];
     }
 }

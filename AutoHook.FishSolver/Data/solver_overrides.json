@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "FishId": 12828,
+    "BaitId": 12707,
+    "ALureEligible": true,
+    "ClearMoochChain": true,
+    "Archetype": "LureStack",
+    "HoldMode": "None"
+  }
+]

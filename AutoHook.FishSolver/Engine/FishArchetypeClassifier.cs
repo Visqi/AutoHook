@@ -9,6 +9,7 @@ namespace AutoHook.FishSolver.Engine;
 // - many triggers (4+) -> rebuild: farm N-1, IC the last at 0s, release at open
 //
 // mooch (no intuition):
+// - if matching lure makes the target (nearly) exclusive on a straight bait, prefer that over mooch (e.g. thunderbolt eel)
 // - Spareful Hand -> bank swimbait; else hold a live mooch (don't stow)
 // - multi-step chain -> same, longer fragile hold
 //
@@ -56,10 +57,11 @@ public static class FishArchetypeClassifier {
         }
 
         // --- mooch without intuition ---
+        // Multi-step chains stay mooch. Single mooch can lose to lure-isolated straight catch (e.g. Thunderbolt Eel)
         if (profile.Acquisition.MoochChain.Count > 1)
             return StrategyArchetype.MoochChain;
 
-        if (profile.Acquisition.MoochChain.Count == 1)
+        if (profile.Acquisition.MoochChain.Count == 1 && !PreferLureStraightOverSingleMooch(profile, pool, player))
             return player.Skills.SparefulHand ? StrategyArchetype.SwimbaitBank : StrategyArchetype.PreMoochOpener;
 
         // --- straight catch legendaries / grinders ---
@@ -78,11 +80,25 @@ public static class FishArchetypeClassifier {
         }
 
         // guide: minority hookset + ≤2 same-hookset siblings + matching lure skill
-        if (SpotBaitPoolAnalyzer.IsLureStackCandidate(profile, pool)
-            && HasMatchingLure(profile, player))
+        // also: lure-eligible fish where ALure/MLure isolates the target (solo or ≤1 sibling)
+        if (HasMatchingLure(profile, player)
+            && (SpotBaitPoolAnalyzer.IsLureStackCandidate(profile, pool)
+                || SpotBaitPoolAnalyzer.IsLureNearlyExclusive(profile, pool)))
             return StrategyArchetype.LureStack;
 
         return StrategyArchetype.SlapAndChum;
+    }
+
+    // Single-mooch fish that respond to A/MLure as a straight catch is preferred over mooch even when mooch has a higher raw bite rate
+    private static bool PreferLureStraightOverSingleMooch(FishProfile profile, IReadOnlyList<PoolMember> pool, PlayerProfile player) {
+        if (!HasMatchingLure(profile, player))
+            return false;
+        if (!profile.Eligibility.ALureEligible && !profile.Eligibility.MLureEligible)
+            return false;
+        // only when primary bait is already a tackle bait (not the mooch fish itself)
+        if (profile.Acquisition.MoochChain.Contains(profile.Eligibility.BaitId))
+            return false;
+        return SpotBaitPoolAnalyzer.IsLureNearlyExclusive(profile, pool) || SpotBaitPoolAnalyzer.IsLureStackCandidate(profile, pool);
     }
 
     private static bool HasMatchingLure(FishProfile profile, PlayerProfile player)
@@ -112,6 +128,10 @@ public static class PrepHoldModeSelector {
         if (archetype == StrategyArchetype.SwimbaitBank && player.Skills.SparefulHand)
             return PrepHoldMode.SwimbaitBank;
 
+        // Lure / straight plans skip mooch hold even when a mooch alternate exists
+        if (archetype is StrategyArchetype.LureStack or StrategyArchetype.LureReroll or StrategyArchetype.SlapAndChum or StrategyArchetype.FailFaster or StrategyArchetype.ShortBiteReset)
+            return PrepHoldMode.None;
+
         if (profile.Acquisition.MoochChain.Count > 0)
             return PrepHoldMode.MoochHold;
 
@@ -129,3 +149,4 @@ public static class PrepHoldModeSelector {
         _ => false,
     };
 }
+

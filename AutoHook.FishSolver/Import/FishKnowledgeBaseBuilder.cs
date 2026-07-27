@@ -38,8 +38,9 @@ public static class FishKnowledgeBaseBuilder {
             Quantity = p.Quantity,
         }).ToList();
         var primarySpot = record.SpotIds.FirstOrDefault();
+        var preferTackle = record.ALure > 0 || record.MLure > 0;
         var baitAtSpot = primarySpot > 0
-            ? SpotBaitPoolIndexBuilder.PrimaryBaitAtSpot(record.ItemId, primarySpot, sources, record.InitialBait) ?? record.InitialBait
+            ? SpotBaitPoolIndexBuilder.PrimaryBaitAtSpot(record.ItemId, primarySpot, sources, record.InitialBait, knownFishIds: byId.Keys.ToHashSet(), preferTackleBait: preferTackle) ?? record.InitialBait
             : record.InitialBait;
         var pool = primarySpot > 0 && baitAtSpot > 0
             ? SpotBaitPoolIndexBuilder.BuildPoolMembers(primarySpot, baitAtSpot, pools, byId)

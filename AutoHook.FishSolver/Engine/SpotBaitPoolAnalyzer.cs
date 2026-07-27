@@ -76,6 +76,17 @@ public static class SpotBaitPoolAnalyzer {
         return RateWeightSum(same) < RateWeightSum(opp);
     }
 
+    // lure isolation: target alone in the pool, or at most one other same-hookset fish (they don't do this in later expansions almost ever so probably very few fish this applies to)
+    // thunderbolt eel is either alone or w/ pipira pira depending on time
+    public static bool IsLureNearlyExclusive(FishProfile target, IReadOnlyList<PoolMember> pool) {
+        var hookset = target.Signals.Hookset;
+        if (hookset is not (HooksetType.Precision or HooksetType.Powerful))
+            return false;
+
+        var same = pool.Count(p => p.Hookset == hookset);
+        return same is 1 or 2;
+    }
+
     private static int MostCommonCompetitor(IReadOnlyList<PoolMember> competitors)
         => competitors
             .OrderBy(c => c.RateTier switch {
