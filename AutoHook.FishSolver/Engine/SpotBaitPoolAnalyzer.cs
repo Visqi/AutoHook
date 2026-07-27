@@ -31,7 +31,53 @@ public static class SpotBaitPoolAnalyzer {
 
         // Default: slap the most common leftover. Prefer common rate tier, then later biters as a weak tie-break
         // late common junk on long casts suck
-        return competitors
+        return MostCommonCompetitor(competitors);
+    }
+
+    // Lure Stack: slap another fish with the same hookset when present, else most common junk
+    public static int? RecommendLureStackSlapTarget(FishProfile target, IReadOnlyList<PoolMember> pool) {
+        var hookset = target.Signals.Hookset;
+        if (hookset is not (HooksetType.Precision or HooksetType.Powerful))
+            return RecommendSlapTarget(target, pool);
+
+        var sameHook = pool
+            .Where(p => p.FishId != target.FishId && p.Hookset == hookset)
+            .ToList();
+        if (sameHook.Count > 0)
+            return MostCommonCompetitor(sameHook);
+
+        return RecommendSlapTarget(target, pool);
+    }
+
+    // Lure Stack when target hookset is minority by fish count, or by rate weight when counts tie
+    // also wants ≤2 other fish sharing that hookset so the lure bias isn't diluted
+    public static bool IsLureStackCandidate(FishProfile target, IReadOnlyList<PoolMember> pool) {
+        var hookset = target.Signals.Hookset;
+        if (hookset is not (HooksetType.Precision or HooksetType.Powerful))
+            return false;
+
+        var opposite = hookset == HooksetType.Powerful ? HooksetType.Precision : HooksetType.Powerful;
+        var same = pool.Where(p => p.Hookset == hookset).ToList();
+        var opp = pool.Where(p => p.Hookset == opposite).ToList();
+        if (same.Count == 0 || opp.Count == 0)
+            return false; // all one hookset → lure useless
+
+        // ideally 0–2 others with the same hookset (target alone, or 1–2 siblings)
+        if (same.Count > 3)
+            return false;
+
+        if (same.Count < opp.Count)
+            return true;
+
+        if (same.Count > opp.Count)
+            return false;
+
+        // equal counts → minority by summed bite-rate weight
+        return RateWeightSum(same) < RateWeightSum(opp);
+    }
+
+    private static int MostCommonCompetitor(IReadOnlyList<PoolMember> competitors)
+        => competitors
             .OrderBy(c => c.RateTier switch {
                 RateTier.Common => 0,
                 RateTier.Uncommon => 1,
@@ -41,7 +87,9 @@ public static class SpotBaitPoolAnalyzer {
             })
             .ThenByDescending(c => c.BiteMax)
             .First().FishId;
-    }
+
+    private static double RateWeightSum(IEnumerable<PoolMember> members)
+        => members.Sum(m => TierWeight(m.RateTier));
 
     public static double? ComputeEarlyCancelSec(FishProfile target, IReadOnlyList<PoolMember> pool) {
         // Early cancel is a !!! trick - weak/strong bites don't get the same clean separation

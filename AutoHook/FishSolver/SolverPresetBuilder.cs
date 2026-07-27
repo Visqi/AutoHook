@@ -349,12 +349,42 @@ public static class SolverPresetBuilder {
             ac.CastChum.Enabled = plan.ResourcePolicy.UseChum;
             if (moochList.Count > 0 || plan.HoldMode == PrepHoldMode.MoochHold) {
                 ac.CastPatience.Enabled = true;
+                ApplyPatienceMinGp(ac.CastPatience, plan);
                 ac.CastMakeShiftBait.Enabled = true;
             }
             else if (Item.GetRow((uint)target.ItemId).IsCollectable) {
                 ac.CastPatience.Enabled = true;
+                ApplyPatienceMinGp(ac.CastPatience, plan);
             }
+
+            // Chum at low GP prevents ever reaching Patience/Prize Catch (mooch needs one of those)
+            if (ac.CastChum.Enabled && (ac.CastPatience.Enabled || moochList.Count > 0
+                || plan.HoldMode is PrepHoldMode.MoochHold or PrepHoldMode.SwimbaitBank))
+                ApplyChumPatienceGate(ac.CastChum, plan);
         }
+    }
+
+    private static void ApplyPatienceMinGp(AutoPatience patience, SolverOutput plan) {
+        if (plan.ResourcePolicy.PatienceMinGp <= 0)
+            return;
+        patience.GpThresholdAbove = true;
+        // don't use SetThreshold — that triggers Save mid-build
+        patience.GpThreshold = plan.ResourcePolicy.PatienceMinGp;
+    }
+
+    // Don't burn Chum while waiting to afford Patience/Prize Catch.
+    // Once Angler's Fortune or Prize Catch is up, Chum is fine at any GP.
+    private static void ApplyChumPatienceGate(AutoChum chum, SolverOutput plan) {
+        const int patienceIICost = 560;
+        const int prizeCatchCost = 200;
+        var gpFloor = plan.ResourcePolicy.PatienceMinGp > 0
+            ? plan.ResourcePolicy.PatienceMinGp
+            : plan.HoldMode == PrepHoldMode.SwimbaitBank ? prizeCatchCost : patienceIICost;
+
+        chum.ConditionSet = Configuration.ConditionSetBuilder.Any(
+            Configuration.ConditionSetBuilder.StatusActive(IDs.Status.AnglersFortune),
+            Configuration.ConditionSetBuilder.StatusActive(IDs.Status.PrizeCatch),
+            Configuration.ConditionSetBuilder.Gp(gpFloor));
     }
 
     private static void ConfigurePreWindowResourceCasts(
@@ -366,6 +396,7 @@ public static class SolverPresetBuilder {
             return;
         var gpMax = plan.PlayerProfileUsed.GpMax;
         ac.CastPatience.Enabled = true;
+        ApplyPatienceMinGp(ac.CastPatience, plan);
         // Prep: outside window + AA not capped. Window: Patience only while Mooch II is on CD
         if (moochList.Count > 0) {
             ac.CastPatience.ConditionSet = new Conditions.ConditionSet {
@@ -458,7 +489,7 @@ public static class SolverPresetBuilder {
 
         ref var cl = ref hookset.CastLures;
         cl.Enabled = true;
-        cl.CancelAttempt = lureRule.Action == HookActionKind.ModestLure;
+        cl.CancelAttempt = true; // early-cancel / reroll: Rest if stacks maxed without a bite
         cl.LureTarget = LureTarget.Special;
         cl.Id = lureRule.Action == HookActionKind.AmbitiousLure ? IDs.Actions.AmbitiousLure : IDs.Actions.ModestLure;
     }

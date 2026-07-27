@@ -35,6 +35,7 @@ public sealed class ResourcePolicy {
     public bool UseChum { get; init; }
     public bool UseCordials { get; init; }
     public int GpReserve { get; init; }
+    public int PatienceMinGp { get; init; } // cost + hookset headroom + lure budget
 }
 
 public sealed class SolverOutput {

@@ -73,6 +73,7 @@ public sealed class IntuitionRequirement {
 public sealed class PoolMember {
     public int FishId { get; init; }
     public TugType Tug { get; init; }
+    public HooksetType Hookset { get; init; }
     public double BiteMin { get; init; }
     public double BiteMax { get; init; }
     public RateTier RateTier { get; init; }

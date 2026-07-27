@@ -88,6 +88,7 @@ public static class FishKnowledgeBaseBuilder {
         return new PoolMember {
             FishId = record.ItemId,
             Tug = MapTug(record.BiteType),
+            Hookset = MapHookset(record.HookType),
             BiteMin = record.BiteTimeMin,
             BiteMax = record.BiteTimeMax,
             RateTier = ClassifyRateTier(record, totalOccurrences),

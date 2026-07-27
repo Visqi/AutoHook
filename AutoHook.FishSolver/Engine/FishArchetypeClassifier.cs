@@ -15,16 +15,20 @@ namespace AutoHook.FishSolver.Engine;
 // straight catch:
 // - short bite vs long pool mates -> Rest / lure early (ShortBiteReset)
 // - long !!! with a slower competitor -> slap the slow one (FailFaster)
+// - minority hookset + matching lure -> LureStack (guide)
 // - else slap junk + chum (SlapAndChum)
-// - several !!! + ALure eligible + skill -> LureStack
 public static class FishArchetypeClassifier {
     public static InferredTactics Classify(FishProfile profile, PlayerProfile player) {
         var pool = profile.PoolAtPrimarySpot;
         var archetype = InferArchetype(profile, pool, player);
         var holdMode = PrepHoldModeSelector.Select(profile, player, archetype);
 
-        // don't get a slap target if we don't have surface slap
-        var slapTarget = player.Skills.SurfaceSlap ? SpotBaitPoolAnalyzer.RecommendSlapTarget(profile, pool) : null;
+        // LureStack prefers slapping the same-hookset competitor; otherwise default slap logic
+        int? slapTarget = null;
+        if (player.Skills.SurfaceSlap) {
+            slapTarget = archetype == StrategyArchetype.LureStack ? SpotBaitPoolAnalyzer.RecommendLureStackSlapTarget(profile, pool) : SpotBaitPoolAnalyzer.RecommendSlapTarget(profile, pool);
+        }
+
         var earlyCancel = SpotBaitPoolAnalyzer.ComputeEarlyCancelSec(profile, pool);
         var hookOnly = SpotBaitPoolAnalyzer.HookOnlyTugs(profile, pool);
 
@@ -59,10 +63,6 @@ public static class FishArchetypeClassifier {
             return player.Skills.SparefulHand ? StrategyArchetype.SwimbaitBank : StrategyArchetype.PreMoochOpener;
 
         // --- straight catch legendaries / grinders ---
-        // Several !!! in the pool + ALure flag -> Ambitious Lure is the intended pressure tool.
-        if (profile.Eligibility.ALureEligible && player.Skills.AmbitiousLure && pool.Count(p => p.Tug == TugType.Legendary) > 2)
-            return StrategyArchetype.LureStack;
-
         // Target bites early, pool mates bite late -> Rest (or lure) instead of waiting out a dead cast.
         if (SpotBaitPoolAnalyzer.ComputeEarlyCancelSec(profile, pool) is > 0 and <= 12)
             return StrategyArchetype.ShortBiteReset;
@@ -70,12 +70,27 @@ public static class FishArchetypeClassifier {
         // Long target + even longer competitor -> slap the slow one so its bite can't waste the cast.
         if (SpotBaitPoolAnalyzer.RecommendSlapTarget(profile, pool) is { } slap) {
             var competitor = pool.FirstOrDefault(p => p.FishId == slap);
-            if (competitor != null && competitor.BiteMax > profile.Signals.BiteTimeMin)
-                return StrategyArchetype.FailFaster;
+            if (competitor != null && competitor.BiteMax > profile.Signals.BiteTimeMin) {
+                var targetDuration = profile.Signals.BiteTimeMax - profile.Signals.BiteTimeMin;
+                if (profile.Signals.Tug == TugType.Legendary && targetDuration >= 10)
+                    return StrategyArchetype.FailFaster;
+            }
         }
+
+        // guide: minority hookset + ≤2 same-hookset siblings + matching lure skill
+        if (SpotBaitPoolAnalyzer.IsLureStackCandidate(profile, pool)
+            && HasMatchingLure(profile, player))
+            return StrategyArchetype.LureStack;
 
         return StrategyArchetype.SlapAndChum;
     }
+
+    private static bool HasMatchingLure(FishProfile profile, PlayerProfile player)
+        => profile.Signals.Hookset switch {
+            HooksetType.Powerful => player.Skills.AmbitiousLure,
+            HooksetType.Precision => player.Skills.ModestLure,
+            _ => false,
+        };
 }
 
 // what we're sitting on until the window opens
