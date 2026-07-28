@@ -244,33 +244,47 @@ public partial class FishingManager {
         var involvedPresetIds = new HashSet<Guid>();
         var iterations = 0;
 
-        while (true) {
-            if (++iterations > _presetSwapCap) {
-                SwapLoopBailout(involvedPresetIds);
-                break;
+        try {
+            while (true) {
+                if (++iterations > _presetSwapCap) {
+                    SwapLoopBailout(involvedPresetIds);
+                    break;
+                }
+
+                Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.PresetSwapped));
+                Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.BaitSwapped));
+
+                involvedPresetIds.Add(GetExtraOwnerPreset().UniqueId);
+
+                var presetBefore = Presets.SelectedPreset?.UniqueId;
+                var extraCfg = GetExtraCfg();
+                if (extraCfg.Triggers.Count == 0)
+                    break;
+
+                RunExtraTriggers(extraCfg);
+
+                if (Presets.SelectedPreset?.UniqueId == presetBefore)
+                    break;
+
+                anyPresetSwapped = true;
+                involvedPresetIds.Add(GetExtraOwnerPreset().UniqueId);
             }
 
-            Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.PresetSwapped));
-            Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.BaitSwapped));
-
-            involvedPresetIds.Add(GetExtraOwnerPreset().UniqueId);
-
-            var presetBefore = Presets.SelectedPreset?.UniqueId;
-            var extraCfg = GetExtraCfg();
-            if (extraCfg.Triggers.Count == 0)
-                break;
-
-            RunExtraTriggers(extraCfg);
-
-            if (Presets.SelectedPreset?.UniqueId == presetBefore)
-                break;
-
-            anyPresetSwapped = true;
-            involvedPresetIds.Add(GetExtraOwnerPreset().UniqueId);
+            if (anyPresetSwapped)
+                Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
         }
+        finally {
+            SettleIntuitionEdges();
+        }
+    }
 
-        if (anyPresetSwapped)
-            Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
+    // turned gained/lost into active/inactive
+    private void SettleIntuitionEdges() {
+        var cur = Ws.Fishing.Intuition;
+        if (cur.Status == IntuitionStatus.Gained)
+            Ws.Execute(new FishingInfo.OpIntuition(new IntuitionInfo(IntuitionStatus.Active, cur.TimeRemaining)));
+        else if (cur.Status == IntuitionStatus.Lost)
+            Ws.Execute(new FishingInfo.OpIntuition(new IntuitionInfo(IntuitionStatus.NotActive, 0f)));
     }
 
     private void SwapLoopBailout(HashSet<Guid> involvedPresetIds) {

@@ -14,6 +14,9 @@ public readonly record struct BaitInfo(uint BaitId, uint? SelectedSwimbaitId, ui
 }
 
 public readonly record struct IntuitionInfo(IntuitionStatus Status, float TimeRemaining) {
+    // gained is active until ExtraOptions settles the edge
+    public bool IsActive => Status is IntuitionStatus.Active or IntuitionStatus.Gained;
+
     public override string ToString()
         => $"Status={Status}, TimeRemaining={TimeRemaining:F1}s";
 }

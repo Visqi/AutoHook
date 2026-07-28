@@ -138,7 +138,7 @@ public partial class FishingManager {
         if (Ws.GetSwimbaitCount() is 0)
             return false;
 
-        var intuitionActive = Ws.Fishing.Intuition.Status == IntuitionStatus.Active;
+        var intuitionActive = Ws.Fishing.Intuition.IsActive;
         var presetName = Presets.SelectedPreset?.PresetName ?? "(none)";
         Service.PrintDebug($"[Swimbait] Evaluating slots, preset={presetName}, intuitionActive={intuitionActive}, storedCount={Ws.GetSwimbaitCount()}");
 

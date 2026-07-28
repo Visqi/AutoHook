@@ -13,7 +13,7 @@ public sealed class IntuitionTimerCD : IntCompareConditionDefinition {
 
     protected override bool? InactiveResult(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var args = GetIntCompareParams(parameters, valueKey: ValueKey);
-        return world.Fishing.Intuition.Status != IntuitionStatus.Active ? args.Invert : null;
+        return world.Fishing.Intuition.IsActive ? null : args.Invert;
     }
 
     protected override int ReadValue(WorldState world, IReadOnlyDictionary<string, object> parameters)

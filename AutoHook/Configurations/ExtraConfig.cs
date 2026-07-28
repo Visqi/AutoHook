@@ -119,20 +119,18 @@ public class ExtraTrigger {
             return string.Empty;
 
         var cond = group.Conditions[0];
-        var core = SummarizeCondition(cond);
-        if (string.IsNullOrEmpty(core))
-            return string.Empty;
-
-        var inv = IConditionDefinition.GetBool(cond.Params, "inv", false);
-        return inv ? $"On Lose {core}" : $"On Gain {core}";
+        return SummarizeCondition(cond);
     }
 
     private static string SummarizeCondition(AhCondition cond) {
+        var inv = IConditionDefinition.GetBool(cond.Params, "inv", false);
         switch (cond.TypeId) {
             case "IntuitionActive" or nameof(IntuitionActiveCD):
-                return "Fisher's Intuition";
+                return inv ? "While Fisher's Intuition inactive" : "While Fisher's Intuition";
+            case nameof(IntuitionEventCD):
+                return inv ? "On Lose Fisher's Intuition" : "On Gain Fisher's Intuition";
             case "SpectralActive" or nameof(SpectralActiveCD):
-                return "Spectral Current";
+                return inv ? "While Spectral Current inactive" : "While Spectral Current";
             case "StatusStacksCD" or "StatusStacks":
                 if (cond.Params.TryGetValue("ids", out var idsObj) && idsObj is List<object> list && list.Count == 1) {
                     var id = Convert.ToUInt32(list[0]);
@@ -147,7 +145,8 @@ public class ExtraTrigger {
                 var fishLabel = fishId == 0 ? "Slot Fish" : Item.GetRow((uint)fishId).Name.ToString();
                 return $"Swimbaits ({fishLabel}) {FormatIntCompare(cond.Params)}";
             default:
-                return cond.Describe(ConditionRegistry.Registry);
+                var desc = cond.Describe(ConditionRegistry.Registry);
+                return inv ? $"NOT {desc}" : desc;
         }
     }
 

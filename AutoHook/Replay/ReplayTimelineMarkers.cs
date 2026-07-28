@@ -88,7 +88,7 @@ public static class ReplayTimelineMarkers {
         foreach (var op in replay.Ops) {
             switch (op) {
                 case FishingInfo.OpIntuition i: {
-                        var active = i.Value.Status == IntuitionStatus.Active;
+                        var active = i.Value.IsActive;
                         if (!intuitionActive && active)
                             intuitionStart = op.Timestamp;
                         else if (intuitionActive && !active && intuitionStart is { } start)

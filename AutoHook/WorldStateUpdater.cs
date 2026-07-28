@@ -374,7 +374,13 @@ public sealed class WorldStateUpdater : IDisposable {
     }
 
     private static void UpdateIntuition(WorldState ws, BiteContext biteContext) {
-        var next = new IntuitionInfo(biteContext.IntuitionStatus, biteContext.IntuitionTimeRemaining);
+        // on edge we want to report intuition as "gained/lost", then wait for extraoptions to poll it and set it as "active/inactive"
+        var isActive = biteContext.IntuitionStatus == IntuitionStatus.Active;
+        var prev = ws.Fishing.Intuition.Status;
+        var wasActive = prev is IntuitionStatus.Active or IntuitionStatus.Gained;
+
+        var nextStatus = isActive ? wasActive ? prev : IntuitionStatus.Gained : wasActive ? IntuitionStatus.Lost : prev;
+        var next = new IntuitionInfo(nextStatus, isActive ? biteContext.IntuitionTimeRemaining : 0f);
         if (ws.Fishing.Intuition == next)
             return;
         ws.Execute(new FishingInfo.OpIntuition(next));

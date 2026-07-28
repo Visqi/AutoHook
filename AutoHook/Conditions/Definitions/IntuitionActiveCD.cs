@@ -7,8 +7,8 @@ public sealed class IntuitionActiveCD : BoolInvertConditionDefinition {
     public override bool SnapshottableOnCast => true;
 
     protected override bool ReadValue(WorldState world)
-        => world.Fishing.Intuition.Status == IntuitionStatus.Active;
+        => world.Fishing.Intuition.IsActive;
 
     protected override bool ReadSnapshotValue(CastInfoSnapshot snapshot)
-        => snapshot.IntuitionStatus == IntuitionStatus.Active;
+        => snapshot.IntuitionStatus is IntuitionStatus.Active or IntuitionStatus.Gained;
 }

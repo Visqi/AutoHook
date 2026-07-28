@@ -141,7 +141,7 @@ public class HookConfig : BaseOption {
         => UsesIntuitionHookConfig() ? SwimbaitIntuition : SwimbaitNormal;
 
     public bool UsesIntuitionHookConfig()
-        => Service.WorldState.Fishing.Intuition.Status == IntuitionStatus.Active && IntuitionHook.UseCustomStatusHook;
+        => Service.WorldState.Fishing.Intuition.IsActive && IntuitionHook.UseCustomStatusHook;
 
     public HookType? GetHook(BiteType bite, double timePassed) {
         var hookset = GetHookset();
