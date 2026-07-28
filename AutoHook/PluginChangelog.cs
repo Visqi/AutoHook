@@ -5,6 +5,11 @@ namespace AutoHook;
 public static class PluginChangelog {
     public static readonly List<Version> Versions =
     [
+        new Version("6.0.0.83") {
+            Main = {
+                "Added an Intuition gained/lost event to conditions."
+            }
+        },
         new Version("6.0.0.53")
         {
             Main =
