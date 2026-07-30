@@ -9,9 +9,6 @@ using System.Globalization;
 namespace AutoHook;
 
 public class Service {
-    public static void Initialize(IDalamudPluginInterface pluginInterface)
-        => pluginInterface.Create<Service>();
-
     public const string PluginName = "AutoHook";
     public const string GlobalPresetName = "Global Preset";
 
@@ -29,7 +26,8 @@ public class Service {
     public static ReplayManagementWindow ReplayManagement { get; set; } = null!;
     public static FileDialogManager FileDialog { get; } = new();
 
-    public static async ValueTask InitAsync() {
+    public static async ValueTask InitAsync(IDalamudPluginInterface pluginInterface) {
+        pluginInterface.Create<Service>();
         unsafe {
             WorldState = new WorldState((ulong)FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->PerformanceCounterFrequency, Svc.Data.GameData.Repositories["ffxiv"].Version);
         }

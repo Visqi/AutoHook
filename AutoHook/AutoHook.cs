@@ -59,11 +59,8 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
     public async Task LoadAsync(CancellationToken cancellationToken) {
         ECommonsMain.Init(pluginInterface, this, Module.DalamudReflector, Module.ObjectFunctions);
         CLibMain.Init(pluginInterface, this, CLibModule.Automation);
-        Service.Initialize(pluginInterface);
         PunishLibMain.Init(pluginInterface, "AutoHook", new AboutPlugin() { Developer = "InitialDet & croizat", Sponsor = "https://ko-fi.com/initialdet" });
-        await Service.InitAsync();
-
-        cancellationToken.ThrowIfCancellationRequested();
+        await Service.InitAsync(pluginInterface);
 
         Plugin = this;
         _pluginUi = new PluginUi();

@@ -36,7 +36,11 @@ public static class ConditionUi {
            && group.Conditions.Any(c => c.Enabled)
            && group.Evaluate(Service.WorldState, Registry);
 
-    private static bool RequiresComplexConditionUi(ConditionSet set) => set.Groups.Count > 1;
+    private static bool RequiresComplexConditionUi(ConditionSet set)
+        => set.Groups.Count > 1 || !string.IsNullOrWhiteSpace(set.Expression);
+
+    private static bool IsExpressionEditorVisible(ConditionSet set)
+        => set.ExprVisible || !string.IsNullOrWhiteSpace(set.Expression);
 
     public static ConditionSet? DrawConditionSet(string label, ConditionSet? set, ConditionScope scope, bool showAdvanced = true, IReadOnlyList<string>? allowedTypeIds = null, bool showSubPrefix = false, Action? drawHeaderExtras = null) {
         set ??= new ConditionSet();
@@ -44,7 +48,7 @@ public static class ConditionUi {
             set.Groups.Add(new ConditionGroup());
 
         // Either slim view or advanced view, never both. Toggle via SlimAdvancedExpanded.
-        // Multi-group sets always use the advanced editor so every group stays visible.
+        // Multi-group sets and sets with an expression always use the advanced editor.
         if (set.SlimAdvancedExpanded || RequiresComplexConditionUi(set)) {
             DrawSlimAdvancedEditor(set, scope, drawHeaderExtras);
             return set;
@@ -175,9 +179,10 @@ public static class ConditionUi {
         ImGui.TooltipOnHover($"Evaluate: {(mode is ConditionCombineMode.All ? "AND" : "OR")} - {(mode is ConditionCombineMode.All ? "all" : "any")} must be true");
 
         ImGui.SameLine();
+        var exprVisible = IsExpressionEditorVisible(set);
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Code))
-            set.ExprVisible = !set.ExprVisible;
-        ImGui.TooltipOnHover(set.ExprVisible ? "Hide editor" : "Show editor");
+            set.ExprVisible = !exprVisible;
+        ImGui.TooltipOnHover(exprVisible ? "Hide editor" : "Show editor");
 
         ImGui.SameLine();
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Copy))
@@ -242,7 +247,7 @@ public static class ConditionUi {
             }
         }
 
-        if (!set.ExprVisible)
+        if (!IsExpressionEditorVisible(set))
             return;
 
         ConditionExpressionUi.DrawExpressionEditor(set);
