@@ -1636,6 +1636,24 @@
   <data name="AutoOceanFishHelpText" xml:space="preserve">
     <value>먼바다 낚시에서 이뤄지는 모든 작업을 실행합니다: 자리이동, 낚싯대 던지기, 프리셋 실행.</value>
   </data>
+  <data name="AutoOceanFish_Fallthrough" xml:space="preserve">
+    <value>이미 목표를 달성한 경우 다음으로 건너뛰기</value>
+  </data>
+  <data name="UseForGoal" xml:space="preserve">
+    <value>사용 목적</value>
+  </data>
+  <data name="OceanFishGoal_Points" xml:space="preserve">
+    <value>먼바다 낚시 점수</value>
+  </data>
+  <data name="OceanFishGoal_Legendary" xml:space="preserve">
+    <value>먼바다 전설어</value>
+  </data>
+  <data name="OceanFishGoal_Achievements" xml:space="preserve">
+    <value>먼바다 낚시 업적</value>
+  </data>
+  <data name="OceanFishGoal_Levelling" xml:space="preserve">
+    <value>어부 레벨링</value>
+  </data>
   <data name="SpectralRestOnGain" xml:space="preserve">
     <value>환해류 출현시 다시 낚싯대 던지기</value>
   </data>
@@ -1668,5 +1686,8 @@
   </data>
   <data name="Opens_Replay_Window" xml:space="preserve">
     <value>리플레이 창 열기</value>
+  </data>
+  <data name="Prioritise" xml:space="preserve">
+    <value>우선 목표</value>
   </data>
 </root>
