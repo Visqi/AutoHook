@@ -7,7 +7,6 @@ public sealed class IntuitionTimerCD : IntCompareConditionDefinition {
     public override string Name => "Intuition time";
     public override ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
     protected override string ValueKey => "sec";
-    protected override string ComboId => "##intu_op";
     protected override string ValueLabel => "Seconds";
     protected override Func<int, int>? Clamp => static v => Math.Max(0, v);
 

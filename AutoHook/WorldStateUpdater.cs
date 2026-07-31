@@ -1,3 +1,5 @@
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Inventory.InventoryEventArgTypes;
 using Dalamud.Hooking;
 using Dalamud.Utility;
@@ -428,6 +430,7 @@ public sealed class WorldStateUpdater : IDisposable {
             Mission1 = new OceanMission(ptr->Mission1Type, ptr->Mission1Progress),
             Mission2 = new OceanMission(ptr->Mission2Type, ptr->Mission2Progress),
             Mission3 = new OceanMission(ptr->Mission3Type, ptr->Mission3Progress),
+            PlayerCount = Svc.Objects.OfType<IPlayerCharacter>().Count(),
             FishData = [.. _fishDataScratch],
             Status = ptr->Status,
         };

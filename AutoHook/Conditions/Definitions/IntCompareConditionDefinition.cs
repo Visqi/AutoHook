@@ -10,7 +10,6 @@ public abstract class IntCompareConditionDefinition : IConditionDefinition {
     protected virtual string ValueKey => "val";
     protected virtual int DefaultValue => 0;
     protected virtual string DefaultOp => ">=";
-    protected virtual string ComboId => $"##{Id}_op";
     protected virtual string ValueLabel => "Value";
     protected virtual float ValueWidth => 80f;
     protected virtual Func<int, int>? Clamp => null;
@@ -28,7 +27,7 @@ public abstract class IntCompareConditionDefinition : IConditionDefinition {
     }
 
     public virtual void DrawParams(Condition condition)
-        => DrawIntCompareParams(condition, ComboId, ValueLabel, valueKey: ValueKey, defaultValue: DefaultValue, defaultOp: DefaultOp, clamp: Clamp, valueWidth: ValueWidth);
+        => DrawIntCompareParams(condition, $"##{Id}_op", ValueLabel, valueKey: ValueKey, defaultValue: DefaultValue, defaultOp: DefaultOp, clamp: Clamp, valueWidth: ValueWidth);
 
     public virtual string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
         => ConditionParameterFormat.FormatIntCompare(parameters, ValueKey, DefaultValue, DefaultOp);

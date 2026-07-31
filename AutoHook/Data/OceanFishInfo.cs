@@ -24,6 +24,7 @@ public sealed class OceanFishingState {
     public uint CurrentTimeId { get; init; }
     public float TimeLeftInZone { get; init; } // seconds
     public float ZoneTimeMax { get; init; } // seconds
+    public int PlayerCount { get; init; }
 
     public OceanMission Mission1 { get; init; }
     public OceanMission Mission2 { get; init; }
@@ -217,6 +218,7 @@ public static class OceanFishingExtensions {
         if (a.Mission1 != b.Mission1) return false;
         if (a.Mission2 != b.Mission2) return false;
         if (a.Mission3 != b.Mission3) return false;
+        if (a.PlayerCount != b.PlayerCount) return false;
         if (a.Status != b.Status) return false;
         if (a.FishData.Count != b.FishData.Count) return false;
         for (var i = 0; i < a.FishData.Count; i++) {

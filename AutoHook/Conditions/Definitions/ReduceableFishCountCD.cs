@@ -4,7 +4,6 @@ public sealed class ReduceableFishCountCD : IntCompareConditionDefinition {
     public override string Id => nameof(ReduceableFishCountCD);
     public override string Name => "Reduceable fish count";
     public override ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
-    protected override string ComboId => "##reduceablefish_op";
     protected override string ValueLabel => "Fish";
     protected override Func<int, int>? Clamp => static v => Math.Max(0, v);
 
