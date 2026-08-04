@@ -87,8 +87,7 @@ public class BaseHookset(uint requiredStatus) {
     }
 
     private void DrawPatience() {
-        if (ImGui.TreeNodeEx(UIStrings.NormalPatienceHookset,
-                ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
+        if (ImGui.TreeNodeEx(UIStrings.NormalPatienceHookset, ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
             PatienceWeak.DrawOptions(UIStrings.HookWeakExclamation, true);
             PatienceStrong.DrawOptions(UIStrings.HookStrongExclamation, true);
             PatienceLegendary.DrawOptions(UIStrings.HookLegendaryExclamation, true);
@@ -123,17 +122,18 @@ public class BaseHookset(uint requiredStatus) {
     }
 
     private void DrawTimeout() {
-        if (ImGui.TreeNodeEx(UIStrings.Timeout,
-                ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
+        if (ImGui.TreeNodeEx(UIStrings.Timeout, ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.TimeoutOption);
             DrawTimeoutField(UIStrings.TimeLimit, ref TimeoutMax, UIStrings.DoesntHaveAffectUnderChum);
             if (TimeoutMax > 0) {
-                TimeoutConditionSet = Ui.ConditionUi.DrawConditionSet(UIStrings.Conditions, TimeoutConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
+                using (ImRaii.PushId("TimeoutConditions"))
+                    TimeoutConditionSet = Ui.ConditionUi.DrawConditionSet(UIStrings.Conditions, TimeoutConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
             }
 
             DrawTimeoutField(UIStrings.ChumTimeLimit, ref ChumTimeoutMax);
             if (ChumTimeoutMax > 0) {
-                ChumTimeoutConditionSet = Ui.ConditionUi.DrawConditionSet(UIStrings.Conditions, ChumTimeoutConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
+                using (ImRaii.PushId("ChumTimeoutConditions"))
+                    ChumTimeoutConditionSet = Ui.ConditionUi.DrawConditionSet(UIStrings.Conditions, ChumTimeoutConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
             }
             ImGui.TreePop();
         }
