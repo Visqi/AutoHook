@@ -53,8 +53,15 @@ public static class ConfigurationJsonMigrator {
         }
 
         // v6 -> v7: swimbait count thresholds, spareful hand swimbait limits, surface slap / identical cast enabled
-        if (version < Configuration.LatestVersion) {
+        if (version < 7) {
             MigrateV7(root);
+            root["Version"] = 7;
+            version = 7;
+        }
+
+        // v7 -> v8: nested lure type/target configs
+        if (version < Configuration.LatestVersion) {
+            MigrateV8(root);
             root["Version"] = Configuration.LatestVersion;
         }
 
@@ -204,6 +211,28 @@ public static class ConfigurationJsonMigrator {
         MigrateSwimbaitCountThresholdToConditions(root);
         MigrateSparefulHandSwimbaitLimits(root);
         MigrateFishCaughtActionEnabledPresets(root);
+    }
+
+    private static void MigrateV8(JObject root) {
+        if (root["HookPresets"] is not JObject hookPresets)
+            return;
+
+        static void MigratePreset(JObject? preset) {
+            if (preset == null) return;
+            foreach (var hook in EnumerateArray(preset["ListOfBaits"]).Concat(EnumerateArray(preset["ListOfMooch"]))) {
+                if (hook is not JObject hookObj) continue;
+                MigrateHooksetJson(hookObj["NormalHook"] as JObject);
+                MigrateHooksetJson(hookObj["IntuitionHook"] as JObject);
+            }
+        }
+
+        MigratePreset(hookPresets["DefaultPreset"] as JObject);
+        if (hookPresets["CustomPresets"] is JArray customPresets) {
+            foreach (var token in customPresets) {
+                if (token is JObject presetObj)
+                    MigratePreset(presetObj);
+            }
+        }
     }
 
     private static void MigratePresetConditions(JObject preset) {
@@ -431,22 +460,81 @@ public static class ConfigurationJsonMigrator {
 
     private static void MigrateLuresJson(JObject lures) {
         var existing = lures["ConditionSet"] as JObject;
-        if (existing?["g"] is JArray groups && groups.Count > 0)
+        if (existing?["g"] is not JArray { Count: > 0 }) {
+            var group = new List<Condition>();
+            if ((bool?)lures["OnlyWhenActiveSlap"] == true)
+                group.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.SurfaceSlap));
+            if ((bool?)lures["OnlyWhenNotActiveSlap"] == true)
+                group.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.SurfaceSlap, inverse: true));
+            if ((bool?)lures["OnlyWhenActiveIdentical"] == true)
+                group.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.IdenticalCast));
+            if ((bool?)lures["OnlyWhenNotActiveIdentical"] == true)
+                group.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.IdenticalCast, inverse: true));
+            if ((bool?)lures["OnlyCastLarge"] == true)
+                group.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.PrizeCatch));
+            if (group.Count > 0) {
+                var set = new ConditionSet { CombineMode = ConditionCombineMode.All, Groups = [new ConditionGroup { CombineMode = ConditionCombineMode.All, Conditions = group }] };
+                lures["ConditionSet"] = JToken.FromObject(set);
+            }
+        }
+
+        MigrateLuresToNestedJson(lures);
+    }
+
+    private static void MigrateLuresToNestedJson(JObject lures) {
+        // already nested
+        if (lures["Ambitious"] is JObject && lures["Modest"] is JObject)
             return;
-        var group = new List<Condition>();
-        if ((bool?)lures["OnlyWhenActiveSlap"] == true)
-            group.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.SurfaceSlap));
-        if ((bool?)lures["OnlyWhenNotActiveSlap"] == true)
-            group.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.SurfaceSlap, inverse: true));
-        if ((bool?)lures["OnlyWhenActiveIdentical"] == true)
-            group.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.IdenticalCast));
-        if ((bool?)lures["OnlyWhenNotActiveIdentical"] == true)
-            group.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.IdenticalCast, inverse: true));
-        if ((bool?)lures["OnlyCastLarge"] == true)
-            group.Add(Configuration.ConditionSetBuilder.StatusActive(IDs.Status.PrizeCatch));
-        if (group.Count == 0) return;
-        var set = new ConditionSet { CombineMode = ConditionCombineMode.All, Groups = [new ConditionGroup { CombineMode = ConditionCombineMode.All, Conditions = group }] };
-        lures["ConditionSet"] = JToken.FromObject(set);
+
+        var actionId = (uint?)(lures["Id"] ?? IDs.Actions.AmbitiousLure) ?? IDs.Actions.AmbitiousLure;
+        var target = (int?)(lures["LureTarget"] ?? 0) ?? 0;
+        var stacks = Math.Clamp((int?)(lures["LureStacks"] ?? 3) ?? 3, 1, 3);
+        var cancel = (bool?)(lures["CancelAttempt"] ?? false) ?? false;
+        var conditionSet = lures["ConditionSet"]?.DeepClone();
+        var hadFlatConfig = lures["LureTarget"] != null || lures["LureStacks"] != null || lures["CancelAttempt"] != null || conditionSet != null;
+
+        // nothing to carry over
+        if (!hadFlatConfig)
+            return;
+
+        static JObject EmptyTarget() => new() {
+            ["Enabled"] = false,
+            ["LureStacks"] = 3,
+            ["CancelAttempt"] = false,
+            ["ForceAttemptLimit"] = false,
+        };
+
+        JObject MakeType(bool enabled) {
+            var any = EmptyTarget();
+            var special = EmptyTarget();
+            var notSpecial = EmptyTarget();
+            var selected = target switch {
+                1 => special,
+                2 => notSpecial,
+                _ => any,
+            };
+            if (enabled) {
+                selected["Enabled"] = true;
+                selected["LureStacks"] = stacks;
+                selected["CancelAttempt"] = cancel;
+                if (conditionSet != null)
+                    selected["ConditionSet"] = conditionSet;
+            }
+
+            return new JObject {
+                ["Enabled"] = enabled,
+                ["Any"] = any,
+                ["Special"] = special,
+                ["NotSpecial"] = notSpecial,
+            };
+        }
+
+        var isAmbitious = actionId == IDs.Actions.AmbitiousLure;
+        lures["Ambitious"] = MakeType(isAmbitious);
+        lures["Modest"] = MakeType(!isAmbitious);
+
+        // conditions moved onto the selected target
+        lures.Remove("ConditionSet");
     }
 
     private static void MigrateHookSwimbaitJson(JObject hook) {

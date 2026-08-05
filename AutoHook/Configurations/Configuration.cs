@@ -11,7 +11,7 @@ namespace AutoHook.Configurations;
 
 [Serializable]
 public partial class Configuration : IPluginConfiguration {
-    public const int LatestVersion = 7;
+    public const int LatestVersion = 8;
 
     public int Version { get; set; } = LatestVersion;
     public string CurrentLanguage { get; set; } = @"en";

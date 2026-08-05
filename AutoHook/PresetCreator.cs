@@ -362,12 +362,8 @@ public class PresetCreator {
             initBaitCfg.SetBiteAndHookType(fishTarget.BiteType, fishTarget!.HookType, isIntuition);
 
             if (fishTarget.IsLureFish) {
-                ref var cl = ref initBaitCfg.NormalHook.CastLures;
-                cl.Enabled = true;
-                cl.CancelAttempt = true;
-                cl.LureTarget = LureTarget.Special;
-                cl.ConditionSet = Configuration.ConditionSetBuilder.SingleStatus(IDs.Status.PrizeCatch);
-                cl.Id = fishTarget!.HookType == HookType.Powerful ? IDs.Actions.AmbitiousLure : IDs.Actions.ModestLure;
+                var actionId = fishTarget!.HookType == HookType.Powerful ? IDs.Actions.AmbitiousLure : IDs.Actions.ModestLure;
+                initBaitCfg.NormalHook.CastLures.ConfigureSpecialLure(actionId, Configuration.ConditionSetBuilder.SingleStatus(IDs.Status.PrizeCatch));
             }
 
             if (_includeTimers) {

@@ -532,12 +532,9 @@ public static class SolverPresetBuilder {
         if (lureRule == null)
             return;
 
-        ref var cl = ref hookset.CastLures;
-        cl.Enabled = true;
-        cl.CancelAttempt = true; // early-cancel / reroll: Rest if stacks maxed without a bite
-        cl.LureTarget = LureTarget.Special;
-        cl.ConditionSet = null; // LureStack / lure isolation should run uncondtionally
-        cl.Id = lureRule.Action == HookActionKind.AmbitiousLure ? IDs.Actions.AmbitiousLure : IDs.Actions.ModestLure;
+        var actionId = lureRule.Action == HookActionKind.AmbitiousLure ? IDs.Actions.AmbitiousLure : IDs.Actions.ModestLure;
+        // lure stack / lure isolation should run unconditionally
+        hookset.CastLures.ConfigureSpecialLure(actionId);
     }
 
     private static void SetupBaitAndMooch(CustomPresetConfig preset, int bait, ImportedFish fishTarget, List<ImportedFish>? moochList, bool isIntuition, ImportedFish? slapFish, SolverOutput? plan) {
@@ -596,12 +593,8 @@ public static class SolverPresetBuilder {
             initBaitCfg.SetBiteAndHookType(slapFish.BiteType, slapFish.HookType, isIntuition);
 
         if (fishTarget.IsLureFish) {
-            ref var cl = ref initBaitCfg.NormalHook.CastLures;
-            cl.Enabled = true;
-            cl.CancelAttempt = true;
-            cl.LureTarget = LureTarget.Special;
-            cl.ConditionSet = Configuration.ConditionSetBuilder.SingleStatus(IDs.Status.PrizeCatch);
-            cl.Id = fishTarget.HookType == HookType.Powerful ? IDs.Actions.AmbitiousLure : IDs.Actions.ModestLure;
+            var actionId = fishTarget.HookType == HookType.Powerful ? IDs.Actions.AmbitiousLure : IDs.Actions.ModestLure;
+            initBaitCfg.NormalHook.CastLures.ConfigureSpecialLure(actionId, Configuration.ConditionSetBuilder.SingleStatus(IDs.Status.PrizeCatch));
         }
 
         initBaitCfg.SetHooksetTimer(fishTarget.BiteType, fishTarget.BiteTimeMin, fishTarget.BiteTimeMax, isIntuition);

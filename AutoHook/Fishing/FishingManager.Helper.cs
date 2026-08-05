@@ -14,13 +14,8 @@ public partial class FishingManager {
 
     private void OnLogMessage(ILogMessage message) {
         var isGenericLure = message.LogMessageId is LogMessageIds.AmbLureSuccess or LogMessageIds.ModLureSuccess;
-        var success = GetHookCfg().GetHookset().CastLures.LureTarget switch {
-            LureTarget.Any => isGenericLure,
-            LureTarget.NotSpecial => isGenericLure,
-            _ => false
-        };
-
-        if (success)
+        var active = GetHookCfg().GetHookset().CastLures.GetActiveOption();
+        if (active != null && AutoLures.MatchesLureSuccess(active.Value.Target, isGenericLure, isSpecialLure: false))
             Ws.Execute(new FishingInfo.OpSetLureSuccess(true));
 
         if (message.LogMessageId is LogMessageIds.CantFish)
@@ -30,13 +25,8 @@ public partial class FishingManager {
     private void CheckForSpecialLure(IHandleableChatMessage message) {
         if (message.LogKind is not XivChatType.Gathering) return;
         var isSpecialLure = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == message.Message.TextValue) != null;
-        var success = GetHookCfg().GetHookset().CastLures.LureTarget switch {
-            LureTarget.Any => isSpecialLure,
-            LureTarget.Special => isSpecialLure,
-            _ => false
-        };
-
-        if (success)
+        var active = GetHookCfg().GetHookset().CastLures.GetActiveOption();
+        if (active != null && AutoLures.MatchesLureSuccess(active.Value.Target, isGenericLure: false, isSpecialLure))
             Ws.Execute(new FishingInfo.OpSetLureSuccess(true));
     }
 

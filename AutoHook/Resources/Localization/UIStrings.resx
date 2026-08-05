@@ -1280,6 +1280,15 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="CancelAttempt" xml:space="preserve">
     <value>Cancel hooking attempt if stack limit is reached without success</value>
   </data>
+  <data name="ForceAttemptLimit" xml:space="preserve">
+    <value>Force attempt limit</value>
+  </data>
+  <data name="ForceAttemptLimitHelp" xml:space="preserve">
+    <value>Continue casting lures until Max. Attempts even after a matching lure text alert. Useful when a special alert can appear before you want to stop (e.g. at 2 stacks) so you can still reach 3 for better fish weighting.</value>
+  </data>
+  <data name="LureMultipleOptionsWarning" xml:space="preserve">
+    <value>Multiple lure options currently match; only the first will be used.</value>
+  </data>
   <data name="LureType" xml:space="preserve">
     <value>Lure Type:</value>
   </data>

@@ -1871,6 +1871,24 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Force attempt limit.
+        /// </summary>
+        internal static string ForceAttemptLimit {
+            get {
+                return ResourceManager.GetString("ForceAttemptLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Continue casting lures until Max. Attempts even after a matching lure text alert. Useful when a special alert can appear before you want to stop (e.g. at 2 stacks) so you can still reach 3 for better fish weighting..
+        /// </summary>
+        internal static string ForceAttemptLimitHelp {
+            get {
+                return ResourceManager.GetString("ForceAttemptLimitHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Force bait swap when using &quot;Start Actions&quot;.
         /// </summary>
         internal static string ForceBaitSwap {
@@ -2382,6 +2400,15 @@ namespace AutoHook.Resources.Localization {
         internal static string LureICNotActive {
             get {
                 return ResourceManager.GetString("LureICNotActive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Multiple lure options currently match; only the first will be used..
+        /// </summary>
+        internal static string LureMultipleOptionsWarning {
+            get {
+                return ResourceManager.GetString("LureMultipleOptionsWarning", resourceCulture);
             }
         }
         
