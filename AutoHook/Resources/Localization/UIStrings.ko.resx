@@ -1649,10 +1649,10 @@
     <value>먼바다 전설어</value>
   </data>
   <data name="OceanFishGoal_Achievements" xml:space="preserve">
-    <value>먼바다 낚시 업적</value>
+    <value>업적</value>
   </data>
   <data name="OceanFishGoal_Levelling" xml:space="preserve">
-    <value>어부 레벨링</value>
+    <value>레벨링</value>
   </data>
   <data name="SpectralRestOnGain" xml:space="preserve">
     <value>환해류 출현시 다시 낚싯대 던지기</value>
