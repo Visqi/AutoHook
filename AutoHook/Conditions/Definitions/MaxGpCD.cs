@@ -7,5 +7,5 @@ public sealed class MaxGpCD : IntCompareConditionDefinition {
     protected override string ValueLabel => "Max GP";
 
     protected override int ReadValue(WorldState world, IReadOnlyDictionary<string, object> parameters)
-        => (int)world.MaxGp;
+        => (int)world.Player.MaxGp;
 }

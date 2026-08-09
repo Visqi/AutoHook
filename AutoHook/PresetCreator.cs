@@ -124,7 +124,7 @@ public class PresetCreator {
         var plan = GameRes.FishSolver.Solve(
             _selectedTargetFish!.ItemId,
             fisherLevel,
-            (int)ws.MaxGp,
+            (int)ws.Player.MaxGp,
             cordials);
 
         if (plan == null) {
@@ -205,7 +205,7 @@ public class PresetCreator {
         var presetName = ResolvePresetName(AutoV2Tag);
         var fisherLevel = Svc.PlayerState.GetClassJobLevel(ClassJob.GetRow(18));
 
-        var preset = GameRes.FishSolver.BuildPreset(_selectedTargetFish.ItemId, fisherLevel, (int)ws.MaxGp, presetName, cordials);
+        var preset = GameRes.FishSolver.BuildPreset(_selectedTargetFish.ItemId, fisherLevel, (int)ws.Player.MaxGp, presetName, cordials);
         if (preset == null) {
             Service.PrintDebug("[FishSolver] Failed to build preset.");
             return;

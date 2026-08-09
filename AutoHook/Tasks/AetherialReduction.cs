@@ -20,10 +20,10 @@ public sealed class AetherialReduction(FishingManager fishingManager) : AutoTask
         ImGui.Text($"CanPurifyAny: {CanPurifyAny()}");
         ImGui.Text($"PurifyResult open: {IsPurifyResultOpen()}");
         ImGui.Text($"Blocked for reduction: {IsBlockedForReduction()}");
-        ImGui.Text($"FishingState: {Service.WorldState.FishingState}");
-        ImGui.Text($"FishingStep: {Service.WorldState.FishingStep}");
+        ImGui.Text($"FishingState: {Service.WorldState.Fishing.FishingState}");
+        ImGui.Text($"FishingStep: {Service.WorldState.Fishing.FishingStep}");
         ImGui.Text($"IsCastAvailable: {Service.WorldState.IsCastAvailable()}");
-        ImGui.Text($"BlockCasting: {Service.WorldState.BlockCasting}");
+        ImGui.Text($"BlockCasting: {Service.WorldState.Player.BlockCasting}");
     }
 
     protected override async Task Execute() {
@@ -64,13 +64,13 @@ public sealed class AetherialReduction(FishingManager fishingManager) : AutoTask
         using var scope = BeginScope(nameof(QuitFishing));
         var ws = Service.WorldState;
 
-        if (ws.FishingState == FishingState.None)
+        if (ws.Fishing.FishingState == FishingState.None)
             return;
 
         ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.Quitting));
 
         await WaitUntil(() => {
-            if (ws.FishingState == FishingState.None)
+            if (ws.Fishing.FishingState == FishingState.None)
                 return true;
 
             if (ws.ActionAvailable(IDs.Actions.Quit, ActionType.Action) && !ws.Player.BlockCasting)
@@ -123,7 +123,7 @@ public sealed class AetherialReduction(FishingManager fishingManager) : AutoTask
         using var scope = BeginScope(nameof(ResumeFishing));
         var ws = Service.WorldState;
 
-        await WaitUntil(() => ws.FishingState == FishingState.None && ws.IsCastAvailable() && !IsBlockedForReduction() && !IsPurifyResultOpen(), nameof(ResumeFishing), checkFrequency: 5);
+        await WaitUntil(() => ws.Fishing.FishingState == FishingState.None && ws.IsCastAvailable() && !IsBlockedForReduction() && !IsPurifyResultOpen(), nameof(ResumeFishing), checkFrequency: 5);
 
         fishingManager.StartFishing();
     }

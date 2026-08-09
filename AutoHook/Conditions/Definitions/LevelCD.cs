@@ -8,5 +8,5 @@ public sealed class LevelCD : IntCompareConditionDefinition {
     protected override Func<int, int>? Clamp => static v => Math.Clamp(v, 1, 100);
 
     protected override int ReadValue(WorldState world, IReadOnlyDictionary<string, object> parameters)
-        => world.Level;
+        => world.Player.Level;
 }

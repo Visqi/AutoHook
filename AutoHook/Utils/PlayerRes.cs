@@ -38,7 +38,7 @@ public static class PlayerRes {
     }
 
     public static bool CastActionDelayed(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
-        if (WS.BlockCasting)
+        if (WS.Player.BlockCasting)
             return false;
 
         if (actionType is ActionType.Action or ActionType.EventAction) {

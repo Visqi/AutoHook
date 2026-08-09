@@ -76,7 +76,7 @@ public abstract class BaseActionCast {
             return "Would cancel mooch";
 
         var condition = CastCondition();
-        var currentGp = Service.WorldState.CurrentGp;
+        var currentGp = Service.WorldState.Player.CurrentGp;
         var hasGp = GpThresholdAbove ? currentGp >= GpThreshold : currentGp <= GpThreshold;
         var actionAvailable = Service.WorldState.ActionAvailable(Id, ActionType);
 
@@ -111,7 +111,7 @@ public abstract class BaseActionCast {
         if (!Service.WorldState.ActionAvailable(Id, ActionType))
             return false;
 
-        var currentGp = Service.WorldState.CurrentGp;
+        var currentGp = Service.WorldState.Player.CurrentGp;
         return GpThresholdAbove ? currentGp < GpThreshold : currentGp > GpThreshold;
     }
 

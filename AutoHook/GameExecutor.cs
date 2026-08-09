@@ -17,7 +17,7 @@ public sealed class GameExecutor(WorldState ws) {
         => AgentInventoryContext.Instance()->UseItem(id);
 
     public void CastActionDelayed(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
-        if (ws.BlockCasting) return;
+        if (ws.Player.BlockCasting) return;
 
         if (actionType is ActionType.Action or ActionType.EventAction) {
             if (!ws.ActionAvailable(actionId, actionType)) return;
@@ -65,7 +65,7 @@ public sealed class GameExecutor(WorldState ws) {
     public ChangeBaitReturn ChangeBait(uint baitId) {
         if (baitId == ws.Fishing.BaitInfo.BaitId) return ChangeBaitReturn.AlreadyEquipped;
         if (baitId == 0 || GameRes.Baits.All(b => b.Id != baitId)) return ChangeBaitReturn.InvalidBait;
-        if (ws.GetItemCount(baitId) <= 0) return ChangeBaitReturn.NotInInventory;
+        if (ws.Player.GetItemCount(baitId) <= 0) return ChangeBaitReturn.NotInInventory;
         return GameMain.ExecuteCommand(701, 4, (int)baitId, 0, 0) ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
     }
 
@@ -83,7 +83,7 @@ public sealed class GameExecutor(WorldState ws) {
             Service.PrintChat($"Bait \"{bait.Name}\" is not a valid bait.");
             return ChangeBaitReturn.InvalidBait;
         }
-        if (ws.GetItemCount((uint)bait.Id) <= 0) {
+        if (ws.Player.GetItemCount((uint)bait.Id) <= 0) {
             Service.PrintChat($"Bait \"{bait.Name}\" is not in your inventory.");
             return ChangeBaitReturn.NotInInventory;
         }

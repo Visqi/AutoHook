@@ -245,7 +245,7 @@ public partial class FishingManager : IDisposable {
     }
 
     private static double GetTimeoutMax(HookConfig selected)
-        => !selected.Enabled ? 0 : selected.GetHookset().GetEffectiveTimeoutMax(Ws.HasStatus(IDs.Status.Chum));
+        => !selected.Enabled ? 0 : selected.GetHookset().GetEffectiveTimeoutMax(Ws.Player.HasStatus(IDs.Status.Chum));
 
     private void OnFrameworkUpdate(IFramework _) {
         if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null)
@@ -264,7 +264,7 @@ public partial class FishingManager : IDisposable {
                 CheckExtraActions();
 
             // cordial can be done while None, but the rest of autocasts are PoleReady-only, so retry them here
-            if (Ws.FishingStep.HasFlag(FishingSteps.StartedCasting) && !Ws.FishingStep.HasFlag(FishingSteps.BeganFishing))
+            if (Ws.Fishing.FishingStep.HasFlag(FishingSteps.StartedCasting) && !Ws.Fishing.FishingStep.HasFlag(FishingSteps.BeganFishing))
                 CheckPluginActions();
 
             if (Service.Configuration.AutoStartFishing && !ShouldSuppressAutoStartFishing() && EzThrottler.Throttle("AutoStartFishing", 1000)) {
@@ -311,7 +311,7 @@ public partial class FishingManager : IDisposable {
                 Service.TaskManager.Enqueue(OnBite);
                 break;
             case FishingState.Quitting:
-                if (!Ws.FishingStep.HasFlag(FishingSteps.Quitting))
+                if (!Ws.Fishing.FishingStep.HasFlag(FishingSteps.Quitting))
                     Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.Quitting));
                 OnFishingStop();
                 break;
@@ -358,7 +358,7 @@ public partial class FishingManager : IDisposable {
         var lastCatchCfg = GetEffectiveCatchConfig();
 
         var casted = false;
-        if (Ws.FishingStep.HasFlag(FishingSteps.FishCaught) && !Ws.FishingStep.HasFlag(FishingSteps.Quitting)) {
+        if (Ws.Fishing.FishingStep.HasFlag(FishingSteps.FishCaught) && !Ws.Fishing.FishingStep.HasFlag(FishingSteps.Quitting)) {
             casted = UseFishCaughtActions(lastCatchCfg);
 
             if (!casted && lastCatchCfg is { Enabled: true } && HasGpBlockedFishCaughtAction(lastCatchCfg)) {

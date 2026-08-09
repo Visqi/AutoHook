@@ -50,7 +50,7 @@ public class BaitConfig(string bait) {
     public int StopAfterCaughtLimit = 1;
 
     public HookType? GetHook(BiteType bite) {
-        var hasIntuition = Service.WorldState.HasStatus(IDs.Status.FishersIntuition);
+        var hasIntuition = Service.WorldState.Player.HasStatus(IDs.Status.FishersIntuition);
 
         if (hasIntuition && UseCustomIntuitionHook) {
             if (!CheckHookIntuitionEnabled(bite))
@@ -71,7 +71,7 @@ public class BaitConfig(string bait) {
     }
 
     public HookType? GetHookIgnoreEnable(BiteType bite) {
-        var hasIntuition = Service.WorldState.HasStatus(IDs.Status.FishersIntuition);
+        var hasIntuition = Service.WorldState.Player.HasStatus(IDs.Status.FishersIntuition);
 
         var hook = GetDoubleTripleHook(bite);
 
@@ -115,16 +115,16 @@ public class BaitConfig(string bait) {
 
     private HookType? GetDoubleTripleHook(BiteType bite) {
         if (UseTripleHook || UseDoubleHook) {
-            if (UseDHTHOnlySurfaceSlap && !Service.WorldState.HasStatus(IDs.Status.IdenticalCast))
+            if (UseDHTHOnlySurfaceSlap && !Service.WorldState.Player.HasStatus(IDs.Status.IdenticalCast))
                 return HookType.None;
 
-            if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune) && !UseDHTHPatience)
+            if (Service.WorldState.Player.HasStatus(IDs.Status.AnglersFortune) && !UseDHTHPatience)
                 return HookType.None;
 
-            if (UseTripleHook && Service.WorldState.CurrentGp >= 700 && CheckHookDHTHEnabled(bite))
+            if (UseTripleHook && Service.WorldState.Player.CurrentGp >= 700 && CheckHookDHTHEnabled(bite))
                 return HookType.Triple;
 
-            if (UseDoubleHook && Service.WorldState.CurrentGp >= 400 && CheckHookDHTHEnabled(bite))
+            if (UseDoubleHook && Service.WorldState.Player.CurrentGp >= 400 && CheckHookDHTHEnabled(bite))
                 return HookType.Double;
 
             if (LetFishEscape)

@@ -14,7 +14,7 @@ public sealed class SessionCaughtCountCD : IConditionDefinition, ISimpleConditio
         if (fishId <= 0)
             return args.Invert;
 
-        var result = CompareInt(world.GetFishCaughtCount(fishId), args.Value, args.Op);
+        var result = CompareInt(world.Fishing.GetFishCaughtCount(fishId), args.Value, args.Op);
         return args.Apply(result);
     }
 

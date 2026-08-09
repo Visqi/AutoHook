@@ -24,7 +24,7 @@ public sealed class AutoThaliaksFavor : BaseActionCast {
         if (!EvaluateConditionSet())
             return false;
 
-        var hasStacks = Service.WorldState.GetStatusStacks(IDs.Status.AnglersArt) >= ThaliaksFavorStacks;
+        var hasStacks = Service.WorldState.Player.GetStatusStacks(IDs.Status.AnglersArt) >= ThaliaksFavorStacks;
         var notOvercaped = Service.WorldState.Player.CurrentGp + ThaliaksFavorRecover < Service.WorldState.Player.MaxGp;
 
         return hasStacks && notOvercaped;

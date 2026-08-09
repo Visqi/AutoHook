@@ -62,7 +62,7 @@ public sealed class AutoCordial : BaseActionCast {
                 continue;
 
             // TODO log this in replay and remove
-            if (!Service.WorldState.HaveCordialInInventory(id)) {
+            if (!Service.WorldState.Player.HaveCordialInInventory(id)) {
                 //Svc.Log.Debug($"No cordial (#{id}) in inventory");
                 continue;
             }
@@ -85,7 +85,7 @@ public sealed class AutoCordial : BaseActionCast {
         if (ConditionSetOvercapHelper.EvaluateAllowsOvercap(OvercapConditionSet, Service.WorldState))
             return true;
 
-        return Service.WorldState.CurrentGp + recovery <= Service.WorldState.MaxGp;
+        return Service.WorldState.Player.CurrentGp + recovery <= Service.WorldState.Player.MaxGp;
     }
 
     protected override DrawOptionsDelegate DrawOptions => () => {

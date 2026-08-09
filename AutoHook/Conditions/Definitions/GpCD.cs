@@ -7,5 +7,5 @@ public sealed class GpCD : IntCompareConditionDefinition {
     protected override string ValueLabel => "GP";
 
     protected override int ReadValue(WorldState world, IReadOnlyDictionary<string, object> parameters)
-        => (int)world.CurrentGp;
+        => (int)world.Player.CurrentGp;
 }

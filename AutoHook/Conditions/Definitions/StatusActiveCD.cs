@@ -24,7 +24,7 @@ public sealed class StatusActiveCD : IConditionDefinition {
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var args = GetParams(parameters);
         if (args.Ids.Count == 0) return args.Invert;
-        var result = args.Ids.Any(world.HasStatus);
+        var result = args.Ids.Any(world.Player.HasStatus);
         return args.Apply(result);
     }
 

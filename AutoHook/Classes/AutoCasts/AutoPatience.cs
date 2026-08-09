@@ -21,10 +21,10 @@ public sealed class AutoPatience : BaseActionCast {
         if (!EvaluateConditionSet())
             return false;
 
-        if (Service.WorldState.HasStatus(IDs.Status.AnglersFortune) && Service.WorldState.GetStatusTime(IDs.Status.AnglersFortune) > RefreshEarlyTime)
+        if (Service.WorldState.Player.HasStatus(IDs.Status.AnglersFortune) && Service.WorldState.Player.GetStatusTime(IDs.Status.AnglersFortune) > RefreshEarlyTime)
             return false;
 
-        if (Service.WorldState.HasStatus(IDs.Status.MakeshiftBait) || Service.WorldState.HasStatus(IDs.Status.PrizeCatch))
+        if (Service.WorldState.Player.HasStatus(IDs.Status.MakeshiftBait) || Service.WorldState.Player.HasStatus(IDs.Status.PrizeCatch))
             return false;
 
         return true;

@@ -14,5 +14,5 @@ public sealed class AutoCollect : BaseActionCast {
 
     public override string GetHelpText() => UIStrings.CollectHelpText;
 
-    public override bool CastCondition() => !Service.WorldState.HasStatus(IDs.Status.CollectorsGlove);
+    public override bool CastCondition() => !Service.WorldState.Player.HasStatus(IDs.Status.CollectorsGlove);
 }

@@ -96,10 +96,10 @@ internal class AutoGig : Window, IDisposable {
         if (_gigCfg is { AutoGigEnabled: true, }) {
             var selectedPreset = _gigCfg.SelectedPreset;
 
-            if (selectedPreset is { KeepCollectorsGloveOn: true } && !Service.WorldState.HasStatus(IDs.Status.CollectorsGlove))
+            if (selectedPreset is { KeepCollectorsGloveOn: true } && !Service.WorldState.Player.HasStatus(IDs.Status.CollectorsGlove))
                 PlayerRes.CastActionDelayed(IDs.Actions.Collect, actionName: UIStrings.Collect);
 
-            if (!Service.WorldState.HasStatus(IDs.Status.NaturesBounty) && _gigCfg.NatureBountyBeforeFish)
+            if (!Service.WorldState.Player.HasStatus(IDs.Status.NaturesBounty) && _gigCfg.NatureBountyBeforeFish)
                 PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
             ;
             GigFish(addon, addon->Fish[0], addon->GetNodeById(Fish1NodeId));
@@ -132,7 +132,7 @@ internal class AutoGig : Window, IDisposable {
         if (fish == null || !fish.Enabled)
             return;
 
-        if (!Service.WorldState.HasStatus(IDs.Status.NaturesBounty) && fish.UseNaturesBounty)
+        if (!Service.WorldState.Player.HasStatus(IDs.Status.NaturesBounty) && fish.UseNaturesBounty)
             PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
 
         var laneOriginX = fishLines->X * _uiScale;

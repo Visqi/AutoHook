@@ -13,5 +13,5 @@ public sealed class AutoFood : BaseActionCast //todo
 
     public override string GetName() => UIStrings.Food_Buff;
 
-    public override bool CastCondition() => Service.WorldState.GetStatusTime(IDs.Status.FoodBuff) <= SecondsRemaining;
+    public override bool CastCondition() => Service.WorldState.Player.GetStatusTime(IDs.Status.FoodBuff) <= SecondsRemaining;
 }

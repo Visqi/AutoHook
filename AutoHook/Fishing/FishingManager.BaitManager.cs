@@ -6,7 +6,7 @@ public partial class FishingManager {
     public static ChangeBaitReturn ChangeBait(uint baitId) {
         if (baitId == Ws.Fishing.BaitInfo.BaitId) return ChangeBaitReturn.AlreadyEquipped;
         if (baitId == 0 || GameRes.Baits.All(b => b.Id != baitId)) return ChangeBaitReturn.InvalidBait;
-        if (Ws.GetItemCount(baitId) <= 0) return ChangeBaitReturn.NotInInventory;
+        if (Ws.Player.GetItemCount(baitId) <= 0) return ChangeBaitReturn.NotInInventory;
         return GameMain.ExecuteCommand(701, 4, (int)baitId, 0, 0) ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
     }
 
@@ -24,7 +24,7 @@ public partial class FishingManager {
             Service.PrintChat($"Bait \"{bait.Name}\" is not a valid bait.");
             return ChangeBaitReturn.InvalidBait;
         }
-        if (Ws.GetItemCount((uint)bait.Id) <= 0) {
+        if (Ws.Player.GetItemCount((uint)bait.Id) <= 0) {
             Service.PrintChat($"Bait \"{bait.Name}\" is not in your inventory.");
             return ChangeBaitReturn.NotInInventory;
         }

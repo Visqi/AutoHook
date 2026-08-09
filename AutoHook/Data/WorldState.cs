@@ -25,23 +25,12 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
     public DateTime CurrentTime => Frame.Timestamp;
     public DateTime FutureTime(float deltaSeconds) => Frame.Timestamp.AddSeconds(deltaSeconds);
 
-    public uint CurrentGp => Player.CurrentGp;
-    public uint MaxGp => Player.MaxGp;
-    public byte Level => Player.Level;
-    public bool BlockCasting => Player.BlockCasting;
-
-    public IReadOnlyDictionary<uint, (float Time, int Stacks)> Statuses => Player.Statuses;
-    public bool HasStatus(uint statusId) => Player.HasStatus(statusId);
-    public float GetStatusTime(uint statusId) => Player.GetStatusTime(statusId);
-    public int GetStatusStacks(uint statusId) => Player.GetStatusStacks(statusId);
-    public bool HasAnyStatus(uint[] statusIds) => Player.HasAnyStatus(statusIds);
-
-    public bool HasAnglersArtStacks(int amount) => GetStatusStacks(IDs.Status.AnglersArt) >= amount;
+    public bool HasAnglersArtStacks(int amount) => Player.GetStatusStacks(IDs.Status.AnglersArt) >= amount;
 
     public bool BlocksFortune()
-        => HasStatus(IDs.Status.MakeshiftBait)
-           || HasStatus(IDs.Status.PrizeCatch)
-           || HasStatus(IDs.Status.AnglersFortune);
+        => Player.HasStatus(IDs.Status.MakeshiftBait)
+           || Player.HasStatus(IDs.Status.PrizeCatch)
+           || Player.HasStatus(IDs.Status.AnglersFortune);
 
     public bool ActionAvailable(uint actionId, ActionType actionType = ActionType.Action)
         => Player.GetActionStatus(actionType, actionId) == 0 && !ActionOnCooldown(actionId, actionType);
@@ -73,13 +62,6 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
     public bool IsSlottedDutyActionReady(uint actionId, ActionType actionType = ActionType.Action)
         => Player.DutyActionManagerActive && HasDutyActionCharges(actionId) && ActionAvailable(actionId, actionType);
 
-    public int GetItemCount(uint itemId) => Player.GetItemCount(itemId);
-
-    public bool HasItem(uint itemId) => Player.HasItem(itemId);
-    public bool HaveCordialInInventory(uint id) => Player.HaveCordialInInventory(id);
-
-    public IReadOnlyList<uint> SwimbaitIds => Fishing.SwimbaitIds;
-
     // fish id while evaluating swimbait slot conditions (0 = unset).
     public uint SwimbaitEvaluationFishId { get; set; }
 
@@ -88,19 +70,11 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
     public bool IsSwimbaitFull() => GetSwimbaitCount() >= 3;
     public bool IsSwimbaitEmpty() => GetSwimbaitCount() == 0;
 
-    public FishingState FishingState => Fishing.FishingState;
-    public FishingState PreviousFishingState => Fishing.PreviousFishingState;
-    public FishingSteps FishingStep => Fishing.FishingStep;
-
-    public bool ChumActive => Fishing.ChumActive;
-    public bool LureSuccess => Fishing.LureSuccess;
-    public int GetFishCaughtCount(uint fishId) => Fishing.GetFishCaughtCount(fishId);
-
     public bool IsMoochAvailable()
         => ActionAvailable(IDs.Actions.Mooch) || ActionAvailable(IDs.Actions.Mooch2);
 
     public bool IsCastAvailable()
-        => ActionAvailable(IDs.Actions.Cast) && !BlockCasting;
+        => ActionAvailable(IDs.Actions.Cast) && !Player.BlockCasting;
 
     public bool HasMultihookAvailable()
         => ActionAvailable(IDs.Actions.MultiHook, ActionType.Action);

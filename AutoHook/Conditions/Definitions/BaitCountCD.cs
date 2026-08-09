@@ -15,7 +15,7 @@ public sealed class BaitCountCD : IConditionDefinition {
         if (baitId <= 0)
             return args.Invert;
 
-        var result = CompareInt(world.GetItemCount((uint)baitId), args.Value, args.Op);
+        var result = CompareInt(world.Player.GetItemCount((uint)baitId), args.Value, args.Op);
         return args.Apply(result);
     }
 

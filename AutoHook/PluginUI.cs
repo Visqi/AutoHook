@@ -179,7 +179,7 @@ public class PluginUi : Window, IDisposable {
             if (!Service.Configuration.PluginEnabled) {
                 ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.Plugin_Disabled);
             }
-            else if (Service.WorldState.FishingState == FishingState.None) {
+            else if (Service.WorldState.Fishing.FishingState == FishingState.None) {
                 try {
                     var preset = _presets.SelectedPreset;
                     if (preset == null) {

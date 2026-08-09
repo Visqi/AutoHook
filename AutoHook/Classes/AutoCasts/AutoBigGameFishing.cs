@@ -14,7 +14,7 @@ public sealed class AutoBigGameFishing : BaseActionCast {
         if (!EvaluateConditionSet())
             return false;
 
-        if (Service.WorldState.HasStatus(IDs.Status.BigGameFishing))
+        if (Service.WorldState.Player.HasStatus(IDs.Status.BigGameFishing))
             return false;
 
         return Service.WorldState.HasAnglersArtStacks(AnglersStacks);

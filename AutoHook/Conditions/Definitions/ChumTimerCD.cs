@@ -9,7 +9,7 @@ public sealed class ChumTimerCD : IConditionDefinition {
 
     public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var args = GetRangeParams(parameters);
-        if (!world.ChumActive) return args.Invert;
+        if (!world.Fishing.ChumActive) return args.Invert;
         var ranges = args.Ranges;
         if (ranges.Count == 0) return true;
         var t = world.Fishing.BiteInfo.BiteTimeSeconds;

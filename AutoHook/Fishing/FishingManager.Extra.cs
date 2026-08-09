@@ -337,7 +337,7 @@ public partial class FishingManager {
         }
 
         // Swap preset
-        if (trig.SwapPreset && !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
+        if (trig.SwapPreset && !Ws.Fishing.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
             if (Presets.CurrentPreset.PresetName == trig.PresetToSwap) {
                 Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
                 FindPresetByName(trig.PresetToSwap)?.TryResetCounter();
@@ -361,7 +361,7 @@ public partial class FishingManager {
         }
 
         // Swap bait
-        if (trig.SwapBait && !Ws.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
+        if (trig.SwapBait && !Ws.Fishing.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
             var result = ChangeBait(trig.BaitToSwap);
             Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.BaitSwapped, Or: true));
 
@@ -371,7 +371,7 @@ public partial class FishingManager {
             }
         }
 
-        if (trig.RemoveStatus && trig.StatusToRemove != 0 && Ws.HasStatus(trig.StatusToRemove) && EzThrottler.Throttle("ExtraRemoveStatus", 500)) {
+        if (trig.RemoveStatus && trig.StatusToRemove != 0 && Ws.Player.HasStatus(trig.StatusToRemove) && EzThrottler.Throttle("ExtraRemoveStatus", 500)) {
             if (StatusManager.ExecuteStatusOff(trig.StatusToRemove)) {
                 Service.PrintChat(@$"[Extra] Trigger: Removed {StatusSheet.GetRow(trig.StatusToRemove).Name}");
             }

@@ -98,10 +98,10 @@ public sealed class AutoLures : BaseActionCast {
 
         Id = option.Value.ActionId;
 
-        if (Service.WorldState.GetStatusStacks(option.Value.StatusId) >= option.Value.Config.LureStacks)
+        if (Service.WorldState.Player.GetStatusStacks(option.Value.StatusId) >= option.Value.Config.LureStacks)
             return false;
 
-        return Service.WorldState.FishingState is FishingState.AmbitiousLure or FishingState.ModestLure or FishingState.LineInWater;
+        return Service.WorldState.Fishing.FishingState is FishingState.AmbitiousLure or FishingState.ModestLure or FishingState.LineInWater;
     }
 
     protected override DrawOptionsDelegate DrawOptions => () => {
@@ -183,7 +183,7 @@ public sealed class AutoLures : BaseActionCast {
             return;
 
         var config = option.Value.Config;
-        var stacks = Service.WorldState.GetStatusStacks(option.Value.StatusId);
+        var stacks = Service.WorldState.Player.GetStatusStacks(option.Value.StatusId);
 
         if (stacks >= config.LureStacks && config.CancelAttempt && !lureSuccess) {
             PlayerRes.CastActionDelayed(IDs.Actions.Rest);

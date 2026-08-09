@@ -8,7 +8,7 @@ public partial class FishingManager {
         if (GetAutoCastCfg().RecastAnimationCancel)
             PlayerRes.CastAction(IDs.Actions.Collect);
 
-        if (Ws.HasStatus(IDs.Status.Salvage) && GetAutoCastCfg().ChumAnimationCancel)
+        if (Ws.Player.HasStatus(IDs.Status.Salvage) && GetAutoCastCfg().ChumAnimationCancel)
             PlayerRes.CastAction(IDs.Actions.Salvage);
     }
 

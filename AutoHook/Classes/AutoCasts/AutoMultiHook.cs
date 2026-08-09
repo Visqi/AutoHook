@@ -15,7 +15,7 @@ public sealed class AutoMultiHook : BaseActionCast {
     public override bool CastCondition() {
         if (!EvaluateConditionSet())
             return false;
-        if (Service.WorldState.HasStatus(IDs.Status.Multihook))
+        if (Service.WorldState.Player.HasStatus(IDs.Status.Multihook))
             return false;
 
         return Service.WorldState.IsSlottedDutyActionReady(IDs.Actions.MultiHook);

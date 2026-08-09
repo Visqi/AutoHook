@@ -53,15 +53,15 @@ public class TabDebug : BaseTab {
                     DrawKvTable("ws_core", [
                         ("Time", ws.CurrentTime.ToString("O")),
                         ("Eorzea", ws.EorzeaTime.ToString("HH:mm:ss")),
-                        ("GP", $"{ws.CurrentGp} / {ws.MaxGp}"),
+                        ("GP", $"{ws.Player.CurrentGp} / {ws.Player.MaxGp}"),
                         ("Territory", ws.TerritoryId == 0 ? "-" : TerritoryType.GetRow(ws.TerritoryId).PlaceName.Value.Name.ToString()),
                         ("Weather (prev)", ws.PreviousWeatherId == 0 ? "-" : Weather.GetRow(ws.PreviousWeatherId).Name.ToString()),
                         ("Weather (current)", ws.CurrentWeatherId == 0 ? "-" : Weather.GetRow(ws.CurrentWeatherId).Name.ToString()),
                         ("Weather (next)", ws.NextWeatherId == 0 ? "-" : Weather.GetRow(ws.NextWeatherId).Name.ToString()),
-                        ("Block casting", ws.BlockCasting.ToString()),
-                        ("Fishing state", ws.FishingState.ToString()),
-                        ("Prev fishing state", ws.PreviousFishingState.ToString()),
-                        ("Fishing step", $"{ws.FishingStep} (0x{(uint)ws.FishingStep:X})"),
+                        ("Block casting", ws.Player.BlockCasting.ToString()),
+                        ("Fishing state", ws.Fishing.FishingState.ToString()),
+                        ("Prev fishing state", ws.Fishing.PreviousFishingState.ToString()),
+                        ("Fishing step", $"{ws.Fishing.FishingStep} (0x{(uint)ws.Fishing.FishingStep:X})"),
                     ]);
                 }
             }
@@ -76,8 +76,8 @@ public class TabDebug : BaseTab {
                         ("Mooching", f.BaitInfo.IsMooching.ToString()),
                         ("Bite time", $"{f.BiteInfo.BiteTimeSeconds:F2}s"),
                         ("Tug", f.BiteInfo.TugType.ToString()),
-                        ("Chum", ws.ChumActive.ToString()),
-                        ("Lure success", ws.LureSuccess.ToString()),
+                        ("Chum", ws.Fishing.ChumActive.ToString()),
+                        ("Lure success", ws.Fishing.LureSuccess.ToString()),
                     ]);
 
                     var snap = f.CastSnapshot;
@@ -157,7 +157,7 @@ public class TabDebug : BaseTab {
 
             if (ImGui.CollapsingHeader("Statuses")) {
                 using (ImRaii.PushIndent()) {
-                    if (ws.Statuses.Count == 0) {
+                    if (ws.Player.Statuses.Count == 0) {
                         ImGui.TextDisabled("(none)");
                     }
                     else {
@@ -170,7 +170,7 @@ public class TabDebug : BaseTab {
                             ImGui.TableSetupColumn("Time", ImGuiTableColumnFlags.WidthFixed, 60.Scaled());
                             ImGui.TableSetupColumn("Stacks", ImGuiTableColumnFlags.WidthFixed, 50.Scaled());
                             ImGui.TableHeadersRow();
-                            foreach (var (id, (time, stacks)) in ws.Statuses.OrderBy(s => s.Key)) {
+                            foreach (var (id, (time, stacks)) in ws.Player.Statuses.OrderBy(s => s.Key)) {
                                 ImGui.TableNextRow();
                                 ImGui.TableNextColumn();
                                 ImGui.Text(id.ToString());
@@ -262,7 +262,7 @@ public class TabDebug : BaseTab {
     }
 
     private static void DrawKnownItems(WorldState ws) {
-        var rows = KnownItemIds.Select(id => (id, Count: ws.GetItemCount(id))).Where(r => r.Count > 0).ToArray();
+        var rows = KnownItemIds.Select(id => (id, Count: ws.Player.GetItemCount(id))).Where(r => r.Count > 0).ToArray();
         if (rows.Length == 0)
             return;
         ImGui.Spacing();

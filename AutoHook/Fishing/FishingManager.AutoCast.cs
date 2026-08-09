@@ -26,11 +26,11 @@ public partial class FishingManager {
         if (!hookCfg.Enabled)
             return;
 
-        hookCfg.GetHookset().CastLures.TryCasting(Ws.LureSuccess);
+        hookCfg.GetHookset().CastLures.TryCasting(Ws.Fishing.LureSuccess);
     }
 
     private bool TryCastCollectBeforeLine(AutoCastsConfig acCfg) {
-        if (!acCfg.EnableAll || !acCfg.CastCollect.Enabled || Ws.HasStatus(IDs.Status.CollectorsGlove))
+        if (!acCfg.EnableAll || !acCfg.CastCollect.Enabled || Ws.Player.HasStatus(IDs.Status.CollectorsGlove))
             return false;
 
         if (!acCfg.CastCollect.IsAvailableToCast())
@@ -42,16 +42,16 @@ public partial class FishingManager {
     private void CastCollectAfterLine() {
         var cfg = GetAutoCastCfg();
 
-        if (Ws.HasStatus(IDs.Status.CollectorsGlove) && cfg.RecastAnimationCancel && cfg.TurnCollectOff && !cfg.CastCollect.Enabled)
+        if (Ws.Player.HasStatus(IDs.Status.CollectorsGlove) && cfg.RecastAnimationCancel && cfg.TurnCollectOff && !cfg.CastCollect.Enabled)
             PlayerRes.CastAction(IDs.Actions.Collect);
-        else if (Ws.HasStatus(IDs.Status.CollectorsGlove) && cfg.TurnCollectOffWithoutAnimCancel && !cfg.CastCollect.Enabled)
+        else if (Ws.Player.HasStatus(IDs.Status.CollectorsGlove) && cfg.TurnCollectOffWithoutAnimCancel && !cfg.CastCollect.Enabled)
             PlayerRes.CastAction(IDs.Actions.Collect);
         else
             cfg.TryCastAction(cfg.CastCollect);
     }
 
     private void UseAutoCasts() {
-        if (Ws.FishingStep.HasFlag(FishingSteps.None) || Ws.FishingStep.HasFlag(FishingSteps.BeganFishing) || Ws.FishingStep.HasFlag(FishingSteps.Quitting))
+        if (Ws.Fishing.FishingStep.HasFlag(FishingSteps.None) || Ws.Fishing.FishingStep.HasFlag(FishingSteps.BeganFishing) || Ws.Fishing.FishingStep.HasFlag(FishingSteps.Quitting))
             return;
 
         if (!Ws.IsCastAvailable() || Service.TaskManager.IsBusy)
@@ -73,13 +73,13 @@ public partial class FishingManager {
     }
 
     private void ContinueStartFishing(BaseActionCast? usedAction) {
-        if (!Ws.FishingStep.HasFlag(FishingSteps.StartedCasting) || Ws.FishingStep.HasFlag(FishingSteps.BeganFishing))
+        if (!Ws.Fishing.FishingStep.HasFlag(FishingSteps.StartedCasting) || Ws.Fishing.FishingStep.HasFlag(FishingSteps.BeganFishing))
             return;
 
         var delay = usedAction != null ? PlayerRes.GetPostCastDelayMs() : 0;
         Service.TaskManager.EnqueueDelay(delay);
         Service.TaskManager.Enqueue(() => {
-            if (!Ws.FishingStep.HasFlag(FishingSteps.StartedCasting) || Ws.FishingStep.HasFlag(FishingSteps.BeganFishing))
+            if (!Ws.Fishing.FishingStep.HasFlag(FishingSteps.StartedCasting) || Ws.Fishing.FishingStep.HasFlag(FishingSteps.BeganFishing))
                 return;
 
             UseAutoCasts();
@@ -123,7 +123,7 @@ public partial class FishingManager {
             return false;
 
         var fishId = lastCatch.FishId;
-        if (!Ws.SwimbaitIds.Any(id => id == fishId))
+        if (!Ws.Fishing.SwimbaitIds.Any(id => id == fishId))
             return false;
 
         if (lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast()) {
@@ -142,7 +142,7 @@ public partial class FishingManager {
         var presetName = Presets.SelectedPreset?.PresetName ?? "(none)";
         Service.PrintDebug($"[Swimbait] Evaluating slots, preset={presetName}, intuitionActive={intuitionActive}, storedCount={Ws.GetSwimbaitCount()}");
 
-        foreach (var (fishId, slotIndex) in Ws.SwimbaitIds.ToArray().WithIndex()) {
+        foreach (var (fishId, slotIndex) in Ws.Fishing.SwimbaitIds.ToArray().WithIndex()) {
             if (fishId == 0)
                 continue;
 

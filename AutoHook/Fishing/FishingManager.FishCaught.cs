@@ -47,7 +47,7 @@ public partial class FishingManager {
     }
 
     private bool UseFishCaughtActions(FishConfig? lastFishCatchCfg) {
-        if (lastFishCatchCfg == null || !lastFishCatchCfg.Enabled || Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped))
+        if (lastFishCatchCfg == null || !lastFishCatchCfg.Enabled || Ws.Fishing.FishingStep.HasFlag(FishingSteps.PresetSwapped))
             return false;
 
         if (Ws.Fishing.LastCatch is { } lc && lc.FishId > 0)
@@ -89,7 +89,7 @@ public partial class FishingManager {
             && Presets.CurrentPreset.PresetName == lastCatchCfg.PresetToSwap)
             FishingHelper.RemovePresetSwap(guid);
 
-        if (swapPresetEnabled && lastCatchCfg.SwapPresetLimit.BackingSet.Passes() && !FishingHelper.SwappedPreset(guid) && !Ws.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
+        if (swapPresetEnabled && lastCatchCfg.SwapPresetLimit.BackingSet.Passes() && !FishingHelper.SwappedPreset(guid) && !Ws.Fishing.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
             if (lastCatchCfg.PresetToSwap == Presets.CurrentPreset.PresetName) {
                 FindPresetByName(lastCatchCfg.PresetToSwap)?.TryResetCounter();
             }
@@ -112,7 +112,7 @@ public partial class FishingManager {
 
         var (swapBaitEnabled, _) = lastCatchCfg.SwapBaitLimit.Value;
 
-        if (swapBaitEnabled && lastCatchCfg.SwapBaitLimit.BackingSet.Passes() && !FishingHelper.SwappedBait(guid) && !Ws.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
+        if (swapBaitEnabled && lastCatchCfg.SwapBaitLimit.BackingSet.Passes() && !FishingHelper.SwappedBait(guid) && !Ws.Fishing.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
             if (lastCatchCfg.BaitToSwap.Id != Ws.Fishing.BaitInfo.BaitId) {
                 var result = ChangeBait(lastCatchCfg.BaitToSwap);
 
