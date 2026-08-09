@@ -939,6 +939,12 @@
   <data name="CollectHelpText" xml:space="preserve">
     <value>収集品採集を有効にして釣り始める</value>
   </data>
+  <data name="Snagging" xml:space="preserve">
+    <value>引掛釣り</value>
+  </data>
+  <data name="SnaggingHelpText" xml:space="preserve">
+    <value>釣りを開始すると、引掛釣りが有効になります</value>
+  </data>
   <data name="RefreshWhenTimeIsLessThanOrEqual" xml:space="preserve">
     <value>バフの残り時間が以下のときに更新</value>
   </data>
@@ -965,6 +971,12 @@
   </data>
   <data name="Reset_the_counter" xml:space="preserve">
     <value>カウンターをリセット</value>
+  </data>
+  <data name="Reset_counter_after_swapping_presets" xml:space="preserve">
+    <value>プリセットを切り替えた後のフック/魚カウンターのリセット</value>
+  </data>
+  <data name="Reset_fish_caught_counter" xml:space="preserve">
+    <value>捕獲した魚の数をリセット</value>
   </data>
   <data name="Only_use_when_Cordial_is_available" xml:space="preserve">
     <value>コーディアルが利用可能な場合にのみ使用</value>
@@ -1259,6 +1271,9 @@
   </data>
   <data name="CancelAttempt" xml:space="preserve">
     <value>成功せずにスタック限界に達した場合、フッキングをキャンセルする</value>
+  </data>
+  <data name="ForceAttemptLimit" xml:space="preserve">
+    <value>強制試行制限</value>
   </data>
   <data name="LureType" xml:space="preserve">
     <value>ルアーの種類:</value>
@@ -1603,5 +1618,53 @@
   </data>
   <data name="Status_HookNotAvailableNormalWillBeUsed" xml:space="preserve">
     <value>利用不可。代わりに通常のフックが使用されます</value>
+  </data>
+  <data name="UseForAllZoneTimes" xml:space="preserve">
+    <value>すべてのゾーン/時間帯で適用</value>
+  </data>
+  <data name="SelectZoneAndTime" xml:space="preserve">
+    <value>エリアと時間を選択してください</value>
+  </data>
+  <data name="AutoOceanFish" xml:space="preserve">
+    <value>自動オーシャンフィッシュ</value>
+  </data>
+  <data name="AutoOceanFishHelpText" xml:space="preserve">
+    <value>ボート上のあらゆる操作: 位置調整、キャスト、プリセット管理をすべて行います。</value>
+  </data>
+  <data name="AutoOceanFish_Fallthrough" xml:space="preserve">
+    <value>すでに取得済みの場合は、次の優先順位に進む</value>
+  </data>
+  <data name="UseForGoal" xml:space="preserve">
+    <value>使用目的</value>
+  </data>
+  <data name="OceanFishGoal_Points" xml:space="preserve">
+    <value>ポイント</value>
+  </data>
+  <data name="OceanFishGoal_Legendary" xml:space="preserve">
+    <value>伝説魚</value>
+  </data>
+  <data name="OceanFishGoal_Achievements" xml:space="preserve">
+    <value>アチーブメント</value>
+  </data>
+  <data name="OceanFishGoal_Levelling" xml:space="preserve">
+    <value>レベリング</value>
+  </data>
+  <data name="SpectralRestOnGain" xml:space="preserve">
+    <value>幻海流リセット</value>
+  </data>
+  <data name="SpectralRestOnGainHelpText" xml:space="preserve">
+    <value>キャスティングの途中で幻海流が発生した場合は、一旦中断して再キャスティングしてください</value>
+  </data>
+  <data name="AutoHandleCollectables" xml:space="preserve">
+    <value>自動収集品採集</value>
+  </data>
+  <data name="AutoHandleCollectablesHelpText" xml:space="preserve">
+    <value>収集可能が表示されたときに自動でプロンプトを受け付けます。追加オプションでプリセットごとに上書きすることができます。 オーバーライドした場合、プリセットの条件が有効になるまで待機します。</value>
+  </data>
+  <data name="AutoHandleCollectables_Preset_HelpText" xml:space="preserve">
+    <value>グローバルな「自動収集」設定を上書きし、このルールの条件が満たされた場合にのみ発動します。</value>
+  </data>
+  <data name="Prioritise" xml:space="preserve">
+    <value>優先度</value>
   </data>
 </root>
