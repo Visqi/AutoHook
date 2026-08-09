@@ -65,6 +65,7 @@ public sealed class FishingInfo {
     public UsedAction? LastUsedAction;
 
     public bool LureSuccess;
+    public bool CollectableWindowOpen;
     public double? LastLureCastBiteTime;
     public PreviousCatchInfo PreviousCatch;
 
@@ -105,6 +106,8 @@ public sealed class FishingInfo {
             yield return new OpSetPreviousFishingState(PreviousFishingState);
         if (LureSuccess)
             yield return new OpSetLureSuccess(LureSuccess);
+        if (CollectableWindowOpen)
+            yield return new OpSetCollectableWindowOpen(true);
         if (LastLureCastBiteTime is { } lureCastBiteTime)
             yield return new OpSetLastLureCastBiteTime(lureCastBiteTime);
         if (PreviousCatch.CanMoochPreviousCatch || PreviousCatch.CanMooch2PreviousCatch ||
@@ -199,6 +202,13 @@ public sealed class FishingInfo {
 
         public override void Write(Replay.ReplayOutput output)
             => output.EmitFourCC("LURE").Emit(Value);
+    }
+
+    public sealed record OpSetCollectableWindowOpen(bool Open) : WorldState.Operation {
+        protected override void Exec(WorldState ws) => ws.Fishing.CollectableWindowOpen = Open;
+
+        public override void Write(Replay.ReplayOutput output)
+            => output.EmitFourCC("CWIN").Emit(Open);
     }
 
     public sealed record OpSetLastLureCastBiteTime(double? Value) : WorldState.Operation {

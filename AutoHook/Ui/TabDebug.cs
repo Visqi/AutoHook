@@ -78,6 +78,7 @@ public class TabDebug : BaseTab {
                         ("Tug", f.BiteInfo.TugType.ToString()),
                         ("Chum", ws.Fishing.ChumActive.ToString()),
                         ("Lure success", ws.Fishing.LureSuccess.ToString()),
+                        ("Collectable window", ws.Fishing.CollectableWindowOpen.ToString()),
                     ]);
 
                     var snap = f.CastSnapshot;

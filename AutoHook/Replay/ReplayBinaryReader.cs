@@ -74,6 +74,7 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
             "FCLR" => new FishingInfo.OpClearFishingStepFlag((FishingSteps)_reader.ReadUInt32()),
             "ACTU" => new FishingInfo.OpPlayerUsedAction(new UsedAction(_reader.ReadUInt32(), (ActionType)_reader.ReadByte())),
             "LURE" => new FishingInfo.OpSetLureSuccess(_reader.ReadBoolean()),
+            "CWIN" => new FishingInfo.OpSetCollectableWindowOpen(_reader.ReadBoolean()),
             "LCBT" => ParseLastLureCastBiteTime(),
             "PFST" => new FishingInfo.OpSetPreviousFishingState((FishingState)_reader.ReadByte()),
             "FCNT" => new FishingInfo.OpAddFishCaught(_reader.ReadUInt32(), _reader.ReadByte()),

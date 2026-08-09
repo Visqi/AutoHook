@@ -15,6 +15,8 @@ public class AutoCollectables : IDisposable {
 
     public AutoCollectables() {
         Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SelectYesno", HandleAddon); // onupdate instead of setup since the pending can trigger before setup fires
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SelectYesno", HandleAddon);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PreFinalize, "SelectYesno", HandleAddon);
     }
 
     public void Dispose() {
@@ -37,34 +39,45 @@ public class AutoCollectables : IDisposable {
     }
 
     private unsafe void HandleAddon(AddonEvent type, AddonArgs args) {
-        if (!Service.Configuration.PluginEnabled)
-            return;
+        switch (type) {
+            case AddonEvent.PreFinalize when Service.WorldState.Fishing.CollectableWindowOpen:
+                Service.WorldState.Execute(new FishingInfo.OpSetCollectableWindowOpen(false));
+                break;
+            case AddonEvent.PostSetup:
+                if (IsCollectableWindow(args.GetAddon<AddonSelectYesno>()) is bool open && open != Service.WorldState.Fishing.CollectableWindowOpen)
+                    Service.WorldState.Execute(new FishingInfo.OpSetCollectableWindowOpen(open));
+                break;
+            case AddonEvent.PostUpdate:
+                if (!Service.Configuration.PluginEnabled)
+                    return;
 
-        var addon = args.GetAddon<AddonSelectYesno>();
-        if (!addon->AtkUnitBase.IsReady)
-            return;
+                var addon = args.GetAddon<AddonSelectYesno>();
+                if (!addon->AtkUnitBase.IsReady)
+                    return;
 
-        if (IsWaitingOnConditions()) {
-            _pendingResolve = false;
-            return;
+                if (IsWaitingOnConditions()) {
+                    _pendingResolve = false;
+                    return;
+                }
+
+                if (TryGetPresetResolve(out var forceNo)) {
+                    if (TrySelectYesNo(addon, forceNo))
+                        _pendingResolve = false;
+                    return;
+                }
+
+                if (_pendingResolve) {
+                    if (TrySelectYesNo(addon, _pendingForceNo))
+                        _pendingResolve = false;
+                    return;
+                }
+
+                if (!Service.Configuration.AutoCollectablesEnabled)
+                    return;
+
+                TrySelectYesNo(addon, forceNo: false);
+                break;
         }
-
-        if (TryGetPresetResolve(out var forceNo)) {
-            if (TrySelectYesNo(addon, forceNo))
-                _pendingResolve = false;
-            return;
-        }
-
-        if (_pendingResolve) {
-            if (TrySelectYesNo(addon, _pendingForceNo))
-                _pendingResolve = false;
-            return;
-        }
-
-        if (!Service.Configuration.AutoCollectablesEnabled)
-            return;
-
-        TrySelectYesNo(addon, forceNo: false);
     }
 
     private IEnumerable<ExtraTrigger> GetTriggers()
@@ -83,12 +96,24 @@ public class AutoCollectables : IDisposable {
         return true;
     }
 
-    private unsafe bool TrySelectYesNo(AddonSelectYesno* addon, bool forceNo) {
+    private unsafe bool TryGetCollectablePrompt(AddonSelectYesno* addon, out Item item) {
+        item = default;
         var text = addon->PromptText->NodeText.AsReadOnlySeString();
         if (!text.ContainsAny(collectablePatterns))
             return false;
 
-        if (Item.GetRow(ItemUtil.GetBaseId(addon->AtkValues[14].UInt).ItemId) is not { IsCollectable: true, RowId: > 0 } item)
+        if (Item.GetRow(ItemUtil.GetBaseId(addon->AtkValues[14].UInt).ItemId) is not { IsCollectable: true, RowId: > 0 } row)
+            return false;
+
+        item = row;
+        return true;
+    }
+
+    private unsafe bool IsCollectableWindow(AddonSelectYesno* addon)
+        => TryGetCollectablePrompt(addon, out _);
+
+    private unsafe bool TrySelectYesNo(AddonSelectYesno* addon, bool forceNo) {
+        if (!TryGetCollectablePrompt(addon, out var item))
             return false;
 
         if (forceNo) {
@@ -96,7 +121,8 @@ public class AutoCollectables : IDisposable {
             return true;
         }
 
-        if (!int.TryParse(Regex.Match(text.ExtractText(), @"\d+").Value, out var value))
+        var text = addon->PromptText->NodeText.AsReadOnlySeString().ExtractText();
+        if (!int.TryParse(Regex.Match(text, @"\d+").Value, out var value))
             return false;
 
         if (CollectablesShopItem.FirstOrNull(x => x.Item.Value.RowId == item.RowId) is { } collectability) {
