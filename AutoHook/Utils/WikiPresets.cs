@@ -67,10 +67,10 @@ public static class WikiPresets {
     }
 
     static bool IsFolder(string preset)
-        => preset.StartsWith(Configuration.ExportPrefixFolder) || preset.StartsWith(Configuration.ExportPrefixFolderV2);
+        => Configuration.IsFolderExport(preset);
 
     static bool IsSpearfishing(string preset)
-        => preset.StartsWith(Configuration.ExportPrefixSf) || preset.StartsWith(Configuration.ExportPrefixSf2);
+        => Configuration.IsSpearfishingExport(preset);
 
     static async Task<List<string>> GetWikiPageUrls(string url) {
         var pageUrls = new List<string>();

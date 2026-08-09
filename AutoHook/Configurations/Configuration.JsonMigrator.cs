@@ -84,13 +84,16 @@ public static class ConfigurationJsonMigrator {
         }
     }
 
-    // migrate one exported preset JSON (AH4/AH6/etc.) to latest schema before deserialize.
-    public static string MigrateImportedPreset(string json) {
+    // migrate up to LatestFishingPresetSchema, fromVersion is from the prefix
+    public static string MigrateImportedPreset(string json, int fromVersion = 0) {
         try {
+            if (fromVersion >= Configuration.LatestFishingPresetSchema.Version)
+                return json;
+
             if (JToken.Parse(json) is not JObject preset)
                 return json;
 
-            MigrateImportedPresetObject(preset);
+            MigrateImportedPresetObject(preset, fromVersion);
             return preset.ToString(Formatting.None);
         }
         catch {
@@ -103,7 +106,8 @@ public static class ConfigurationJsonMigrator {
             if (JToken.Parse(json) is not JObject root)
                 return json;
 
-            MigrateImportedFolderExportObject(root);
+            // Legacy folder payloads may contain pre-current preset JSON.
+            MigrateImportedFolderExportObject(root, fromVersion: 0);
             return root.ToString(Formatting.None);
         }
         catch {
@@ -111,25 +115,47 @@ public static class ConfigurationJsonMigrator {
         }
     }
 
-    private static void MigrateImportedFolderExportObject(JObject folderExport) {
+    private static void MigrateImportedFolderExportObject(JObject folderExport, int fromVersion) {
         foreach (var token in EnumerateArray(folderExport["Presets"])) {
             if (token is JObject presetObj)
-                MigrateImportedPresetObject(presetObj);
+                MigrateImportedPresetObject(presetObj, fromVersion);
         }
 
         foreach (var token in EnumerateArray(folderExport["ChildFolders"])) {
             if (token is JObject childObj)
-                MigrateImportedFolderExportObject(childObj);
+                MigrateImportedFolderExportObject(childObj, fromVersion);
         }
     }
 
-    private static void MigrateImportedPresetObject(JObject preset) {
-        MigratePresetExtra(preset);
-        MigratePresetConditions(preset);
-        MigratePresetSwimbaitCountThreshold(preset);
-        MigratePresetSparefulHandSwimbaitLimits(preset);
-        MigratePresetFishCaughtActionEnabled(preset);
+    private static void MigrateImportedPresetObject(JObject preset, int fromVersion) {
+        foreach (var migration in PresetImportMigrations) {
+            if (fromVersion < migration.ToVersion)
+                migration.Apply(preset);
+        }
     }
+
+    private interface IPresetImportMigration {
+        int ToVersion { get; }
+        void Apply(JObject preset);
+    }
+
+    private sealed class PresetImportMigration(int toVersion, Action<JObject> apply) : IPresetImportMigration {
+        public int ToVersion { get; } = toVersion;
+        public void Apply(JObject preset) => apply(preset);
+    }
+
+    private static readonly IPresetImportMigration[] PresetImportMigrations =
+    [
+        new PresetImportMigration(6, preset => {
+            MigratePresetExtra(preset);
+            MigratePresetConditions(preset);
+        }),
+        new PresetImportMigration(7, preset => {
+            MigratePresetSwimbaitCountThreshold(preset);
+            MigratePresetSparefulHandSwimbaitLimits(preset);
+            MigratePresetFishCaughtActionEnabled(preset);
+        }),
+    ];
 
     private static void MigrateV2ToV3Json(JObject root) {
         if (root["BaitPresetList"] is not JArray baitPresetList || baitPresetList.Count == 0) {

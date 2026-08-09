@@ -91,15 +91,119 @@ public partial class Configuration : IPluginConfiguration {
         NullValueHandling = NullValueHandling.Ignore
     };
 
+    public readonly record struct ExportSchema(int Version, string Prefix, bool UseBrotli = false);
+
+    // legacy prefixes
+    [NonSerialized] public const string ExportPrefixV2 = "AH_";
+    [NonSerialized] public const string ExportPrefixV3 = "AH3_";
+
+    private static readonly ExportSchema[] FishingPresetSchemas =
+    [
+        new(4, "AH4_"),
+        new(6, "AH6_"),
+        new(7, "AH7_", UseBrotli: true),
+    ];
+
+    private static readonly ExportSchema[] FolderExportSchemas =
+    [
+        new(1, "AHFOLDER_"),
+        new(2, "AHFOLDER2_", UseBrotli: true),
+    ];
+
+    private static readonly ExportSchema[] SpearfishingSchemas =
+    [
+        new(1, "AHSF1_"),
+        new(2, "AHSF2_", UseBrotli: true),
+    ];
+
+    public static ExportSchema LatestFishingPresetSchema => FishingPresetSchemas[^1];
+    public static ExportSchema LatestFolderExportSchema => FolderExportSchemas[^1];
+    public static ExportSchema LatestSpearfishingSchema => SpearfishingSchemas[^1];
+
+    [NonSerialized]
+    public static readonly IReadOnlyList<string> ExportPrefixes =
+    [
+        ExportPrefixV2,
+        ExportPrefixV3,
+        .. FishingPresetSchemas.Select(s => s.Prefix),
+        .. SpearfishingSchemas.Select(s => s.Prefix),
+        .. FolderExportSchemas.Select(s => s.Prefix),
+    ];
+
+    private static readonly ExportSchema[] AllVersionedSchemas =
+    [
+        .. FishingPresetSchemas,
+        .. FolderExportSchemas,
+        .. SpearfishingSchemas,
+    ];
+
+    public static bool TryGetFishingPresetSchema(string import, out ExportSchema schema)
+        => TryMatchSchema(import, FishingPresetSchemas, out schema);
+
+    public static bool TryGetFolderExportSchema(string import, out ExportSchema schema)
+        => TryMatchSchema(import, FolderExportSchemas, out schema);
+
+    public static bool TryGetSpearfishingSchema(string import, out ExportSchema schema)
+        => TryMatchSchema(import, SpearfishingSchemas, out schema);
+
+    public static bool IsFolderExport(string import)
+        => TryGetFolderExportSchema(import, out _);
+
+    public static bool IsSpearfishingExport(string import)
+        => TryGetSpearfishingSchema(import, out _);
+
+    private static bool TryMatchSchema(string import, ExportSchema[] schemas, out ExportSchema schema) {
+        // longest prefix first
+        foreach (var candidate in schemas.OrderByDescending(s => s.Prefix.Length)) {
+            if (import.StartsWith(candidate.Prefix)) {
+                schema = candidate;
+                return true;
+            }
+        }
+
+        schema = default;
+        return false;
+    }
+
+    private static bool TryResolveExportPrefix(string import, out string prefix, out bool useBrotli) {
+        if (import.StartsWith(ExportPrefixV2)) {
+            prefix = ExportPrefixV2;
+            useBrotli = false;
+            return true;
+        }
+
+        if (import.StartsWith(ExportPrefixV3)) {
+            prefix = ExportPrefixV3;
+            useBrotli = false;
+            return true;
+        }
+
+        foreach (var candidate in AllVersionedSchemas.OrderByDescending(s => s.Prefix.Length)) {
+            if (import.StartsWith(candidate.Prefix)) {
+                prefix = candidate.Prefix;
+                useBrotli = candidate.UseBrotli;
+                return true;
+            }
+        }
+
+        prefix = "";
+        useBrotli = false;
+        return false;
+    }
+
     // Got the export/import function from the UnknownX7's ReAction repo
     public static string ExportPreset(BasePresetConfig preset) {
-        var exported = CompressString(JsonConvert.SerializeObject(preset, NewExportSettings), true);
+        var json = JsonConvert.SerializeObject(preset, NewExportSettings);
 
-        // check if preset is type of AutoGigConfig or CustomPresetConfig
-        if (preset is AutoGigConfig)
-            return ExportPrefixSf2 + exported;
-        else if (preset is CustomPresetConfig)
-            return ExportPrefixV7 + exported;
+        if (preset is AutoGigConfig) {
+            var schema = LatestSpearfishingSchema;
+            return schema.Prefix + CompressString(json, schema.UseBrotli);
+        }
+
+        if (preset is CustomPresetConfig) {
+            var schema = LatestFishingPresetSchema;
+            return schema.Prefix + CompressString(json, schema.UseBrotli);
+        }
 
         return "Something went wrong while exporting the preset";
     }
@@ -112,10 +216,9 @@ public partial class Configuration : IPluginConfiguration {
 
     public static string ExportFolder(PresetFolder folder, List<CustomPresetConfig> presets, List<PresetFolder> allFolders) {
         var folderExport = BuildFolderExport(folder, presets, allFolders);
-
-        var exported = CompressString(JsonConvert.SerializeObject(folderExport, NewExportSettings), true);
-
-        return ExportPrefixFolderV2 + exported;
+        var schema = LatestFolderExportSchema;
+        var exported = CompressString(JsonConvert.SerializeObject(folderExport, NewExportSettings), schema.UseBrotli);
+        return schema.Prefix + exported;
     }
 
     private static FolderExport BuildFolderExport(PresetFolder folder, List<CustomPresetConfig> presets, List<PresetFolder> allFolders) {
@@ -143,11 +246,13 @@ public partial class Configuration : IPluginConfiguration {
 
     public static (PresetFolder Folder, List<PresetFolder> Folders, List<CustomPresetConfig> Presets)? ImportFolder(string import) {
         import = import.Trim();
-        if (!import.StartsWith(ExportPrefixFolder) && !import.StartsWith(ExportPrefixFolderV2))
+        if (!TryGetFolderExportSchema(import, out var schema))
             return null;
 
         try {
-            var json = ConfigurationJsonMigrator.MigrateImportedFolderExport(DecompressString(import));
+            var json = DecompressString(import);
+            if (schema.Version < LatestFolderExportSchema.Version)
+                json = ConfigurationJsonMigrator.MigrateImportedFolderExport(json);
             var folderData = DeserializePresetImport<FolderExport>(json);
 
             if (folderData == null)
@@ -198,44 +303,15 @@ public partial class Configuration : IPluginConfiguration {
             return old == null ? null : LegacyPresetMapper.ConvertOldPresetV3(old);
         }
 
-        if (import.StartsWith(ExportPrefixSf) || import.StartsWith(ExportPrefixSf2))
+        if (TryGetSpearfishingSchema(import, out _))
             return DeserializePresetImport<AutoGigConfig>(json);
 
-        json = ConfigurationJsonMigrator.MigrateImportedPreset(json);
+        if (!TryGetFishingPresetSchema(import, out var schema))
+            return null;
+
+        json = ConfigurationJsonMigrator.MigrateImportedPreset(json, schema.Version);
         return DeserializePresetImport<CustomPresetConfig>(json);
     }
-
-    [NonSerialized] public const string ExportPrefixV2 = "AH_";
-    [NonSerialized] public const string ExportPrefixV3 = "AH3_";
-    [NonSerialized] public const string ExportPrefixV4 = "AH4_";
-    [NonSerialized] public const string ExportPrefixV6 = "AH6_";
-    [NonSerialized] public const string ExportPrefixV7 = "AH7_";
-    [NonSerialized] public const string ExportPrefixSf = "AHSF1_";
-    [NonSerialized] public const string ExportPrefixSf2 = "AHSF2_";
-    [NonSerialized] public const string ExportPrefixFolder = "AHFOLDER_";
-    [NonSerialized] public const string ExportPrefixFolderV2 = "AHFOLDER2_";
-
-    [NonSerialized]
-    public static readonly IReadOnlyList<string> ExportPrefixes =
-    [
-        ExportPrefixV2,
-        ExportPrefixV3,
-        ExportPrefixV4,
-        ExportPrefixV6,
-        ExportPrefixV7,
-        ExportPrefixSf,
-        ExportPrefixSf2,
-        ExportPrefixFolder,
-        ExportPrefixFolderV2
-    ];
-
-    [NonSerialized]
-    private static readonly IReadOnlyList<string> BroccoliExportPrefixes =
-    [
-        ExportPrefixV7,
-        ExportPrefixSf2,
-        ExportPrefixFolderV2
-    ];
 
     public static string CompressString(string s, bool useBrotli = false) {
         var bytes = Encoding.UTF8.GetBytes(s);
@@ -250,14 +326,13 @@ public partial class Configuration : IPluginConfiguration {
 
     public static string DecompressString(string s) {
         s = s.Trim();
-        if (!ExportPrefixes.Any(s.StartsWith))
+        if (!TryResolveExportPrefix(s, out var prefix, out var useBrotli))
             throw new ApplicationException(UIStrings.DecompressString_Invalid_Import);
 
-        var prefix = ExportPrefixes.First(s.StartsWith);
         var data = Convert.FromBase64String(s[prefix.Length..].Trim());
 
         using var ms = new MemoryStream(data);
-        using Stream decompressor = BroccoliExportPrefixes.Contains(prefix)
+        using Stream decompressor = useBrotli
             ? new BrotliStream(ms, CompressionMode.Decompress)
             : new GZipStream(ms, CompressionMode.Decompress);
         using var result = new MemoryStream();
