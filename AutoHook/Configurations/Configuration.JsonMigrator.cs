@@ -101,13 +101,13 @@ public static class ConfigurationJsonMigrator {
         }
     }
 
-    public static string MigrateImportedFolderExport(string json) {
+    public static string MigrateImportedFolderExport(string json, int fromVersion = 0) {
         try {
             if (JToken.Parse(json) is not JObject root)
                 return json;
 
             // Legacy folder payloads may contain pre-current preset JSON.
-            MigrateImportedFolderExportObject(root, fromVersion: 0);
+            MigrateImportedFolderExportObject(root, fromVersion);
             return root.ToString(Formatting.None);
         }
         catch {
@@ -155,6 +155,7 @@ public static class ConfigurationJsonMigrator {
             MigratePresetSparefulHandSwimbaitLimits(preset);
             MigratePresetFishCaughtActionEnabled(preset);
         }),
+        new PresetImportMigration(8, MigratePresetLuresToNested),
     ];
 
     private static void MigrateV2ToV3Json(JObject root) {
@@ -507,9 +508,19 @@ public static class ConfigurationJsonMigrator {
         MigrateLuresToNestedJson(lures);
     }
 
+    private static void MigratePresetLuresToNested(JObject preset) {
+        foreach (var hook in EnumerateArray(preset["ListOfBaits"]).Concat(EnumerateArray(preset["ListOfMooch"]))) {
+            if (hook is not JObject hookObj) continue;
+            if (hookObj["NormalHook"] is JObject normal && normal["CastLures"] is JObject normalLures)
+                MigrateLuresToNestedJson(normalLures);
+            if (hookObj["IntuitionHook"] is JObject intuition && intuition["CastLures"] is JObject intuitionLures)
+                MigrateLuresToNestedJson(intuitionLures);
+        }
+    }
+
     private static void MigrateLuresToNestedJson(JObject lures) {
-        // already nested
-        if (lures["Ambitious"] is JObject && lures["Modest"] is JObject)
+        // already nested, either type works since default values are omited
+        if (lures["Ambitious"] is JObject || lures["Modest"] is JObject)
             return;
 
         var actionId = (uint?)(lures["Id"] ?? IDs.Actions.AmbitiousLure) ?? IDs.Actions.AmbitiousLure;
@@ -517,7 +528,7 @@ public static class ConfigurationJsonMigrator {
         var stacks = Math.Clamp((int?)(lures["LureStacks"] ?? 3) ?? 3, 1, 3);
         var cancel = (bool?)(lures["CancelAttempt"] ?? false) ?? false;
         var conditionSet = lures["ConditionSet"]?.DeepClone();
-        var hadFlatConfig = lures["LureTarget"] != null || lures["LureStacks"] != null || lures["CancelAttempt"] != null || conditionSet != null;
+        var hadFlatConfig = (bool?)lures["Enabled"] == true || lures["Id"] != null || lures["LureTarget"] != null || lures["LureStacks"] != null || lures["CancelAttempt"] != null || conditionSet != null;
 
         // nothing to carry over
         if (!hadFlatConfig)

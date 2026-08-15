@@ -102,12 +102,14 @@ public partial class Configuration : IPluginConfiguration {
         new(4, "AH4_"),
         new(6, "AH6_"),
         new(7, "AH7_", UseBrotli: true),
+        new(8, "AH8_", UseBrotli: true),
     ];
 
     private static readonly ExportSchema[] FolderExportSchemas =
     [
         new(1, "AHFOLDER_"),
         new(2, "AHFOLDER2_", UseBrotli: true),
+        new(3, "AHFOLDER3_", UseBrotli: true),
     ];
 
     private static readonly ExportSchema[] SpearfishingSchemas =
@@ -251,8 +253,14 @@ public partial class Configuration : IPluginConfiguration {
 
         try {
             var json = DecompressString(import);
-            if (schema.Version < LatestFolderExportSchema.Version)
-                json = ConfigurationJsonMigrator.MigrateImportedFolderExport(json);
+            if (schema.Version < LatestFolderExportSchema.Version) {
+                var fromVer = schema.Version switch {
+                    <= 1 => 0, // before condition sets
+                    2 => 7, // before lure-nesting
+                    _ => LatestFishingPresetSchema.Version
+                };
+                json = ConfigurationJsonMigrator.MigrateImportedFolderExport(json, fromVer);
+            }
             var folderData = DeserializePresetImport<FolderExport>(json);
 
             if (folderData == null)
