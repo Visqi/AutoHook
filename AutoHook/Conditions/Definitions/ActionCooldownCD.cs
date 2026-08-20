@@ -44,6 +44,10 @@ public sealed class ActionCooldownCD : IConditionDefinition {
             return false;
 
         var actionType = GetActionType(args.Type, args.Id);
+
+        if (args.Seconds <= 0 && args.Op is "=" or "<=")
+            return args.Apply(world.ActionAvailable(args.Id, actionType)); // 0 is treated as off CD and actually available. I don't think only 0 cd is useful
+
         var lhs = GetCooldownSeconds(world, args.Id, actionType);
         var rhs = args.Seconds;
         var result = CompareInt(lhs, rhs, args.Op);
