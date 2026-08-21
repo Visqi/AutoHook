@@ -45,13 +45,19 @@ public sealed class ActionCooldownCD : IConditionDefinition {
 
         var actionType = GetActionType(args.Type, args.Id);
 
-        if (args.Seconds <= 0 && args.Op is "=" or "<=")
-            return args.Apply(world.ActionAvailable(args.Id, actionType)); // 0 is treated as off CD and actually available. I don't think only 0 cd is useful
+        if (IsReadyCheck(args.Seconds, args.Op, args.Invert)) // =0, <=0, NOT >0, etc
+            return world.ActionAvailable(args.Id, actionType); // 0 is treated as off CD and actually available. I don't think only 0 cd is useful
 
         var lhs = GetCooldownSeconds(world, args.Id, actionType);
         var rhs = args.Seconds;
         var result = CompareInt(lhs, rhs, args.Op);
         return args.Apply(result);
+    }
+
+    private static bool IsReadyCheck(int seconds, string op, bool invert) {
+        static bool apply(bool result, bool inv) => inv ? !result : result;
+        var rhs = Math.Max(0, seconds);
+        return apply(CompareInt(0, rhs, op), invert) && !apply(CompareInt(1, rhs, op), invert);
     }
 
     public void DrawParams(Condition condition) {
