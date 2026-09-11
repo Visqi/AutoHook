@@ -9,6 +9,9 @@ public static class PluginChangelog {
             Main = {
                 "Extra Options: retain hook/fish counters between fishing sessions",
             },
+            Minor = {
+                "Goal zone area fixed. Should also stop trying to move no matter what once the zone has started."
+            }
         },
         new Version("6.0.0.83") {
             Main = {

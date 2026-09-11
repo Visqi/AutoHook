@@ -1,5 +1,7 @@
 using clib.TaskSystem;
 using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using System.Numerics;
 
 namespace AutoHook.Tasks;
@@ -13,6 +15,8 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
         new("Left B", 7f, 7.25f, 6.711f, -2f, 3f),
         new("Right", -7.25f, -7f, 6.711f, -11f, 3.5f),
     ];
+
+    private bool IsZoneStarted() => Service.WorldState.OceanFishing.TimeLeftInZone != Service.WorldState.OceanFishing.ZoneTimeMax || Service.WorldState.OceanFishing.Status is InstanceContentOceanFishing.OceanFishingStatus.Fishing;
 
     protected override async Task Execute() {
         using var scope = BeginScope(nameof(AutoOceanFish));
@@ -42,7 +46,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
         using var scope = BeginScope(nameof(WalkToRailing));
         var position = GetFishingPosition();
         var rotation = position.X > 0 ? 1.5f : -1.5f;
-        await MoveToDirectly(position, 0.25f);
+        await MoveToDirectly(position, () => Svc.Objects.LocalPlayer.WithinRange(position, 0.25f) || IsZoneStarted());
         unsafe {
             Svc.Objects.LocalPlayer?.Character->SetRotation(rotation);
         }
@@ -54,6 +58,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
     private async Task AvoidStacking(float rotation, int maxAttempts = 3) {
         using var scope = BeginScope(nameof(AvoidStacking));
         for (var attempt = 0; attempt < maxAttempts; attempt++) {
+            if (IsZoneStarted()) return;
             var blockers = Svc.Objects.OfType<IPlayerCharacter>().Where(x => x.EntityId != Player.Object?.GameObjectId).Where(x => Vector3.Distance(Player.Position, x.Position) < MinFishingSpotDistance).ToList();
             if (blockers.Count == 0) return;
 
@@ -65,7 +70,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
             var step = Player.Position + Vector3.Normalize(away) * NudgeStepDistance;
             ClampToValidFishingRegions(ref step, onLeft);
 
-            await MoveToDirectly(step, 0.1f);
+            await MoveToDirectly(step, () => Svc.Objects.LocalPlayer.WithinRange(step, 0.1f) || IsZoneStarted());
             unsafe {
                 Svc.Objects.LocalPlayer?.Character->SetRotation(rotation);
             }
