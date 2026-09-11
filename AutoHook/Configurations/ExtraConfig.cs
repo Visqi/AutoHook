@@ -167,6 +167,7 @@ public class ExtraConfig : BaseOption {
     public bool Enabled = false;
 
     public bool ResetCounterPresetSwap = false;
+    public bool RetainCountersBetweenSessions = false;
     public bool ForceBaitSwap;
     public int ForcedBaitId;
 

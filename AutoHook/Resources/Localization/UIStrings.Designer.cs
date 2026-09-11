@@ -3556,6 +3556,24 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Retain Hook/Fish Counter Between Sessions.
+        /// </summary>
+        internal static string Retain_counters_between_sessions {
+            get {
+                return ResourceManager.GetString("Retain_counters_between_sessions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Persist preset fish counts and session fish counts when you stop fishing. Intended for multi-window fish.
+        /// </summary>
+        internal static string Retain_counters_between_sessions_HelpText {
+            get {
+                return ResourceManager.GetString("Retain_counters_between_sessions_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Right click for options.
         /// </summary>
         internal static string RightClickOptions {

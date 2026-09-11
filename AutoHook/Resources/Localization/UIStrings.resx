@@ -983,6 +983,12 @@ Check the Guide Tab for Guides.</value>
   <data name="Reset_counter_after_swapping_presets" xml:space="preserve">
     <value>Reset Hook/Fish Counter After Swapping Presets</value>
   </data>
+  <data name="Retain_counters_between_sessions" xml:space="preserve">
+    <value>Retain Hook/Fish Counter Between Sessions</value>
+  </data>
+  <data name="Retain_counters_between_sessions_HelpText" xml:space="preserve">
+    <value>Persist preset fish counts and session fish counts when you stop fishing. Intended for multi-window fish</value>
+  </data>
   <data name="Reset_fish_caught_counter" xml:space="preserve">
     <value>Reset Fish Caught Counter</value>
   </data>

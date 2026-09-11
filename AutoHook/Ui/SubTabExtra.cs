@@ -78,6 +78,7 @@ public class SubTabExtra {
             DrawUtil.SpacingSeparator();
 
             DrawUtil.Checkbox(UIStrings.Reset_counter_after_swapping_presets, ref config.ResetCounterPresetSwap);
+            DrawUtil.Checkbox(UIStrings.Retain_counters_between_sessions, ref config.RetainCountersBetweenSessions, UIStrings.Retain_counters_between_sessions_HelpText);
         }
     }
 
