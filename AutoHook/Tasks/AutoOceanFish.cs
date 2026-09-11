@@ -11,7 +11,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
     internal static readonly FishingSpotRegion[] ValidFishingRegions = [
         new("Left A", 7f, 7.25f, 6.711f, -12f, -4f),
         new("Left B", 7f, 7.25f, 6.711f, -2f, 3f),
-        new("Right", -7.25f, -7f, 6.711f, -12f, 3.5f),
+        new("Right", -7.25f, -7f, 6.711f, -11f, 3.5f),
     ];
 
     protected override async Task Execute() {
