@@ -46,7 +46,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
         using var scope = BeginScope(nameof(WalkToRailing));
         var position = GetFishingPosition();
         var rotation = position.X > 0 ? 1.5f : -1.5f;
-        await MoveToDirectly(position, () => Svc.Objects.LocalPlayer.WithinRange(position, 0.25f) || IsZoneStarted());
+        await MoveToDirectly(position, 0.25f);
         unsafe {
             Svc.Objects.LocalPlayer?.Character->SetRotation(rotation);
         }
@@ -58,7 +58,6 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
     private async Task AvoidStacking(float rotation, int maxAttempts = 3) {
         using var scope = BeginScope(nameof(AvoidStacking));
         for (var attempt = 0; attempt < maxAttempts; attempt++) {
-            if (IsZoneStarted()) return;
             var blockers = Svc.Objects.OfType<IPlayerCharacter>().Where(x => x.EntityId != Player.Object?.GameObjectId).Where(x => Vector3.Distance(Player.Position, x.Position) < MinFishingSpotDistance).ToList();
             if (blockers.Count == 0) return;
 
@@ -70,7 +69,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
             var step = Player.Position + Vector3.Normalize(away) * NudgeStepDistance;
             ClampToValidFishingRegions(ref step, onLeft);
 
-            await MoveToDirectly(step, () => Svc.Objects.LocalPlayer.WithinRange(step, 0.1f) || IsZoneStarted());
+            await MoveToDirectly(step, 0.1f);
             unsafe {
                 Svc.Objects.LocalPlayer?.Character->SetRotation(rotation);
             }
