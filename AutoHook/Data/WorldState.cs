@@ -12,6 +12,7 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
     public readonly PlayerInfo Player = new();
     public readonly PartyState Party = new();
     public readonly FishingInfo Fishing = new();
+    public readonly SpearfishingInfo Spearfishing = new();
     public readonly OceanFishInfo Ocean = new();
     public readonly WKSInfo WKS = new();
 
@@ -134,6 +135,8 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
         foreach (var o in Player.CompareToInitial())
             yield return o;
         foreach (var o in Fishing.CompareToInitial())
+            yield return o;
+        foreach (var o in Spearfishing.CompareToInitial())
             yield return o;
         foreach (var o in Ocean.CompareToInitial())
             yield return o;

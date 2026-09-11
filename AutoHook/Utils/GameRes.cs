@@ -18,8 +18,13 @@ public static class GameRes {
     public static List<BaitFishClass> MoochableFish { get; private set; } = [];
     public static List<ImportedFish> ImportedFishes { get; private set; } = [];
     public static List<ImportedFish> SpearfishFishes { get; private set; } = [];
+    public static HashSet<uint> SpearfishItemIds { get; private set; } = [];
+    public static IReadOnlyDictionary<uint, SpearfishingSpotRef> SpearfishingSpotsByPointId { get; private set; }
+        = new Dictionary<uint, SpearfishingSpotRef>();
     public static List<uint> FishingStatuses { get; private set; } = [];
     public static FishSolverBridge FishSolver { get; private set; } = new();
+
+    public readonly record struct SpearfishingSpotRef(uint GatheringPointId, uint GatheringPointBaseId, uint NotebookId, bool IsShadowNode);
 
     public static void Initialize() {
         FishingStatuses = [.. typeof(IDs.Status).GetFields(BindingFlags.Public | BindingFlags.Static)
@@ -59,10 +64,32 @@ public static class GameRes {
                         Speed = match.Speed,
                     })
             ];
+            SpearfishItemIds = SpearfishFishes.Select(f => (uint)f.ItemId).ToHashSet();
+            SpearfishingSpotsByPointId = BuildSpearfishingSpotMap();
         }
         catch (Exception e) {
             ImGui.SetClipboardText(e.Message);
             Svc.Log.Error(e, "[GameRes] Init failed.");
         }
+    }
+
+    private static Dictionary<uint, SpearfishingSpotRef> BuildSpearfishingSpotMap() {
+        var notebookByBase = new Dictionary<uint, SpearfishingNotebook>();
+        foreach (var notebook in Svc.Data.GetExcelSheet<SpearfishingNotebook>()) {
+            var baseId = notebook.GatheringPointBase.RowId;
+            if (baseId == 0)
+                continue;
+            notebookByBase.TryAdd(baseId, notebook);
+        }
+
+        var map = new Dictionary<uint, SpearfishingSpotRef>();
+        foreach (var point in Svc.Data.GetExcelSheet<GatheringPoint>()) {
+            var baseId = point.GatheringPointBase.RowId;
+            if (baseId == 0 || !notebookByBase.TryGetValue(baseId, out var notebook))
+                continue;
+            map[point.RowId] = new SpearfishingSpotRef(point.RowId, baseId, notebook.RowId, notebook.IsShadowNode);
+        }
+
+        return map;
     }
 }

@@ -5,6 +5,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using Lumina.Excel.Sheets;
 using System.Numerics;
 using System.Reflection;
@@ -123,6 +124,44 @@ public class TabDebug : BaseTab {
                 }
             }
 
+            if (ImGui.CollapsingHeader("Spearfishing")) {
+                using (ImRaii.PushIndent()) {
+                    var sf = ws.Spearfishing;
+                    var spotName = sf.Spot.NotebookId != 0 && SpearfishingNotebook.TryGetRow(sf.Spot.NotebookId, out var notebook) ? notebook.PlaceName.Value.Name.ToString() : "-";
+                    DrawKvTable("ws_spearfishing", [
+                        ("Window open", sf.WindowOpen.ToString()),
+                        ("Session active", sf.SessionActive.ToString()),
+                        ("Wariness", sf.WindowOpen || sf.Wariness != 0 ? $"{sf.Wariness} / {sf.WarinessMax}" : "-"),
+                        ("Spot", sf.Spot.IsEmpty ? "-" : $"{spotName} (point {sf.Spot.GatheringPointId}, base {sf.Spot.GatheringPointBaseId}, nb {sf.Spot.NotebookId})"),
+                        ("Shadow node", sf.Spot.IsShadowNode.ToString()),
+                        ("Lane 0", FormatFishInfo(sf.Lane0)),
+                        ("Lane 1", FormatFishInfo(sf.Lane1)),
+                        ("Lane 2", FormatFishInfo(sf.Lane2)),
+                        ("Last catch", sf.LastCatchFishId == 0 ? "-" : $"{Item.GetRow(sf.LastCatchFishId).Name} ×{sf.LastCatchAmount}"),
+                    ]);
+
+                    if (sf.FishCaughtCounts.Count > 0) {
+                        ImGui.Spacing();
+                        ImGui.Text("Session spear catches");
+                        using var table = ImRaii.Table("ws_spear_counts", 2,
+                            ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY,
+                            new Vector2(0, 100.Scaled()));
+                        if (table) {
+                            ImGui.TableSetupColumn("Fish");
+                            ImGui.TableSetupColumn("Count", ImGuiTableColumnFlags.WidthFixed, 50.Scaled());
+                            ImGui.TableHeadersRow();
+                            foreach (var (fishId, count) in sf.FishCaughtCounts.OrderByDescending(p => p.Value)) {
+                                ImGui.TableNextRow();
+                                ImGui.TableNextColumn();
+                                ImGui.Text(Item.GetRow(fishId).Name.ToString());
+                                ImGui.TableNextColumn();
+                                ImGui.Text(count.ToString());
+                            }
+                        }
+                    }
+                }
+            }
+
             if (ImGui.CollapsingHeader("Ocean fishing")) {
                 using (ImRaii.PushIndent()) {
                     var of = ws.OceanFishing;
@@ -218,6 +257,11 @@ public class TabDebug : BaseTab {
             ImGui.Text(dur);
         }
     }
+
+    private static string FormatFishInfo(AddonSpearFishing.FishInfo fish)
+        => !fish.Available
+            ? "—"
+            : $"Size={fish.Size}, Speed={fish.Speed}, Dir={(fish.InverseDirection ? "L←R" : "L→R")}{(fish.GuaranteedLarge ? ", Large*" : "")}";
 
     private static void DrawFishCaughtData(FishingInfo f) {
         if (f.FishCaughtCounts.Count > 0) {

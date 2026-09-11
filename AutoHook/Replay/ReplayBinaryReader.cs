@@ -4,6 +4,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using FFXIVClientStructs.FFXIV.Client.UI;
 
 namespace AutoHook.Replay;
 
@@ -87,6 +88,14 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
             "OCNF" => ParseOcean(),
             "SPTM" => new OceanFishInfo.OpSpectralTimer(new OceanSpectralTimerInfo(_reader.ReadSingle(), _reader.ReadBoolean(), _reader.ReadSingle())),
             "WKST" => ParseWks(),
+            "SPFN" => new SpearfishingInfo.OpHud(_reader.ReadBoolean(), _reader.ReadInt32(), _reader.ReadInt32()),
+            "SPSA" => new SpearfishingInfo.OpSessionActive(_reader.ReadBoolean()),
+            "SPST" => new SpearfishingInfo.OpSpot(new SpearfishingSpotState(_reader.ReadUInt32(), _reader.ReadUInt32(), _reader.ReadUInt32(), _reader.ReadBoolean())),
+            "SPFL" => ParseSpearfishingFishLanes(),
+            "SPFC" => new SpearfishingInfo.OpAddFishCaught(_reader.ReadUInt32(), _reader.ReadByte()),
+            "SPLC" => new SpearfishingInfo.OpSetLastCatch(_reader.ReadUInt32(), _reader.ReadByte()),
+            "SPRS" => new SpearfishingInfo.OpResetFishCaught(),
+            "SPES" => new SpearfishingInfo.OpEndSession(),
             "DECN" => ParseDecision(),
             "FBGN" => new WorldState.OpBeganSession(),
             "FEND" => new WorldState.OpEndedSession(),
@@ -227,6 +236,18 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
             ids.Add(_reader.ReadUInt32());
         return new FishingInfo.OpSwimbaitIds(ids);
     }
+
+    private SpearfishingInfo.OpFishLanes ParseSpearfishingFishLanes()
+        => new(ParseSpearfishingFishLane(), ParseSpearfishingFishLane(), ParseSpearfishingFishLane());
+
+    private AddonSpearFishing.FishInfo ParseSpearfishingFishLane()
+        => new() {
+            Available = _reader.ReadBoolean(),
+            InverseDirection = _reader.ReadBoolean(),
+            GuaranteedLarge = _reader.ReadBoolean(),
+            Size = (SpearfishSize)_reader.ReadSByte(),
+            Speed = _reader.ReadInt16(),
+        };
 
     private FishingInfo.OpSetLastLureCastBiteTime ParseLastLureCastBiteTime() {
         var has = _reader.ReadBoolean();
