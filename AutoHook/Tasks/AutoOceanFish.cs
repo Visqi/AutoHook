@@ -16,7 +16,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
         new("Right", -7.25f, -7f, 6.711f, -11f, 3.5f),
     ];
 
-    private bool IsZoneStarted() => Service.WorldState.OceanFishing.TimeLeftInZone != Service.WorldState.OceanFishing.ZoneTimeMax || Service.WorldState.OceanFishing.Status is InstanceContentOceanFishing.OceanFishingStatus.Fishing;
+    private bool IsZoneStarted() => Service.WorldState.OceanFishing.Status is InstanceContentOceanFishing.OceanFishingStatus.Fishing;
 
     protected override async Task Execute() {
         using var scope = BeginScope(nameof(AutoOceanFish));
