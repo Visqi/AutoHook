@@ -417,11 +417,14 @@ public sealed class WorldStateUpdater : IDisposable {
         }
 
         var sf = ws.Spearfishing;
+        var wasWindowOpen = sf.WindowOpen;
         if (sf.WindowOpen != windowOpen || sf.Wariness != wariness || sf.WarinessMax != warinessMax)
             ws.Execute(new SpearfishingInfo.OpHud(windowOpen, wariness, warinessMax));
 
         if (windowOpen && !sf.SessionActive)
             ws.Execute(new SpearfishingInfo.OpSessionActive(true));
+        else if (wasWindowOpen && !windowOpen && sf.SessionActive)
+            ws.Execute(new SpearfishingInfo.OpEndSession());
 
         if (windowOpen) {
             var spot = ResolveCurrentSpearfishingSpot();

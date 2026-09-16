@@ -8,7 +8,8 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class WeatherCD : SnapshottableConditionDefinition {
     public override string Id => nameof(WeatherCD);
     public override string Name => "Weather";
-    public override ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
+    public override ConditionScopeFlags AllowedScopes
+        => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast | ConditionScopeFlags.Spearfishing;
 
     protected override bool EvaluateLive(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         var ids = GetWeatherIds(parameters);
@@ -102,13 +103,7 @@ public sealed class WeatherCD : SnapshottableConditionDefinition {
         var unique = Weather.Select(row => (Name: row.Name.ToString(), Id: (byte)row.RowId)).Where(x => !string.IsNullOrEmpty(x.Name)).DistinctBy(x => x.Name).ToDictionary(x => x.Name, x => x.Id);
         var weathers = unique.OrderBy(k => k.Key).Select(k => (Id: k.Value, Name: k.Key)).ToList();
         var label = currentId != 0 && Weather.TryGetRow(currentId, out var currentRow) ? currentRow.Name.ToString() : "Any weather";
-        DrawUtil.DrawComboSelector(
-            weathers,
-            w => w.Name,
-            label,
-            w => {
-                condition.Params["ids"] = new List<object> { (long)w.Id };
-            });
+        DrawUtil.DrawComboSelector(weathers, w => w.Name, label, w => { condition.Params["ids"] = new List<object> { (long)w.Id }; });
     }
 
     public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)

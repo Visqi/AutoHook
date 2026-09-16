@@ -8,11 +8,15 @@ public sealed class AutoCollect : BaseActionCast {
     [DefaultValue(true)]
     public override bool IsExcludedPriority { get; set; } = true;
 
-    public AutoCollect() : base(IDs.Actions.Collect) { }
+    public AutoCollect(bool isSpearfishing = false) : base(IDs.Actions.Collect) => IsSpearFishing = isSpearfishing;
 
     public override string GetName() => UIStrings.Collect;
 
     public override string GetHelpText() => UIStrings.CollectHelpText;
+    public override bool ShowGpThreshold => false;
 
-    public override bool CastCondition() => !Service.WorldState.Player.HasStatus(IDs.Status.CollectorsGlove);
+    public override bool CastCondition()
+        => EvaluateConditionSet() && !Service.WorldState.Player.HasStatus(IDs.Status.CollectorsGlove);
+
+    protected override DrawOptionsDelegate DrawOptions => () => DrawAutoCastConditions();
 }

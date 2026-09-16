@@ -1,4 +1,6 @@
 using Newtonsoft.Json;
+using AutoHook.Conditions;
+using System.Runtime.Serialization;
 
 namespace AutoHook.Spearfishing;
 
@@ -11,13 +13,26 @@ public class SpearFishingPresets : BasePreset {
     public bool AutoGigDrawGigHitbox = true;
 
     public AutoThaliaksFavor ThaliaksFavor = new(true);
+    public AutoCordial Cordial = new(true);
 
     public bool CatchAll = false;
-    public bool CatchAllNaturesBounty = false;
-
-    public bool NatureBountyBeforeFish = false;
+    public ConditionSet? CatchAllConditionSet { get; set; }
+    public AutoNaturesBounty CatchAllNaturesBountyAction = new(true);
+    public AutoNaturesBounty NatureBountyBeforeFishAction = new(true);
 
     public List<AutoGigConfig> Presets = [];
+
+    [OnDeserialized]
+    private void OnDeserialized(StreamingContext _) => PrepareActions();
+
+    public void PrepareActions() {
+        ThaliaksFavor.IsSpearFishing = true;
+        Cordial.IsSpearFishing = true;
+        CatchAllNaturesBountyAction.IsSpearFishing = true;
+        NatureBountyBeforeFishAction.IsSpearFishing = true;
+        foreach (var preset in Presets)
+            preset.PrepareActions();
+    }
 
     [JsonIgnore] private List<BasePresetConfig>? _presetListCache;
     [JsonIgnore] private int _presetListCacheCount = -1;
@@ -41,6 +56,12 @@ public class SpearFishingPresets : BasePreset {
 
     [JsonIgnore] public override AutoGigConfig? SelectedPreset => base.SelectedPreset as AutoGigConfig;
 
+    public override void OnSelectedPreset(BasePresetConfig? newPreset, BasePresetConfig? oldPreset) {
+        if (oldPreset is AutoGigConfig old)
+            old.ResetCounter();
+        base.OnSelectedPreset(newPreset, oldPreset);
+    }
+
     public override void AddNewPreset(string presetName) {
         var newPreset = new AutoGigConfig(presetName);
         Presets.Add(newPreset);
@@ -53,6 +74,7 @@ public class SpearFishingPresets : BasePreset {
         var json = JsonConvert.SerializeObject(preset);
         var copy = JsonConvert.DeserializeObject<AutoGigConfig>(json);
         copy!.UniqueId = Guid.NewGuid();
+        copy.RegenerateNestedUniqueIds();
         Presets.Add(copy);
         InvalidatePresetListCache();
         SelectedGuid = copy.UniqueId.ToString();

@@ -246,6 +246,9 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
         public override void Write(Replay.ReplayOutput output) => output.EmitFourCC("FEND");
     }
 
+    public Event<SpearfishingInfo.OpSessionActive> SpearfishingSessionStarted = new();
+    public Event<SpearfishingInfo.OpEndSession> SpearfishingSessionEnded = new();
+
     public Event<OpOceanZoneStarted> OceanZoneStarted = new();
     public sealed record OpOceanZoneStarted(uint ZoneIndex) : Operation {
         protected override void Exec(WorldState ws) => ws.OceanZoneStarted.Fire(this);

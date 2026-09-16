@@ -17,7 +17,7 @@ public abstract class BaseActionCast {
 
         ActionType = actionType;
 
-        if (actionType == ActionType.Action && id != IDs.Actions.ThaliaksFavor)
+        if (actionType == ActionType.Action && id is not IDs.Actions.ThaliaksFavor and not IDs.Actions.NaturesBounty and not IDs.Actions.Collect)
             GpThreshold = (int)PlayerRes.CastActionCost(Id, ActionType);
     }
 
@@ -42,6 +42,7 @@ public abstract class BaseActionCast {
     public virtual bool RequiresTimeWindow() => false;
 
     public virtual bool RestoresGp => false;
+    public virtual bool ShowGpThreshold => true;
 
     public virtual int Priority { get; set; }
 
@@ -53,7 +54,7 @@ public abstract class BaseActionCast {
         => ConditionSet.PassesOrUnconfigured();
 
     protected void DrawAutoCastConditions(bool showSubPrefix = true)
-        => ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, ConditionScope.AutoCast, showAdvanced: true, showSubPrefix: showSubPrefix);
+        => ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, IsSpearFishing ? ConditionScope.Spearfishing : ConditionScope.AutoCast, showAdvanced: true, showSubPrefix: showSubPrefix);
 
     public void DrawFishCaughtActionOptions()
         => DrawAutoCastConditions(showSubPrefix: false);
@@ -143,8 +144,10 @@ public abstract class BaseActionCast {
 
             var x = ImGui.GetCursorPosX();
             if (ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.FramePadding)) {
-                ImGui.SameLine(200.Scaled());
-                DrawGpThreshold();
+                if (ShowGpThreshold) {
+                    ImGui.SameLine();
+                    DrawGpThreshold();
+                }
                 DrawUpDownArrows(availableActs);
                 ImGui.SetCursorPosX(x);
                 using (ImRaii.Group()) {
@@ -154,8 +157,10 @@ public abstract class BaseActionCast {
                 ImGui.TreePop();
             }
             else {
-                ImGui.SameLine(200.Scaled());
-                DrawGpThreshold();
+                if (ShowGpThreshold) {
+                    ImGui.SameLine();
+                    DrawGpThreshold();
+                }
                 DrawUpDownArrows(availableActs);
             }
         }
@@ -165,8 +170,10 @@ public abstract class BaseActionCast {
 
             ImGui.SameLine(0, 28.Scaled());
             ImGui.Text(label);
-            ImGui.SameLine(200.Scaled());
-            DrawGpThreshold();
+            if (ShowGpThreshold) {
+                ImGui.SameLine();
+                DrawGpThreshold();
+            }
             DrawUpDownArrows(availableActs);
         }
     }

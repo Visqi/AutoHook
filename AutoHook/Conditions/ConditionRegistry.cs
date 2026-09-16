@@ -54,5 +54,6 @@ public enum ConditionScopeFlags {
     AutoCordial = 1 << 1,
     FishIgnore = 1 << 2,
     AutoCast = 1 << 3,
-    All = Hook | AutoCordial | FishIgnore | AutoCast,
+    Spearfishing = 1 << 4,
+    All = Hook | AutoCordial | FishIgnore | AutoCast | Spearfishing,
 }

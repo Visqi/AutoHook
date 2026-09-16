@@ -6,7 +6,8 @@ namespace AutoHook.Conditions.Definitions;
 public sealed class LastActionUsedCD : IConditionDefinition {
     public string Id => nameof(LastActionUsedCD);
     public string Name => "Last action used";
-    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
+    public ConditionScopeFlags AllowedScopes
+        => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast | ConditionScopeFlags.Spearfishing;
 
     private readonly record struct LastActionUsedParams(uint Id, bool Invert) {
         public bool Apply(bool result) => Invert ? !result : result;

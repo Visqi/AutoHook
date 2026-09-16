@@ -11,7 +11,7 @@ namespace AutoHook.Configurations;
 
 [Serializable]
 public partial class Configuration : IPluginConfiguration {
-    public const int LatestVersion = 9;
+    public const int LatestVersion = 10;
 
     public int Version { get; set; } = LatestVersion;
     public string CurrentLanguage { get; set; } = @"en";
@@ -118,6 +118,7 @@ public partial class Configuration : IPluginConfiguration {
     [
         new(1, "AHSF1_"),
         new(2, "AHSF2_", UseBrotli: true),
+        new(3, "AHSF3_", UseBrotli: true),
     ];
 
     public static ExportSchema LatestFishingPresetSchema => FishingPresetSchemas[^1];
@@ -314,8 +315,12 @@ public partial class Configuration : IPluginConfiguration {
             return old == null ? null : LegacyPresetMapper.ConvertOldPresetV3(old);
         }
 
-        if (TryGetSpearfishingSchema(import, out _))
-            return DeserializePresetImport<AutoGigConfig>(json);
+        if (TryGetSpearfishingSchema(import, out var spearSchema)) {
+            json = ConfigurationJsonMigrator.MigrateImportedSpearfishingPreset(json, spearSchema.Version);
+            var preset = DeserializePresetImport<AutoGigConfig>(json);
+            preset?.RegenerateNestedUniqueIds();
+            return preset;
+        }
 
         if (!TryGetFishingPresetSchema(import, out var schema))
             return null;
@@ -327,9 +332,7 @@ public partial class Configuration : IPluginConfiguration {
     public static string CompressString(string s, bool useBrotli = false) {
         var bytes = Encoding.UTF8.GetBytes(s);
         using var ms = new MemoryStream();
-        using (Stream compressor = useBrotli
-                   ? new BrotliStream(ms, CompressionLevel.SmallestSize)
-                   : new GZipStream(ms, CompressionMode.Compress))
+        using (Stream compressor = useBrotli ? new BrotliStream(ms, CompressionLevel.SmallestSize) : new GZipStream(ms, CompressionMode.Compress))
             compressor.Write(bytes, 0, bytes.Length);
 
         return Convert.ToBase64String(ms.ToArray());

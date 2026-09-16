@@ -1,4 +1,3 @@
-using FFXIVClientStructs.FFXIV.Client.UI;
 using FishInfo = FFXIVClientStructs.FFXIV.Client.UI.AddonSpearFishing.FishInfo;
 
 namespace AutoHook.Data;
@@ -42,8 +41,14 @@ public sealed class SpearfishingInfo {
         if (Lane0.Available || Lane1.Available || Lane2.Available)
             yield return new OpFishLanes(Lane0, Lane1, Lane2);
         foreach (var (fishId, count) in FishCaughtCounts) {
-            if (fishId > 0 && count > 0 && count <= byte.MaxValue)
-                yield return new OpAddFishCaught(fishId, (byte)count);
+            if (fishId == 0 || count <= 0)
+                continue;
+            var remaining = count;
+            while (remaining > 0) {
+                var amount = (byte)Math.Min(remaining, byte.MaxValue);
+                yield return new OpAddFishCaught(fishId, amount);
+                remaining -= amount;
+            }
         }
         if (LastCatchFishId > 0 && LastCatchAmount > 0)
             yield return new OpSetLastCatch(LastCatchFishId, LastCatchAmount);
@@ -64,7 +69,12 @@ public sealed class SpearfishingInfo {
     }
 
     public sealed record OpSessionActive(bool Active) : WorldState.Operation {
-        protected override void Exec(WorldState ws) => ws.Spearfishing.SessionActive = Active;
+        protected override void Exec(WorldState ws) {
+            var wasActive = ws.Spearfishing.SessionActive;
+            ws.Spearfishing.SessionActive = Active;
+            if (Active && !wasActive)
+                ws.SpearfishingSessionStarted.Fire(this);
+        }
 
         public override void Write(Replay.ReplayOutput output)
             => output.EmitFourCC("SPSA").Emit(Active);
@@ -147,9 +157,9 @@ public sealed class SpearfishingInfo {
             sf.Lane0 = default;
             sf.Lane1 = default;
             sf.Lane2 = default;
-            sf.FishCaughtCounts.Clear();
             sf.LastCatchFishId = 0;
             sf.LastCatchAmount = 0;
+            ws.SpearfishingSessionEnded.Fire(this);
         }
 
         public override void Write(Replay.ReplayOutput output) => output.EmitFourCC("SPES");

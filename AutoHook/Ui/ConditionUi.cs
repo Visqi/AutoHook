@@ -16,6 +16,7 @@ public enum ConditionScope {
     AutoCordial,
     FishIgnore,
     AutoCast,
+    Spearfishing,
     PresetDefinition,
 }
 
@@ -371,12 +372,11 @@ public static class ConditionUi {
             ConditionScope.AutoCordial => ConditionScopeFlags.AutoCordial,
             ConditionScope.FishIgnore => ConditionScopeFlags.FishIgnore,
             ConditionScope.AutoCast => ConditionScopeFlags.AutoCast,
+            ConditionScope.Spearfishing => ConditionScopeFlags.Spearfishing,
             ConditionScope.PresetDefinition => ConditionScopeFlags.All,
             _ => ConditionScopeFlags.All,
         };
-        cached = scope == ConditionScope.PresetDefinition
-            ? [.. all]
-            : [.. all.Where(d => (d.AllowedScopes & flag) != 0)];
+        cached = scope == ConditionScope.PresetDefinition ? [.. all] : [.. all.Where(d => (d.AllowedScopes & flag) != 0)];
         ScopedTypesCache[scope] = cached;
         return cached;
     }

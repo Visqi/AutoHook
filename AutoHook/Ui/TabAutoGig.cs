@@ -1,5 +1,6 @@
 using AutoHook.Spearfishing;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Common.Math;
@@ -30,21 +31,20 @@ internal class TabAutoGig : BaseTab {
 
             DrawUtil.Checkbox(UIStrings.DrawGigHitbox, ref _gigCfg.AutoGigDrawGigHitbox);
 
-            //_gigCfg.Cordial.DrawConfig();
-            _gigCfg.ThaliaksFavor.DrawConfig();
+            DrawUtil.DrawTreeNodeEx("Automatic actions", () => {
+                var actionX = ImGui.GetCursorPosX();
+                ImGui.SetCursorPosX(actionX);
+                _gigCfg.ThaliaksFavor.DrawConfig();
+                ImGui.SetCursorPosX(actionX);
+                _gigCfg.Cordial.DrawConfigWithLabel("Cordials");
+                ImGui.SetCursorPosX(actionX);
+                _gigCfg.NatureBountyBeforeFishAction.DrawConfigWithLabel(UIStrings.NBBeforeFish);
+            });
 
-            DrawUtil.Checkbox(UIStrings.CatchEverything, ref _gigCfg.CatchAll, UIStrings.IgnoresPresets);
-
-            if (_gigCfg.CatchAll) {
-                ImGui.Text($" └");
-                ImGui.SameLine();
-                DrawUtil.Checkbox(UIStrings.Use_Natures_Bounty, ref _gigCfg.CatchAllNaturesBounty,
-                    UIStrings.CatchAllNaturesBountyHelpText);
-            }
-
-            DrawUtil.Checkbox(UIStrings.NBBeforeFish, ref _gigCfg.NatureBountyBeforeFish, UIStrings.NBBeforeFishHelpText);
-
-            ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.AutoCordialPandoras);
+            DrawUtil.DrawCheckboxTree(UIStrings.CatchEverything, ref _gigCfg.CatchAll, () => {
+                _gigCfg.CatchAllConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, _gigCfg.CatchAllConditionSet, ConditionScope.Spearfishing, showAdvanced: true);
+                _gigCfg.CatchAllNaturesBountyAction.DrawConfigWithLabel("Use Nature's Bounty for every fish");
+            }, UIStrings.IgnoresPresets);
         });
 
         ImGui.Spacing();
@@ -59,11 +59,21 @@ internal class TabAutoGig : BaseTab {
                 ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.CatchAllNotice);
             }
 
-            // add new gig button
-            if (ImGui.Button(UIStrings.Add_new_fish)) {
-                selectedPreset.AddItem(new BaseGig(0));
-                Service.Save();
+            var poolIds = new List<uint> { 0 };
+            poolIds.AddRange(GameRes.SpearfishingPoolsByNotebookId.Keys.Where(id => id != 0).OrderBy(AutoGigConfig.GetPoolName));
+            DrawUtil.DrawComboSelector(poolIds, AutoGigConfig.GetPoolName, AutoGigConfig.GetPoolName(selectedPreset.SelectedAddPoolId), id => selectedPreset.SelectedAddPoolId = id);
+            ImGui.SameLine();
+
+            var poolAlreadyAdded = selectedPreset.Gigs.Any(gig => gig.SpearfishingNotebookId == selectedPreset.SelectedAddPoolId);
+            using (ImRaii.Disabled(poolAlreadyAdded)) {
+                if (ImGui.SmallIconButton(FontAwesomeIcon.Plus)) {
+                    selectedPreset.AddItem(new BaseGig(0) {
+                        SpearfishingNotebookId = selectedPreset.SelectedAddPoolId,
+                    });
+                    Service.Save();
+                }
             }
+            DrawUtil.HoveredTooltip("Add pool");
 
             ImGui.SameLine();
 
@@ -73,7 +83,18 @@ internal class TabAutoGig : BaseTab {
                 Service.Save();
             }
 
-            DrawUtil.Checkbox(UIStrings.Collect, ref selectedPreset.KeepCollectorsGloveOn, UIStrings.CollectHelpText);
+            DrawUtil.DrawTreeNodeEx("Preset actions", () => {
+                var actionX = ImGui.GetCursorPosX();
+                ImGui.SetCursorPosX(actionX);
+                selectedPreset.Collect.DrawConfig();
+                ImGui.SetCursorPosX(actionX);
+                selectedPreset.ThaliaksFavor.DrawConfig();
+                ImGui.SetCursorPosX(actionX);
+                selectedPreset.Cordial.DrawConfigWithLabel("Cordials");
+            });
+            DrawUtil.Checkbox("Retain counters between pools", ref selectedPreset.RetainCountersBetweenSessions);
+            if (ImGui.Button("Reset caught counters"))
+                selectedPreset.ResetCounter();
 
             DrawUtil.SpacingSeparator();
 

@@ -248,8 +248,12 @@ public partial class FishingManager : IDisposable {
         => !selected.Enabled ? 0 : selected.GetHookset().GetEffectiveTimeoutMax(Ws.Player.HasStatus(IDs.Status.Chum));
 
     private void OnFrameworkUpdate(IFramework _) {
-        if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null)
+        if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null) {
+            var sf = Ws.Spearfishing;
+            if (sf.SessionActive || sf.WindowOpen || !sf.Spot.IsEmpty || sf.Wariness != 0)
+                Ws.Execute(new SpearfishingInfo.OpEndSession());
             return;
+        }
 
         Service.WorldStateUpdater.Update();
 
@@ -325,7 +329,9 @@ public partial class FishingManager : IDisposable {
     private void ClearWorldState() {
         var f = Ws.Fishing;
         var sf = Ws.Spearfishing;
-        if (!Ws.Player.BlockCasting && f.FishingState == FishingState.None && f.FishingStep == FishingSteps.None && f.PreviousFishingState == FishingState.None && !sf.SessionActive && !sf.WindowOpen && sf.FishCaughtCounts.Count == 0)
+        if (!Ws.Player.BlockCasting && f.FishingState == FishingState.None && f.FishingStep == FishingSteps.None &&
+            f.PreviousFishingState == FishingState.None && !sf.SessionActive && !sf.WindowOpen &&
+            sf.Spot.IsEmpty && sf.Wariness == 0)
             return;
 
         Ws.Execute(new WorldState.OpSetBlockCasting(false));
@@ -333,7 +339,7 @@ public partial class FishingManager : IDisposable {
         Ws.Execute(new FishingInfo.OpSetPreviousFishingState(FishingState.None));
         Ws.Execute(new FishingInfo.OpFishingState(FishingState.None, new BaitInfo(0, null, 0, false)));
 
-        if (sf.SessionActive || sf.WindowOpen || !sf.Spot.IsEmpty || sf.FishCaughtCounts.Count > 0 || sf.Wariness != 0)
+        if (sf.SessionActive || sf.WindowOpen || !sf.Spot.IsEmpty || sf.Wariness != 0)
             Ws.Execute(new SpearfishingInfo.OpEndSession());
     }
 
