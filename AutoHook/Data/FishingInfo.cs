@@ -127,11 +127,8 @@ public sealed class FishingInfo {
 
     public sealed record OpFishingState(FishingState State, BaitInfo Bait) : WorldState.Operation {
         protected override void Exec(WorldState ws) {
-            var prevState = ws.Fishing.FishingState;
             ws.Fishing.FishingState = State;
             ws.Fishing.BaitInfo = Bait;
-            if (prevState == FishingState.LineInWater && State != FishingState.LineInWater)
-                ws.Fishing.CastSnapshot.Invalidate();
         }
 
         public override void Write(Replay.ReplayOutput output)
@@ -312,5 +309,12 @@ public sealed class FishingInfo {
 
         public override void Write(Replay.ReplayOutput output)
             => output.EmitFourCC("CSNP").Emit((byte)PreviousState);
+    }
+
+    public sealed record OpInvalidateCastSnapshot() : WorldState.Operation {
+        protected override void Exec(WorldState ws) => ws.Fishing.CastSnapshot.Invalidate();
+
+        public override void Write(Replay.ReplayOutput output)
+            => output.EmitFourCC("CSNI");
     }
 }

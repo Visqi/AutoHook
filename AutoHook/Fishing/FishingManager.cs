@@ -427,16 +427,21 @@ public partial class FishingManager : IDisposable {
     }
 
     private void OnBite() {
-        UpdateStatusAndTimer();
-        var currentHook = GetHookCfg();
-        DecisionLog.Start("Hook Preset")
-            .Chose(currentHook.Enabled ? "Enabled preset on bite" : "No enabled preset on bite");
-        _fishingTimer.Stop();
+        try {
+            UpdateStatusAndTimer();
+            var currentHook = GetHookCfg();
+            DecisionLog.Start("Hook Preset")
+                .Chose(currentHook.Enabled ? "Enabled preset on bite" : "No enabled preset on bite");
+            _fishingTimer.Stop();
 
-        if (Ws.Player.HasStatus(IDs.Status.Salvage) && GetAutoCastCfg().ChumAnimationCancel)
-            PlayerRes.CastAction(IDs.Actions.Salvage);
+            if (Ws.Player.HasStatus(IDs.Status.Salvage) && GetAutoCastCfg().ChumAnimationCancel)
+                PlayerRes.CastAction(IDs.Actions.Salvage);
 
-        HookFish(Ws.Fishing.BiteInfo.TugType.ToBiteType(), currentHook);
+            HookFish(Ws.Fishing.BiteInfo.TugType.ToBiteType(), currentHook);
+        }
+        finally {
+            Ws.Execute(new FishingInfo.OpInvalidateCastSnapshot());
+        }
     }
 
     private void HookFish(BiteType bite, HookConfig currentHook) {

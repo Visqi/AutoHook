@@ -85,6 +85,7 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
             "FHND" => ParseFishingHandler(),
             "SWIM" => ParseSwimbait(),
             "CSNP" => new FishingInfo.OpUpdateCastSnapshot((FishingState)_reader.ReadByte()),
+            "CSNI" => new FishingInfo.OpInvalidateCastSnapshot(),
             "OCNF" => ParseOcean(),
             "SPTM" => new OceanFishInfo.OpSpectralTimer(new OceanSpectralTimerInfo(_reader.ReadSingle(), _reader.ReadBoolean(), _reader.ReadSingle())),
             "WKST" => ParseWks(),

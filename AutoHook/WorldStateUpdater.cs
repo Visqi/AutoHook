@@ -153,13 +153,14 @@ public sealed class WorldStateUpdater : IDisposable {
         UpdateSpearfishing(ws);
 
         var fishingState = ws.Fishing.FishingState;
-        if (CastSnapshotTransition(previousFishingState, fishingState))
+        if (ShouldCaptureCastSnapshot(previousFishingState, fishingState))
             ws.Execute(new FishingInfo.OpUpdateCastSnapshot(previousFishingState));
+        else if (ws.Fishing.CastSnapshot.Active && fishingState is not FishingState.LineInWater and not FishingState.Bite)
+            ws.Execute(new FishingInfo.OpInvalidateCastSnapshot());
     }
 
-    private static bool CastSnapshotTransition(FishingState previous, FishingState current)
-        => previous != FishingState.LineInWater && current == FishingState.LineInWater
-           || previous == FishingState.LineInWater && current != FishingState.LineInWater;
+    private static bool ShouldCaptureCastSnapshot(FishingState previous, FishingState current)
+        => previous != FishingState.LineInWater && current == FishingState.LineInWater;
 
     public void RefreshFishingStateSnapshot() {
         if (Player.ClassJob.RowId is not 18 || Svc.Objects.LocalPlayer is null)
