@@ -374,9 +374,6 @@ public class PresetCreator {
             return;
         }
 
-        // the list is going backwards to make it easier
-        moochList.Reverse();
-
         foreach (var mooch in moochList) {
             // check if the mooch is already included in the list
             var newMooch = newPreset.ListOfMooch.FirstOrDefault(f => f.BaitFish.Id == mooch.ItemId);
@@ -397,12 +394,11 @@ public class PresetCreator {
 
             var nextFish = mooch == moochList.First() ? fishTarget : mooch == moochList.Last() ? moochList[^2] : moochList[moochList.IndexOf(mooch) - 1];
 
-            // target fish < last mooch < other mooches < first mooch < bait
-            // in other words, the bait needs to know the BiteType of the first mooch and the last mooch needs to know the bite of the target fish
-            // The list is reversed so we can setup more easily
+            // Mooches are ordered from the target backwards toward the tackle bait:
+            // target fish < first mooch < other mooches < last mooch < bait.
+            // The bait hooks the last mooch, while each mooch hooks the fish before it.
 
             // only hook the next fish BiteType
-            // REMEMBER YOU FUCK, THE NEXT FISH IS THE PREVIOUS ONE IN THE LIST
             newMooch.SetBiteAndHookType(nextFish.BiteType, nextFish.HookType, isIntuition);
 
             if (_includeTimers) {
@@ -411,7 +407,7 @@ public class PresetCreator {
 
             newPreset.ReplaceMoochConfig(newMooch);
 
-            // the last fish in the list is the first one being hooked
+            // The last fish in the list is the first one caught from the tackle bait.
             if (mooch == moochList.Last()) {
                 // that means we need to set up the bait to the this fish bite.
                 initBaitCfg.SetBiteAndHookType(mooch.BiteType, mooch.HookType, isIntuition);

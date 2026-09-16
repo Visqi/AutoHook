@@ -553,9 +553,6 @@ public static class SolverPresetBuilder {
             return;
         }
 
-        moochList = [.. moochList];
-        moochList.Reverse();
-
         foreach (var mooch in moochList) {
             var newMooch = preset.ListOfMooch.FirstOrDefault(f => f.BaitFish.Id == mooch.ItemId) ?? new HookConfig(mooch.ItemId);
             newMooch.ResetAllHooksets();
