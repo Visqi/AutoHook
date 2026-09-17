@@ -38,12 +38,12 @@ internal class TabAutoGig : BaseTab {
                 ImGui.SetCursorPosX(actionX);
                 _gigCfg.Cordial.DrawConfigWithLabel("Cordials");
                 ImGui.SetCursorPosX(actionX);
-                _gigCfg.NatureBountyBeforeFishAction.DrawConfigWithLabel(UIStrings.NBBeforeFish);
+                _gigCfg.NatureBountyBeforeFishAction.DrawConfigWithLabel(UIStrings.UseNaturesBounty);
             });
 
             DrawUtil.DrawCheckboxTree(UIStrings.CatchEverything, ref _gigCfg.CatchAll, () => {
                 _gigCfg.CatchAllConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, _gigCfg.CatchAllConditionSet, ConditionScope.Spearfishing, showAdvanced: true);
-                _gigCfg.CatchAllNaturesBountyAction.DrawConfigWithLabel("Use Nature's Bounty for every fish");
+                _gigCfg.CatchAllNaturesBountyAction.DrawConfigWithLabel(UIStrings.UseNaturesBounty);
             }, UIStrings.IgnoresPresets);
         });
 

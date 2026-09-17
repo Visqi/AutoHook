@@ -11,6 +11,8 @@ using System.Numerics;
 namespace AutoHook.Classes;
 
 public abstract class BaseActionCast {
+    private const int ActionControlColumn = 200;
+
     protected BaseActionCast(uint id, ActionType actionType = ActionType.Action) {
         Id = id;
         Enabled = false;
@@ -145,7 +147,7 @@ public abstract class BaseActionCast {
             var x = ImGui.GetCursorPosX();
             if (ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.FramePadding)) {
                 if (ShowGpThreshold) {
-                    ImGui.SameLine();
+                    ImGui.SameLine(ActionControlColumn.Scaled());
                     DrawGpThreshold();
                 }
                 DrawUpDownArrows(availableActs);
@@ -158,7 +160,7 @@ public abstract class BaseActionCast {
             }
             else {
                 if (ShowGpThreshold) {
-                    ImGui.SameLine();
+                    ImGui.SameLine(ActionControlColumn.Scaled());
                     DrawGpThreshold();
                 }
                 DrawUpDownArrows(availableActs);
@@ -171,7 +173,7 @@ public abstract class BaseActionCast {
             ImGui.SameLine(0, 28.Scaled());
             ImGui.Text(label);
             if (ShowGpThreshold) {
-                ImGui.SameLine();
+                ImGui.SameLine(ActionControlColumn.Scaled());
                 DrawGpThreshold();
             }
             DrawUpDownArrows(availableActs);
