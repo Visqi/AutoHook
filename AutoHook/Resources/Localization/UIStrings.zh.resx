@@ -604,6 +604,9 @@
   <data name="TabAutoCasts_DrawMakeShiftBait_HelpText" xml:space="preserve">
     <value>这可能与自动沙利亚克的恩宠冲突</value>
   </data>
+  <data name="TabAutoCasts_DrawExtraOptionsThaliaksFavor_" xml:space="preserve">
+    <value></value>
+  </data>
   <data name="TabAutoCasts_DrawThaliaksFavor_HelpText" xml:space="preserve">
     <value>这可能与自动熟练渔技冲突</value>
   </data>
