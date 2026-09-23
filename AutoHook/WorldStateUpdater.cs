@@ -123,9 +123,9 @@ public sealed class WorldStateUpdater : IDisposable {
         UpdateActionStates(ws);
         UpdateDutyActions(ws);
         UpdatePartyAndInstance(ws);
+        UpdateTerritory(ws);
         UpdateOceanFishing(ws);
         UpdateWKS(ws);
-        UpdateTerritory(ws);
         UpdateWeather(ws);
 
         var previousFishingState = ws.Fishing.FishingState;

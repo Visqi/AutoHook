@@ -5,10 +5,12 @@ using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
+using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using TerritoryIntendedUse = FFXIVClientStructs.FFXIV.Client.Enums.TerritoryIntendedUse;
 
 namespace AutoHook;
 
@@ -63,6 +65,7 @@ public sealed class ReplayManager : IDisposable {
     private string _fileDialogStartPath;
     private AutoGigConfig? _recordingSpearfishingPreset;
     private int _stopAfterFrames;
+    private uint _lastTerritoryId;
 
     public bool IsRecording => _recorder != null;
     public string? LastRecordedPath { get; private set; }
@@ -78,8 +81,12 @@ public sealed class ReplayManager : IDisposable {
         var ws = Service.WorldState;
         _subs = new(
             ws.BeganSession.Subscribe(_ => TryAutoStart()),
-            ws.OceanZoneStarted.Subscribe(_ => TryAutoStart()), // zone start happens before BeganSession. capture OZON / ACHP during walk to railing
-            ws.EndedSession.Subscribe(_ => TryAutoStop()),
+            ws.TerritoryChanged.Subscribe(OnTerritoryChanged),
+            ws.OceanZoneStarted.Subscribe(_ => TryAutoStart()),
+            ws.EndedSession.Subscribe(_ => {
+                if (TerritoryType.GetRow(Service.WorldState.TerritoryId).TerritoryIntendedUse.Value.StructsEnum is TerritoryIntendedUse.OceanFishing)
+                    TryAutoStop();
+            }),
             ws.SpearfishingSessionStarted.Subscribe(_ => TryAutoStart()),
             ws.SpearfishingSessionEnded.Subscribe(_ => TryAutoStop()));
 
@@ -259,6 +266,18 @@ public sealed class ReplayManager : IDisposable {
             return;
         // Session events fire before Modified enqueues their operation, so stop next frame to capture it.
         _stopAfterFrames = 1;
+    }
+
+    private void OnTerritoryChanged(WorldState.OpTerritory op) {
+        static bool IsOcean(uint territoryId) => territoryId != 0 && TerritoryType.GetRow(territoryId).TerritoryIntendedUse.Value.StructsEnum is TerritoryIntendedUse.OceanFishing;
+        var wasOcean = IsOcean(_lastTerritoryId);
+        var isOcean = IsOcean(op.TerritoryId);
+        _lastTerritoryId = op.TerritoryId;
+
+        if (isOcean)
+            TryAutoStart();
+        else if (wasOcean)
+            TryAutoStop();
     }
 
     private void PruneOldReplays() {
