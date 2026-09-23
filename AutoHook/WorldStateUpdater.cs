@@ -123,9 +123,9 @@ public sealed class WorldStateUpdater : IDisposable {
         UpdateActionStates(ws);
         UpdateDutyActions(ws);
         UpdatePartyAndInstance(ws);
+        UpdateTerritory(ws);
         UpdateOceanFishing(ws);
         UpdateWKS(ws);
-        UpdateTerritory(ws);
         UpdateWeather(ws);
 
         var previousFishingState = ws.Fishing.FishingState;
@@ -417,11 +417,14 @@ public sealed class WorldStateUpdater : IDisposable {
         }
 
         var sf = ws.Spearfishing;
+        var wasWindowOpen = sf.WindowOpen;
         if (sf.WindowOpen != windowOpen || sf.Wariness != wariness || sf.WarinessMax != warinessMax)
             ws.Execute(new SpearfishingInfo.OpHud(windowOpen, wariness, warinessMax));
 
         if (windowOpen && !sf.SessionActive)
             ws.Execute(new SpearfishingInfo.OpSessionActive(true));
+        else if (wasWindowOpen && !windowOpen && sf.SessionActive)
+            ws.Execute(new SpearfishingInfo.OpEndSession());
 
         if (windowOpen) {
             var spot = ResolveCurrentSpearfishingSpot();
@@ -529,7 +532,7 @@ public sealed class WorldStateUpdater : IDisposable {
             CurrentSpotId = routeRow.Spot[zoneIndex].RowId,
             CurrentTimeId = timeId,
             TimeLeftInZone = Math.Max(0f, EventFramework.Instance()->GetInstanceContentDirector()->ContentTimeLeft - ptr->TimeOffset),
-            ZoneTimeMax = ptr->GetContentTimeMax(),
+            ZoneTimeMax = ptr->Duration,
             Mission1 = new OceanMission(ptr->Mission1Type, ptr->Mission1Progress),
             Mission2 = new OceanMission(ptr->Mission2Type, ptr->Mission2Progress),
             Mission3 = new OceanMission(ptr->Mission3Type, ptr->Mission3Progress),

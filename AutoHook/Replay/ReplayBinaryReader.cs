@@ -119,7 +119,7 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
     }
 
     private WorldState.Operation? ParseVer() {
-        _ = _reader.ReadInt32();
+        replay.FormatVersion = _reader.ReadInt32();
         replay.QPF = _reader.ReadUInt64();
         replay.GameVersion = _reader.ReadString();
         _tsStart = new DateTime(_reader.ReadInt64(), DateTimeKind.Utc);

@@ -25,6 +25,12 @@ public static class ReplayTimelineMarkers {
                 case WorldState.OpEndedSession:
                     markers.Add(new(op.Timestamp, 0xff0000ff, "Session end"));
                     break;
+                case SpearfishingInfo.OpSessionActive { Active: true }:
+                    markers.Add(new(op.Timestamp, 0xff00ff00, "Spearfishing session start"));
+                    break;
+                case SpearfishingInfo.OpEndSession:
+                    markers.Add(new(op.Timestamp, 0xff0000ff, "Spearfishing session end"));
+                    break;
                 case WorldState.OpDecision d when HasTimelineMarker(d): {
                         var label = $"Decision: {d.Context} -> {d.Action}";
                         if (!string.IsNullOrEmpty(d.Detail))
@@ -36,9 +42,7 @@ public static class ReplayTimelineMarkers {
                     }
                 case FishingInfo.OpPlayerUsedAction act when act.Value.ActionId != 0: {
                         var decision = FindNearestSuccessfulAutoCast(decisions, op.Timestamp, maxDeltaMs: 500);
-                        var extra = decision is { ConditionResults.Count: > 0 }
-                            ? DecisionLog.FormatConditionTrace(decision.ConditionResults)
-                            : null;
+                        var extra = decision is { ConditionResults.Count: > 0 } ? DecisionLog.FormatConditionTrace(decision.ConditionResults) : null;
                         markers.Add(new(op.Timestamp, ActionColor, $"Action: {ActionLabel(act.Value.ActionId)}", extra));
                         break;
                     }
@@ -52,10 +56,7 @@ public static class ReplayTimelineMarkers {
                         break;
                     }
                 case FishingInfo.OpFishingState fish when fish.Bait.BaitId != prevBaitId && fish.Bait.BaitId != 0:
-                    markers.Add(new(op.Timestamp, 0xffa0522d,
-                        prevBaitId == 0
-                            ? $"Bait: {Item.GetRow(fish.Bait.BaitId).Name}"
-                            : $"Bait change: {Item.GetRow(fish.Bait.BaitId).Name}"));
+                    markers.Add(new(op.Timestamp, 0xffa0522d, prevBaitId == 0 ? $"Bait: {Item.GetRow(fish.Bait.BaitId).Name}" : $"Bait change: {Item.GetRow(fish.Bait.BaitId).Name}"));
                     prevBaitId = fish.Bait.BaitId;
                     break;
                 case FishingInfo.OpSetFishingStep step:
@@ -67,6 +68,9 @@ public static class ReplayTimelineMarkers {
                 case FishingInfo.OpAddFishCaught fc when fc.FishId > 0:
                     markers.Add(new(op.Timestamp, 0xff44dd44,
                         $"Fish counter +{fc.Amount}: {Item.GetRow(fc.FishId).Name}"));
+                    break;
+                case SpearfishingInfo.OpAddFishCaught fc when fc.FishId > 0:
+                    markers.Add(new(op.Timestamp, 0xff44dd44, $"Spearfish counter +{fc.Amount}: {Item.GetRow(fc.FishId).Name}"));
                     break;
             }
         }

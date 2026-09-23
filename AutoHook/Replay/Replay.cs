@@ -1,6 +1,7 @@
 namespace AutoHook.Replay;
 
 public sealed class FishingReplay {
+    public int FormatVersion;
     public ulong QPF = TimeSpan.TicksPerSecond;
     public string GameVersion = string.Empty;
     public string SourcePath = string.Empty;

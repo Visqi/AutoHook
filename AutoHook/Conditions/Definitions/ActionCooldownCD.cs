@@ -15,7 +15,8 @@ public sealed class ActionCooldownCD : IConditionDefinition {
 
     public string Id => nameof(ActionCooldownCD);
     public string Name => "Action";
-    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast;
+    public ConditionScopeFlags AllowedScopes
+        => ConditionScopeFlags.Hook | ConditionScopeFlags.AutoCast | ConditionScopeFlags.Spearfishing;
 
     public readonly record struct ActionCooldownParams(uint Id, int Type, string Check, int Seconds, string Op, bool Invert) {
         public bool Apply(bool result) => Invert ? !result : result;

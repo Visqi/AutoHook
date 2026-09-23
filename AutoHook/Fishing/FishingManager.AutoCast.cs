@@ -17,8 +17,7 @@ public partial class FishingManager {
                 Ws.Execute(new FishingInfo.OpBiteContext(elapsed, chum));
         }
 
-        // early return after bite time is set
-        if (!EzThrottler.Throttle("CheckWhileFishingActions", 200))
+        if (!EzThrottler.Throttle("CheckWhileFishingActions", 200) || _spectralRestPending)
             return;
 
         var hookCfg = GetHookCfg();

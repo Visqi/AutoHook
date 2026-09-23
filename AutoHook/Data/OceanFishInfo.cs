@@ -206,6 +206,9 @@ public readonly record struct OceanSpectralTimerInfo(float TimeRemaining, bool I
 }
 
 public static class OceanFishingExtensions {
+    public static bool IsZoneTimerStarted(this OceanFishingState state)
+        => state.TimeLeftInZone > 0f && state.TimeLeftInZone < state.ZoneTimeMax;
+
     public static bool SameAs(this OceanFishingState a, OceanFishingState b) {
         if (a.SpectralCurrentActive != b.SpectralCurrentActive) return false;
         if (a.CurrentRoute != b.CurrentRoute) return false;

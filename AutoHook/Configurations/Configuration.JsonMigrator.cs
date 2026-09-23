@@ -67,8 +67,15 @@ public static class ConfigurationJsonMigrator {
         }
 
         // v8 -> v9: ActionCooldownCD gets chk
-        if (version < Configuration.LatestVersion) {
+        if (version < 9) {
             MigrateV9(root);
+            root["Version"] = 9;
+            version = 9;
+        }
+
+        // v9 -> v10: spearfishing rework
+        if (version < Configuration.LatestVersion) {
+            MigrateV10(root);
             root["Version"] = Configuration.LatestVersion;
         }
 
@@ -101,6 +108,21 @@ public static class ConfigurationJsonMigrator {
                 return json;
 
             MigrateImportedPresetObject(preset, fromVersion);
+            return preset.ToString(Formatting.None);
+        }
+        catch {
+            return json;
+        }
+    }
+
+    public static string MigrateImportedSpearfishingPreset(string json, int fromVersion = 0) {
+        try {
+            if (fromVersion >= Configuration.LatestSpearfishingSchema.Version)
+                return json;
+            if (JToken.Parse(json) is not JObject preset)
+                return json;
+
+            MigrateSpearfishingPreset(preset);
             return preset.ToString(Formatting.None);
         }
         catch {
@@ -272,6 +294,47 @@ public static class ConfigurationJsonMigrator {
 
     private static void MigrateV9(JObject root)
         => MigrateActionCooldownChecks(root);
+
+    private static void MigrateV10(JObject root) {
+        if (root["AutoGigConfig"] is not JObject autoGig)
+            return;
+
+        if ((bool?)autoGig["NatureBountyBeforeFish"] == true)
+            EnableAction(autoGig, "NatureBountyBeforeFishAction");
+        if ((bool?)autoGig["CatchAllNaturesBounty"] == true)
+            EnableAction(autoGig, "CatchAllNaturesBountyAction");
+
+        if (autoGig["Presets"] is JArray presets) {
+            foreach (var token in presets) {
+                if (token is JObject preset)
+                    MigrateSpearfishingPreset(preset);
+            }
+        }
+    }
+
+    private static void MigrateSpearfishingPreset(JObject preset) {
+        if (preset["Gigs"] is JArray gigs) {
+            foreach (var token in gigs) {
+                if (token is not JObject gig)
+                    continue;
+
+                gig["SpearfishingNotebookId"] ??= 0;
+                if ((bool?)gig["UseNaturesBounty"] == true)
+                    EnableAction(gig, "NaturesBounty");
+            }
+        }
+
+        if ((bool?)preset["KeepCollectorsGloveOn"] == true)
+            EnableAction(preset, "Collect");
+    }
+
+    private static void EnableAction(JObject owner, string propertyName) {
+        if (owner[propertyName] is not JObject action) {
+            action = [];
+            owner[propertyName] = action;
+        }
+        action["Enabled"] = true;
+    }
 
     private static void MigratePresetActionCooldownChecks(JObject preset)
         => MigrateActionCooldownChecks(preset);

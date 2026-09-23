@@ -1,13 +1,14 @@
+using AutoHook.Conditions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
 using ECommons.Automation;
 using ECommons.Automation.NeoTaskManager;
-using FFXIVClientStructs.FFXIV.Component.GUI;
-using LuminaAction = Lumina.Excel.Sheets.Action;
-using System.Numerics;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
+using System.Numerics;
+using LuminaAction = Lumina.Excel.Sheets.Action;
 
 namespace AutoHook.Spearfishing;
 
@@ -29,6 +30,7 @@ internal class AutoGig : Window, IDisposable {
     private Vector2 _uiSize = Vector2.Zero;
 
     private int currentNode = 0;
+    private Guid _lastGigEntryId;
 
     private readonly SpearFishingPresets _gigCfg = Service.Configuration.AutoGigConfig;
 
@@ -39,12 +41,15 @@ internal class AutoGig : Window, IDisposable {
     };
 
     public AutoGig() : base(@"SpearfishingHelper", WindowFlags, true) {
+        _gigCfg.PrepareActions();
         Service.WindowSystem.AddWindow(this);
+        Service.WorldState.Modified += OnWorldStateModified;
         IsOpen = true;
         Gig = LuminaAction.GetRow(IDs.Actions.Gig).Name.ToString();
     }
 
     public void Dispose() {
+        Service.WorldState.Modified -= OnWorldStateModified;
         Service.WindowSystem.RemoveWindow(this);
         Configuration.FlushAsync().GetAwaiter().GetResult();
     }
@@ -93,15 +98,10 @@ internal class AutoGig : Window, IDisposable {
             ImGui.End();
         }
 
-        if (_gigCfg is { AutoGigEnabled: true, }) {
+        if (Service.Configuration.PluginEnabled && _gigCfg is { AutoGigEnabled: true, }) {
             var selectedPreset = _gigCfg.SelectedPreset;
 
-            if (selectedPreset is { KeepCollectorsGloveOn: true } && !Service.WorldState.Player.HasStatus(IDs.Status.CollectorsGlove))
-                PlayerRes.CastActionDelayed(IDs.Actions.Collect, actionName: UIStrings.Collect);
-
-            if (!Service.WorldState.Player.HasStatus(IDs.Status.NaturesBounty) && _gigCfg.NatureBountyBeforeFish)
-                PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
-            ;
+            TrySessionActions(selectedPreset);
             GigFish(addon, addon->Fish[0], addon->GetNodeById(Fish1NodeId));
             GigFish(addon, addon->Fish[1], addon->GetNodeById(Fish2NodeId));
             GigFish(addon, addon->Fish[2], addon->GetNodeById(Fish3NodeId));
@@ -120,45 +120,71 @@ internal class AutoGig : Window, IDisposable {
 
         DrawGigHitbox(fishLines, drawList, gigHitbox);
 
-        if (_gigCfg.ThaliaksFavor.IsAvailableToCast())
-            PlayerRes.CastActionDelayed(_gigCfg.ThaliaksFavor.Id, _gigCfg.ThaliaksFavor.ActionType,
-                UIStrings.Thaliaks_Favor);
-
         if (!info.Available)
             return;
 
         var fish = _gigCfg.CatchAll ? GetCatchAllGig() : CheckFish(info);
 
-        if (fish == null || !fish.Enabled)
+        if (fish == null || !fish.Enabled || !fish.GigConditionSet.PassesOrUnconfigured())
             return;
 
-        if (!Service.WorldState.Player.HasStatus(IDs.Status.NaturesBounty) && fish.UseNaturesBounty)
-            PlayerRes.CastActionDelayed(IDs.Actions.NaturesBounty);
+        var naturesBounty = _gigCfg.CatchAll ? _gigCfg.CatchAllNaturesBountyAction : fish.NaturesBounty;
+        if (naturesBounty.IsAvailableToCast())
+            PlayerRes.CastActionDelayed(naturesBounty.Id, naturesBounty.ActionType, naturesBounty.GetName());
 
         var laneOriginX = fishLines->X * _uiScale;
         var centerX = laneOriginX + fishLines->Width * fishLines->ScaleX * _uiScale / 2f;
-        var anchor = info.InverseDirection
-            ? 0.5f + fish.RightOffset / 10
-            : 0.4f - fish.LeftOffset / 10;
+        var anchor = info.InverseDirection ? 0.5f + fish.RightOffset / 10 : 0.4f - fish.LeftOffset / 10;
         var fishHitbox = laneOriginX + node->X * _uiScale + node->Width * node->ScaleX * _uiScale * anchor;
 
         DrawFishHitbox(fishLines, drawList, fishHitbox);
 
-        if (fishHitbox >= centerX - gigHitbox && fishHitbox <= centerX + gigHitbox)
+        if (fishHitbox >= centerX - gigHitbox && fishHitbox <= centerX + gigHitbox) {
+            _lastGigEntryId = _gigCfg.CatchAll ? Guid.Empty : fish.UniqueId;
             _taskManager.Enqueue(() => { Chat.ExecuteCommand($"/ac \"{Gig}\""); });
+        }
     }
 
     private BaseGig? CheckFish(AddonSpearFishing.FishInfo info) {
-        var fishes = _gigCfg.SelectedPreset?.GetGigCurrentNode(currentNode);
-
-        if (fishes is null || fishes.Count == 0)
-            return null;
-
-        return fishes.FirstOrDefault(f => f.Fish != null && (short)f.Fish.Speed == info.Speed && f.Fish.Size == (Enums.SpearfishSize)info.Size);
+        var notebookId = Service.WorldState.Spearfishing.Spot.NotebookId;
+        return _gigCfg.SelectedPreset?.FindGigForPool(notebookId, (Enums.SpearfishSpeed)info.Speed, (Enums.SpearfishSize)info.Size);
     }
 
-    private BaseGig? GetCatchAllGig() {
-        return new BaseGig(0) { Enabled = true, UseNaturesBounty = _gigCfg.CatchAllNaturesBounty };
+    private BaseGig? GetCatchAllGig() => _gigCfg.CatchAllConditionSet.PassesOrUnconfigured() ? new BaseGig(0) { Enabled = true } : null;
+
+    private void TrySessionActions(AutoGigConfig? selectedPreset) {
+        if (selectedPreset?.Collect.IsAvailableToCast() == true)
+            PlayerRes.CastActionDelayed(selectedPreset.Collect.Id, selectedPreset.Collect.ActionType, selectedPreset.Collect.GetName());
+        if (_gigCfg.NatureBountyBeforeFishAction.IsAvailableToCast())
+            PlayerRes.CastActionDelayed(_gigCfg.NatureBountyBeforeFishAction.Id, _gigCfg.NatureBountyBeforeFishAction.ActionType, _gigCfg.NatureBountyBeforeFishAction.GetName());
+        var thaliaksFavor = selectedPreset is { ThaliaksFavor.Enabled: true } ? selectedPreset.ThaliaksFavor : _gigCfg.ThaliaksFavor;
+        if (thaliaksFavor.IsAvailableToCast())
+            PlayerRes.CastActionDelayed(thaliaksFavor.Id, thaliaksFavor.ActionType, thaliaksFavor.GetName());
+
+        var cordial = selectedPreset is { Cordial.Enabled: true } ? selectedPreset.Cordial : _gigCfg.Cordial;
+        if (cordial.IsAvailableToCast())
+            PlayerRes.CastActionDelayed(cordial.Id, cordial.ActionType, cordial.GetName());
+    }
+
+    private void OnWorldStateModified(WorldState.Operation op) {
+        if (op is SpearfishingInfo.OpAddFishCaught caught) {
+            var preset = _gigCfg.SelectedPreset;
+            if (preset == null)
+                return;
+
+            var matched = _lastGigEntryId == Guid.Empty ? null : preset.Gigs.FirstOrDefault(gig => gig.UniqueId == _lastGigEntryId && gig.Fish?.ItemId == caught.FishId);
+            matched ??= preset.GetGigsForPool(Service.WorldState.Spearfishing.Spot.NotebookId).FirstOrDefault(gig => gig.Fish?.ItemId == caught.FishId);
+            if (matched != null)
+                SpearfishingCounterHelper.AddFishCount(matched.UniqueId, caught.Amount);
+            _lastGigEntryId = Guid.Empty;
+        }
+        else if (op is SpearfishingInfo.OpEndSession) {
+            _lastGigEntryId = Guid.Empty;
+            if (_gigCfg.SelectedPreset is not { RetainCountersBetweenSessions: true }) {
+                SpearfishingCounterHelper.ResetAll();
+                Service.WorldState.Execute(new SpearfishingInfo.OpResetFishCaught());
+            }
+        }
     }
 
     private unsafe void DrawGigHitbox(AtkResNode* fishLines, ImDrawListPtr drawList, int gigHitbox) {
@@ -219,8 +245,7 @@ internal class AutoGig : Window, IDisposable {
         if (!Svc.GameGui.TryGetAddon<AtkUnitBase>("SpearFishing", out var addon)) return;
         _uiScale = addon->Scale;
         _uiPos = new Vector2(addon->X, addon->Y);
-        _uiSize = new Vector2(addon->WindowNode->AtkResNode.Width * _uiScale,
-            addon->WindowNode->AtkResNode.Height * _uiScale);
+        _uiSize = new Vector2(addon->WindowNode->AtkResNode.Width * _uiScale, addon->WindowNode->AtkResNode.Height * _uiScale);
 
         Position = _uiPos;
         SizeConstraints = new WindowSizeConstraints {

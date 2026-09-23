@@ -19,6 +19,7 @@ public partial class FishingManager : IDisposable {
     private readonly Random _rng = new();
     private readonly EventSubscriptions _eventSubs;
     private StopAfterState _stopAfterNextFish;
+    private bool _spectralRestPending;
     private double FishTimerSecs => Math.Truncate(_fishingTimer.ElapsedMilliseconds / 1000.0 * 100) / 100;
 
     private enum StopAfterState {
@@ -99,22 +100,30 @@ public partial class FishingManager : IDisposable {
     }
 
     private void OnSpectralCurrentChanged(WorldState.OpSpectralCurrentChanged op) {
-        if (op.Change is not SpectralCurrentChange.Gained) return;
-        if (!Service.Configuration.PluginEnabled || !Service.Configuration.SpectralRest) return;
-        if (Ws.Fishing.FishingState is not (FishingState.LineInWater or FishingState.AmbitiousLure or FishingState.ModestLure)) return;
-        if (Ws.Fishing.FishingStep.HasFlag(FishingSteps.Reeling | FishingSteps.TimeOut)) return;
-        if (Ws.Player.BlockCasting || Service.TaskManager.IsBusy) return;
-        if (!EzThrottler.Throttle("SpectralRestMidCast", 1000)) return;
+        if (op.Change is SpectralCurrentChange.Lost) {
+            _spectralRestPending = false;
+            return;
+        }
+        if (op.Change is not SpectralCurrentChange.Gained || !Service.Configuration.PluginEnabled || !Service.Configuration.SpectralRest)
+            return;
+        _spectralRestPending = true;
+        TrySpectralRest();
+    }
+
+    private void TrySpectralRest() {
+        if (!_spectralRestPending) return;
+
+        var midCast = Ws.Fishing.FishingState is FishingState.LineInWater or FishingState.AmbitiousLure or FishingState.ModestLure;
+        var canceling = (Ws.Fishing.FishingStep & (FishingSteps.Reeling | FishingSteps.TimeOut)) != 0;
+        if (!Service.Configuration.PluginEnabled || !Service.Configuration.SpectralRest || !midCast) {
+            _spectralRestPending = false;
+            return;
+        }
+        if (canceling || Ws.Player.BlockCasting || !EzThrottler.Throttle("SpectralRestMidCast", 200)) return;
+        if (!PlayerRes.CastActionDelayed(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook)) return;
 
         Service.Status = UIStrings.SpectralRestOnGain;
-        Service.PrintDebug("Spectral gained mid-cast; resting");
-
-        var delay = _rng.Next(Service.Configuration.DelayBeforeCancelMin, Service.Configuration.DelayBeforeCancelMax);
-        Service.TaskManager.EnqueueDelay(delay);
-        Service.TaskManager.Enqueue(() => {
-            PlayerRes.CastActionDelayed(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook);
-            Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.Reeling));
-        });
+        Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.Reeling));
     }
 
     private void OnWorldStateModified(WorldState.Operation op) {
@@ -248,10 +257,22 @@ public partial class FishingManager : IDisposable {
         => !selected.Enabled ? 0 : selected.GetHookset().GetEffectiveTimeoutMax(Ws.Player.HasStatus(IDs.Status.Chum));
 
     private void OnFrameworkUpdate(IFramework _) {
-        if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null)
+        if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null) {
+            if (!Service.Configuration.PluginEnabled && Svc.Automation.CurrentTask is AutoOceanFish)
+                Svc.Automation.Stop();
+
+            var sf = Ws.Spearfishing;
+            if (sf.SessionActive || sf.WindowOpen || !sf.Spot.IsEmpty || sf.Wariness != 0)
+                Ws.Execute(new SpearfishingInfo.OpEndSession());
             return;
+        }
 
         Service.WorldStateUpdater.Update();
+
+        if (Svc.Automation.CurrentTask is AutoOceanFish && Ws.Fishing.FishingState != FishingState.None) {
+            Service.PrintDebug("[AutoOceanFish] Stopping automation (already fishing)");
+            Svc.Automation.Stop();
+        }
 
         if (Player.ClassJob.RowId != FisherJobId) {
             ClearWorldState();
@@ -286,6 +307,9 @@ public partial class FishingManager : IDisposable {
 
         if (!Ws.Fishing.FishingStep.HasFlag(FishingSteps.Quitting) && currentState == FishingState.PoleReady)
             CheckPluginActions();
+
+        if (_spectralRestPending)
+            TrySpectralRest();
 
         if (currentState is FishingState.AmbitiousLure or FishingState.ModestLure or FishingState.LineInWater) {
             CheckWhileFishingActions();
@@ -325,7 +349,9 @@ public partial class FishingManager : IDisposable {
     private void ClearWorldState() {
         var f = Ws.Fishing;
         var sf = Ws.Spearfishing;
-        if (!Ws.Player.BlockCasting && f.FishingState == FishingState.None && f.FishingStep == FishingSteps.None && f.PreviousFishingState == FishingState.None && !sf.SessionActive && !sf.WindowOpen && sf.FishCaughtCounts.Count == 0)
+        if (!Ws.Player.BlockCasting && f.FishingState == FishingState.None && f.FishingStep == FishingSteps.None &&
+            f.PreviousFishingState == FishingState.None && !sf.SessionActive && !sf.WindowOpen &&
+            sf.Spot.IsEmpty && sf.Wariness == 0)
             return;
 
         Ws.Execute(new WorldState.OpSetBlockCasting(false));
@@ -333,7 +359,7 @@ public partial class FishingManager : IDisposable {
         Ws.Execute(new FishingInfo.OpSetPreviousFishingState(FishingState.None));
         Ws.Execute(new FishingInfo.OpFishingState(FishingState.None, new BaitInfo(0, null, 0, false)));
 
-        if (sf.SessionActive || sf.WindowOpen || !sf.Spot.IsEmpty || sf.FishCaughtCounts.Count > 0 || sf.Wariness != 0)
+        if (sf.SessionActive || sf.WindowOpen || !sf.Spot.IsEmpty || sf.Wariness != 0)
             Ws.Execute(new SpearfishingInfo.OpEndSession());
     }
 
@@ -534,6 +560,7 @@ public partial class FishingManager : IDisposable {
 
     private void OnFishingStop() {
         ClearStopAfterNextFish();
+        _spectralRestPending = false;
 
         Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.None));
 

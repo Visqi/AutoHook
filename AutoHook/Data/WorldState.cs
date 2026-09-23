@@ -166,8 +166,12 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
             => output.EmitFourCC("EORZ").Emit(Time);
     }
 
+    public Event<OpTerritory> TerritoryChanged = new();
     public sealed record OpTerritory(uint TerritoryId) : Operation {
-        protected override void Exec(WorldState ws) => ws.TerritoryId = TerritoryId;
+        protected override void Exec(WorldState ws) {
+            ws.TerritoryId = TerritoryId;
+            ws.TerritoryChanged.Fire(this);
+        }
 
         public override void Write(Replay.ReplayOutput output)
             => output.EmitFourCC("TRTY").Emit(TerritoryId);
@@ -245,6 +249,9 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
 
         public override void Write(Replay.ReplayOutput output) => output.EmitFourCC("FEND");
     }
+
+    public Event<SpearfishingInfo.OpSessionActive> SpearfishingSessionStarted = new();
+    public Event<SpearfishingInfo.OpEndSession> SpearfishingSessionEnded = new();
 
     public Event<OpOceanZoneStarted> OceanZoneStarted = new();
     public sealed record OpOceanZoneStarted(uint ZoneIndex) : Operation {

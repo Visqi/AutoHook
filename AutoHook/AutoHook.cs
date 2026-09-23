@@ -24,7 +24,6 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
 
     internal static AutoHook Plugin = null!;
 
-    //todo: - Spearfishing rework
     private const string CmdAhCfg = "/ahcfg";
     private const string CmdAh = "/autohook";
     private const string CmdAhOn = "/ahon";

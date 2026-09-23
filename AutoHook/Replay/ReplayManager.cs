@@ -5,10 +5,12 @@ using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
+using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using TerritoryIntendedUse = FFXIVClientStructs.FFXIV.Client.Enums.TerritoryIntendedUse;
 
 namespace AutoHook;
 
@@ -61,8 +63,9 @@ public sealed class ReplayManager : IDisposable {
     private readonly List<ReplayEntry> _entries = [];
     private string _path = "";
     private string _fileDialogStartPath;
-    // defer stop so OpEndedSession can enqueue via Modified before we unsubscribe.
+    private AutoGigConfig? _recordingSpearfishingPreset;
     private int _stopAfterFrames;
+    private uint _lastTerritoryId;
 
     public bool IsRecording => _recorder != null;
     public string? LastRecordedPath { get; private set; }
@@ -78,8 +81,14 @@ public sealed class ReplayManager : IDisposable {
         var ws = Service.WorldState;
         _subs = new(
             ws.BeganSession.Subscribe(_ => TryAutoStart()),
-            ws.OceanZoneStarted.Subscribe(_ => TryAutoStart()), // zone start happens before BeganSession. capture OZON / ACHP during walk to railing
-            ws.EndedSession.Subscribe(_ => TryAutoStop()));
+            ws.TerritoryChanged.Subscribe(OnTerritoryChanged),
+            ws.OceanZoneStarted.Subscribe(_ => TryAutoStart()),
+            ws.EndedSession.Subscribe(_ => {
+                if (TerritoryType.GetRow(Service.WorldState.TerritoryId).TerritoryIntendedUse.Value.StructsEnum is TerritoryIntendedUse.OceanFishing)
+                    TryAutoStop();
+            }),
+            ws.SpearfishingSessionStarted.Subscribe(_ => TryAutoStart()),
+            ws.SpearfishingSessionEnded.Subscribe(_ => TryAutoStop()));
 
         Svc.Framework.Update += OnFrameworkUpdate;
         PruneOldReplays();
@@ -122,8 +131,9 @@ public sealed class ReplayManager : IDisposable {
             return;
 
         var prefix = manual ? "manual" : "session";
+        _recordingSpearfishingPreset = GetActiveSpearfishingPreset();
         _recorder = new ReplayRecorder(Service.WorldState, ReplayDirectory, prefix, logInitialState: true);
-        _recorder.WritePresetSnapshot(SerializeCurrentPreset());
+        _recorder.WritePresetSnapshot(SerializeCurrentPreset(_recordingSpearfishingPreset));
         LastRecordedPath = _recorder.FilePath;
         Service.PrintDebug($"[Replay] Recording started: {_recorder.FilePath}");
     }
@@ -133,10 +143,11 @@ public sealed class ReplayManager : IDisposable {
             return;
 
         recorder.FlushPending();
-        recorder.WriteMeta(BuildMetadata());
+        recorder.WriteMeta(BuildMetadata(_recordingSpearfishingPreset));
         LastRecordedPath = recorder.FilePath;
         recorder.Dispose();
         _recorder = null;
+        _recordingSpearfishingPreset = null;
         PruneOldReplays();
         Service.PrintDebug($"[Replay] Recording stopped: {LastRecordedPath}");
     }
@@ -253,8 +264,20 @@ public sealed class ReplayManager : IDisposable {
     private void TryAutoStop() {
         if (_recorder == null)
             return;
-        // OpEndedSession.Fire runs before Modified enqueues FEND, so stop next frame so FlushPending can write FEND before disposal
+        // Session events fire before Modified enqueues their operation, so stop next frame to capture it.
         _stopAfterFrames = 1;
+    }
+
+    private void OnTerritoryChanged(WorldState.OpTerritory op) {
+        static bool IsOcean(uint territoryId) => territoryId != 0 && TerritoryType.GetRow(territoryId).TerritoryIntendedUse.Value.StructsEnum is TerritoryIntendedUse.OceanFishing;
+        var wasOcean = IsOcean(_lastTerritoryId);
+        var isOcean = IsOcean(op.TerritoryId);
+        _lastTerritoryId = op.TerritoryId;
+
+        if (isOcean)
+            TryAutoStart();
+        else if (wasOcean)
+            TryAutoStop();
     }
 
     private void PruneOldReplays() {
@@ -274,18 +297,20 @@ public sealed class ReplayManager : IDisposable {
         }
     }
 
-    private static ReplayMetadata BuildMetadata() {
+    private static ReplayMetadata BuildMetadata(AutoGigConfig? recordedSpearPreset) {
         var cfg = Service.Configuration;
         return new ReplayMetadata {
-            PresetName = cfg.HookPresets.CurrentPreset.PresetName,
+            PresetName = recordedSpearPreset?.PresetName ?? cfg.HookPresets.CurrentPreset.PresetName,
             PluginVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? string.Empty,
             TerritoryId = Service.WorldState.TerritoryId,
-            PresetSnapshotJson = SerializeCurrentPreset(),
+            PresetSnapshotJson = SerializeCurrentPreset(recordedSpearPreset),
         };
     }
 
-    private static string SerializeCurrentPreset() {
-        var preset = Service.Configuration.HookPresets.CurrentPreset;
+    private static string SerializeCurrentPreset(AutoGigConfig? spearPreset) {
+        BasePresetConfig preset = spearPreset is not null
+            ? spearPreset
+            : Service.Configuration.HookPresets.CurrentPreset;
         try {
             return JsonConvert.SerializeObject(preset);
         }
@@ -294,4 +319,7 @@ public sealed class ReplayManager : IDisposable {
             return string.Empty;
         }
     }
+
+    private static AutoGigConfig? GetActiveSpearfishingPreset()
+        => Service.WorldState.Spearfishing.SessionActive ? Service.Configuration.AutoGigConfig.SelectedPreset : null;
 }
