@@ -1711,6 +1711,12 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="AutoOceanFish_Fallthrough" xml:space="preserve">
     <value>Fall through to next priority if already acquired</value>
   </data>
+  <data name="AutoOceanFish_AllowMovement" xml:space="preserve">
+    <value>Auto move</value>
+  </data>
+  <data name="AutoOceanFish_AllowMovementHelpText" xml:space="preserve">
+    <value>On the first zone, will move to a position along the railing before selecting a preset and casting. Will also try to shuffle around to not stack on top of other players.</value>
+  </data>
   <data name="UseForGoal" xml:space="preserve">
     <value>Use for goal</value>
   </data>

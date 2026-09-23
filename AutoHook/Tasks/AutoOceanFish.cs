@@ -19,9 +19,10 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
 
     protected override async Task Execute() {
         using var scope = BeginScope(nameof(AutoOceanFish));
-        Service.PrintDebug($"[AutoOceanFish] Task execute zone={ZoneIndex + 1}, walkToRailing={ZoneIndex == 0}");
+        var walk = ZoneIndex == 0 && Service.Configuration.AOF_WalkToRailing;
+        Service.PrintDebug($"[AutoOceanFish] Task execute zone={ZoneIndex + 1}, walkToRailing={walk}");
 
-        if (ZoneIndex == 0) {
+        if (walk) {
             Status = "Walking to railing";
             Service.PrintDebug("[AutoOceanFish] Walking to railing");
             await WalkToRailing();

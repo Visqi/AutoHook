@@ -678,6 +678,24 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Auto move.
+        /// </summary>
+        internal static string AutoOceanFish_AllowMovement {
+            get {
+                return ResourceManager.GetString("AutoOceanFish_AllowMovement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to On the first zone, will move to a position along the railing before selecting a preset and casting. Will also try to shuffle around to not stack on top of other players..
+        /// </summary>
+        internal static string AutoOceanFish_AllowMovementHelpText {
+            get {
+                return ResourceManager.GetString("AutoOceanFish_AllowMovementHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Fall through to next priority if already acquired.
         /// </summary>
         internal static string AutoOceanFish_Fallthrough {

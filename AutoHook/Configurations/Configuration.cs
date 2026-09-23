@@ -4,6 +4,7 @@ using AutoHook.Spearfishing;
 using Dalamud.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 
@@ -47,6 +48,7 @@ public partial class Configuration : IPluginConfiguration {
     public bool AutoOceanFish = false;
     public OceanFishGoalKind AutoOceanFishGoal = OceanFishGoalKind.Points;
     public bool AOF_Fallthrough = false;
+    [DefaultValue(true)] public bool AOF_WalkToRailing = true;
     public bool SpectralRest = false;
     public bool DtrBarEnabled = false;
     public bool DtrPresetBarEnabled = false;

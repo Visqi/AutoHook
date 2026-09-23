@@ -47,6 +47,7 @@ public class TabSettings : BaseTab {
             using (ImRaii.PushIndent()) {
                 DrawAutoOceanFishGoal();
                 DrawUtil.Checkbox(UIStrings.AutoOceanFish_Fallthrough, ref Service.Configuration.AOF_Fallthrough);
+                DrawUtil.Checkbox(UIStrings.AutoOceanFish_AllowMovement, ref Service.Configuration.AOF_WalkToRailing, UIStrings.AutoOceanFish_AllowMovementHelpText);
             }
         }
         DrawUtil.Checkbox(UIStrings.SpectralRestOnGain, ref Service.Configuration.SpectralRest, UIStrings.SpectralRestOnGainHelpText);
