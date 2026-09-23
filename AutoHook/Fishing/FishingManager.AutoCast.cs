@@ -67,6 +67,9 @@ public partial class FishingManager {
                 return;
             }
 
+            if (Service.WorldStateUpdater.HasPendingGp)
+                return;
+
             CastLineMoochOrRelease(acCfg, lastFishCatchCfg);
         }, "AutoCasting");
     }

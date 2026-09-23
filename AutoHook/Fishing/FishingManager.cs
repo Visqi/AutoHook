@@ -394,7 +394,7 @@ public partial class FishingManager : IDisposable {
             if (!casted && lastCatchCfg is { Enabled: true } && HasGpBlockedFishCaughtAction(lastCatchCfg)) {
                 var acCfg = GetAutoCastCfg();
                 var ignoreMooch = lastCatchCfg.NeverMooch;
-                casted = acCfg.TryCastGpRestoringAction(ignoreMooch);
+                casted = acCfg.TryCastGpRestoringAction(ignoreMooch) || Service.WorldStateUpdater.HasPendingGp; // hold casting while gp is pending
             }
 
             CheckFishCaughtSwap(lastCatchCfg);

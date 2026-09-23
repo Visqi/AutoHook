@@ -78,6 +78,9 @@ public abstract class BaseActionCast {
         if (DoesCancelMooch() && Service.WorldState.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch)
             return "Would cancel mooch";
 
+        if (RestoresGp && Service.WorldStateUpdater.HasPendingGp)
+            return "GP pending";
+
         var condition = CastCondition();
         var currentGp = Service.WorldState.Player.CurrentGp;
         var hasGp = GpThresholdAbove ? currentGp >= GpThreshold : currentGp <= GpThreshold;
