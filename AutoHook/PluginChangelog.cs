@@ -5,6 +5,18 @@ namespace AutoHook;
 public static class PluginChangelog {
     public static readonly List<Version> Versions =
     [
+        new Version("6.0.2.0") {
+            Main = {
+                "Spearfishing preset rework",
+                "Spearfishing: Baited Breath, Electric Current, Veteran Trade, and Vital Sight support",
+                "Added FishOnScreen condition for spearfishing",
+            },
+            Minor = {
+                "Changed AutoOceanFish priority to Levelling -> Achievement -> Legends -> Points",
+                "Added some hooks to track gp pending to hopefully prevent overusing thaliak's",
+                "AutoOceanFish movement can be disabled. It is also changed to auto shut off after 5s, turning off the plugin, or casting",
+            }
+        },
         new Version("6.0.0.96") {
             Main = {
                 "Extra Options: retain hook/fish counters between fishing sessions",

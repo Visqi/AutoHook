@@ -157,6 +157,19 @@ internal class AutoGig : Window, IDisposable {
             PlayerRes.CastActionDelayed(selectedPreset.Collect.Id, selectedPreset.Collect.ActionType, selectedPreset.Collect.GetName());
         if (_gigCfg.NatureBountyBeforeFishAction.IsAvailableToCast())
             PlayerRes.CastActionDelayed(_gigCfg.NatureBountyBeforeFishAction.Id, _gigCfg.NatureBountyBeforeFishAction.ActionType, _gigCfg.NatureBountyBeforeFishAction.GetName());
+
+        var baitedBreath = selectedPreset is { BaitedBreath.Enabled: true } ? selectedPreset.BaitedBreath : _gigCfg.BaitedBreath;
+        if (baitedBreath.IsAvailableToCast())
+            PlayerRes.CastActionDelayed(baitedBreath.Id, baitedBreath.ActionType, baitedBreath.GetName());
+
+        var vitalSight = selectedPreset is { VitalSight.Enabled: true } ? selectedPreset.VitalSight : _gigCfg.VitalSight;
+        if (vitalSight.IsAvailableToCast())
+            PlayerRes.CastActionDelayed(vitalSight.Id, vitalSight.ActionType, vitalSight.GetName());
+
+        var electricCurrent = selectedPreset is { ElectricCurrent.Enabled: true } ? selectedPreset.ElectricCurrent : _gigCfg.ElectricCurrent;
+        if (electricCurrent.IsAvailableToCast())
+            PlayerRes.CastActionDelayed(electricCurrent.Id, electricCurrent.ActionType, electricCurrent.GetName());
+
         var thaliaksFavor = selectedPreset is { ThaliaksFavor.Enabled: true } ? selectedPreset.ThaliaksFavor : _gigCfg.ThaliaksFavor;
         if (thaliaksFavor.IsAvailableToCast())
             PlayerRes.CastActionDelayed(thaliaksFavor.Id, thaliaksFavor.ActionType, thaliaksFavor.GetName());
@@ -176,6 +189,13 @@ internal class AutoGig : Window, IDisposable {
             matched ??= preset.GetGigsForPool(Service.WorldState.Spearfishing.Spot.NotebookId).FirstOrDefault(gig => gig.Fish?.ItemId == caught.FishId);
             if (matched != null)
                 SpearfishingCounterHelper.AddFishCount(matched.UniqueId, caught.Amount);
+
+            var veteranTrade = _gigCfg.CatchAll
+                ? _gigCfg.CatchAllVeteranTradeAction
+                : matched?.VeteranTrade;
+            if (veteranTrade?.IsAvailableToCast() == true)
+                PlayerRes.CastActionDelayed(veteranTrade.Id, veteranTrade.ActionType, veteranTrade.GetName());
+
             _lastGigEntryId = Guid.Empty;
         }
         else if (op is SpearfishingInfo.OpEndSession) {

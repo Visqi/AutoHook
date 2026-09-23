@@ -768,6 +768,15 @@ namespace AutoHook.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Baited Breath.
+        /// </summary>
+        internal static string BaitedBreath {
+            get {
+                return ResourceManager.GetString("BaitedBreath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Default.
         /// </summary>
         internal static string BaitName_Default {
@@ -1504,6 +1513,15 @@ namespace AutoHook.Resources.Localization {
         internal static string EditMe {
             get {
                 return ResourceManager.GetString("EditMe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Electric Current.
+        /// </summary>
+        internal static string ElectricCurrent {
+            get {
+                return ResourceManager.GetString("ElectricCurrent", resourceCulture);
             }
         }
         
@@ -4875,6 +4893,24 @@ namespace AutoHook.Resources.Localization {
         internal static string Using_Chum_Timer {
             get {
                 return ResourceManager.GetString("Using_Chum_Timer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Veteran Trade.
+        /// </summary>
+        internal static string VeteranTrade {
+            get {
+                return ResourceManager.GetString("VeteranTrade", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vital Sight.
+        /// </summary>
+        internal static string VitalSight {
+            get {
+                return ResourceManager.GetString("VitalSight", resourceCulture);
             }
         }
         

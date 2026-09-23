@@ -14,10 +14,14 @@ public class SpearFishingPresets : BasePreset {
 
     public AutoThaliaksFavor ThaliaksFavor = new(true);
     public AutoCordial Cordial = new(true);
+    public AutoBaitedBreath BaitedBreath = new(true);
+    public AutoElectricCurrent ElectricCurrent = new(true);
+    public AutoVitalSight VitalSight = new(true);
 
     public bool CatchAll = false;
     public ConditionSet? CatchAllConditionSet { get; set; }
     public AutoNaturesBounty CatchAllNaturesBountyAction = new(true);
+    public AutoVeteranTrade CatchAllVeteranTradeAction = new(true);
     public AutoNaturesBounty NatureBountyBeforeFishAction = new(true);
 
     public List<AutoGigConfig> Presets = [];
@@ -28,7 +32,11 @@ public class SpearFishingPresets : BasePreset {
     public void PrepareActions() {
         ThaliaksFavor.IsSpearFishing = true;
         Cordial.IsSpearFishing = true;
+        BaitedBreath.IsSpearFishing = true;
+        ElectricCurrent.IsSpearFishing = true;
+        VitalSight.IsSpearFishing = true;
         CatchAllNaturesBountyAction.IsSpearFishing = true;
+        CatchAllVeteranTradeAction.IsSpearFishing = true;
         NatureBountyBeforeFishAction.IsSpearFishing = true;
         foreach (var preset in Presets)
             preset.PrepareActions();

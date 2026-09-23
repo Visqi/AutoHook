@@ -38,12 +38,19 @@ internal class TabAutoGig : BaseTab {
                 ImGui.SetCursorPosX(actionX);
                 _gigCfg.Cordial.DrawConfigWithLabel("Cordials");
                 ImGui.SetCursorPosX(actionX);
+                _gigCfg.BaitedBreath.DrawConfig();
+                ImGui.SetCursorPosX(actionX);
+                _gigCfg.VitalSight.DrawConfig();
+                ImGui.SetCursorPosX(actionX);
+                _gigCfg.ElectricCurrent.DrawConfig();
+                ImGui.SetCursorPosX(actionX);
                 _gigCfg.NatureBountyBeforeFishAction.DrawConfigWithLabel(UIStrings.UseNaturesBounty);
             });
 
             DrawUtil.DrawCheckboxTree(UIStrings.CatchEverything, ref _gigCfg.CatchAll, () => {
                 _gigCfg.CatchAllConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, _gigCfg.CatchAllConditionSet, ConditionScope.Spearfishing, showAdvanced: true);
                 _gigCfg.CatchAllNaturesBountyAction.DrawConfigWithLabel(UIStrings.UseNaturesBounty);
+                _gigCfg.CatchAllVeteranTradeAction.DrawConfig();
             }, UIStrings.IgnoresPresets);
         });
 
@@ -91,6 +98,12 @@ internal class TabAutoGig : BaseTab {
                 selectedPreset.ThaliaksFavor.DrawConfig();
                 ImGui.SetCursorPosX(actionX);
                 selectedPreset.Cordial.DrawConfigWithLabel("Cordials");
+                ImGui.SetCursorPosX(actionX);
+                selectedPreset.BaitedBreath.DrawConfig();
+                ImGui.SetCursorPosX(actionX);
+                selectedPreset.VitalSight.DrawConfig();
+                ImGui.SetCursorPosX(actionX);
+                selectedPreset.ElectricCurrent.DrawConfig();
             });
             DrawUtil.Checkbox("Retain counters between pools", ref selectedPreset.RetainCountersBetweenSessions);
             if (ImGui.Button("Reset caught counters"))

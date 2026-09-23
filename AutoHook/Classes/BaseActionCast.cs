@@ -19,7 +19,9 @@ public abstract class BaseActionCast {
 
         ActionType = actionType;
 
-        if (actionType == ActionType.Action && id is not IDs.Actions.ThaliaksFavor and not IDs.Actions.NaturesBounty and not IDs.Actions.Collect)
+        if (actionType == ActionType.Action && id is not IDs.Actions.ThaliaksFavor and not IDs.Actions.NaturesBounty and not IDs.Actions.Collect
+            and not IDs.Actions.BaitedBreath and not IDs.Actions.ElectricCurrent and not IDs.Actions.VeteranTrade
+            and not IDs.Actions.VitalSight)
             GpThreshold = (int)PlayerRes.CastActionCost(Id, ActionType);
     }
 

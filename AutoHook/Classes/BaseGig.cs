@@ -31,6 +31,7 @@ public class BaseGig(int itemId) : BaseOption {
 
     public ConditionSet? GigConditionSet { get; set; }
     public AutoNaturesBounty NaturesBounty { get; set; } = new(true);
+    public AutoVeteranTrade VeteranTrade { get; set; } = new(true);
 
     public float LeftOffset;
     public float RightOffset;
@@ -45,6 +46,7 @@ public class BaseGig(int itemId) : BaseOption {
 
         GigConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, GigConditionSet, ConditionScope.Spearfishing, showAdvanced: true);
         NaturesBounty.DrawConfig();
+        VeteranTrade.DrawConfig();
 
         DrawUtil.DrawTreeNodeEx(UIStrings.Fish_Hitbox_Offset, () => {
             var x = ImGui.GetCursorPosX();

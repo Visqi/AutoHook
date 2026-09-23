@@ -21,6 +21,9 @@ public class AutoGigConfig : BasePresetConfig {
     public AutoCollect Collect { get; set; } = new(true);
     public AutoThaliaksFavor ThaliaksFavor { get; set; } = new(true);
     public AutoCordial Cordial { get; set; } = new(true);
+    public AutoBaitedBreath BaitedBreath { get; set; } = new(true);
+    public AutoElectricCurrent ElectricCurrent { get; set; } = new(true);
+    public AutoVitalSight VitalSight { get; set; } = new(true);
     public bool RetainCountersBetweenSessions;
 
     [JsonIgnore] public uint SelectedAddPoolId;
@@ -34,6 +37,13 @@ public class AutoGigConfig : BasePresetConfig {
         Collect.IsSpearFishing = true;
         ThaliaksFavor.IsSpearFishing = true;
         Cordial.IsSpearFishing = true;
+        BaitedBreath.IsSpearFishing = true;
+        ElectricCurrent.IsSpearFishing = true;
+        VitalSight.IsSpearFishing = true;
+        foreach (var gig in Gigs) {
+            gig.NaturesBounty.IsSpearFishing = true;
+            gig.VeteranTrade.IsSpearFishing = true;
+        }
     }
 
     public List<BaseGig> GetGigsForPool(uint spearfishingNotebookId) {

@@ -1777,4 +1777,16 @@ You may also use the command /ahstart to start. Try making a macro with it!</val
   <data name="Cooldown" xml:space="preserve">
     <value>Cooldown</value>
   </data>
+  <data name="ElectricCurrent" xml:space="preserve">
+    <value>Electric Current</value>
+  </data>
+  <data name="BaitedBreath" xml:space="preserve">
+    <value>Baited Breath</value>
+  </data>
+  <data name="VeteranTrade" xml:space="preserve">
+    <value>Veteran Trade</value>
+  </data>
+  <data name="VitalSight" xml:space="preserve">
+    <value>Vital Sight</value>
+  </data>
 </root>

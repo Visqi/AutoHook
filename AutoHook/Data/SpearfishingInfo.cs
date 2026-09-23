@@ -24,6 +24,9 @@ public sealed class SpearfishingInfo {
 
     public int GetFishCaughtCount(uint fishId) => FishCaughtCounts.TryGetValue(fishId, out var c) ? c : 0;
 
+    public int FishOnScreenCount
+        => (Lane0.Available ? 1 : 0) + (Lane1.Available ? 1 : 0) + (Lane2.Available ? 1 : 0);
+
     public FishInfo GetLane(int index) => index switch {
         0 => Lane0,
         1 => Lane1,

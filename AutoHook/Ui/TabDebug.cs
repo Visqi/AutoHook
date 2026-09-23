@@ -137,6 +137,7 @@ public class TabDebug : BaseTab {
                         ("Lane 0", FormatFishInfo(sf.Lane0)),
                         ("Lane 1", FormatFishInfo(sf.Lane1)),
                         ("Lane 2", FormatFishInfo(sf.Lane2)),
+                        ("Fish on screen", sf.FishOnScreenCount.ToString()),
                         ("Last catch", sf.LastCatchFishId == 0 ? "-" : $"{Item.GetRow(sf.LastCatchFishId).Name} ×{sf.LastCatchAmount}"),
                     ]);
 
