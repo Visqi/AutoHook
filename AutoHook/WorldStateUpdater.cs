@@ -532,7 +532,7 @@ public sealed class WorldStateUpdater : IDisposable {
             CurrentSpotId = routeRow.Spot[zoneIndex].RowId,
             CurrentTimeId = timeId,
             TimeLeftInZone = Math.Max(0f, EventFramework.Instance()->GetInstanceContentDirector()->ContentTimeLeft - ptr->TimeOffset),
-            ZoneTimeMax = ptr->GetContentTimeMax(),
+            ZoneTimeMax = ptr->Duration,
             Mission1 = new OceanMission(ptr->Mission1Type, ptr->Mission1Progress),
             Mission2 = new OceanMission(ptr->Mission2Type, ptr->Mission2Progress),
             Mission3 = new OceanMission(ptr->Mission3Type, ptr->Mission3Progress),

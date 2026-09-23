@@ -1,6 +1,6 @@
 using clib.TaskSystem;
 using Dalamud.Game.ClientState.Objects.SubKinds;
-using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using System.Numerics;
 
 namespace AutoHook.Tasks;
@@ -15,7 +15,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
         new("Right", -7.25f, -7f, 6.711f, -11f, 3.5f),
     ];
 
-    private bool IsZoneStarted() => Service.WorldState.OceanFishing.Status is InstanceContentOceanFishing.OceanFishingStatus.Fishing;
+    private static WorldState Ws => Service.WorldState;
 
     protected override async Task Execute() {
         using var scope = BeginScope(nameof(AutoOceanFish));
@@ -25,6 +25,10 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
             Status = "Walking to railing";
             Service.PrintDebug("[AutoOceanFish] Walking to railing");
             await WalkToRailing();
+            if (ShouldCancelMovement()) {
+                Service.PrintDebug("[AutoOceanFish] Aborting after walk");
+                return;
+            }
         }
 
         Status = "Starting fishing";
@@ -45,7 +49,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
         using var scope = BeginScope(nameof(WalkToRailing));
         var position = GetFishingPosition();
         var rotation = position.X > 0 ? 1.5f : -1.5f;
-        await MoveToDirectly(position, 0.25f);
+        await MoveToDirectly(position, () => Player.DistanceTo(position) < 0.25f || ShouldCancelMovement());
         unsafe {
             Svc.Objects.LocalPlayer?.Character->SetRotation(rotation);
         }
@@ -68,7 +72,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
             var step = Player.Position + Vector3.Normalize(away) * NudgeStepDistance;
             ClampToValidFishingRegions(ref step, onLeft);
 
-            await MoveToDirectly(step, 0.1f);
+            await MoveToDirectly(step, () => Player.DistanceTo(step) < 0.1f || ShouldCancelMovement());
             unsafe {
                 Svc.Objects.LocalPlayer?.Character->SetRotation(rotation);
             }
@@ -90,6 +94,9 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
         });
         step.Z = Math.Clamp(z, nearest.MinZ, nearest.MaxZ);
     }
+
+    private static bool ShouldCancelMovement()
+        => !Service.Configuration.PluginEnabled || Ws.Fishing.FishingState is not FishingState.None || Ws.OceanFishing.TimeLeftInZone != 0 && Ws.OceanFishing.TimeLeftInZone < Ws.OceanFishing.ZoneTimeMax - 5;
 }
 
 internal readonly record struct FishingSpotRegion(string Name, float MinX, float MaxX, float Y, float MinZ, float MaxZ) {

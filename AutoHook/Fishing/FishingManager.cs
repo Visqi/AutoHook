@@ -249,6 +249,9 @@ public partial class FishingManager : IDisposable {
 
     private void OnFrameworkUpdate(IFramework _) {
         if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null) {
+            if (!Service.Configuration.PluginEnabled && Svc.Automation.CurrentTask is AutoOceanFish)
+                Svc.Automation.Stop();
+
             var sf = Ws.Spearfishing;
             if (sf.SessionActive || sf.WindowOpen || !sf.Spot.IsEmpty || sf.Wariness != 0)
                 Ws.Execute(new SpearfishingInfo.OpEndSession());
@@ -256,6 +259,11 @@ public partial class FishingManager : IDisposable {
         }
 
         Service.WorldStateUpdater.Update();
+
+        if (Svc.Automation.CurrentTask is AutoOceanFish && Ws.Fishing.FishingState != FishingState.None) {
+            Service.PrintDebug("[AutoOceanFish] Stopping automation (already fishing)");
+            Svc.Automation.Stop();
+        }
 
         if (Player.ClassJob.RowId != FisherJobId) {
             ClearWorldState();
