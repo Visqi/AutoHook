@@ -83,10 +83,7 @@ public sealed class ReplayManager : IDisposable {
             ws.BeganSession.Subscribe(_ => TryAutoStart()),
             ws.TerritoryChanged.Subscribe(OnTerritoryChanged),
             ws.OceanZoneStarted.Subscribe(_ => TryAutoStart()),
-            ws.EndedSession.Subscribe(_ => {
-                if (TerritoryType.GetRow(Service.WorldState.TerritoryId).TerritoryIntendedUse.Value.StructsEnum is TerritoryIntendedUse.OceanFishing)
-                    TryAutoStop();
-            }),
+            ws.EndedSession.Subscribe(_ => TryAutoStop()),
             ws.SpearfishingSessionStarted.Subscribe(_ => TryAutoStart()),
             ws.SpearfishingSessionEnded.Subscribe(_ => TryAutoStop()));
 
