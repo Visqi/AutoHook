@@ -744,9 +744,11 @@ public sealed class WorldStateUpdater : IDisposable {
         }
     }
 
-    private const byte GpLoss = 12;
     private const byte GpGain = 13;
-    private readonly Dictionary<(uint Seq, byte TargetIndex), int> _pending = [];
+    private readonly Dictionary<(uint Seq, byte TargetIndex), int> _pendingGp = [];
+
+    public bool HasPendingGp => _pendingGp.Count > 0;
+
     private unsafe void ActionEffectDetour(uint casterEntityId, Character* casterPtr, Vector3* targetPos, ActionEffectHandler.Header* header, ActionEffectHandler.TargetEffects* effects, GameObjectId* targetEntityIds) {
         var me = UIState.Instance()->PlayerState.EntityId;
         for (var i = 0; i < header->NumTargets; i++) {
@@ -754,13 +756,13 @@ public sealed class WorldStateUpdater : IDisposable {
             var te = effects[i];
             for (var j = 0; j < 8; j++) {
                 var e = te.Effects[j];
-                if (e.Type is not (GpLoss or GpGain))
+                if (e.Type != GpGain)
                     continue;
                 var atSource = (e.Param4 & 0x80) != 0;
                 var affectsSelf = atSource ? casterEntityId == me : targetId == me;
                 if (!affectsSelf)
                     continue;
-                _pending[(header->GlobalSequence, (byte)i)] = e.Type == GpGain ? e.Value : -e.Value;
+                _pendingGp[(header->GlobalSequence, (byte)i)] = e.Value;
             }
         }
         _receiveActionEffectHook!.Original(casterEntityId, casterPtr, targetPos, header, effects, targetEntityIds);
@@ -771,7 +773,7 @@ public sealed class WorldStateUpdater : IDisposable {
             var count = packet[0];
             var p = (EffectResultEntry*)(packet + 4);
             for (var i = 0; i < count; i++, p++)
-                _pending.Remove((p->RelatedActionSequence, p->RelatedTargetIndex));
+                _pendingGp.Remove((p->RelatedActionSequence, p->RelatedTargetIndex));
         }
         _effectResultHook!.Original(targetId, packet, replaying);
     }
