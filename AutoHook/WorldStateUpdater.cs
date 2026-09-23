@@ -8,6 +8,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
 using FFXIVClientStructs.FFXIV.Client.Network;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
@@ -15,7 +16,9 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.Interop;
 using Lumina.Excel.Sheets;
+using System.Numerics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using AchievementStruct = FFXIVClientStructs.FFXIV.Client.Game.UI.Achievement;
 
 namespace AutoHook;
@@ -37,6 +40,9 @@ public sealed class WorldStateUpdater : IDisposable {
     private readonly Hook<FishingEventHandler.Delegates.PlayAnimation>? _playAnimationHook;
     private readonly Hook<PacketDispatcher.Delegates.HandleActorControlPacket>? _handleActorControlPacketHook;
     private readonly Hook<AchievementStruct.Delegates.ReceiveAchievementProgress>? _receiveAchievementProgressHook;
+    private readonly Hook<ActionEffectHandler.Delegates.Receive>? _receiveActionEffectHook;
+    private delegate void EffectResultDetourDelegate(uint targetId, byte* packet, byte replaying);
+    private readonly Hook<EffectResultDetourDelegate>? _effectResultHook;
     private static IReadOnlyList<Lumina.Excel.Sheets.Action> FshActions = [];
     private static readonly (uint Id, ActionType Type)[] TrackedFishingActions = BuildTrackedFishingActions();
     private static readonly (uint Id, ActionType Type)[] TrackedAutoCastItems =
@@ -70,11 +76,15 @@ public sealed class WorldStateUpdater : IDisposable {
         _playAnimationHook = Svc.Hook.HookFromAddress<FishingEventHandler.Delegates.PlayAnimation>((nint)FishingEventHandler.StaticVirtualTablePointer->PlayAnimation, PlayAnimationDetour);
         _handleActorControlPacketHook = Svc.Hook.HookFromAddress<PacketDispatcher.Delegates.HandleActorControlPacket>((nint)PacketDispatcher.MemberFunctionPointers.HandleActorControlPacket, HandleActorControlPacketDetour);
         _receiveAchievementProgressHook = Svc.Hook.HookFromAddress<AchievementStruct.Delegates.ReceiveAchievementProgress>((nint)AchievementStruct.MemberFunctionPointers.ReceiveAchievementProgress, ReceiveAchievementProgressDetour);
+        _receiveActionEffectHook = Svc.Hook.HookFromAddress<ActionEffectHandler.Delegates.Receive>((nint)ActionEffectHandler.MemberFunctionPointers.Receive, ActionEffectDetour);
+        _effectResultHook = Svc.Hook.HookFromSignature<EffectResultDetourDelegate>("48 8B C4 44 88 40 18 89 48 08", EffectResultDetour);
         _updateCatchHook?.Enable();
         _useActionHook?.Enable();
         _playAnimationHook?.Enable();
         _handleActorControlPacketHook?.Enable();
         _receiveAchievementProgressHook?.Enable();
+        _receiveActionEffectHook?.Enable();
+        _effectResultHook?.Enable();
         FshActions = ClassJob.Get(18).GetActions();
 
         Svc.GameInventory.InventoryChanged += OnInventoryChanged;
@@ -86,6 +96,8 @@ public sealed class WorldStateUpdater : IDisposable {
         _playAnimationHook?.Dispose();
         _handleActorControlPacketHook?.Dispose();
         _receiveAchievementProgressHook?.Dispose();
+        _receiveActionEffectHook?.Dispose();
+        _effectResultHook?.Dispose();
         Svc.GameInventory.InventoryChanged -= OnInventoryChanged;
     }
 
@@ -566,7 +578,7 @@ public sealed class WorldStateUpdater : IDisposable {
                     baitId = cosmic->State.FishingBait;
             }
             else
-                baitId = FFXIVClientStructs.FFXIV.Client.Game.UI.PlayerState.Instance()->FishingBait;
+                baitId = PlayerState.Instance()->FishingBait;
 
             var ef = EventFramework.Instance();
             var handler = ef != null ? ef->EventHandlerModule.FishingEventHandler : null;
@@ -730,6 +742,52 @@ public sealed class WorldStateUpdater : IDisposable {
                 _needInventoryUpdate = true;
                 break;
         }
+    }
+
+    private const byte GpLoss = 12;
+    private const byte GpGain = 13;
+    private readonly Dictionary<(uint Seq, byte TargetIndex), int> _pending = [];
+    private unsafe void ActionEffectDetour(uint casterEntityId, Character* casterPtr, Vector3* targetPos, ActionEffectHandler.Header* header, ActionEffectHandler.TargetEffects* effects, GameObjectId* targetEntityIds) {
+        var me = UIState.Instance()->PlayerState.EntityId;
+        for (var i = 0; i < header->NumTargets; i++) {
+            var targetId = targetEntityIds[i].ObjectId;
+            var te = effects[i];
+            for (var j = 0; j < 8; j++) {
+                var e = te.Effects[j];
+                if (e.Type is not (GpLoss or GpGain))
+                    continue;
+                var atSource = (e.Param4 & 0x80) != 0;
+                var affectsSelf = atSource ? casterEntityId == me : targetId == me;
+                if (!affectsSelf)
+                    continue;
+                _pending[(header->GlobalSequence, (byte)i)] = e.Type == GpGain ? e.Value : -e.Value;
+            }
+        }
+        _receiveActionEffectHook!.Original(casterEntityId, casterPtr, targetPos, header, effects, targetEntityIds);
+    }
+
+    private unsafe void EffectResultDetour(uint targetId, byte* packet, byte replaying) {
+        if (targetId == UIState.Instance()->PlayerState.EntityId) {
+            var count = packet[0];
+            var p = (EffectResultEntry*)(packet + 4);
+            for (var i = 0; i < count; i++, p++)
+                _pending.Remove((p->RelatedActionSequence, p->RelatedTargetIndex));
+        }
+        _effectResultHook!.Original(targetId, packet, replaying);
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    private struct EffectResultEntry {
+        public uint RelatedActionSequence;
+        public uint ActorID;
+        public uint CurHP;
+        public uint MaxHP;
+        public ushort CurMP;
+        public byte RelatedTargetIndex;
+        public byte ClassID;
+        public byte ShieldValue;
+        public byte EffectCount;
+        public ushort Pad;
     }
 
     private static readonly HashSet<uint> FishIdSet = [];
