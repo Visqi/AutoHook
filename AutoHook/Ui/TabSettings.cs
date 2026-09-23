@@ -82,8 +82,8 @@ public class TabSettings : BaseTab {
 
         var goal = Service.Configuration.AutoOceanFishGoal;
 
-        if (ImGui.RadioButton(UIStrings.OceanFishGoal_Points, goal == OceanFishGoalKind.Points)) {
-            Service.Configuration.AutoOceanFishGoal = OceanFishGoalKind.Points;
+        if (ImGui.RadioButton(UIStrings.OceanFishGoal_Levelling, goal == OceanFishGoalKind.Levelling)) {
+            Service.Configuration.AutoOceanFishGoal = OceanFishGoalKind.Levelling;
             Service.Save();
         }
         ImGui.SameLine();
@@ -97,8 +97,8 @@ public class TabSettings : BaseTab {
             Service.Save();
         }
         ImGui.SameLine();
-        if (ImGui.RadioButton(UIStrings.OceanFishGoal_Levelling, goal == OceanFishGoalKind.Levelling)) {
-            Service.Configuration.AutoOceanFishGoal = OceanFishGoalKind.Levelling;
+        if (ImGui.RadioButton(UIStrings.OceanFishGoal_Points, goal == OceanFishGoalKind.Points)) {
+            Service.Configuration.AutoOceanFishGoal = OceanFishGoalKind.Points;
             Service.Save();
         }
     }

@@ -51,20 +51,20 @@ public static class OceanGoalCatalog {
         switch (settingsGoal) {
             case OceanFishGoalKind.Achievement:
                 yield return OceanFishGoalKind.Achievement;
-                yield return OceanFishGoalKind.Legendary;
                 yield return OceanFishGoalKind.Levelling;
+                yield return OceanFishGoalKind.Legendary;
                 yield return OceanFishGoalKind.Points;
                 break;
             case OceanFishGoalKind.Levelling:
                 yield return OceanFishGoalKind.Levelling;
-                yield return OceanFishGoalKind.Legendary;
                 yield return OceanFishGoalKind.Achievement;
+                yield return OceanFishGoalKind.Legendary;
                 yield return OceanFishGoalKind.Points;
                 break;
             case OceanFishGoalKind.Legendary:
                 yield return OceanFishGoalKind.Legendary;
-                yield return OceanFishGoalKind.Achievement;
                 yield return OceanFishGoalKind.Levelling;
+                yield return OceanFishGoalKind.Achievement;
                 yield return OceanFishGoalKind.Points;
                 break;
             default:
