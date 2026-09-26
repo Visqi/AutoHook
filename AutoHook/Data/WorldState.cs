@@ -209,21 +209,6 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
             => output.EmitFourCC("BLKC").Emit(Block);
     }
 
-    public sealed record OpSetFishingStep(FishingSteps Step, bool Or = false) : Operation {
-        protected override void Exec(WorldState ws)
-            => ws.Fishing.FishingStep = Or ? ws.Fishing.FishingStep | Step : Step;
-
-        public override void Write(Replay.ReplayOutput output)
-            => output.EmitFourCC("FSTP").Emit((uint)Step).Emit(Or);
-    }
-
-    public sealed record OpClearFishingStepFlag(FishingSteps Flag) : Operation {
-        protected override void Exec(WorldState ws) => ws.Fishing.FishingStep &= ~Flag;
-
-        public override void Write(Replay.ReplayOutput output)
-            => output.EmitFourCC("FCLR").Emit((uint)Flag);
-    }
-
     public sealed record OpDecision(DecisionContext Context, bool Success, string PresetName, string Action, string Detail) : Operation {
         protected override void Exec(WorldState ws) { }
 

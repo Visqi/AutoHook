@@ -21,11 +21,11 @@ public sealed class SingleCondition<TCD, TValue>(Func<object?>? context = null) 
         var p = Definition.ToParams(value, context?.Invoke());
         if (p == null || p.Count == 0) {
             var set = BackingSet;
-            set = SingleConditionSetHelper.SetSingleCondition(set, Definition.Id, null);
-            BackingSet = SingleConditionSetHelper.CompactOrNull(set);
+            set = ConditionSetUtil.SetSingleCondition(set, Definition.Id, null);
+            BackingSet = ConditionSetUtil.CompactOrNull(set);
         }
         else {
-            BackingSet = SingleConditionSetHelper.SetSingleCondition(BackingSet, Definition.Id, p);
+            BackingSet = ConditionSetUtil.SetSingleCondition(BackingSet, Definition.Id, p);
         }
     }
 }

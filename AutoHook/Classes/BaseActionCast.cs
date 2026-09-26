@@ -3,7 +3,6 @@ using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
-using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using System.ComponentModel;
 using System.Numerics;
@@ -87,9 +86,6 @@ public abstract class BaseActionCast {
         var currentGp = Service.WorldState.Player.CurrentGp;
         var hasGp = GpThresholdAbove ? currentGp >= GpThreshold : currentGp <= GpThreshold;
         var actionAvailable = Service.WorldState.ActionAvailable(Id, ActionType);
-
-        if (EzThrottler.Throttle("LogActions", 1000))
-            Service.PrintDebug(@$"[BaseAction] {GetName()} - GpCheck:{hasGp}, ActionAvailable: {actionAvailable}, OtherConditions: {condition}");
 
         if (!condition) {
             if (ConditionSet != null && !ConditionSet.PassesOrUnconfigured())

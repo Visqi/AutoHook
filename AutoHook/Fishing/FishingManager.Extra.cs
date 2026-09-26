@@ -257,8 +257,8 @@ public partial class FishingManager {
                     break;
                 }
 
-                Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.PresetSwapped));
-                Ws.Execute(new WorldState.OpClearFishingStepFlag(FishingSteps.BaitSwapped));
+                Ws.Execute(new FishingInfo.OpClearFishingStepFlag(FishingSteps.PresetSwapped));
+                Ws.Execute(new FishingInfo.OpClearFishingStepFlag(FishingSteps.BaitSwapped));
 
                 involvedPresetIds.Add(GetExtraOwnerPreset().UniqueId);
 
@@ -277,7 +277,7 @@ public partial class FishingManager {
             }
 
             if (anyPresetSwapped)
-                Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
+                Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
         }
         finally {
             SettleIntuitionEdges();
@@ -301,7 +301,6 @@ public partial class FishingManager {
 
         var presetList = involvedNames.Count > 0 ? string.Join(", ", involvedNames) : UIStrings.UnknownPresets;
         Service.PrintChat(string.Format(UIStrings.Extra_PresetSwapLoop_Bailout, presetList));
-        Service.PrintDebug($"[Extra.{nameof(SwapLoopBailout)}] {_presetSwapCap} iterations; involved: {presetList}");
     }
 
     private void RunExtraTriggers(ExtraConfig extraCfg) {
@@ -333,10 +332,10 @@ public partial class FishingManager {
     private void ExecuteExtraTriggerActions(ExtraConfig extraCfg, ExtraTrigger trig) {
         // Stop/quit fishing
         if (trig.StopAction == ExtraStopAction.StopOnly) {
-            Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.None));
+            Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.None));
         }
         else if (trig.StopAction == ExtraStopAction.QuitFishing) {
-            Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.Quitting));
+            Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.Quitting));
         }
 
         if (trig.ResetFishCaughtCounter) {
@@ -347,13 +346,13 @@ public partial class FishingManager {
         // Swap preset
         if (trig.SwapPreset && !Ws.Fishing.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
             if (Presets.CurrentPreset.PresetName == trig.PresetToSwap) {
-                Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
+                Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
                 FindPresetByName(trig.PresetToSwap)?.TryResetCounter();
             }
             else {
                 var preset = FindPresetByName(trig.PresetToSwap);
 
-                Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
+                Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
 
                 if (preset != null) {
                     Service.Save();
@@ -371,7 +370,7 @@ public partial class FishingManager {
         // Swap bait
         if (trig.SwapBait && !Ws.Fishing.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
             var result = ChangeBait(trig.BaitToSwap);
-            Ws.Execute(new WorldState.OpSetFishingStep(FishingSteps.BaitSwapped, Or: true));
+            Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.BaitSwapped, Or: true));
 
             if (result is ChangeBaitReturn.Success or ChangeBaitReturn.AlreadyEquipped) {
                 Service.PrintChat(@$"[Extra] Trigger: Swapping bait to {trig.BaitToSwap.Name}");

@@ -7,7 +7,7 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Newtonsoft.Json;
 using static AutoHook.Conditions.ConditionRegistry;
-using static AutoHook.Conditions.IConditionDefinition;
+using static AutoHook.Conditions.ConditionParams;
 
 namespace AutoHook.Ui;
 

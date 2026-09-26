@@ -1,6 +1,6 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
-using static AutoHook.Conditions.IConditionDefinition;
+using static AutoHook.Conditions.ConditionParams;
 
 namespace AutoHook.Conditions;
 

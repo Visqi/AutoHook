@@ -211,7 +211,6 @@ public partial class FishingManager : IDisposable {
                 : @$"Hooking with: {hookCfgName} {buffStatus}";
 
             Service.Status = message;
-            Service.PrintDebug(@$"[HookManager] {message}");
         }
     }
 
@@ -416,12 +415,6 @@ public partial class FishingManager : IDisposable {
         Ws.Execute(new FishingInfo.OpSetLastLureCastBiteTime(null));
         Ws.Execute(new FishingInfo.OpBiteContext(0, Ws.Player.HasStatus(IDs.Status.Chum)));
 
-        var baitname = Item.GetRow(Ws.Fishing.BaitInfo.MoochId).Name.ToString();
-        if (!mooching)
-            Service.PrintDebug(@$"Started fishing with normal bait: {baitname}");
-        else
-            Service.PrintDebug(@$"Started mooching/swimbait with {baitname}");
-
         Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.BeganFishing));
         if (_stopAfterNextFish == StopAfterState.Pending)
             _stopAfterNextFish = StopAfterState.Armed;
@@ -514,7 +507,6 @@ public partial class FishingManager : IDisposable {
         var currentHook = GetHookCfg();
 
         Service.LastCatch = lastCatchFish;
-        Service.PrintDebug(@$"[HookManager] Caught {lastCatchFish.Name} (id {lastCatchFish.Id})");
 
         if (lastFishCatchCfg != null) {
             for (var i = 0; i < amount; i++)

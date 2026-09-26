@@ -5,7 +5,7 @@ using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
 using LuminaAction = Lumina.Excel.Sheets.Action;
-using static AutoHook.Conditions.IConditionDefinition;
+using static AutoHook.Conditions.ConditionParams;
 
 namespace AutoHook.Conditions.Definitions;
 

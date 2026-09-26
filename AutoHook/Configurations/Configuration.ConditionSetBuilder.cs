@@ -60,7 +60,7 @@ public partial class Configuration {
         }
 
         public static ConditionSet SingleFishCaughtCount(int fishId, int limit) {
-            var dict = new IConditionDefinition.IntCompareParams(limit, ">=", false).ToParams();
+            var dict = new ConditionParams.IntCompareParams(limit, ">=", false).ToParams();
             if (fishId > 0)
                 dict["id"] = (long)fishId;
             var cond = new Condition {
@@ -72,7 +72,7 @@ public partial class Configuration {
         }
 
         public static ConditionSet SingleHookCount(Guid hookGuid, int limit) {
-            var dict = new IConditionDefinition.IntCompareParams(limit, ">=", false).ToParams();
+            var dict = new ConditionParams.IntCompareParams(limit, ">=", false).ToParams();
             if (hookGuid != Guid.Empty)
                 dict["guid"] = hookGuid.ToString();
             var cond = new Condition {
@@ -119,7 +119,7 @@ public partial class Configuration {
         }
 
         public static Condition Gp(int value, string op = ">=") {
-            var dict = new IConditionDefinition.IntCompareParams(value, op, false).ToParams();
+            var dict = new ConditionParams.IntCompareParams(value, op, false).ToParams();
             return new Condition {
                 TypeId = Registry.GetId<GpCD>(),
                 Params = dict,
@@ -173,7 +173,7 @@ public partial class Configuration {
         }
 
         public static Condition FishCount(int fishId, int count, string op = ">=") {
-            var dict = new IConditionDefinition.IntCompareParams(count, op, false).ToParams();
+            var dict = new ConditionParams.IntCompareParams(count, op, false).ToParams();
             dict["id"] = (long)fishId;
             return new Condition {
                 TypeId = Registry.GetId<FishCaughtCounterCD>(),

@@ -22,13 +22,11 @@ public sealed class AutoMooch : BaseActionCast {
             return false;
 
         if (Mooch2.IsAvailableToCast()) {
-            Service.PrintDebug(@$"Mooch2 Available, casting mooch2");
             Id = IDs.Actions.Mooch2;
             return true;
         }
 
         if (Service.WorldState.ActionAvailable(IDs.Actions.Mooch)) {
-            Service.PrintDebug(@$"Mooch Available, casting normal mooch");
             Id = IDs.Actions.Mooch;
             return true;
         }
