@@ -34,7 +34,6 @@ public partial class FishingManager : IDisposable {
             return;
 
         _stopAfterNextFish = Ws.Fishing.FishingStep.HasFlag(FishingSteps.BeganFishing) ? StopAfterState.Armed : StopAfterState.Pending;
-        Service.PrintDebug("[AutoHook] Stop after next fish or fishing attempt scheduled.");
     }
 
     private void ClearStopAfterNextFish() => _stopAfterNextFish = StopAfterState.None;
@@ -45,7 +44,6 @@ public partial class FishingManager : IDisposable {
 
         ClearStopAfterNextFish();
         Service.Configuration.PluginEnabled = false;
-        Service.PrintDebug("[AutoHook] Stopped after fishing attempt.");
         return true;
     }
 
@@ -74,28 +72,29 @@ public partial class FishingManager : IDisposable {
 
     private void OnOceanZoneStarted(WorldState.OpOceanZoneStarted op) {
         var ocean = Ws.OceanFishing;
-        Service.PrintDebug($"[AutoOceanFish] OnZoneStarted zone={op.ZoneIndex + 1}, {OceanStopUtil.FormatStateLog(ocean)}");
 
         if (ocean != OceanFishingState.Empty) // prefetch immediately so it's cached by the time we're at the railing (hopefully)
             OceanGoalCatalog.PrefetchRouteAchievements(ocean.CurrentRoute);
 
         if (!Service.Configuration.PluginEnabled) {
-            Service.PrintDebug("[AutoOceanFish] Task not started: plugin disabled");
+            Ws.Decide(DecisionContext.OceanPreset, false, "Task not started", "plugin disabled");
             return;
         }
 
         if (!Service.Configuration.AutoOceanFish) {
-            Service.PrintDebug("[AutoOceanFish] Task not started: Auto ocean fishing disabled in Settings");
+            Ws.Decide(DecisionContext.OceanPreset, false, "Task not started", "Auto ocean fishing disabled");
             return;
         }
 
         if (Svc.Automation.CurrentTask is AutoOceanFish existing) {
-            Service.PrintDebug($"[AutoOceanFish] Task not started: AutoOceanFish already running (zone {existing.ZoneIndex + 1})");
+            Ws.Decide(DecisionContext.OceanPreset, false, "Task not started",
+                $"already running (zone {existing.ZoneIndex + 1})");
             return;
         }
 
         Svc.Automation.Start(new AutoOceanFish(this, op.ZoneIndex));
-        Service.PrintDebug($"[AutoOceanFish] Task started for zone {op.ZoneIndex + 1}");
+        Ws.Decide(DecisionContext.OceanPreset, true, "Task started",
+            OceanStopUtil.FormatStateLog(ocean));
     }
 
     private void OnSpectralCurrentChanged(WorldState.OpSpectralCurrentChanged op) {
@@ -268,7 +267,7 @@ public partial class FishingManager : IDisposable {
         Service.WorldStateUpdater.Update();
 
         if (Svc.Automation.CurrentTask is AutoOceanFish && Ws.Fishing.FishingState != FishingState.None) {
-            Service.PrintDebug("[AutoOceanFish] Stopping automation (already fishing)");
+            Ws.Decide(DecisionContext.OceanPreset, true, "Stop task", "already fishing");
             Svc.Automation.Stop();
         }
 

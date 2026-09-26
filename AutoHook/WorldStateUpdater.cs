@@ -702,7 +702,7 @@ public sealed class WorldStateUpdater : IDisposable {
                 Service.WorldState.Execute(new FishingInfo.OpPlayerUsedAction(new UsedAction(actionId, actionType)));
         }
         catch (Exception e) {
-            Service.PrintDebug($"[WorldStateUpdater] UseAction: {e.Message}");
+            Svc.Log.Warning(e, "[WorldStateUpdater] UseAction");
         }
         return _useActionHook!.Original(thisPtr, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
     }
@@ -710,7 +710,6 @@ public sealed class WorldStateUpdater : IDisposable {
     private unsafe void UpdateCatchDetour(AgentCatch* thisPtr, uint itemId, bool isLarge, ushort size, byte amount, byte level, byte stars, byte oceanStars, bool isMoochable, bool isFirstTimeCatch, byte a11, byte a12) {
         _updateCatchHook!.Original(thisPtr, itemId, isLarge, size, amount, level, stars, oceanStars, isMoochable, isFirstTimeCatch, a11, a12);
         if (ItemUtil.GetBaseId(itemId) is { ItemId: > 0 and var id }) {
-            Service.PrintDebug($"Caught fish: {id}, amount: {amount}, large: {isLarge}, size: {size}, level: {level}, stars: {stars}, oceanStars: {oceanStars}, moochable: {isMoochable}, firstTimeCatch: {isFirstTimeCatch}");
             Service.WorldState.Execute(new FishingInfo.OpSetLastCatch(new CatchInfo(id, amount, isLarge, size, level, stars, oceanStars, isMoochable, isFirstTimeCatch)));
         }
         Service.WorldState.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.FishCaught));

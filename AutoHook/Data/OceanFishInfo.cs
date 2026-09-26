@@ -100,7 +100,6 @@ public sealed class OceanFishInfo {
 
     private IEnumerable<WorldState.Operation> TickZoneStarted(OceanFishingState state) {
         if (_lastOceanStatus != InstanceContentOceanFishing.OceanFishingStatus.Fishing && state.Status == InstanceContentOceanFishing.OceanFishingStatus.Fishing) {
-            Service.PrintDebug($"[OceanZone] ZoneStarted ({_lastOceanStatus} -> {state.Status}), {OceanStopUtil.FormatStateLog(state)}");
             yield return new WorldState.OpOceanZoneStarted(state.CurrentZone);
         }
 

@@ -76,11 +76,8 @@ public class SubTabAutoCast {
 
         if (DrawUtil.Checkbox(UIStrings.Dont_Cancel_Mooch, ref acCfg.DontCancelMooch,
                 UIStrings.TabAutoCasts_DrawHeader_HelpText)) {
-            foreach (var action in _actionsAvailable.Where(action => action != null)) {
+            foreach (var action in _actionsAvailable.Where(action => action != null))
                 action.DontCancelMooch = acCfg.DontCancelMooch;
-
-                Service.PrintDebug($"{action.GetName()} DontCancelMooch: {action.DontCancelMooch}");
-            }
         }
 
         if (!_preset.IsGlobal) {

@@ -20,23 +20,17 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
     protected override async Task Execute() {
         using var scope = BeginScope(nameof(AutoOceanFish));
         var walk = ZoneIndex == 0 && Service.Configuration.AOF_WalkToRailing;
-        Service.PrintDebug($"[AutoOceanFish] Task execute zone={ZoneIndex + 1}, walkToRailing={walk}");
 
         if (walk) {
             Status = "Walking to railing";
-            Service.PrintDebug("[AutoOceanFish] Walking to railing");
             await WalkToRailing();
-            if (ShouldCancelMovement()) {
-                Service.PrintDebug("[AutoOceanFish] Aborting after walk");
+            if (ShouldCancelMovement())
                 return;
-            }
         }
 
         Status = "Starting fishing";
         await WaitUntil(() => Service.WorldState.Fishing.CanFish, "WaitForCanFish", checkFrequency: 50);
-        Service.PrintDebug("[AutoOceanFish] Calling StartFishing");
         fishingManager.StartFishing();
-        Service.PrintDebug("[AutoOceanFish] StartFishing returned");
     }
 
     // https://github.com/Knightmore/Henchman/blob/4aa8cf33b6164536acca81afefa0df5da6740e89/Henchman/Features/OnABoat/OnABoat.cs#L120

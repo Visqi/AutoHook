@@ -140,8 +140,7 @@ public abstract class BaseActionCast {
         using var cfgId = ImRaii.PushId(@$"{GetType().Name}_cfg");
 
         if (DrawOptions != null) {
-            if (DrawUtil.Checkbox(@$"###{GetType().Name}", ref Enabled, GetHelpText(), true))
-                Service.PrintDebug(@$"[BaseAction] {GetName()} - {(Enabled ? @"Enabled" : @"Disabled")}");
+            DrawUtil.Checkbox(@$"###{GetType().Name}", ref Enabled, GetHelpText(), true);
 
             ImGui.SameLine(0, 3.Scaled());
 
@@ -168,8 +167,7 @@ public abstract class BaseActionCast {
             }
         }
         else {
-            if (DrawUtil.Checkbox(@$"###{GetType().Name}", ref Enabled, GetHelpText(), true))
-                Service.PrintDebug(@$"[BaseAction] {GetName()} - {(Enabled ? @"Enabled" : @"Disabled")}");
+            DrawUtil.Checkbox(@$"###{GetType().Name}", ref Enabled, GetHelpText(), true);
 
             ImGui.SameLine(0, 28.Scaled());
             ImGui.Text(label);

@@ -46,9 +46,8 @@ public static class PlayerRes {
                 return false;
 
             WS.Execute(new WorldState.OpSetBlockCasting(true));
-            Service.PrintDebug(@$"[PlayerResources] Casting Action: {actionName}, Id: {actionId}");
             try { CastAction(actionId, actionType); }
-            catch (Exception e) { Service.PrintDebug(@$"Error casting action: {actionName}, Id: {actionId}, {e}"); }
+            catch (Exception e) { Svc.Log.Error(e, $"Error casting action: {actionName}, Id: {actionId}"); }
 
             DelayNextCast();
             return true;
@@ -61,9 +60,8 @@ public static class PlayerRes {
             return false;
 
         WS.Execute(new WorldState.OpSetBlockCasting(true));
-        Service.PrintDebug(@$"[PlayerResources] Using Item: {actionName}, Id: {actionId}");
         try { UseItems(actionId); }
-        catch (Exception e) { Service.PrintDebug(@$"Error casting action: {actionName}, Id: {actionId}, {e}"); }
+        catch (Exception e) { Svc.Log.Error(e, $"Error using item: {actionName}, Id: {actionId}"); }
         DelayNextCast();
         return true;
     }
@@ -90,10 +88,8 @@ public static class PlayerRes {
         var casted = false;
         if (actionType is ActionType.Action or ActionType.EventAction && WS.ActionAvailable(actionId, actionType)) {
             casted = CastAction(actionId, actionType);
-            if (casted) Service.PrintDebug(@$"[PlayerResources] Casting Action: {actionName}, Id: {actionId}");
         }
         else if (actionType == ActionType.Item && WS.ActionAvailable(actionId, actionType)) {
-            Service.PrintDebug(@$"[PlayerResources] Using Item: {actionName}, Id: {actionId}");
             UseItems(actionId);
             casted = true;
         }
