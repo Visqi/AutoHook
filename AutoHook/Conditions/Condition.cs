@@ -42,19 +42,6 @@ public class Condition {
         return registry.Get(TypeId) is { } def && def.Evaluate(world, Params);
     }
 
-    public (bool Result, List<(string Id, bool Result)> Trace) EvaluateWithTrace(WorldState world, ConditionRegistry registry) {
-        if (!Enabled)
-            return (false, []);
-
-        if (PresetConditionHelper.IsPresetType(TypeId)) {
-            var r = PresetConditionHelper.EvaluateFromTypeId(TypeId, world, Params);
-            return (r, [(TypeId, r)]);
-        }
-
-        var result = registry.Get(TypeId) is { } def && def.Evaluate(world, Params);
-        return (result, [(TypeId, result)]);
-    }
-
     public string Describe(ConditionRegistry registry) {
         if (string.IsNullOrEmpty(TypeId))
             return "(empty)";

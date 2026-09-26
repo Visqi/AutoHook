@@ -118,8 +118,10 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
 
     public void Execute(Operation op) => op.Execute(this);
 
-    public void LogDecision(string context, string presetName, string action, IReadOnlyList<(string ConditionId, bool Result)>? conditionResults = null, string detail = "")
-        => Execute(new OpDecision(context, presetName, action, detail, conditionResults ?? []));
+    public void Decide(DecisionContext context, bool success, string action, string? detail = null, string? preset = null) {
+        var presetName = preset ?? Service.Configuration.HookPresets.SelectedPreset?.PresetName ?? Service.GlobalPresetName;
+        Execute(new OpDecision(context, success, presetName, action, detail ?? ""));
+    }
 
     public IEnumerable<Operation> CompareToInitial() {
         if (CurrentTime != default)
@@ -222,14 +224,16 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
             => output.EmitFourCC("FCLR").Emit((uint)Flag);
     }
 
-    public sealed record OpDecision(string Context, string PresetName, string Action, string Detail, IReadOnlyList<(string ConditionId, bool Result)> ConditionResults) : Operation {
+    public sealed record OpDecision(DecisionContext Context, bool Success, string PresetName, string Action, string Detail) : Operation {
         protected override void Exec(WorldState ws) { }
 
-        public override void Write(Replay.ReplayOutput output) {
-            output.EmitFourCC("DECN").Emit(Context).Emit(PresetName).Emit(Action).Emit(Detail).Emit(ConditionResults.Count);
-            foreach (var (id, result) in ConditionResults)
-                output.Emit(id).Emit(result);
-        }
+        public override void Write(Replay.ReplayOutput output)
+            => output.EmitFourCC("DECN")
+                .Emit((byte)Context)
+                .Emit(Success)
+                .Emit(PresetName)
+                .Emit(Action)
+                .Emit(Detail);
     }
 
     public Event<OpBeganSession> BeganSession = new();

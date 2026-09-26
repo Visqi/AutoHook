@@ -1,4 +1,3 @@
-using AutoHook.Replay;
 using Newtonsoft.Json;
 
 namespace AutoHook.Fishing;
@@ -171,9 +170,7 @@ public class FishingPresets : BasePreset {
         var from = oldPreset?.PresetName ?? Service.GlobalPresetName;
         var to = newPreset?.PresetName ?? Service.GlobalPresetName;
         if (from != to) {
-            DecisionLog.Start("Preset Switch", to)
-                .About($"Reason: {_selectReason ?? ReasonManual}")
-                .Chose($"{from} -> {to}");
+            Service.WorldState.Decide(DecisionContext.PresetSwitch, true, $"{from} -> {to}", $"Reason: {_selectReason ?? ReasonManual}", to);
         }
 
         if (newPreset is CustomPresetConfig { ListOfFish: var fishCaught } && fishCaught.Any(c => c.Fish.IsLocked)) {

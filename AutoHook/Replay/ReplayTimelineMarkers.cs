@@ -37,13 +37,12 @@ public static class ReplayTimelineMarkers {
                             label += $" [{d.Detail}]";
                         if (!string.IsNullOrEmpty(d.PresetName))
                             label += $" ({d.PresetName})";
-                        markers.Add(new(op.Timestamp, 0xffffff00, label));
+                        markers.Add(new(op.Timestamp, d.Success ? 0xffffff00 : 0xff808080, label));
                         break;
                     }
                 case FishingInfo.OpPlayerUsedAction act when act.Value.ActionId != 0: {
                         var decision = FindNearestSuccessfulAutoCast(decisions, op.Timestamp, maxDeltaMs: 500);
-                        var extra = decision is { ConditionResults.Count: > 0 } ? DecisionLog.FormatConditionTrace(decision.ConditionResults) : null;
-                        markers.Add(new(op.Timestamp, ActionColor, $"Action: {ActionLabel(act.Value.ActionId)}", extra));
+                        markers.Add(new(op.Timestamp, ActionColor, $"Action: {ActionLabel(act.Value.ActionId)}", string.IsNullOrEmpty(decision?.Detail) ? null : decision!.Detail));
                         break;
                     }
                 case FishingInfo.OpTugType tug when tug.HookStrength != 0:
@@ -51,8 +50,7 @@ public static class ReplayTimelineMarkers {
                     break;
                 case FishingInfo.OpSetLastCatch catchOp when catchOp.Value.FishId > 0: {
                         var c = catchOp.Value;
-                        markers.Add(new(op.Timestamp, 0xffff00ff,
-                            $"Catch: {Item.GetRow(c.FishId).Name} ×{c.Amount}"));
+                        markers.Add(new(op.Timestamp, 0xffff00ff, $"Catch: {Item.GetRow(c.FishId).Name} ×{c.Amount}"));
                         break;
                     }
                 case FishingInfo.OpFishingState fish when fish.Bait.BaitId != prevBaitId && fish.Bait.BaitId != 0:
@@ -66,8 +64,7 @@ public static class ReplayTimelineMarkers {
                         markers.Add(new(op.Timestamp, 0xff66ccff, "Bait swapped (fish-caught rule)"));
                     break;
                 case FishingInfo.OpAddFishCaught fc when fc.FishId > 0:
-                    markers.Add(new(op.Timestamp, 0xff44dd44,
-                        $"Fish counter +{fc.Amount}: {Item.GetRow(fc.FishId).Name}"));
+                    markers.Add(new(op.Timestamp, 0xff44dd44, $"Fish counter +{fc.Amount}: {Item.GetRow(fc.FishId).Name}"));
                     break;
                 case SpearfishingInfo.OpAddFishCaught fc when fc.FishId > 0:
                     markers.Add(new(op.Timestamp, 0xff44dd44, $"Spearfish counter +{fc.Amount}: {Item.GetRow(fc.FishId).Name}"));
@@ -137,13 +134,13 @@ public static class ReplayTimelineMarkers {
 
     // successful auto casts keep markers; failed attempts stay in the decision list only.
     private static bool HasTimelineMarker(WorldState.OpDecision d)
-        => d.Context != UIStrings.Auto_Casts || d.Action.StartsWith("Cast ", StringComparison.Ordinal);
+        => d.Context != DecisionContext.AutoCast || d.Success;
 
     private static WorldState.OpDecision? FindNearestSuccessfulAutoCast(IReadOnlyList<WorldState.OpDecision> decisions, DateTime time, double maxDeltaMs) {
         WorldState.OpDecision? best = null;
         var bestDelta = maxDeltaMs;
         foreach (var d in decisions) {
-            if (d.Context != UIStrings.Auto_Casts || !d.Action.StartsWith("Cast ", StringComparison.Ordinal))
+            if (d.Context != DecisionContext.AutoCast || !d.Success)
                 continue;
             var delta = Math.Abs((d.Timestamp - time).TotalMilliseconds);
             if (delta >= bestDelta)

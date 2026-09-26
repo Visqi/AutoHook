@@ -1,10 +1,10 @@
-using System.IO;
-using System.Threading;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using System.IO;
+using System.Threading;
 
 namespace AutoHook.Replay;
 
@@ -150,9 +150,7 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
         var duration = _reader.ReadSingle();
         var tickSpeed = _reader.ReadSingle();
 
-        var ts = _qpcStart == 0
-            ? _tsStart
-            : _tsStart + TimeSpan.FromSeconds((qpc - _qpcStart) * _invQpf);
+        var ts = _qpcStart == 0 ? _tsStart : _tsStart + TimeSpan.FromSeconds((qpc - _qpcStart) * _invQpf);
         if (_qpcStart == 0)
             _qpcStart = qpc;
 
@@ -309,15 +307,6 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
             _reader.ReadUInt32(), (WKSMissionModule.MissionRank)_reader.ReadByte(),
             _reader.ReadUInt16(), _reader.ReadByte());
 
-    private WorldState.OpDecision ParseDecision() {
-        var context = _reader.ReadString();
-        var preset = _reader.ReadString();
-        var action = _reader.ReadString();
-        var detail = _reader.ReadString();
-        var count = _reader.ReadInt32();
-        var results = new List<(string, bool)>();
-        for (var n = 0; n < count; n++)
-            results.Add((_reader.ReadString(), _reader.ReadBoolean()));
-        return new WorldState.OpDecision(context, preset, action, detail, results);
-    }
+    private WorldState.OpDecision ParseDecision()
+        => new((DecisionContext)_reader.ReadByte(), _reader.ReadBoolean(), _reader.ReadString(), _reader.ReadString(), _reader.ReadString());
 }

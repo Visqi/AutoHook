@@ -1,6 +1,5 @@
 using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
-using AutoHook.Replay;
 using Newtonsoft.Json;
 using System.ComponentModel;
 
@@ -66,7 +65,6 @@ public class AutoCastsConfig {
                 continue;
             }
 
-            Service.PrintDebug($"[AutoCast] Returning {action.GetName()}");
             return action;
         }
 
@@ -116,26 +114,23 @@ public class AutoCastsConfig {
     }
 
     private void LogAutoCastDecision(BaseActionCast action, string? failureReason = null) {
-        var trace = action.ConditionSet?.DescribeEvaluation(Service.WorldState, ConditionRegistry.Registry) ?? [];
+        var detail = failureReason ?? "";
+        var cond = action.ConditionSet?.Describe() ?? "";
         if (action.RequiresTimeWindow() && TimeWindow.BackingSet is { } timeWindow) {
-            var global = timeWindow.DescribeEvaluation(Service.WorldState, ConditionRegistry.Registry);
-            if (global.Count > 0)
-                trace = [.. trace, .. global.Select(t => ($"Global {t.Label}", t.Result))];
+            var global = timeWindow.Describe();
+            if (!string.IsNullOrEmpty(global))
+                cond = string.IsNullOrEmpty(cond) ? $"Global:\n{global}" : $"{cond}\nGlobal:\n{global}";
         }
 
-        var outcome = failureReason == null
-            ? $"Cast {action.GetName()}"
-            : $"Did not cast {action.GetName()} — {failureReason}";
+        if (!string.IsNullOrEmpty(cond))
+            detail = string.IsNullOrEmpty(detail) ? cond : $"{detail}\n{cond}";
 
-        DecisionLog.Start(UIStrings.Auto_Casts)
-            .WithConditionResults(trace)
-            .Chose(outcome);
+        Service.WorldState.Decide(DecisionContext.AutoCast, failureReason == null, action.GetName(),
+            string.IsNullOrEmpty(detail) ? null : detail);
     }
 
     private void TryChumAnimationCancel() {
-        Service.PrintDebug("Trying to cancel chum animation");
         // Make sure Salvage is disabled before chum
-
         Service.TaskManager.EnqueueDelay(40);
         Service.TaskManager.Enqueue(() => PlayerRes.CastAction(IDs.Actions.Chum));
 

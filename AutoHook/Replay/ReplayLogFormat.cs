@@ -1,7 +1,7 @@
 namespace AutoHook.Replay;
 
 public static class ReplayLogFormatMagic {
-    public const int Version = 3;
+    public const int Version = 4;
 
     public static readonly uint CompressedBinary = ToFourCC("AHCB");
 

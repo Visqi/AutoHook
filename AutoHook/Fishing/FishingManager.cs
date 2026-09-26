@@ -1,5 +1,4 @@
 using AutoHook.Conditions;
-using AutoHook.Replay;
 using AutoHook.Tasks;
 using Dalamud.Plugin.Services;
 using ECommons.Throttlers;
@@ -456,8 +455,7 @@ public partial class FishingManager : IDisposable {
         try {
             UpdateStatusAndTimer();
             var currentHook = GetHookCfg();
-            DecisionLog.Start("Hook Preset")
-                .Chose(currentHook.Enabled ? "Enabled preset on bite" : "No enabled preset on bite");
+            Ws.Decide(DecisionContext.Hook, currentHook.Enabled, currentHook.Enabled ? "Enabled on bite" : "Disabled on bite");
             _fishingTimer.Stop();
 
             if (Ws.Player.HasStatus(IDs.Status.Salvage) && GetAutoCastCfg().ChumAnimationCancel)
@@ -485,16 +483,15 @@ public partial class FishingManager : IDisposable {
 
         if (hook is null or HookType.None) {
             delay = _rng.Next(Service.Configuration.DelayBeforeCancelMin, Service.Configuration.DelayBeforeCancelMax);
-            DecisionLog.Start("Hook Preset").Chose($"No hook for {bite} bite");
+            Ws.Decide(DecisionContext.Hook, false, "Rest", $"{bite} bite");
 
             Service.TaskManager.EnqueueDelay(delay);
             Service.TaskManager.Enqueue(() => PlayerRes.CastAction(IDs.Actions.Rest));
             //_lastStep = FishingSteps.Reeling;
-            Service.PrintDebug(@$"[HookManager] No hook found, using Rest");
             return;
         }
 
-        DecisionLog.Start("Hook Preset").Chose($"Use {hook} for {bite} bite");
+        Ws.Decide(DecisionContext.Hook, true, $"{hook}", $"{bite} bite");
         Service.TaskManager.EnqueueDelay(delay);
         Service.TaskManager.Enqueue(() => {
             if (hook == HookType.Stellar)

@@ -1,5 +1,4 @@
 using AutoHook.Conditions;
-using AutoHook.Replay;
 using ECommons.Throttlers;
 using Lumina.Excel.Sheets;
 
@@ -140,9 +139,7 @@ public partial class FishingManager {
         if (Ws.GetSwimbaitCount() is 0)
             return false;
 
-        var intuitionActive = Ws.Fishing.Intuition.IsActive;
         var presetName = Presets.SelectedPreset?.PresetName ?? "(none)";
-        Service.PrintDebug($"[Swimbait] Evaluating slots, preset={presetName}, intuitionActive={intuitionActive}, storedCount={Ws.GetSwimbaitCount()}");
 
         foreach (var (fishId, slotIndex) in Ws.Fishing.SwimbaitIds.ToArray().WithIndex()) {
             if (fishId == 0)
@@ -159,12 +156,6 @@ public partial class FishingManager {
                 var useIntuitionTab = swimbaitMoochConfig.UsesIntuitionHookConfig();
                 activeSwimbaitCfg = swimbaitMoochConfig.GetSwimbaitConfig();
                 configSource = $"preset ({swimbaitMoochConfig.BaitFish.Name}, {(useIntuitionTab ? "intuition" : "normal")} tab)";
-                Service.PrintDebug($"[Swimbait] Fish {fishId}: preset entry found, enabled=true, useIntuitionTab={useIntuitionTab}, " +
-                    $"normalUseSwimbait={swimbaitMoochConfig.SwimbaitNormal.UseSwimbait}, intuitionUseSwimbait={swimbaitMoochConfig.SwimbaitIntuition.UseSwimbait}, " +
-                    $"activeUseSwimbait={activeSwimbaitCfg.UseSwimbait}");
-            }
-            else {
-                Service.PrintDebug($"[Swimbait] Fish {fishId}: no enabled preset entry (found={swimbaitMoochConfig != null}, enabled={swimbaitMoochConfig?.Enabled ?? false})");
             }
 
             if (activeSwimbaitCfg == null || !activeSwimbaitCfg.UseSwimbait) {
@@ -175,24 +166,19 @@ public partial class FishingManager {
                         swimbaitMoochConfig = globalAllMooches;
                         activeSwimbaitCfg = globalCfg;
                         configSource = $"global All Mooches ({(globalAllMooches.UsesIntuitionHookConfig() ? "intuition" : "normal")} tab)";
-                        Service.PrintDebug($"[Swimbait] Fish {fishId}: using global fallback, activeUseSwimbait=true");
                     }
                 }
 
-                if (activeSwimbaitCfg == null || !activeSwimbaitCfg.UseSwimbait) {
-                    Service.PrintDebug($"[Swimbait] Fish {fishId}: no usable config (source={configSource}), trying next slot");
+                if (activeSwimbaitCfg == null || !activeSwimbaitCfg.UseSwimbait)
                     continue;
-                }
             }
 
+            var fishName = fishId == 0 ? "unknown fish" : Item.GetRow(fishId).Name.ToString();
             Ws.SwimbaitEvaluationFishId = fishId;
             try {
                 if (activeSwimbaitCfg.ConditionSet.Fails()) {
-                    var fishName = fishId == 0 ? "unknown fish" : Item.GetRow(fishId).Name.ToString();
-                    DecisionLog.Start("Swimbait", presetName)
-                        .WithConditions(activeSwimbaitCfg.ConditionSet)
-                        .Chose($"Conditions failed for {fishName}");
-                    Service.PrintDebug($"[Swimbait] Fish {fishId}: conditions failed (source={configSource}), trying next slot");
+                    Ws.Decide(DecisionContext.Swimbait, false, fishName,
+                        JoinSwimbaitDetail(configSource, activeSwimbaitCfg.ConditionSet?.Describe()), presetName);
                     continue;
                 }
             }
@@ -201,20 +187,24 @@ public partial class FishingManager {
             }
 
             if (ChangeSwimbait((uint)slotIndex) == ChangeBaitReturn.Success) {
-                var fishName = fishId == 0 ? "unknown fish" : Item.GetRow(fishId).Name.ToString();
-                DecisionLog.Start("Swimbait", presetName)
-                    .WithConditions(activeSwimbaitCfg.ConditionSet)
-                    .Chose($"Selected slot {slotIndex} for {fishName}");
+                Ws.Decide(DecisionContext.Swimbait, true, $"Slot {slotIndex}",
+                    JoinSwimbaitDetail($"{fishName} · {configSource}", activeSwimbaitCfg.ConditionSet?.Describe()), presetName);
                 Service.WorldStateUpdater?.RefreshFishingStateSnapshot();
                 UpdateStatusAndTimer();
-                Service.PrintDebug($"[Swimbait] Using slot {slotIndex} (fish ID: {fishId}, source={configSource})");
                 Service.Status = $"Using swimbait: {Item.GetRow(fishId).Name}";
                 return true;
             }
 
-            Service.PrintDebug($"[Swimbait] Fish {fishId}: ChangeSwimbait({slotIndex}) failed, trying next slot");
+            Ws.Decide(DecisionContext.Swimbait, false, $"Slot {slotIndex}",
+                JoinSwimbaitDetail($"{fishName} · ChangeSwimbait failed · {configSource}", null), presetName);
         }
 
         return false;
+    }
+
+    private static string? JoinSwimbaitDetail(string? head, string? conditions) {
+        if (string.IsNullOrEmpty(head))
+            return string.IsNullOrEmpty(conditions) ? null : conditions;
+        return string.IsNullOrEmpty(conditions) ? head : $"{head}\n{conditions}";
     }
 }

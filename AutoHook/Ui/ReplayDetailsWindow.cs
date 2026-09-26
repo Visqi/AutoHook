@@ -258,8 +258,8 @@ public sealed class ReplayDetailsWindow : Window, IDisposable {
                 ImGui.TableSetupColumn("Time", ImGuiTableColumnFlags.WidthFixed, 100.Scaled());
                 ImGui.TableSetupColumn("Context");
                 ImGui.TableSetupColumn("Action", ImGuiTableColumnFlags.WidthFixed, 140.Scaled());
+                ImGui.TableSetupColumn("Ok", ImGuiTableColumnFlags.WidthFixed, 36.Scaled());
                 ImGui.TableSetupColumn("Detail");
-                ImGui.TableSetupColumn("Conditions");
                 ImGui.TableHeadersRow();
 
                 foreach (var d in decisions) {
@@ -275,17 +275,9 @@ public sealed class ReplayDetailsWindow : Window, IDisposable {
                     ImGui.TableNextColumn();
                     ImGui.Text(d.Action);
                     ImGui.TableNextColumn();
-                    ImGui.TextWrapped(string.IsNullOrEmpty(d.Detail) ? "-" : d.Detail);
+                    ImGui.TextColored(d.Success ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed, d.Success ? "Y" : "N");
                     ImGui.TableNextColumn();
-                    if (d.ConditionResults.Count == 0) {
-                        ImGui.TextDisabled("-");
-                    }
-                    else {
-                        foreach (var (label, result) in d.ConditionResults) {
-                            var color = result ? ImGuiColors.HealerGreen : ImGuiColors.DalamudRed;
-                            ImGui.TextColored(color, $"{label}: {(result ? "T" : "F")}");
-                        }
-                    }
+                    ImGui.TextWrapped(string.IsNullOrEmpty(d.Detail) ? "-" : d.Detail);
                 }
             }
         }
