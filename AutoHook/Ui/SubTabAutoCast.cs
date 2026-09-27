@@ -93,9 +93,6 @@ public class SubTabAutoCast {
     }
 
     private static void DrawBody(AutoCastsConfig acCfg) {
-        if (!acCfg.EnableAll && !Service.Configuration.DontHideOptionsDisabled)
-            return;
-
         DrawUtil.DrawTreeNodeEx(UIStrings.AnimationCanceling, () => {
             DrawUtil.Checkbox(UIStrings.EnableRecastCancel, ref acCfg.RecastAnimationCancel,
                 UIStrings.EnableRecastCancelHelp);

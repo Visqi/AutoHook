@@ -17,9 +17,7 @@ public class SubTabExtra {
         var extraCfg = _preset.ExtraCfg;
 
         DrawHeader(extraCfg);
-
-        if (extraCfg.Enabled || Service.Configuration.DontHideOptionsDisabled)
-            DrawBody(extraCfg);
+        DrawBody(extraCfg);
     }
 
     public static void DrawHeader(ExtraConfig config) {
@@ -90,7 +88,7 @@ public class SubTabExtra {
 
         var enabled = config.AutoOceanFishEnabled;
         using (ImRaii.PushId("AutoOceanFish")) {
-            if (DrawUtil.DrawCheckboxHeader(UIStrings.UseWithOceanFishing, ref enabled, ImGuiTreeNodeFlags.DefaultOpen, () => {
+            if (DrawUtil.DrawCheckboxHeader(UIStrings.UseWithOceanFishing, ref enabled, ImGuiTreeNodeFlags.None, () => {
                 if (DrawUtil.Checkbox(UIStrings.UseForAllZoneTimes, ref config.AutoOceanFishAllStops)) {
                     Service.Save();
                 }
@@ -251,13 +249,13 @@ public class SubTabExtra {
 
                 var swapPreset = trig.SwapPreset;
                 var presetName = trig.PresetToSwap;
-                DrawPresetSwap(ref swapPreset, ref presetName);
+                DrawEnabledSelector(UIStrings.Swap_Preset, ref swapPreset, () => DrawUtil.DrawPresetSwapSelector(presetName, preset => presetName = preset));
                 trig.SwapPreset = swapPreset;
                 trig.PresetToSwap = presetName;
 
                 var swapBait = trig.SwapBait;
                 var bait = trig.BaitToSwap;
-                DrawBaitSwap(ref swapBait, ref bait);
+                DrawEnabledSelector(UIStrings.Swap_Bait, ref swapBait, () => DrawUtil.DrawBaitSwapSelector(bait, b => bait = b));
                 trig.SwapBait = swapBait;
                 trig.BaitToSwap = bait;
 
@@ -273,7 +271,16 @@ public class SubTabExtra {
 
                 var removeStatus = trig.RemoveStatus;
                 var statusToRemove = trig.StatusToRemove;
-                DrawRemoveStatus(ref removeStatus, ref statusToRemove);
+                DrawEnabledSelector("Remove Status", ref removeStatus, () => {
+                    if (GameRes.FishingStatuses.Count == 0)
+                        return;
+
+                    if (statusToRemove == 0 || GameRes.FishingStatuses.All(s => s != statusToRemove))
+                        statusToRemove = GameRes.FishingStatuses[0];
+
+                    var selectedLabel = $"{statusToRemove}: {Status.GetRow(statusToRemove).Name}";
+                    DrawUtil.DrawComboSelector(GameRes.FishingStatuses, s => $"{s}: {Status.GetRow(s).Name}", selectedLabel, s => statusToRemove = s);
+                });
                 if (removeStatus && statusToRemove == 0 && GameRes.FishingStatuses.Count > 0)
                     statusToRemove = GameRes.FishingStatuses[0];
                 trig.RemoveStatus = removeStatus;
@@ -294,41 +301,8 @@ public class SubTabExtra {
         }
     }
 
-    private static void DrawPresetSwap(ref bool enable, ref string presetName) {
-        using var _ = ImRaii.PushId(@$"{nameof(DrawPresetSwap)}");
-
-        var text = presetName;
-        DrawUtil.DrawCheckboxTree(UIStrings.Swap_Preset, ref enable, () => DrawUtil.DrawPresetSwapSelector(text, preset => text = preset));
-
-        presetName = text;
-    }
-
-    private static void DrawRemoveStatus(ref bool enable, ref uint statusId) {
-        using var _ = ImRaii.PushId(@$"{nameof(DrawRemoveStatus)}");
-
-        var selectedId = statusId;
-        DrawUtil.DrawCheckboxTree("Remove Status", ref enable,
-            () => {
-                if (GameRes.FishingStatuses.Count == 0)
-                    return;
-
-                if (selectedId == 0 || GameRes.FishingStatuses.All(s => s != selectedId))
-                    selectedId = GameRes.FishingStatuses[0];
-
-                var selectedLabel = $"{selectedId}: {Lumina.Excel.Sheets.Status.GetRow(selectedId).Name}";
-                DrawUtil.DrawComboSelector(GameRes.FishingStatuses, s => $"{s}: {Lumina.Excel.Sheets.Status.GetRow(s).Name}", selectedLabel, s => selectedId = s);
-            });
-
-        statusId = selectedId;
-    }
-
-    private static void DrawBaitSwap(ref bool enable, ref BaitFishClass baitSwap) {
-        using var _ = ImRaii.PushId(@$"{nameof(DrawBaitSwap)}");
-
-        var newBait = baitSwap;
-        DrawUtil.DrawCheckboxTree(UIStrings.Swap_Bait, ref enable,
-            () => DrawUtil.DrawBaitSwapSelector(newBait, bait => newBait = bait));
-
-        baitSwap = newBait;
+    private static void DrawEnabledSelector(string label, ref bool enable, System.Action drawSelector, string helpText = "") {
+        using var _ = ImRaii.PushId(label);
+        DrawUtil.DrawCheckboxTree(label, ref enable, drawSelector, helpText);
     }
 }

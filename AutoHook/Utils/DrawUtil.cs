@@ -441,4 +441,31 @@ public static class DrawUtil {
         DrawCheckboxTree(UIStrings.UseIdenticalCast, ref identicalCast.Enabled,
             () => identicalCast.DrawFishCaughtActionOptions(), identicalCast.GetHelpText());
     }
+
+    public static void DrawStopAfter<TCD>(string label, SingleCondition<TCD, (bool Enabled, int Limit)> condition, ref FishingSteps stopStep, ref bool resetCount) where TCD : class, IConditionDefinition, ISimpleConditionValue<(bool Enabled, int Limit)> {
+        using var _ = ImRaii.PushId(label);
+        var step = stopStep;
+        var reset = resetCount;
+        DrawCaughtCountLimitTree(label, condition, () => {
+            if (ImGui.RadioButton(UIStrings.Stop_Casting, step == FishingSteps.None)) {
+                step = FishingSteps.None;
+                Service.Save();
+            }
+
+            ImGui.SameLine();
+            ImGuiComponents.HelpMarker(UIStrings.Auto_Cast_Stopped);
+
+            if (ImGui.RadioButton(UIStrings.Quit_Fishing, step == FishingSteps.Quitting)) {
+                step = FishingSteps.Quitting;
+                Service.Save();
+            }
+
+            ImGui.SameLine();
+            ImGuiComponents.HelpMarker(UIStrings.Quit_Action_HelpText);
+
+            Checkbox(UIStrings.Reset_the_counter, ref reset);
+        });
+        stopStep = step;
+        resetCount = reset;
+    }
 }

@@ -47,7 +47,7 @@ public class SubTabFish {
                 DrawSwapPreset(fish);
                 ImGui.Spacing();
 
-                DrawStopAfter(fish);
+                DrawUtil.DrawStopAfter(UIStrings.Stop_After_Caught, fish.StopAfterCaughtLimit, ref fish.StopFishingStep, ref fish.StopAfterResetCount);
                 ImGui.Spacing();
 
                 fish.NotifyOnSuccess.DrawConfig($"Fish caught: {fish.Fish.Name}!");
@@ -139,31 +139,6 @@ public class SubTabFish {
             fishConfig.SparefulHand.FishIdToCheck = (uint)fishConfig.Fish.Id;
             fishConfig.SparefulHand.DrawConfig();
         });
-    }
-
-    private static void DrawStopAfter(FishConfig fishConfig) {
-        using var _ = ImRaii.PushId("DrawStopAfter");
-
-        DrawUtil.DrawCaughtCountLimitTree(UIStrings.Stop_After_Caught, fishConfig.StopAfterCaughtLimit,
-            () => {
-                if (ImGui.RadioButton(UIStrings.Stop_Casting, fishConfig.StopFishingStep == FishingSteps.None)) {
-                    fishConfig.StopFishingStep = FishingSteps.None;
-                    Service.Save();
-                }
-
-                ImGui.SameLine();
-                ImGuiComponents.HelpMarker(UIStrings.Auto_Cast_Stopped);
-
-                if (ImGui.RadioButton(UIStrings.Quit_Fishing, fishConfig.StopFishingStep == FishingSteps.Quitting)) {
-                    fishConfig.StopFishingStep = FishingSteps.Quitting;
-                    Service.Save();
-                }
-
-                ImGui.SameLine();
-                ImGuiComponents.HelpMarker(UIStrings.Quit_Action_HelpText);
-
-                DrawUtil.Checkbox(UIStrings.Reset_the_counter, ref fishConfig.StopAfterResetCount);
-            });
     }
 
     private static void DrawSwapBait(FishConfig fishConfig) {

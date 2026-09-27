@@ -38,7 +38,6 @@ public partial class Configuration : IPluginConfiguration {
 
     public bool HideTabDescription = false;
 
-    public bool DontHideOptionsDisabled = true;
     public bool ResetAfkTimer = true;
     public bool BlockInputWhileFishing = false;
     public bool AutoStartFishing = false;
