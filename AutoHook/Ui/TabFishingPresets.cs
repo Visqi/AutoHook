@@ -853,39 +853,18 @@ public class TabFishingPresets : BaseTab {
                     }
                 }
                 else if (!_isImportingFolder && _tempImportPreset != null) {
-                    // Handle preset import - EXACTLY matching the DrawImportPreset method
-                    var name = _tempImportPreset.PresetName;
-
-                    if (_tempImportPreset.PresetName.StartsWith(@"[Old Version]"))
-                        ImGui.TextColored(ImGuiColors.ParsedOrange, UIStrings.Old_Preset_Warning);
-                    else
-                        ImGui.TextWrapped(UIStrings.ImportThisPreset);
-
-                    if (ImGui.InputText(UIStrings.PresetName, ref name, 64, ImGuiInputTextFlags.AutoSelectAll))
-                        _tempImportPreset.RenamePreset(name);
-
-                    if (ImGui.Button(UIStrings.Import, new Vector2(120.Scaled(), 0))) {
-                        if (_tempImportPreset is CustomPresetConfig custom) {
-                            PresetImport.ImportPresets(
-                                _basePreset,
-                                [custom],
-                                new PresetImportOptions { SelectFirst = true });
-                        }
-                        else {
-                            _basePreset.AddNewPreset(_tempImportPreset);
-                        }
-
+                    if (DrawUtil.DrawPendingImportPreset(_tempImportPreset, p => {
+                            if (p is CustomPresetConfig custom) {
+                                PresetImport.ImportPresets(
+                                    _basePreset,
+                                    [custom],
+                                    new PresetImportOptions { SelectFirst = true });
+                            }
+                            else {
+                                _basePreset.AddNewPreset(p);
+                            }
+                        }, new Vector2(120.Scaled(), 0)))
                         _tempImportPreset = null;
-                        Service.Save();
-                        ImGui.CloseCurrentPopup();
-                    }
-
-                    ImGui.SameLine();
-
-                    if (ImGui.Button(UIStrings.DrawImportExport_Cancel, new Vector2(120.Scaled(), 0))) {
-                        _tempImportPreset = null;
-                        ImGui.CloseCurrentPopup();
-                    }
                 }
             }
         }

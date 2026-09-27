@@ -56,21 +56,6 @@ public class TabSettings : BaseTab {
         DrawUtil.Checkbox(UIStrings.Hide_Tab_Description, ref Service.Configuration.HideTabDescription);
         DrawUtil.Checkbox(UIStrings.Show_Current_Status_Header, ref Service.Configuration.ShowStatus);
         DrawUtil.Checkbox(UIStrings.Show_Chat_Logs, ref Service.Configuration.ShowChatLogs, UIStrings.Show_Chat_Logs_HelpText);
-        //DrawUtil.Checkbox(UIStrings.Show_Debug_Console, ref Service.Configuration.ShowDebugConsole);
-        //DrawUtil.Checkbox(UIStrings.Show_Presets_As_Sidebar, ref Service.Configuration.ShowPresetsAsSidebar);
-        DrawUtil.DrawCheckboxTree(UIStrings.SwapTreeNodeButtons, ref Service.Configuration.SwapToButtons, () => {
-            if (ImGui.RadioButton(UIStrings.Type_1, Service.Configuration.SwapType == 0)) {
-                Service.Configuration.SwapType = 0;
-                Service.Save();
-            }
-
-            if (ImGui.RadioButton(UIStrings.Type_2, Service.Configuration.SwapType == 1)) {
-                Service.Configuration.SwapType = 1;
-                Service.Save();
-            }
-
-            ImGui.Text("Hello, you're cute!");
-        });
 
         DrawUtil.Checkbox(UIStrings.Dtr_Show, ref Service.Configuration.DtrBarEnabled, UIStrings.Dtr_Settings_Help_Text);
         DrawUtil.Checkbox(UIStrings.Dtr_Show_Preset, ref Service.Configuration.DtrPresetBarEnabled, UIStrings.Dtr_Preset_Setting_Help);

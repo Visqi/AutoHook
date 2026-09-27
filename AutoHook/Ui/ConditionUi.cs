@@ -330,7 +330,7 @@ public static class ConditionUi {
         if (PresetConditionHelper.IsPresetType(cond.TypeId))
             custom.FirstOrDefault(d => d.Id == cond.TypeId)?.DrawParams?.Invoke(cond);
         else
-            ConditionParamUi.DrawParams(cond);
+            ConditionRegistry.Registry.Get(cond.TypeId)?.DrawParams?.Invoke(cond);
         return typeChanged;
     }
 

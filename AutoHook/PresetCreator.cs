@@ -28,9 +28,8 @@ public class PresetCreator {
     private bool _sparefulHandPrep;
 
     private void DrawHeader() {
-        ImGui.PushTextWrapPos();
-        ImGui.TextColored(ImGuiColors.DalamudYellow, "Experimental — leave feedback on Discord.");
-        ImGui.PopTextWrapPos();
+        using (ImRaii.TextWrapPos(0))
+            ImGui.TextColored(ImGuiColors.DalamudYellow, "Experimental — leave feedback on Discord.");
 
         ImGui.AlignTextToFramePadding();
         ImGui.Text("Fish");
@@ -136,9 +135,8 @@ public class PresetCreator {
         ImGui.TextDisabled($"Arrive early: {DurationFormat.MinutesSeconds(plan.ArriveEarlySeconds)}");
 
         if (plan.MissingSkillsFallbacks.Count > 0) {
-            ImGui.PushTextWrapPos();
-            ImGui.TextColored(ImGuiColors.DalamudYellow, string.Join("; ", plan.MissingSkillsFallbacks));
-            ImGui.PopTextWrapPos();
+            using (ImRaii.TextWrapPos(0))
+                ImGui.TextColored(ImGuiColors.DalamudYellow, string.Join("; ", plan.MissingSkillsFallbacks));
         }
 
         if (plan.PrepPhase.Steps.Count > 0 && ImGui.TreeNode("Prep steps")) {
@@ -155,9 +153,8 @@ public class PresetCreator {
         using var _ = ImRaii.PushId("AutoV1");
 
         DrawSectionHeader("Auto V1");
-        ImGui.PushTextWrapPos();
-        ImGui.TextDisabled("Legacy generator");
-        ImGui.PopTextWrapPos();
+        using (ImRaii.TextWrapPos(0))
+            ImGui.TextDisabled("Legacy generator");
 
         var tackleBait = ResolveTackleBait(_selectedTargetFish!, _presetMoochList);
         ImGui.Text($"Bait: {Item.GetRow((uint)tackleBait).Name}");

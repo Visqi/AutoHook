@@ -38,9 +38,6 @@ public partial class Configuration : IPluginConfiguration {
 
     public bool HideTabDescription = false;
 
-    public bool SwapToButtons = false;
-    public int SwapType;
-
     public bool DontHideOptionsDisabled = true;
     public bool ResetAfkTimer = true;
     public bool BlockInputWhileFishing = false;

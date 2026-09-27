@@ -69,12 +69,7 @@ public class PluginUi : Window, IDisposable {
         if (ImGui.Begin($"DebugWIndows", ref Service.OpenConsole)) {
             var logs = Service.LogMessages.AsEnumerable().Reverse().ToList();
             for (var i = 0; i < logs.Count; i++) {
-                if (i == 0) {
-                    ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
-                    ImGui.TextWrapped($"{i + 1} - {logs[i]}");
-                    ImGui.PopStyleColor();
-                }
-                else
+                using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudYellow, i == 0))
                     ImGui.TextWrapped($"{i + 1} - {logs[i]}");
 
                 ImGui.Spacing();
@@ -104,8 +99,7 @@ public class PluginUi : Window, IDisposable {
             ImGui.TableNextColumn();
 
             var regionSize = ImGui.GetContentRegionAvail();
-            ImGui.PushStyleVar(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
-
+            using (ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f)))
             using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight }, false, ImGuiWindowFlags.NoDecoration)) {
                 if (ImGui.Selectable(UIStrings.StartActions))
                     Service.FishManager.StartFishing();
@@ -151,8 +145,6 @@ public class PluginUi : Window, IDisposable {
                 if (ImGui.Selectable($"{UIStrings.Changelog}"))
                     _openChangelog = !_openChangelog;
             }
-
-            ImGui.PopStyleVar();
 
             ImGui.TableNextColumn();
             using var rightChild = ImRaii.Child($"###AhRight", Vector2.Zero, false);
@@ -220,14 +212,12 @@ public class PluginUi : Window, IDisposable {
 
     public static void ShowKofi() {
         ImGui.SameLine();
-        ImGui.PushStyleColor(ImGuiCol.Button, 0xFF000000 | 0x005E5BFF);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0xDD000000 | 0x005E5BFF);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0xAA000000 | 0x005E5BFF);
-
-        if (ImGui.Button("Ko-fi"))
-            Util.OpenLink(@"https://ko-fi.com/initialdet");
-
-        ImGui.PopStyleColor(3);
+        using (ImRaii.PushColor(ImGuiCol.Button, 0xFF000000 | 0x005E5BFF))
+        using (ImRaii.PushColor(ImGuiCol.ButtonActive, 0xDD000000 | 0x005E5BFF))
+        using (ImRaii.PushColor(ImGuiCol.ButtonHovered, 0xAA000000 | 0x005E5BFF)) {
+            if (ImGui.Button("Ko-fi"))
+                Util.OpenLink(@"https://ko-fi.com/initialdet");
+        }
     }
 
     private bool _openChangelog = false;
@@ -243,9 +233,8 @@ public class PluginUi : Window, IDisposable {
             var changes = PluginChangelog.Versions;
 
             if (changes.Count > 0) {
-                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
-                ImGui.TextWrapped($"{changes[0].VersionNumber}");
-                ImGui.PopStyleColor();
+                using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudYellow))
+                    ImGui.TextWrapped($"{changes[0].VersionNumber}");
                 ImGui.Separator();
 
                 //First value is the current Version

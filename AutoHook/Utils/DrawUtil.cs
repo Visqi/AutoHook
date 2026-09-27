@@ -10,24 +10,6 @@ using System.Numerics;
 namespace AutoHook.Utils;
 
 public static class DrawUtil {
-    public static void NumericDisplay(string label, int value) {
-        ImGui.Text(label);
-        ImGui.SameLine();
-        ImGui.Text($"{value}");
-    }
-
-    public static void NumericDisplay(string label, string formattedString) {
-        ImGui.Text(label);
-        ImGui.SameLine();
-        ImGui.Text(formattedString);
-    }
-
-    public static void NumericDisplay(string label, int value, Vector4 color) {
-        ImGui.Text(label);
-        ImGui.SameLine();
-        ImGui.TextColored(color, $"{value}");
-    }
-
     public static bool EditFloatField(string label, ref float refValue, string helpText = "",
         bool hoverHelpText = false) {
         return EditFloatField(label, 85, ref refValue, helpText, hoverHelpText);
@@ -40,18 +22,18 @@ public static class DrawUtil {
 
         ImGui.SameLine();
 
-        ImGui.PushItemWidth(fieldWidth.Scale());
-        var clicked = ImGui.InputFloat($"##{label}###", ref refValue, .1f, 0, @"%.1f%");
-        ImGui.PopItemWidth();
+        using (ImRaii.ItemWidth(fieldWidth.Scale())) {
+            var clicked = ImGui.InputFloat($"##{label}###", ref refValue, .1f, 0, @"%.1f%");
 
-        if (helpText != string.Empty) {
-            if (hoverHelpText)
-                ImGui.TooltipOnHover(helpText);
-            else
-                ImGuiComponents.HelpMarker(helpText);
+            if (helpText != string.Empty) {
+                if (hoverHelpText)
+                    ImGui.TooltipOnHover(helpText);
+                else
+                    ImGuiComponents.HelpMarker(helpText);
+            }
+
+            return clicked;
         }
-
-        return clicked;
     }
 
     public static bool EditNumberField(string label, ref int refValue, string helpText = "", int steps = 0) {
@@ -69,15 +51,15 @@ public static class DrawUtil {
 
         ImGui.SameLine();
 
-        ImGui.PushItemWidth(fieldWidth.Scale());
-        var clicked = ImGui.InputInt($"##{label}###", ref refValue, steps, 0);
-        ImGui.PopItemWidth();
+        using (ImRaii.ItemWidth(fieldWidth.Scale())) {
+            var clicked = ImGui.InputInt($"##{label}###", ref refValue, steps, 0);
 
-        if (helpText != string.Empty) {
-            ImGuiComponents.HelpMarker(helpText);
+            if (helpText != string.Empty) {
+                ImGuiComponents.HelpMarker(helpText);
+            }
+
+            return clicked;
         }
-
-        return clicked;
     }
 
     public static void TextV(string s) {
@@ -116,34 +98,6 @@ public static class DrawUtil {
         }
 
         return clicked;
-    }
-
-    public static void DrawWordWrappedString(string message) {
-        var words = message.Split(' ');
-
-        var windowWidth = ImGui.GetContentRegionAvail().X;
-        var cumulativeSize = 0.0f;
-        var padding = 2.0f;
-
-        using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(2.0f.Scale(), 0.0f))) {
-            foreach (var word in words) {
-                var wordWidth = ImGui.CalcTextSize(word).X;
-
-                if (cumulativeSize == 0) {
-                    ImGui.Text(word);
-                    cumulativeSize += wordWidth + padding;
-                }
-                else if ((cumulativeSize + wordWidth) < windowWidth) {
-                    ImGui.SameLine();
-                    ImGui.Text(word);
-                    cumulativeSize += wordWidth + padding;
-                }
-                else if ((cumulativeSize + wordWidth) >= windowWidth) {
-                    ImGui.Text(word);
-                    cumulativeSize = wordWidth + padding;
-                }
-            }
-        }
     }
 
     private static string _filterText = "";
@@ -267,6 +221,36 @@ public static class DrawUtil {
 
     private static BasePresetConfig? _tempImport;
 
+    // shared rename/warning/import/cancel body. true = finished (imported or cancelled).
+    public static bool DrawPendingImportPreset(BasePresetConfig import, Action<BasePresetConfig> onConfirm, Vector2? buttonSize = null) {
+        var name = import.PresetName;
+
+        if (import.PresetName.StartsWith(@"[Old Version]"))
+            ImGui.TextColored(ImGuiColors.ParsedOrange, UIStrings.Old_Preset_Warning);
+        else
+            ImGui.TextWrapped(UIStrings.ImportThisPreset);
+
+        if (ImGui.InputText(UIStrings.PresetName, ref name, 64, ImGuiInputTextFlags.AutoSelectAll))
+            import.RenamePreset(name);
+
+        var size = buttonSize ?? default;
+        if (ImGui.Button(UIStrings.Import, size)) {
+            onConfirm(import);
+            Service.Save();
+            ImGui.CloseCurrentPopup();
+            return true;
+        }
+
+        ImGui.SameLine();
+
+        if (ImGui.Button(UIStrings.DrawImportExport_Cancel, size)) {
+            ImGui.CloseCurrentPopup();
+            return true;
+        }
+
+        return false;
+    }
+
     public static void DrawImportExport(BasePreset basePreset) {
         try {
             using (ImRaii.Disabled(basePreset.SelectedPreset == null)) {
@@ -291,71 +275,8 @@ public static class DrawUtil {
             using var popup = ImRaii.Popup("import_new_preset");
 
             if (popup.Success && _tempImport != null) {
-                var name = _tempImport.PresetName;
-
-                if (_tempImport.PresetName.StartsWith(@"[Old Version]"))
-                    ImGui.TextColored(ImGuiColors.ParsedOrange, UIStrings.Old_Preset_Warning);
-                else
-                    ImGui.TextWrapped(UIStrings.ImportThisPreset);
-
-                if (ImGui.InputText(UIStrings.PresetName, ref name, 64, ImGuiInputTextFlags.AutoSelectAll))
-                    _tempImport.RenamePreset(name);
-
-                if (ImGui.Button(UIStrings.Import)) {
-                    Service.Save();
-                    basePreset.AddNewPreset(_tempImport);
+                if (DrawPendingImportPreset(_tempImport, p => basePreset.AddNewPreset(p)))
                     _tempImport = null;
-                    Service.Save();
-                }
-
-                ImGui.SameLine();
-
-                if (ImGui.Button(UIStrings.DrawImportExport_Cancel)) {
-                    ImGui.CloseCurrentPopup();
-                }
-            }
-        }
-        catch (Exception e) {
-            Svc.Log.Error(e.ToString());
-            Notify.Error(e.Message);
-        }
-    }
-
-    public static void DrawImportPreset(BasePreset hookPresets) {
-        try {
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.FileImport)) {
-                _tempImport = Configuration.ImportPreset(ImGui.GetClipboardText());
-                if (_tempImport != null)
-                    ImGui.OpenPopup(@"import_new_preset");
-            }
-
-            ImGui.TooltipOnHover(UIStrings.ImportPresetFromClipboard);
-
-            using var popup = ImRaii.Popup("import_new_preset");
-            if (popup.Success && _tempImport != null) {
-                var name = _tempImport.PresetName;
-
-                if (_tempImport.PresetName.StartsWith(@"[Old Version]"))
-                    ImGui.TextColored(ImGuiColors.ParsedOrange, UIStrings.Old_Preset_Warning);
-                else
-                    ImGui.TextWrapped(UIStrings.ImportThisPreset);
-
-                if (ImGui.InputText(UIStrings.PresetName, ref name, 64, ImGuiInputTextFlags.AutoSelectAll))
-                    _tempImport.RenamePreset(name);
-
-                if (ImGui.Button(UIStrings.Import)) {
-                    Service.Save();
-                    hookPresets.AddNewPreset(_tempImport);
-                    hookPresets.SelectedPreset = _tempImport;
-                    _tempImport = null;
-                    Service.Save();
-                }
-
-                ImGui.SameLine();
-
-                if (ImGui.Button(UIStrings.DrawImportExport_Cancel)) {
-                    ImGui.CloseCurrentPopup();
-                }
             }
         }
         catch (Exception e) {
@@ -389,49 +310,37 @@ public static class DrawUtil {
 
         ImGui.SameLine(0, 3.Scaled());
 
-        if (Service.Configuration.SwapToButtons) {
-            switch (Service.Configuration.SwapType) {
-                case 0:
-                    DrawButtonPopupType0(treeName, action, helpText, highlightLabel);
-                    break;
-                case 1:
-                    DrawButtonPopupType1(treeName, action, helpText, highlightLabel);
-                    break;
-            }
-        }
-        else {
-            var x = ImGui.GetCursorPosX();
+        var x = ImGui.GetCursorPosX();
 
-            if (action == null) {
-                using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
-                    ImGui.TreeNodeEx(treeName,
-                        ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen);
-                if (!string.IsNullOrEmpty(helpText))
-                    ImGui.TooltipOnHover(helpText);
-                return;
-            }
-
-            if (forceOpen)
-                ImGui.SetNextItemOpen(true, ImGuiCond.Always);
+        if (action == null) {
             using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
-                if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding)) {
-                    ImGui.SetCursorPosX(x);
-                    TextV($" └");
-                    ImGui.SameLine();
-
-                    x = ImGui.GetCursorPosX();
-                    if (helpText != string.Empty)
-                        ImGui.TooltipOnHover(helpText);
-
-                    ImGui.SetCursorPosX(x);
-                    using (ImRaii.Group()) {
-                        action();
-                        ImGui.Separator();
-                    }
-
-                    ImGui.TreePop();
-                }
+                ImGui.TreeNodeEx(treeName,
+                    ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen);
+            if (!string.IsNullOrEmpty(helpText))
+                ImGui.TooltipOnHover(helpText);
+            return;
         }
+
+        if (forceOpen)
+            ImGui.SetNextItemOpen(true, ImGuiCond.Always);
+        using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
+            if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding)) {
+                ImGui.SetCursorPosX(x);
+                TextV($" └");
+                ImGui.SameLine();
+
+                x = ImGui.GetCursorPosX();
+                if (helpText != string.Empty)
+                    ImGui.TooltipOnHover(helpText);
+
+                ImGui.SetCursorPosX(x);
+                using (ImRaii.Group()) {
+                    action();
+                    ImGui.Separator();
+                }
+
+                ImGui.TreePop();
+            }
     }
 
     // checkbox + inline collapsing header sharing one label. returns true if enable changed.
@@ -458,81 +367,21 @@ public static class DrawUtil {
     public static void DrawTreeNodeEx(string treeName, Action action, string helpText = "") {
         using var id = ImRaii.PushId(treeName);
 
-        if (Service.Configuration.SwapToButtons) {
-            switch (Service.Configuration.SwapType) {
-                case 0:
-                    DrawButtonPopupType0(treeName, action, helpText);
-                    break;
-                case 1:
-                    DrawButtonPopupType1(treeName, action, helpText);
-                    break;
-            }
-        }
-        else {
-            var x = ImGui.GetCursorPosX();
-            if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
-                if (helpText != string.Empty)
-                    ImGui.TooltipOnHover(helpText);
-
-                ImGui.SetCursorPosX(x);
-                using (ImRaii.Group()) {
-                    TextV($" └");
-                    ImGui.SameLine();
-                    action();
-                }
-                ImGui.TreePop();
-            }
-            else if (helpText != string.Empty)
+        var x = ImGui.GetCursorPosX();
+        if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
+            if (helpText != string.Empty)
                 ImGui.TooltipOnHover(helpText);
-        }
-    }
 
-    public static void DrawButtonPopupType0(string popupName, Action? action, string helpText = "", bool highlightLabel = false) {
-        using var id = ImRaii.PushId(popupName);
-
-        var indexOfId = popupName.IndexOf('#');
-        if (indexOfId != -1) {
-            popupName = popupName[..indexOfId];
-        }
-
-        using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
-            TextV(popupName);
-        ImGui.SameLine();
-        if (ImGui.Button(UIStrings.Configure)) {
-            ImGui.OpenPopup(popupName);
-        }
-
-        if (helpText != string.Empty)
-            ImGui.TooltipOnHover(helpText);
-
-        using var popup = ImRaii.Popup(popupName, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Tooltip);
-        if (popup.Success) {
-            var windowPos = ImGui.GetWindowPos();
-            var windowSize = ImGui.GetWindowSize();
-            ImGui.GetForegroundDrawList().AddRect(windowPos, windowPos + windowSize, ImGui.GetColorU32(ImGuiCol.Separator));
-
-            action?.Invoke();
-        }
-    }
-
-    public static void DrawButtonPopupType1(string popupName, Action? action, string helpText = "", bool highlightLabel = false) {
-        using var id = ImRaii.PushId(popupName);
-        using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
-            if (ImGui.Button(popupName)) {
-                ImGui.OpenPopup(popupName);
+            ImGui.SetCursorPosX(x);
+            using (ImRaii.Group()) {
+                TextV($" └");
+                ImGui.SameLine();
+                action();
             }
-
-        if (helpText != string.Empty)
-            ImGui.TooltipOnHover(helpText);
-
-        using var popup = ImRaii.Popup(popupName, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Tooltip);
-        if (popup.Success) {
-            var windowPos = ImGui.GetWindowPos();
-            var windowSize = ImGui.GetWindowSize();
-            ImGui.GetForegroundDrawList().AddRect(windowPos, windowPos + windowSize, ImGui.GetColorU32(ImGuiCol.Separator));
-
-            action?.Invoke();
+            ImGui.TreePop();
         }
+        else if (helpText != string.Empty)
+            ImGui.TooltipOnHover(helpText);
     }
 
     public static void SpacingSeparator() {
