@@ -197,11 +197,15 @@ public class TabFishingPresets : BaseTab {
     }
 
     private void DrawAnonymousItem(CustomPresetConfig preset) {
+        DrawPresetRow(preset);
+    }
+
+    private void DrawPresetRow(CustomPresetConfig preset, Action? drawDragDrop = null, string? label = null) {
         using var id = ImRaii.PushId(preset.UniqueId.ToString());
         var selected = _basePreset.SelectedGuid == preset.UniqueId.ToString();
         var color = selected ? ImGuiColors.DalamudOrange : ImGuiColors.DalamudWhite;
-        using (var a = ImRaii.PushColor(ImGuiCol.Text, color)) {
-            if (ImGui.Selectable((selected ? "> " : "") + preset.PresetName,
+        using (ImRaii.PushColor(ImGuiCol.Text, color)) {
+            if (ImGui.Selectable((selected ? "> " : "") + (label ?? preset.PresetName),
                     displayed?.UniqueId == preset.UniqueId,
                     ImGuiSelectableFlags.AllowDoubleClick)) {
                 displayed = preset;
@@ -213,8 +217,8 @@ public class TabFishingPresets : BaseTab {
             }
         }
 
+        drawDragDrop?.Invoke();
         ImGui.TooltipOnHover(UIStrings.RightClickOptions);
-
         DrawPresetContext(preset);
     }
 
@@ -321,101 +325,13 @@ public class TabFishingPresets : BaseTab {
                     (folder.IsExpanded ? ImGuiTreeNodeFlags.DefaultOpen : 0));
             }
 
-            // Handle drag and drop onto folder
-            if (ImGui.BeginDragDropTarget()) {
-                // Accept preset drops from outside folders
-                if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_ORDER", out int itemIndex)) {
-                    if (ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
-                        var preset = _basePreset.CustomPresets[itemIndex];
-                        folder.AddPreset(preset.UniqueId);
-                        Service.Save();
-                    }
-                }
+            // Handle drag and drop onto folder (presets + folder reparent/reorder)
+            AcceptDropsOntoFolder(folder, folderIndex);
 
-                // Accept preset drops from inside folders
-                if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_IN_FOLDER", out Guid presetId)) {
-                    if (ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
-                        // First, find which folder this preset is coming from
-                        PresetFolder? sourceFolder = null;
-                        foreach (var otherFolder in _basePreset.Folders) {
-                            if (otherFolder.PresetIds.Contains(presetId)) {
-                                sourceFolder = otherFolder;
-                                break;
-                            }
-                        }
-
-                        // Now handle the move
-                        if (sourceFolder != null && sourceFolder.UniqueId != folder.UniqueId) {
-                            // Remove from source folder
-                            var sourcePresetIds = new List<Guid>(sourceFolder.PresetIds);
-                            sourcePresetIds.Remove(presetId);
-                            sourceFolder.PresetIds = sourcePresetIds;
-
-                            // Add to target folder if not already there
-                            if (!folder.PresetIds.Contains(presetId)) {
-                                folder.AddPreset(presetId);
-                            }
-
-                            Service.Save();
-                        }
-                        else if (sourceFolder == null) {
-                            // If not found in any folder (shouldn't happen, but just in case)
-                            folder.AddPreset(presetId);
-                            Service.Save();
-                        }
-                    }
-                }
-
-                ImGui.EndDragDropTarget();
-            }
-
-            // Folder drag source
             if (ImGui.BeginDragDropSource()) {
                 ImGuiDragDrop.SetDragDropPayload("FOLDER_ORDER", folderIndex);
                 ImGui.Text($"{UIStrings.MovingFolder_} {folder.FolderName}");
-
                 ImGui.EndDragDropSource();
-            }
-
-            // Handle folder reparenting / reordering by dropping one folder onto another
-            if (ImGui.BeginDragDropTarget()) {
-                if (ImGuiDragDrop.AcceptDragDropPayload("FOLDER_ORDER", out int sourceFolderIndex)) {
-                    if (ImGui.IsMouseReleased(ImGuiMouseButton.Left) && sourceFolderIndex != folderIndex) {
-                        if (sourceFolderIndex >= 0 && sourceFolderIndex < _basePreset.Folders.Count) {
-                            var movingFolder = _basePreset.Folders[sourceFolderIndex];
-
-                            // If both folders share the same parent, treat drop as a reorder within that level
-                            if (movingFolder.ParentFolderId == folder.ParentFolderId) {
-                                _basePreset.Folders.RemoveAt(sourceFolderIndex);
-                                var targetIndex = _basePreset.Folders.IndexOf(folder);
-                                if (targetIndex < 0) {
-                                    // Fallback: append if target somehow not found
-                                    _basePreset.Folders.Add(movingFolder);
-                                }
-                                else {
-                                    _basePreset.Folders.Insert(targetIndex, movingFolder);
-                                }
-                                Service.Save();
-                            }
-                            else {
-                                // Special-case: if dropping a parent onto its direct child, swap places
-                                if (folder.ParentFolderId == movingFolder.UniqueId) {
-                                    var oldParent = movingFolder.ParentFolderId;
-                                    movingFolder.ParentFolderId = folder.UniqueId;
-                                    folder.ParentFolderId = oldParent;
-                                    Service.Save();
-                                }
-                                // Otherwise, prevent creating cycles (cannot parent a folder under its own descendant)
-                                else if (!IsFolderDescendantOf(movingFolder, folder)) {
-                                    movingFolder.ParentFolderId = folder.UniqueId;
-                                    Service.Save();
-                                }
-                            }
-                        }
-                    }
-                }
-
-                ImGui.EndDragDropTarget();
             }
 
             // Right click for context menu
@@ -458,176 +374,162 @@ public class TabFishingPresets : BaseTab {
     }
 
     private void DrawItemInFolder(CustomPresetConfig preset, int i, PresetFolder folder) {
-        using var id = ImRaii.PushId(preset.UniqueId.ToString());
-        var selected = _basePreset.SelectedGuid == preset.UniqueId.ToString();
-        var color = selected ? ImGuiColors.DalamudOrange : ImGuiColors.DalamudWhite;
-
-        // Indent to show hierarchy
         ImGui.Indent(10.Scaled());
-
-        using (var a = ImRaii.PushColor(ImGuiCol.Text, color)) {
-            if (ImGui.Selectable((selected ? "> " : "") + preset.PresetName,
-                    displayed?.UniqueId == preset.UniqueId,
-                    ImGuiSelectableFlags.AllowDoubleClick)) {
-                displayed = preset;
-
-                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
-                    _basePreset.SelectedPreset = selected ? null : preset;
-                    Service.Save();
-                }
-            }
-        }
-
+        DrawPresetRow(preset, () => DrawFolderPresetDragDrop(preset, folder));
         ImGui.Unindent(10.Scaled());
-
-        if (ImGui.BeginDragDropSource()) {
-            // Use a different drag type to identify presets from folders
-            ImGuiDragDrop.SetDragDropPayload("PRESET_IN_FOLDER", preset.UniqueId);
-            ImGui.Text($"{UIStrings.Moving_} {preset.PresetName}");
-            ImGui.EndDragDropSource();
-        }
-
-        if (ImGui.BeginDragDropTarget()) {
-            if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_IN_FOLDER", out Guid presetId)) {
-                if (ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
-                    try {
-                        // Find where to place in the folder
-                        var targetIndex = folder.PresetIds.IndexOf(preset.UniqueId);
-                        if (targetIndex >= 0) {
-                            // Create a new list to avoid modifying the collection during enumeration
-                            var newPresetIds = new List<Guid>(folder.PresetIds);
-
-                            // Find the current index of the preset being moved
-                            var currentIndex = newPresetIds.IndexOf(presetId);
-
-                            // Only reorder if the preset is in this folder
-                            if (currentIndex >= 0) {
-                                // Remove from current position and insert at target position
-                                newPresetIds.RemoveAt(currentIndex);
-                                newPresetIds.Insert(targetIndex, presetId);
-
-                                // Replace the folder's preset list with our reordered one
-                                folder.PresetIds = newPresetIds;
-                                Service.Save();
-                            }
-                        }
-                    }
-                    catch (Exception ex) {
-                        Svc.Log.Error(ex, "[TabFishingPresets] Error reordering presets.");
-                    }
-                }
-            }
-
-            // Allow dropping a folder here to reparent it to this preset's folder level
-            if (ImGuiDragDrop.AcceptDragDropPayload("FOLDER_ORDER", out int sourceFolderIndex)) {
-                if (ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
-                    if (sourceFolderIndex >= 0 && sourceFolderIndex < _basePreset.Folders.Count) {
-                        var movingFolder = _basePreset.Folders[sourceFolderIndex];
-
-                        // Determine target folder level (the folder that contains this preset)
-                        var targetFolder = _basePreset.GetFolderContainingPreset(preset.UniqueId);
-
-                        // If the preset is in the moving folder's subtree, ignore to avoid cycles
-                        if (targetFolder != null && (targetFolder.UniqueId == movingFolder.UniqueId || IsFolderDescendantOf(movingFolder, targetFolder))) {
-                            // do nothing
-                        }
-                        else {
-                            // If preset is in a folder, become sibling at that level; otherwise become root-level
-                            movingFolder.ParentFolderId = targetFolder?.UniqueId;
-                            Service.Save();
-                        }
-                    }
-                }
-            }
-
-            ImGui.EndDragDropTarget();
-        }
-
-        ImGui.TooltipOnHover(UIStrings.RightClickOptions);
-
-        DrawPresetContext(preset);
     }
 
     private void DrawItem(CustomPresetConfig preset, int i) {
-        using var id = ImRaii.PushId(preset.UniqueId.ToString());
-        var selected = _basePreset.SelectedGuid == preset.UniqueId.ToString();
-        var color = selected ? ImGuiColors.DalamudOrange : ImGuiColors.DalamudWhite;
-        using (var a = ImRaii.PushColor(ImGuiCol.Text, color)) {
-            if (ImGui.Selectable((selected ? "> " : "") + preset.PresetName,
-                    displayed?.UniqueId == preset.UniqueId,
-                    ImGuiSelectableFlags.AllowDoubleClick)) {
-                displayed = preset;
+        DrawPresetRow(preset, () => DrawRootPresetDragDrop(preset, i));
+    }
 
-                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
-                    _basePreset.SelectedPreset = selected ? null : preset;
-                    Service.Save();
-                }
-            }
+    private void AcceptDropsOntoFolder(PresetFolder folder, int folderIndex) {
+        if (!ImGui.BeginDragDropTarget())
+            return;
+
+        if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_ORDER", out int itemIndex) && ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
+            folder.AddPreset(_basePreset.CustomPresets[itemIndex].UniqueId);
+            Service.Save();
         }
 
+        if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_IN_FOLDER", out Guid presetId) && ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+            AcceptPresetMoveIntoFolder(presetId, folder);
+
+        if (ImGuiDragDrop.AcceptDragDropPayload("FOLDER_ORDER", out int sourceFolderIndex) && ImGui.IsMouseReleased(ImGuiMouseButton.Left) && sourceFolderIndex != folderIndex) {
+            AcceptFolderOntoFolder(sourceFolderIndex, folder);
+        }
+
+        ImGui.EndDragDropTarget();
+    }
+
+    private void AcceptPresetMoveIntoFolder(Guid presetId, PresetFolder folder) {
+        var sourceFolder = _basePreset.Folders.FirstOrDefault(f => f.PresetIds.Contains(presetId));
+        if (sourceFolder != null && sourceFolder.UniqueId != folder.UniqueId) {
+            var sourcePresetIds = new List<Guid>(sourceFolder.PresetIds);
+            sourcePresetIds.Remove(presetId);
+            sourceFolder.PresetIds = sourcePresetIds;
+
+            if (!folder.PresetIds.Contains(presetId))
+                folder.AddPreset(presetId);
+
+            Service.Save();
+        }
+        else if (sourceFolder == null) {
+            folder.AddPreset(presetId);
+            Service.Save();
+        }
+    }
+
+    private void AcceptFolderOntoFolder(int sourceFolderIndex, PresetFolder folder) {
+        if (sourceFolderIndex < 0 || sourceFolderIndex >= _basePreset.Folders.Count)
+            return;
+
+        var movingFolder = _basePreset.Folders[sourceFolderIndex];
+
+        if (movingFolder.ParentFolderId == folder.ParentFolderId) {
+            _basePreset.Folders.RemoveAt(sourceFolderIndex);
+            var targetIndex = _basePreset.Folders.IndexOf(folder);
+            if (targetIndex < 0)
+                _basePreset.Folders.Add(movingFolder);
+            else
+                _basePreset.Folders.Insert(targetIndex, movingFolder);
+            Service.Save();
+            return;
+        }
+
+        if (folder.ParentFolderId == movingFolder.UniqueId) {
+            var oldParent = movingFolder.ParentFolderId;
+            movingFolder.ParentFolderId = folder.UniqueId;
+            folder.ParentFolderId = oldParent;
+            Service.Save();
+            return;
+        }
+
+        if (!IsFolderDescendantOf(movingFolder, folder)) {
+            movingFolder.ParentFolderId = folder.UniqueId;
+            Service.Save();
+        }
+    }
+
+    private void AcceptFolderReparentAtPresetLevel(CustomPresetConfig preset) {
+        if (!ImGuiDragDrop.AcceptDragDropPayload("FOLDER_ORDER", out int sourceFolderIndex) || !ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+            return;
+
+        if (sourceFolderIndex < 0 || sourceFolderIndex >= _basePreset.Folders.Count)
+            return;
+
+        var movingFolder = _basePreset.Folders[sourceFolderIndex];
+        var targetFolder = _basePreset.GetFolderContainingPreset(preset.UniqueId);
+
+        if (targetFolder != null && (targetFolder.UniqueId == movingFolder.UniqueId || IsFolderDescendantOf(movingFolder, targetFolder)))
+            return;
+
+        movingFolder.ParentFolderId = targetFolder?.UniqueId;
+        Service.Save();
+    }
+
+    private void DrawRootPresetDragDrop(CustomPresetConfig preset, int i) {
         if (ImGui.BeginDragDropSource()) {
             ImGuiDragDrop.SetDragDropPayload("PRESET_ORDER", i);
             ImGui.Text($"{UIStrings.Moving_} {preset.PresetName}");
             ImGui.EndDragDropSource();
         }
 
-        if (ImGui.BeginDragDropTarget()) {
-            if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_ORDER", out int itemIndex)) {
-                if (ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
-                    _basePreset.SwapIndex(itemIndex, i);
-                }
+        if (!ImGui.BeginDragDropTarget())
+            return;
+
+        if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_ORDER", out int itemIndex) && ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+            _basePreset.SwapIndex(itemIndex, i);
+
+        if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_IN_FOLDER", out Guid presetId) && ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
+            foreach (var folder in _basePreset.Folders)
+                folder.RemovePreset(presetId);
+
+            var draggedPreset = _basePreset.CustomPresets.FirstOrDefault(p => p.UniqueId == presetId);
+            if (draggedPreset != null) {
+                var draggedIndex = _basePreset.CustomPresets.IndexOf(draggedPreset);
+                if (draggedIndex >= 0)
+                    _basePreset.SwapIndex(draggedIndex, i);
             }
 
-            // Handle dropping from folders
-            if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_IN_FOLDER", out Guid presetId)) {
-                if (ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
-                    // Remove from any folder
-                    foreach (var folder in _basePreset.Folders) {
-                        folder.RemovePreset(presetId);
-                    }
-
-                    // Reorder in the main list if needed
-                    var draggedPreset = _basePreset.CustomPresets.FirstOrDefault(p => p.UniqueId == presetId);
-                    var targetPreset = _basePreset.CustomPresets[i];
-                    if (draggedPreset != null && targetPreset != null) {
-                        var draggedIndex = _basePreset.CustomPresets.IndexOf(draggedPreset);
-                        if (draggedIndex >= 0) {
-                            _basePreset.SwapIndex(draggedIndex, i);
-                        }
-                    }
-
-                    Service.Save();
-                }
-            }
-
-            // Allow dropping a folder here to reparent it to this preset's level
-            if (ImGuiDragDrop.AcceptDragDropPayload("FOLDER_ORDER", out int sourceFolderIndex)) {
-                if (ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
-                    if (sourceFolderIndex >= 0 && sourceFolderIndex < _basePreset.Folders.Count) {
-                        var movingFolder = _basePreset.Folders[sourceFolderIndex];
-
-                        // Determine target folder level (the folder that contains this preset)
-                        var targetFolder = _basePreset.GetFolderContainingPreset(preset.UniqueId);
-
-                        // If the preset is in the moving folder's subtree, ignore to avoid cycles
-                        if (targetFolder != null && (targetFolder.UniqueId == movingFolder.UniqueId || IsFolderDescendantOf(movingFolder, targetFolder))) {
-                            // do nothing
-                        }
-                        else {
-                            // If preset is in a folder, become sibling at that level; otherwise become root-level
-                            movingFolder.ParentFolderId = targetFolder?.UniqueId;
-                            Service.Save();
-                        }
-                    }
-                }
-            }
-
-            ImGui.EndDragDropTarget();
+            Service.Save();
         }
 
-        ImGui.TooltipOnHover(UIStrings.RightClickOptions);
+        AcceptFolderReparentAtPresetLevel(preset);
+        ImGui.EndDragDropTarget();
+    }
 
-        DrawPresetContext(preset);
+    private void DrawFolderPresetDragDrop(CustomPresetConfig preset, PresetFolder folder) {
+        if (ImGui.BeginDragDropSource()) {
+            ImGuiDragDrop.SetDragDropPayload("PRESET_IN_FOLDER", preset.UniqueId);
+            ImGui.Text($"{UIStrings.Moving_} {preset.PresetName}");
+            ImGui.EndDragDropSource();
+        }
+
+        if (!ImGui.BeginDragDropTarget())
+            return;
+
+        if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_IN_FOLDER", out Guid presetId) && ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
+            try {
+                var targetIndex = folder.PresetIds.IndexOf(preset.UniqueId);
+                if (targetIndex >= 0) {
+                    var newPresetIds = new List<Guid>(folder.PresetIds);
+                    var currentIndex = newPresetIds.IndexOf(presetId);
+                    if (currentIndex >= 0) {
+                        newPresetIds.RemoveAt(currentIndex);
+                        newPresetIds.Insert(targetIndex, presetId);
+                        folder.PresetIds = newPresetIds;
+                        Service.Save();
+                    }
+                }
+            }
+            catch (Exception ex) {
+                Svc.Log.Error(ex, "[TabFishingPresets] Error reordering presets.");
+            }
+        }
+
+        AcceptFolderReparentAtPresetLevel(preset);
+        ImGui.EndDragDropTarget();
     }
 
     private void DrawPresetOptions(BasePresetConfig? preset) {
@@ -668,9 +570,7 @@ public class TabFishingPresets : BaseTab {
         ImGui.SameLine(0, 3.Scaled());
         DrawUtil.DrawDeletePresetButton(_basePreset);
 
-        if (displayed != null
-            && displayed != _basePreset.DefaultPreset
-            && _basePreset.GetPreset(displayed.UniqueId) == null) {
+        if (displayed != null && displayed != _basePreset.DefaultPreset && _basePreset.GetPreset(displayed.UniqueId) == null) {
             displayed = _basePreset.SelectedPreset ?? _basePreset.DefaultPreset;
         }
     }
@@ -849,13 +749,7 @@ public class TabFishingPresets : BaseTab {
                                 preset.PresetName = newName;
                         }
 
-                        var result = PresetImport.ImportFolderTree(
-                            _basePreset,
-                            folder,
-                            folders,
-                            presets,
-                            new PresetImportOptions { SelectedPresetIds = selectedPresetIds });
-
+                        var result = PresetImport.ImportFolderTree(_basePreset, folder, folders, presets, new PresetImportOptions { SelectedPresetIds = selectedPresetIds });
                         Service.Save();
                         Notify.Success($"Folder imported with {result.ImportedPresets} presets");
 
@@ -872,16 +766,13 @@ public class TabFishingPresets : BaseTab {
                 }
                 else if (!_isImportingFolder && _tempImportPreset != null) {
                     if (DrawUtil.DrawPendingImportPreset(_tempImportPreset, p => {
-                            if (p is CustomPresetConfig custom) {
-                                PresetImport.ImportPresets(
-                                    _basePreset,
-                                    [custom],
-                                    new PresetImportOptions { SelectFirst = true });
-                            }
-                            else {
-                                _basePreset.AddNewPreset(p);
-                            }
-                        }, new Vector2(120.Scaled(), 0)))
+                        if (p is CustomPresetConfig custom) {
+                            PresetImport.ImportPresets(_basePreset, [custom], new PresetImportOptions { SelectFirst = true });
+                        }
+                        else {
+                            _basePreset.AddNewPreset(p);
+                        }
+                    }, new Vector2(120.Scaled(), 0)))
                         _tempImportPreset = null;
                 }
             }
