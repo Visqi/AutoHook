@@ -1,3 +1,4 @@
+using AutoHook.Actions;
 using AutoHook.IPC;
 using AutoHook.Ui;
 using Dalamud.Interface.ImGuiFileDialog;
@@ -15,6 +16,7 @@ public class Service {
     public static WorldState WorldState { get; set; } = null!;
     // pushed each frame before fishing logic reads WorldState (framework tick).
     public static WorldStateUpdater WorldStateUpdater { get; set; } = null!;
+    public static ActionExecutor ActionExecutor { get; set; } = null!;
     public static Configuration Configuration { get; set; } = null!;
     public static WindowSystem WindowSystem { get; } = new(PluginName);
     public static BaitFishClass LastCatch { get; set; } = new(@"-", -1);
@@ -36,6 +38,7 @@ public class Service {
         AutoCollectables = new AutoCollectables();
         NotificationMaster = new(Svc.Interface);
         WorldStateUpdater = new WorldStateUpdater();
+        ActionExecutor = new ActionExecutor(WorldState);
         FishManager = new FishingManager();
         Ipc = new AutoHookIPC();
         ReplayManager = new ReplayManager();
@@ -44,6 +47,7 @@ public class Service {
     public static async ValueTask DisposeAsync() {
         FishManager.Dispose();
         ReplayManager.Dispose();
+        ActionExecutor.Dispose();
         await Configuration.FlushAsync();
         WorldStateUpdater.Dispose();
         AutoCollectables.Dispose();

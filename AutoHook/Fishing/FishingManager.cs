@@ -118,7 +118,7 @@ public partial class FishingManager : IDisposable {
             return;
         }
         if (canceling || Ws.Player.BlockCasting || !EzThrottler.Throttle("SpectralRestMidCast", 200)) return;
-        if (!PlayerRes.CastActionDelayed(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook)) return;
+        if (!Service.ActionExecutor.TryCastDelayed(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook)) return;
 
         Service.Status = UIStrings.SpectralRestOnGain;
         Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.Reeling));
@@ -297,7 +297,7 @@ public partial class FishingManager : IDisposable {
 
         if (currentState != FishingState.Quitting && Ws.Fishing.FishingStep.HasFlag(FishingSteps.Quitting)) {
             if (Ws.ActionAvailable(IDs.Actions.Quit, ActionType.Action) && !Ws.Player.BlockCasting) {
-                PlayerRes.CastActionDelayed(IDs.Actions.Quit, ActionType.Action, @"Quit");
+                Service.ActionExecutor.TryCastDelayed(IDs.Actions.Quit, ActionType.Action, @"Quit");
                 currentState = FishingState.Quitting;
             }
         }
@@ -439,7 +439,7 @@ public partial class FishingManager : IDisposable {
             return;
 
         Service.Status = @$"Timeout reached - using Rest";
-        PlayerRes.CastActionDelayed(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook);
+        Service.ActionExecutor.TryCastDelayed(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook);
         Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.TimeOut));
     }
 
@@ -451,7 +451,7 @@ public partial class FishingManager : IDisposable {
             _fishingTimer.Stop();
 
             if (Ws.Player.HasStatus(IDs.Status.Salvage) && GetAutoCastCfg().ChumAnimationCancel)
-                PlayerRes.CastAction(IDs.Actions.Salvage);
+                Service.ActionExecutor.UseAction(IDs.Actions.Salvage);
 
             HookFish(Ws.Fishing.BiteInfo.TugType.ToBiteType(), currentHook);
         }
@@ -478,7 +478,7 @@ public partial class FishingManager : IDisposable {
             Ws.Decide(DecisionContext.Hook, false, "Rest", $"{bite} bite");
 
             Service.TaskManager.EnqueueDelay(delay);
-            Service.TaskManager.Enqueue(() => PlayerRes.CastAction(IDs.Actions.Rest));
+            Service.TaskManager.Enqueue(() => Service.ActionExecutor.UseAction(IDs.Actions.Rest));
             //_lastStep = FishingSteps.Reeling;
             return;
         }
@@ -487,9 +487,9 @@ public partial class FishingManager : IDisposable {
         Service.TaskManager.EnqueueDelay(delay);
         Service.TaskManager.Enqueue(() => {
             if (hook == HookType.Stellar)
-                PlayerRes.TryUseStellarHookset();
+                Service.ActionExecutor.TryUseStellarHookset();
             else
-                PlayerRes.CastActionDelayed((uint)hook, ActionType.Action, @$"{hook}");
+                Service.ActionExecutor.TryCastDelayed((uint)hook, ActionType.Action, @$"{hook}");
         });
         Service.Status = @$"Using {hook} hook. (Bite: {bite})";
     }
@@ -565,7 +565,8 @@ public partial class FishingManager : IDisposable {
 
         Service.Status = "";
 
-        PlayerRes.CastActionNoDelay(IDs.Actions.Quit);
-        PlayerRes.DelayNextCast();
+        // quit even if BlockCasting is still set from the last cast
+        Service.ActionExecutor.UseAction(IDs.Actions.Quit);
+        Service.ActionExecutor.BeginPostCastDelay();
     }
 }

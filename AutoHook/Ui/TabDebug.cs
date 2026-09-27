@@ -391,10 +391,10 @@ public class TabDebug : BaseTab {
                 bool onCd;
                 bool avail;
                 try {
-                    status = PlayerRes.ActionStatus(id, type);
-                    cd = PlayerRes.GetCooldown(id, type);
-                    group = PlayerRes.GetRecastGroups(id, type);
-                    onCd = PlayerRes.ActionOnCoolDown(id, type);
+                    status = ws.Player.GetActionStatus(type, id);
+                    cd = ws.GetCooldownRemaining(id, type);
+                    group = ws.Player.GetRecastGroup(type, id);
+                    onCd = ws.ActionOnCooldown(id, type);
                     avail = ws.ActionAvailable(id, type);
                 }
                 catch (Exception e) {

@@ -58,19 +58,19 @@ public partial class FishingManager {
         var waitingOnGp = cast == null && HasGpBlockedFishCaughtAction(lastFishCatchCfg);
 
         if (cast == null && !waitingOnGp && multiHook.Enabled && multiHook.CastCondition()) {
-            Service.TaskManager.Enqueue(() => PlayerRes.CastActionDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));
+            Service.TaskManager.Enqueue(() => Service.ActionExecutor.TryCastDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));
             Service.TaskManager.Enqueue(() => CastLineMoochOrRelease(GetAutoCastCfg(), lastFishCatchCfg));
             return true;
         }
 
         if (cast != null) {
             if (multiHook.Enabled && multiHook.CastCondition()) {
-                Service.TaskManager.Enqueue(() => PlayerRes.CastActionDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));
-                Service.TaskManager.Enqueue(() => PlayerRes.CastActionDelayed(cast.Id, cast.ActionType, cast.GetName()));
+                Service.TaskManager.Enqueue(() => Service.ActionExecutor.TryCastDelayed(multiHook.Id, multiHook.ActionType, multiHook.GetName()));
+                Service.TaskManager.Enqueue(() => Service.ActionExecutor.TryCastDelayed(cast.Id, cast.ActionType, cast.GetName()));
                 return true;
             }
 
-            PlayerRes.CastActionDelayed(cast.Id, cast.ActionType, cast.GetName());
+            Service.ActionExecutor.TryCastDelayed(cast.Id, cast.ActionType, cast.GetName());
             return true;
         }
 

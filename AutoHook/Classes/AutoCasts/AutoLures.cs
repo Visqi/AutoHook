@@ -186,7 +186,7 @@ public sealed class AutoLures : BaseActionCast {
         var stacks = Service.WorldState.Player.GetStatusStacks(option.Value.StatusId);
 
         if (stacks >= config.LureStacks && config.CancelAttempt && !lureSuccess) {
-            PlayerRes.CastActionDelayed(IDs.Actions.Rest);
+            Service.ActionExecutor.TryCastDelayed(IDs.Actions.Rest);
             return;
         }
 
@@ -198,7 +198,7 @@ public sealed class AutoLures : BaseActionCast {
         if (!IsAvailableToCast())
             return;
 
-        if (!PlayerRes.TryCastActionNoDelay(Id, ActionType.Action, GetName()))
+        if (!Service.ActionExecutor.TryCastNoDelay(Id, ActionType.Action, GetName()))
             return;
 
         EzThrottler.Throttle("CastingLure", 2500);

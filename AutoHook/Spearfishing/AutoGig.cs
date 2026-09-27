@@ -143,7 +143,7 @@ internal class AutoGig : Window, IDisposable {
 
         var naturesBounty = useCatchAll ? _gigCfg.CatchAllNaturesBountyAction : fish.NaturesBounty;
         if (naturesBounty.IsAvailableToCast())
-            PlayerRes.CastActionDelayed(naturesBounty.Id, naturesBounty.ActionType, naturesBounty.GetName());
+            Service.ActionExecutor.TryCastDelayed(naturesBounty.Id, naturesBounty.ActionType, naturesBounty.GetName());
 
         var laneOriginX = fishLines->X * _uiScale;
         var centerX = laneOriginX + fishLines->Width * fishLines->ScaleX * _uiScale / 2f;
@@ -168,29 +168,29 @@ internal class AutoGig : Window, IDisposable {
     private void TrySessionActions(AutoGigConfig? selectedPreset) {
         var collect = selectedPreset is { Collect.Enabled: true } ? selectedPreset.Collect : _gigCfg.Collect;
         if (collect.IsAvailableToCast())
-            PlayerRes.CastActionDelayed(collect.Id, collect.ActionType, collect.GetName());
+            Service.ActionExecutor.TryCastDelayed(collect.Id, collect.ActionType, collect.GetName());
         if (_gigCfg.NatureBountyBeforeFishAction.IsAvailableToCast())
-            PlayerRes.CastActionDelayed(_gigCfg.NatureBountyBeforeFishAction.Id, _gigCfg.NatureBountyBeforeFishAction.ActionType, _gigCfg.NatureBountyBeforeFishAction.GetName());
+            Service.ActionExecutor.TryCastDelayed(_gigCfg.NatureBountyBeforeFishAction.Id, _gigCfg.NatureBountyBeforeFishAction.ActionType, _gigCfg.NatureBountyBeforeFishAction.GetName());
 
         var baitedBreath = selectedPreset is { BaitedBreath.Enabled: true } ? selectedPreset.BaitedBreath : _gigCfg.BaitedBreath;
         if (baitedBreath.IsAvailableToCast())
-            PlayerRes.CastActionDelayed(baitedBreath.Id, baitedBreath.ActionType, baitedBreath.GetName());
+            Service.ActionExecutor.TryCastDelayed(baitedBreath.Id, baitedBreath.ActionType, baitedBreath.GetName());
 
         var vitalSight = selectedPreset is { VitalSight.Enabled: true } ? selectedPreset.VitalSight : _gigCfg.VitalSight;
         if (vitalSight.IsAvailableToCast())
-            PlayerRes.CastActionDelayed(vitalSight.Id, vitalSight.ActionType, vitalSight.GetName());
+            Service.ActionExecutor.TryCastDelayed(vitalSight.Id, vitalSight.ActionType, vitalSight.GetName());
 
         var electricCurrent = selectedPreset is { ElectricCurrent.Enabled: true } ? selectedPreset.ElectricCurrent : _gigCfg.ElectricCurrent;
         if (electricCurrent.IsAvailableToCast())
-            PlayerRes.CastActionDelayed(electricCurrent.Id, electricCurrent.ActionType, electricCurrent.GetName());
+            Service.ActionExecutor.TryCastDelayed(electricCurrent.Id, electricCurrent.ActionType, electricCurrent.GetName());
 
         var thaliaksFavor = selectedPreset is { ThaliaksFavor.Enabled: true } ? selectedPreset.ThaliaksFavor : _gigCfg.ThaliaksFavor;
         if (thaliaksFavor.IsAvailableToCast())
-            PlayerRes.CastActionDelayed(thaliaksFavor.Id, thaliaksFavor.ActionType, thaliaksFavor.GetName());
+            Service.ActionExecutor.TryCastDelayed(thaliaksFavor.Id, thaliaksFavor.ActionType, thaliaksFavor.GetName());
 
         var cordial = selectedPreset is { Cordial.Enabled: true } ? selectedPreset.Cordial : _gigCfg.Cordial;
         if (cordial.IsAvailableToCast())
-            PlayerRes.CastActionDelayed(cordial.Id, cordial.ActionType, cordial.GetName());
+            Service.ActionExecutor.TryCastDelayed(cordial.Id, cordial.ActionType, cordial.GetName());
     }
 
     private void OnWorldStateModified(WorldState.Operation op) {
@@ -204,10 +204,10 @@ internal class AutoGig : Window, IDisposable {
 
                 var veteranTrade = matched?.VeteranTrade;
                 if (veteranTrade?.IsAvailableToCast() == true)
-                    PlayerRes.CastActionDelayed(veteranTrade.Id, veteranTrade.ActionType, veteranTrade.GetName());
+                    Service.ActionExecutor.TryCastDelayed(veteranTrade.Id, veteranTrade.ActionType, veteranTrade.GetName());
             }
             else if (_gigCfg.CatchAllVeteranTradeAction.IsAvailableToCast()) {
-                PlayerRes.CastActionDelayed(_gigCfg.CatchAllVeteranTradeAction.Id, _gigCfg.CatchAllVeteranTradeAction.ActionType, _gigCfg.CatchAllVeteranTradeAction.GetName());
+                Service.ActionExecutor.TryCastDelayed(_gigCfg.CatchAllVeteranTradeAction.Id, _gigCfg.CatchAllVeteranTradeAction.ActionType, _gigCfg.CatchAllVeteranTradeAction.GetName());
             }
 
             _lastGigEntryId = Guid.Empty;

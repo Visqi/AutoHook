@@ -41,9 +41,9 @@ public partial class FishingManager {
         var cfg = GetAutoCastCfg();
 
         if (Ws.Player.HasStatus(IDs.Status.CollectorsGlove) && cfg.RecastAnimationCancel && cfg.TurnCollectOff && !cfg.CastCollect.Enabled)
-            PlayerRes.CastAction(IDs.Actions.Collect);
+            Service.ActionExecutor.UseAction(IDs.Actions.Collect);
         else if (Ws.Player.HasStatus(IDs.Status.CollectorsGlove) && cfg.TurnCollectOffWithoutAnimCancel && !cfg.CastCollect.Enabled)
-            PlayerRes.CastAction(IDs.Actions.Collect);
+            Service.ActionExecutor.UseAction(IDs.Actions.Collect);
         else
             cfg.TryCastAction(cfg.CastCollect);
     }
@@ -77,7 +77,7 @@ public partial class FishingManager {
         if (!Ws.Fishing.FishingStep.HasFlag(FishingSteps.StartedCasting) || Ws.Fishing.FishingStep.HasFlag(FishingSteps.BeganFishing))
             return;
 
-        var delay = usedAction != null ? PlayerRes.GetPostCastDelayMs() : 0;
+        var delay = usedAction != null ? Service.ActionExecutor.GetPostCastDelayMs() : 0;
         Service.TaskManager.EnqueueDelay(delay);
         Service.TaskManager.Enqueue(() => {
             if (!Ws.Fishing.FishingStep.HasFlag(FishingSteps.StartedCasting) || Ws.Fishing.FishingStep.HasFlag(FishingSteps.BeganFishing))
@@ -102,7 +102,7 @@ public partial class FishingManager {
 
         if (!blockMooch) {
             if (lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast()) {
-                PlayerRes.CastActionNoDelay(lastFishCatchCfg.Mooch.Id, lastFishCatchCfg.Mooch.ActionType,
+                Service.ActionExecutor.TryCastNoDelay(lastFishCatchCfg.Mooch.Id, lastFishCatchCfg.Mooch.ActionType,
                     UIStrings.Mooch);
                 return;
             }
@@ -128,7 +128,7 @@ public partial class FishingManager {
             return false;
 
         if (lastFishCatchCfg is { Enabled: true } && lastFishCatchCfg.Mooch.IsAvailableToCast()) {
-            PlayerRes.CastActionNoDelay(lastFishCatchCfg.Mooch.Id, lastFishCatchCfg.Mooch.ActionType, UIStrings.Mooch);
+            Service.ActionExecutor.TryCastNoDelay(lastFishCatchCfg.Mooch.Id, lastFishCatchCfg.Mooch.ActionType, UIStrings.Mooch);
             return true;
         }
 

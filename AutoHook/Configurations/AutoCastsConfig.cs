@@ -99,12 +99,12 @@ public class AutoCastsConfig {
         }
 
         if (noDelay) {
-            if (!PlayerRes.TryCastActionNoDelay(action.Id, action.ActionType, action.GetName())) {
+            if (!Service.ActionExecutor.TryCastNoDelay(action.Id, action.ActionType, action.GetName())) {
                 LogAutoCastDecision(action, "Cast rejected by game");
                 return false;
             }
         }
-        else if (!PlayerRes.TryCastActionDelayed(action.Id, action.ActionType, action.GetName())) {
+        else if (!Service.ActionExecutor.TryCastDelayed(action.Id, action.ActionType, action.GetName())) {
             LogAutoCastDecision(action, "Cast rejected by game");
             return false;
         }
@@ -132,10 +132,10 @@ public class AutoCastsConfig {
     private void TryChumAnimationCancel() {
         // Make sure Salvage is disabled before chum
         Service.TaskManager.EnqueueDelay(40);
-        Service.TaskManager.Enqueue(() => PlayerRes.CastAction(IDs.Actions.Chum));
+        Service.TaskManager.Enqueue(() => Service.ActionExecutor.UseAction(IDs.Actions.Chum));
 
         // Recast Salvage a few ms's later, maybe 500 is enough?
         Service.TaskManager.EnqueueDelay(465);
-        Service.TaskManager.Enqueue(() => PlayerRes.CastAction(IDs.Actions.Salvage));
+        Service.TaskManager.Enqueue(() => Service.ActionExecutor.UseAction(IDs.Actions.Salvage));
     }
 }

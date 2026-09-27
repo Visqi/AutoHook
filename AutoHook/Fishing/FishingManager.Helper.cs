@@ -6,10 +6,10 @@ namespace AutoHook.Fishing;
 public partial class FishingManager {
     private void AnimationCancel() {
         if (GetAutoCastCfg().RecastAnimationCancel)
-            PlayerRes.CastAction(IDs.Actions.Collect);
+            Service.ActionExecutor.UseAction(IDs.Actions.Collect);
 
         if (Ws.Player.HasStatus(IDs.Status.Salvage) && GetAutoCastCfg().ChumAnimationCancel)
-            PlayerRes.CastAction(IDs.Actions.Salvage);
+            Service.ActionExecutor.UseAction(IDs.Actions.Salvage);
     }
 
     private void OnLogMessage(ILogMessage message) {

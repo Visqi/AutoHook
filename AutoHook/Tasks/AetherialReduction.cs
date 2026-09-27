@@ -74,7 +74,7 @@ public sealed class AetherialReduction(FishingManager fishingManager) : AutoTask
                 return true;
 
             if (ws.ActionAvailable(IDs.Actions.Quit, ActionType.Action) && !ws.Player.BlockCasting)
-                PlayerRes.CastActionDelayed(IDs.Actions.Quit, ActionType.Action, "Quit");
+                Service.ActionExecutor.TryCastDelayed(IDs.Actions.Quit, ActionType.Action, "Quit");
 
             return false;
         }, nameof(QuitFishing), checkFrequency: 5);

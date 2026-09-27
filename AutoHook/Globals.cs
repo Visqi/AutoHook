@@ -1,4 +1,5 @@
-﻿global using AutoHook.Classes;
+﻿global using AutoHook.Actions;
+global using AutoHook.Classes;
 global using AutoHook.Classes.AutoCasts;
 global using AutoHook.Configurations;
 global using AutoHook.Data;

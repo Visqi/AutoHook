@@ -21,7 +21,7 @@ public abstract class BaseActionCast {
         if (actionType == ActionType.Action && id is not IDs.Actions.ThaliaksFavor and not IDs.Actions.NaturesBounty and not IDs.Actions.Collect
             and not IDs.Actions.BaitedBreath and not IDs.Actions.ElectricCurrent and not IDs.Actions.VeteranTrade
             and not IDs.Actions.VitalSight)
-            GpThreshold = (int)PlayerRes.CastActionCost(Id, ActionType);
+            GpThreshold = (int)ActionExecutor.GetActionCost(Id, ActionType);
     }
 
     public bool Enabled;
@@ -63,7 +63,7 @@ public abstract class BaseActionCast {
         => DrawAutoCastConditions(showSubPrefix: false);
 
     public virtual void SetThreshold(int newCost) {
-        var actionCost = Id == IDs.Actions.ThaliaksFavor ? 0 : (int)PlayerRes.CastActionCost(Id, ActionType);
+        var actionCost = Id == IDs.Actions.ThaliaksFavor ? 0 : (int)ActionExecutor.GetActionCost(Id, ActionType);
         GpThreshold = (newCost < 0) ? 0 : Math.Max(newCost, actionCost);
         Service.Save();
     }
