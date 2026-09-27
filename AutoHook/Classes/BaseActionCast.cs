@@ -140,31 +140,14 @@ public abstract class BaseActionCast {
         using var cfgId = ImRaii.PushId(@$"{GetType().Name}_cfg");
 
         if (DrawOptions != null) {
-            DrawUtil.Checkbox(@$"###{GetType().Name}", ref Enabled, GetHelpText(), true);
-
-            ImGui.SameLine(0, 3.Scaled());
-
-            var x = ImGui.GetCursorPosX();
-            if (ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.FramePadding)) {
-                if (ShowGpThreshold) {
-                    ImGui.SameLine(ActionControlColumn.Scaled());
-                    DrawGpThreshold();
-                }
-                DrawUpDownArrows(availableActs);
-                ImGui.SetCursorPosX(x);
-                using (ImRaii.Group()) {
-                    DrawOptions?.Invoke();
-                    ImGui.Separator();
-                }
-                ImGui.TreePop();
-            }
-            else {
-                if (ShowGpThreshold) {
-                    ImGui.SameLine(ActionControlColumn.Scaled());
-                    DrawGpThreshold();
-                }
-                DrawUpDownArrows(availableActs);
-            }
+            DrawUtil.DrawCheckboxTree(label, ref Enabled, () => DrawOptions?.Invoke(), GetHelpText(),
+                drawLabelExtras: () => {
+                    if (ShowGpThreshold) {
+                        ImGui.SameLine(ActionControlColumn.Scaled());
+                        DrawGpThreshold();
+                    }
+                    DrawUpDownArrows(availableActs);
+                });
         }
         else {
             DrawUtil.Checkbox(@$"###{GetType().Name}", ref Enabled, GetHelpText(), true);

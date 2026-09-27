@@ -1,35 +1,49 @@
 using Newtonsoft.Json;
 using AutoHook.Conditions;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace AutoHook.Spearfishing;
 
 public class SpearFishingPresets : BasePreset {
-    public bool AutoGigEnabled = false;
+    public bool AutoGigEnabled = false; // deprecated
     public bool AutoGigHideOverlay = false;
-
     public bool AutoGigDrawFishHitbox = true;
-
     public bool AutoGigDrawGigHitbox = true;
 
+    public AutoCollect Collect = new(true);
     public AutoThaliaksFavor ThaliaksFavor = new(true);
     public AutoCordial Cordial = new(true);
     public AutoBaitedBreath BaitedBreath = new(true);
     public AutoElectricCurrent ElectricCurrent = new(true);
     public AutoVitalSight VitalSight = new(true);
 
-    public bool CatchAll = false;
+    public bool CatchAll = false; // deprecated
     public ConditionSet? CatchAllConditionSet { get; set; }
     public AutoNaturesBounty CatchAllNaturesBountyAction = new(true);
     public AutoVeteranTrade CatchAllVeteranTradeAction = new(true);
     public AutoNaturesBounty NatureBountyBeforeFishAction = new(true);
 
+    [DefaultValue(25)]
+    public int GlobalHitboxSize = 25;
+
     public List<AutoGigConfig> Presets = [];
 
+    [JsonIgnore]
+    public bool IsCatchAllActive => SelectedPreset == null;
+
+    [JsonIgnore]
+    public int ActiveHitboxSize => SelectedPreset?.HitboxSize ?? GlobalHitboxSize;
+
     [OnDeserialized]
-    private void OnDeserialized(StreamingContext _) => PrepareActions();
+    private void OnDeserialized(StreamingContext _) {
+        if (CatchAll)
+            SelectedGuid = "";
+        PrepareActions();
+    }
 
     public void PrepareActions() {
+        Collect.IsSpearFishing = true;
         ThaliaksFavor.IsSpearFishing = true;
         Cordial.IsSpearFishing = true;
         BaitedBreath.IsSpearFishing = true;

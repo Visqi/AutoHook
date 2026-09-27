@@ -298,7 +298,7 @@ public static class DrawUtil {
 
     }
 
-    public static void DrawCheckboxTree(string treeName, ref bool enable, Action? action = null, string helpText = "", bool forceOpen = false, bool highlightLabel = false) {
+    public static void DrawCheckboxTree(string treeName, ref bool enable, Action? action = null, string helpText = "", bool forceOpen = false, bool highlightLabel = false, Action? drawLabelExtras = null) {
         using var id = ImRaii.PushId(treeName);
         if (ImGui.Checkbox("###checkbox", ref enable)) {
             if (enable) ImGui.SetNextItemOpen(true);
@@ -318,6 +318,7 @@ public static class DrawUtil {
                     ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen);
             if (!string.IsNullOrEmpty(helpText))
                 ImGui.TooltipOnHover(helpText);
+            drawLabelExtras?.Invoke();
             return;
         }
 
@@ -325,6 +326,7 @@ public static class DrawUtil {
             ImGui.SetNextItemOpen(true, ImGuiCond.Always);
         using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
             if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding)) {
+                drawLabelExtras?.Invoke();
                 ImGui.SetCursorPosX(x);
                 TextV($" └");
                 ImGui.SameLine();
@@ -341,6 +343,9 @@ public static class DrawUtil {
 
                 ImGui.TreePop();
             }
+            else {
+                drawLabelExtras?.Invoke();
+            }
     }
 
     // checkbox + inline collapsing header sharing one label. returns true if enable changed.
@@ -350,7 +355,7 @@ public static class DrawUtil {
         if (!string.IsNullOrEmpty(helpText))
             ImGui.TooltipOnHover(helpText);
 
-        ImGui.SameLine(0, 6.Scaled());
+        ImGui.SameLine(0, 3.Scaled());
         var x = ImGui.GetCursorPosX();
         if (forceOpen)
             ImGui.SetNextItemOpen(true, ImGuiCond.Always);

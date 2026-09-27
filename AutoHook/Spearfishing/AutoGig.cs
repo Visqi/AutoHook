@@ -2,6 +2,7 @@ using AutoHook.Conditions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ECommons.Automation;
 using ECommons.Automation.NeoTaskManager;
@@ -55,33 +56,41 @@ internal class AutoGig : Window, IDisposable {
     }
 
     public override void Draw() {
-        if (!_gigCfg.AutoGigHideOverlay || _gigCfg.AutoGigEnabled)
-            DrawFishOverlay();
+        DrawFishOverlay();
     }
 
     public void DrawSettings() {
-        if (ImGui.Checkbox(UIStrings.Enable_AutoGig, ref _gigCfg.AutoGigEnabled))
-            Service.Save();
-
         var selectedPreset = _gigCfg.SelectedPreset;
-        ImGui.SameLine();
-        DrawUtil.Checkbox(UIStrings.CatchEverything, ref _gigCfg.CatchAll, UIStrings.IgnoresPresets);
+        ImGui.TextColored(ImGuiColors.DalamudOrange,
+            selectedPreset?.PresetName ?? UIStrings.CatchEverything);
         PluginUi.ShowKofi();
-        DrawUtil.DrawComboSelector(_gigCfg.Presets, preset => preset.PresetName, _gigCfg.SelectedPreset?.PresetName ?? UIStrings.None, gig => _gigCfg.SelectedPreset = gig);
 
-        ImGui.SetNextItemWidth(90.Scaled());
-        if (selectedPreset != null) {
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(90.Scaled());
-            if (ImGui.InputInt(UIStrings.Hitbox + @" ", ref selectedPreset.HitboxSize)) {
-                selectedPreset.HitboxSize = Math.Max(0, Math.Min(selectedPreset.HitboxSize, 300));
-                Service.Save();
+        ImGui.SetNextItemWidth(220.Scaled());
+        var preview = selectedPreset?.PresetName ?? UIStrings.CatchEverything;
+        using (var combo = ImRaii.Combo("###gigOverlayPreset", preview)) {
+            if (combo) {
+                if (ImGui.Selectable(UIStrings.CatchEverything, selectedPreset == null))
+                    _gigCfg.SelectedPreset = null;
+                foreach (var preset in _gigCfg.Presets) {
+                    if (ImGui.Selectable(preset.PresetName, selectedPreset?.UniqueId == preset.UniqueId))
+                        _gigCfg.SelectedPreset = preset;
+                }
             }
         }
 
         ImGui.SameLine();
+        ImGui.SetNextItemWidth(90.Scaled());
+        var hitbox = _gigCfg.ActiveHitboxSize;
+        if (ImGui.InputInt(UIStrings.Hitbox + @" ", ref hitbox)) {
+            hitbox = Math.Max(0, Math.Min(hitbox, 300));
+            if (selectedPreset != null)
+                selectedPreset.HitboxSize = hitbox;
+            else
+                _gigCfg.GlobalHitboxSize = hitbox;
+            Service.Save();
+        }
 
-        if (_gigCfg.CatchAll)
+        if (_gigCfg.IsCatchAllActive)
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.CatchAllGigWindow);
     }
 
@@ -92,28 +101,31 @@ internal class AutoGig : Window, IDisposable {
         if (!isOpen)
             return;
 
-        ImGui.SetNextWindowPos(new Vector2(addon->AtkUnitBase.X + 5, addon->AtkUnitBase.Y - 65));
-        if (ImGui.Begin("gig###gig", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar)) {
-            DrawSettings();
-            ImGui.End();
+        if (!_gigCfg.AutoGigHideOverlay) {
+            ImGui.SetNextWindowPos(new Vector2(addon->AtkUnitBase.X + 5, addon->AtkUnitBase.Y - 65));
+            if (ImGui.Begin("gig###gig", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar)) {
+                DrawSettings();
+                ImGui.End();
+            }
         }
 
-        if (Service.Configuration.PluginEnabled && _gigCfg is { AutoGigEnabled: true, }) {
-            var selectedPreset = _gigCfg.SelectedPreset;
+        if (!Service.Configuration.PluginEnabled)
+            return;
 
-            TrySessionActions(selectedPreset);
-            GigFish(addon, addon->Fish[0], addon->GetNodeById(Fish1NodeId));
-            GigFish(addon, addon->Fish[1], addon->GetNodeById(Fish2NodeId));
-            GigFish(addon, addon->Fish[2], addon->GetNodeById(Fish3NodeId));
-        }
+        var selectedPreset = _gigCfg.SelectedPreset;
+
+        TrySessionActions(selectedPreset);
+        GigFish(addon, addon->Fish[0], addon->GetNodeById(Fish1NodeId));
+        GigFish(addon, addon->Fish[1], addon->GetNodeById(Fish2NodeId));
+        GigFish(addon, addon->Fish[2], addon->GetNodeById(Fish3NodeId));
     }
 
     private unsafe void GigFish(AddonSpearFishing* addon, AddonSpearFishing.FishInfo info, AtkResNode* node) {
         if (node == null)
             return;
 
-        var drawList = ImGui.GetWindowDrawList();
-        var gigHitbox = _gigCfg.SelectedPreset?.HitboxSize ?? 0;
+        var drawList = ImGui.GetForegroundDrawList();
+        var gigHitbox = _gigCfg.ActiveHitboxSize;
         var fishLines = addon->GetNodeById(FishLaneNodeId);
         if (fishLines == null)
             return;
@@ -123,12 +135,13 @@ internal class AutoGig : Window, IDisposable {
         if (!info.Available)
             return;
 
-        var fish = _gigCfg.CatchAll ? GetCatchAllGig() : CheckFish(info);
+        var useCatchAll = _gigCfg.IsCatchAllActive;
+        var fish = useCatchAll ? GetCatchAllGig() : CheckFish(info);
 
         if (fish == null || !fish.Enabled || !fish.GigConditionSet.PassesOrUnconfigured())
             return;
 
-        var naturesBounty = _gigCfg.CatchAll ? _gigCfg.CatchAllNaturesBountyAction : fish.NaturesBounty;
+        var naturesBounty = useCatchAll ? _gigCfg.CatchAllNaturesBountyAction : fish.NaturesBounty;
         if (naturesBounty.IsAvailableToCast())
             PlayerRes.CastActionDelayed(naturesBounty.Id, naturesBounty.ActionType, naturesBounty.GetName());
 
@@ -140,7 +153,7 @@ internal class AutoGig : Window, IDisposable {
         DrawFishHitbox(fishLines, drawList, fishHitbox);
 
         if (fishHitbox >= centerX - gigHitbox && fishHitbox <= centerX + gigHitbox) {
-            _lastGigEntryId = _gigCfg.CatchAll ? Guid.Empty : fish.UniqueId;
+            _lastGigEntryId = useCatchAll ? Guid.Empty : fish.UniqueId;
             _taskManager.Enqueue(() => { Chat.ExecuteCommand($"/ac \"{Gig}\""); });
         }
     }
@@ -153,8 +166,9 @@ internal class AutoGig : Window, IDisposable {
     private BaseGig? GetCatchAllGig() => _gigCfg.CatchAllConditionSet.PassesOrUnconfigured() ? new BaseGig(0) { Enabled = true } : null;
 
     private void TrySessionActions(AutoGigConfig? selectedPreset) {
-        if (selectedPreset?.Collect.IsAvailableToCast() == true)
-            PlayerRes.CastActionDelayed(selectedPreset.Collect.Id, selectedPreset.Collect.ActionType, selectedPreset.Collect.GetName());
+        var collect = selectedPreset is { Collect.Enabled: true } ? selectedPreset.Collect : _gigCfg.Collect;
+        if (collect.IsAvailableToCast())
+            PlayerRes.CastActionDelayed(collect.Id, collect.ActionType, collect.GetName());
         if (_gigCfg.NatureBountyBeforeFishAction.IsAvailableToCast())
             PlayerRes.CastActionDelayed(_gigCfg.NatureBountyBeforeFishAction.Id, _gigCfg.NatureBountyBeforeFishAction.ActionType, _gigCfg.NatureBountyBeforeFishAction.GetName());
 
@@ -182,19 +196,19 @@ internal class AutoGig : Window, IDisposable {
     private void OnWorldStateModified(WorldState.Operation op) {
         if (op is SpearfishingInfo.OpAddFishCaught caught) {
             var preset = _gigCfg.SelectedPreset;
-            if (preset == null)
-                return;
+            if (preset != null) {
+                var matched = _lastGigEntryId == Guid.Empty ? null : preset.Gigs.FirstOrDefault(gig => gig.UniqueId == _lastGigEntryId && gig.Fish?.ItemId == caught.FishId);
+                matched ??= preset.GetGigsForPool(Service.WorldState.Spearfishing.Spot.NotebookId).FirstOrDefault(gig => gig.Fish?.ItemId == caught.FishId);
+                if (matched != null)
+                    SpearfishingCounterHelper.AddFishCount(matched.UniqueId, caught.Amount);
 
-            var matched = _lastGigEntryId == Guid.Empty ? null : preset.Gigs.FirstOrDefault(gig => gig.UniqueId == _lastGigEntryId && gig.Fish?.ItemId == caught.FishId);
-            matched ??= preset.GetGigsForPool(Service.WorldState.Spearfishing.Spot.NotebookId).FirstOrDefault(gig => gig.Fish?.ItemId == caught.FishId);
-            if (matched != null)
-                SpearfishingCounterHelper.AddFishCount(matched.UniqueId, caught.Amount);
-
-            var veteranTrade = _gigCfg.CatchAll
-                ? _gigCfg.CatchAllVeteranTradeAction
-                : matched?.VeteranTrade;
-            if (veteranTrade?.IsAvailableToCast() == true)
-                PlayerRes.CastActionDelayed(veteranTrade.Id, veteranTrade.ActionType, veteranTrade.GetName());
+                var veteranTrade = matched?.VeteranTrade;
+                if (veteranTrade?.IsAvailableToCast() == true)
+                    PlayerRes.CastActionDelayed(veteranTrade.Id, veteranTrade.ActionType, veteranTrade.GetName());
+            }
+            else if (_gigCfg.CatchAllVeteranTradeAction.IsAvailableToCast()) {
+                PlayerRes.CastActionDelayed(_gigCfg.CatchAllVeteranTradeAction.Id, _gigCfg.CatchAllVeteranTradeAction.ActionType, _gigCfg.CatchAllVeteranTradeAction.GetName());
+            }
 
             _lastGigEntryId = Guid.Empty;
         }

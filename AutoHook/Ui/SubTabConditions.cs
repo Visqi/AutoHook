@@ -25,7 +25,7 @@ public static class SubTabConditions {
         ImGui.TextColored(ImGuiColors.DalamudGrey, $"({preset.NamedConditions.Count})");
         ImGui.Spacing();
 
-        using var items = ImRaii.Child("###PresetConditions", new System.Numerics.Vector2(0, 0), true);
+        using var items = ImRaii.Child("###PresetConditions", new System.Numerics.Vector2(0, 0), false);
         for (var i = 0; i < preset.NamedConditions.Count; i++) {
             var named = preset.NamedConditions[i];
             named.EnsureUiId();

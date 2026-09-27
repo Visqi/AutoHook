@@ -96,7 +96,7 @@ public class SubTabAutoCast {
         if (!acCfg.EnableAll && !Service.Configuration.DontHideOptionsDisabled)
             return;
 
-        if (ImGui.TreeNodeEx(UIStrings.AnimationCanceling, ImGuiTreeNodeFlags.FramePadding)) {
+        DrawUtil.DrawTreeNodeEx(UIStrings.AnimationCanceling, () => {
             DrawUtil.Checkbox(UIStrings.EnableRecastCancel, ref acCfg.RecastAnimationCancel,
                 UIStrings.EnableRecastCancelHelp);
             if (acCfg.RecastAnimationCancel)
@@ -106,10 +106,7 @@ public class SubTabAutoCast {
 
             DrawUtil.Checkbox(UIStrings.EnableChumCancel, ref acCfg.ChumAnimationCancel,
                 UIStrings.ChumCancelHelp);
-
-            ImGui.Separator();
-            ImGui.TreePop();
-        }
+        });
 
         DrawUtil.Checkbox(UIStrings.TurnCollectOffWithoutAnimCancel, ref acCfg.TurnCollectOffWithoutAnimCancel,
             UIStrings.TurnCollectOffWithoutAnimCancelHelp);
@@ -146,7 +143,7 @@ public class SubTabAutoCast {
 
         _actionsAvailable.Sort(CompareActions);
 
-        using var item = ImRaii.Child("###AutoCastItems", new Vector2(0, 0), true);
+        using var item = ImRaii.Child("###AutoCastItems", new Vector2(0, 0), false);
         foreach (var action in _actionsAvailable) {
             try {
                 using var id = ImRaii.PushId(action.GetType().ToString());

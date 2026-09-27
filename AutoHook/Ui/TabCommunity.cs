@@ -26,13 +26,14 @@ public class TabCommunity : BaseTab {
     private string SearchFilter => _searchFilter.Trim();
     private bool MatchesSearch(string text) => !SearchActive || text.Contains(SearchFilter, StringComparison.InvariantCultureIgnoreCase);
 
-    public override void DrawHeader() { }
-
-    public override void Draw() {
+    public override void DrawHeader() {
         ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.CommunityDescription);
         ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
         ImGui.InputTextWithHint("##CommunityPresetSearch", UIStrings.Search_Hint, ref _searchFilter, 128);
+        ImGui.Separator();
+    }
 
+    public override void Draw() {
         using (ImRaii.Group()) {
             using (var disabled = ImRaii.Disabled(EzThrottler.GetRemainingTime("WikiUpdate") > 0)) {
                 if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.CloudDownloadAlt, UIStrings.GetWikiPresets))
@@ -337,7 +338,7 @@ public class TabCommunity : BaseTab {
         }
 
         using (var a = ImRaii.PushColor(ImGuiCol.Text, color)) {
-            ImGui.Selectable($"- {item.PresetName}");
+            ImGui.Selectable(item.PresetName);
             if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
                 ImGui.OpenPopup($"PresetOptions###{item.PresetName}");
         }
@@ -378,38 +379,20 @@ public class TabCommunity : BaseTab {
         using var ctx = ImRaii.ContextPopupItem(@$"PresetOptions###{preset.PresetName}");
         if (!ctx.Success) return;
 
-        var name = preset.PresetName;
-        if (preset.PresetName.StartsWith(@"[Old Version]"))
-            ImGui.TextColored(ImGuiColors.ParsedOrange, UIStrings.Old_Preset_Warning);
-        else
-            ImGui.TextWrapped(UIStrings.ImportThisPreset);
-
-        if (ImGui.InputText(UIStrings.PresetName, ref name, 64, ImGuiInputTextFlags.AutoSelectAll))
-            preset.RenamePreset(name);
-
-        if (ImGui.Button(UIStrings.Import)) {
-            if (preset is CustomPresetConfig customPreset) {
+        DrawUtil.DrawPendingImportPreset(preset, p => {
+            if (p is CustomPresetConfig customPreset) {
                 var result = PresetImport.ImportPresets(_fishingPreset, [customPreset], CommunityOptions());
                 if (result.ImportedPresets == 0) {
                     Notify.Info("No new presets to import.");
-                    ImGui.CloseCurrentPopup();
                     return;
                 }
-
-                Service.Save();
             }
-            else if (preset is AutoGigConfig gigPreset) {
+            else if (p is AutoGigConfig gigPreset) {
                 _gigPreset.AddNewPreset(gigPreset);
             }
 
             Notify.Success(UIStrings.PresetImported);
-            ImGui.CloseCurrentPopup();
-        }
-
-        ImGui.SameLine();
-
-        if (ImGui.Button(UIStrings.DrawImportExport_Cancel))
-            ImGui.CloseCurrentPopup();
+        });
     }
 
     private static void OpenWiki() {

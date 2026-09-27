@@ -6,6 +6,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Newtonsoft.Json;
+using System.Numerics;
 using static AutoHook.Conditions.ConditionRegistry;
 using static AutoHook.Conditions.ConditionParams;
 
@@ -215,7 +216,9 @@ public static class ConditionUi {
                 ImGui.TextColored(ImGuiColors.DalamudYellow, "Conditions / Expression Export");
                 ImGui.Separator();
 
-                if (ImGui.Button("Export conditions")) {
+                var buttonSize = new Vector2(120.Scaled(), 0);
+
+                if (ImGui.Button("Export conditions", buttonSize)) {
                     var json = JsonConvert.SerializeObject(set);
                     var bytes = Encoding.UTF8.GetBytes(json);
                     _exportBase64 = Convert.ToBase64String(bytes);
@@ -223,14 +226,14 @@ public static class ConditionUi {
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Export expression")) {
+                if (ImGui.Button("Export expression", buttonSize)) {
                     var expr = set.Expression ?? string.Empty;
                     var bytes = Encoding.UTF8.GetBytes(expr);
                     var exprBase64 = Convert.ToBase64String(bytes);
                     ImGui.SetClipboardText(exprBase64);
                 }
 
-                if (ImGui.Button("Import conditions")) {
+                if (ImGui.Button("Import conditions", buttonSize)) {
                     try {
                         var fromClipboard = ImGui.GetClipboardText();
                         var data = Convert.FromBase64String(fromClipboard.Trim());
@@ -245,7 +248,7 @@ public static class ConditionUi {
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Import expression")) {
+                if (ImGui.Button("Import expression", buttonSize)) {
                     try {
                         var fromClipboard = ImGui.GetClipboardText();
                         var data = Convert.FromBase64String(fromClipboard.Trim());

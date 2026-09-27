@@ -1,8 +1,9 @@
+using AutoHook.Spearfishing;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
-using FFXIVClientStructs.FFXIV.Common.Math;
 using System.Diagnostics;
 using System.Globalization;
+using System.Numerics;
 
 namespace AutoHook.Ui;
 
@@ -11,6 +12,8 @@ public class TabSettings : BaseTab {
     public override bool Enabled { get; } = true;
 
     public override OpenWindow Type => OpenWindow.Settings;
+
+    private readonly SpearFishingPresets _gigCfg = Service.Configuration.AutoGigConfig;
 
     public override void DrawHeader() {
         DrawLanguageSelector();
@@ -24,42 +27,75 @@ public class TabSettings : BaseTab {
     }
 
     public override void Draw() {
-        using var item = ImRaii.Child("SettingItems", new Vector2(0, 0), true);
-        DrawConfigs();
+        using var item = ImRaii.Child("SettingItems", new Vector2(0, 0), false);
+        using var tabs = ImRaii.TabBar("###SettingsTabs", ImGuiTabBarFlags.NoTooltip);
+        if (!tabs)
+            return;
+
+        using (var tab = ImRaii.TabItem("General")) {
+            if (tab)
+                DrawGeneralSettings();
+        }
+
+        using (var tab = ImRaii.TabItem("Fishing")) {
+            if (tab)
+                DrawFishingSettings();
+        }
+
+        using (var tab = ImRaii.TabItem("Spearfishing")) {
+            if (tab)
+                DrawSpearfishingSettings();
+        }
+
+        using (var tab = ImRaii.TabItem("Ocean Fishing")) {
+            if (tab)
+                DrawOceanFishingSettings();
+        }
     }
 
-    private void DrawConfigs() {
+    private void DrawGeneralSettings() {
         DrawUtil.Checkbox(UIStrings.Plugin_Enabled, ref Service.Configuration.PluginEnabled, UIStrings.PluginEnabledHelp);
-
-        if (ImGui.TreeNodeEx(UIStrings.DelaySettings, ImGuiTreeNodeFlags.FramePadding)) {
-            DrawDelayHook();
-            DrawDelayCasts();
-            DrawDelayCancel();
-            ImGui.TreePop();
-        }
-
-        ImGui.Separator();
-
         DrawUtil.Checkbox(UIStrings.AntiAfkOption, ref Service.Configuration.ResetAfkTimer);
-        DrawUtil.Checkbox(UIStrings.AutoStartFishing, ref Service.Configuration.AutoStartFishing, UIStrings.AutoStartFishingHelpText);
-        DrawUtil.Checkbox(UIStrings.AutoOceanFish, ref Service.Configuration.AutoOceanFish, UIStrings.AutoOceanFishHelpText);
-        if (Service.Configuration.AutoOceanFish) {
-            using (ImRaii.PushIndent()) {
-                DrawAutoOceanFishGoal();
-                DrawUtil.Checkbox(UIStrings.AutoOceanFish_Fallthrough, ref Service.Configuration.AOF_Fallthrough);
-                DrawUtil.Checkbox(UIStrings.AutoOceanFish_AllowMovement, ref Service.Configuration.AOF_WalkToRailing, UIStrings.AutoOceanFish_AllowMovementHelpText);
-            }
-        }
-        DrawUtil.Checkbox(UIStrings.SpectralRestOnGain, ref Service.Configuration.SpectralRest, UIStrings.SpectralRestOnGainHelpText);
-        DrawUtil.Checkbox(UIStrings.AutoHandleCollectables, ref Service.Configuration.AutoCollectablesEnabled, UIStrings.AutoHandleCollectablesHelpText);
         DrawUtil.Checkbox(UIStrings.DontHideExtraAutoCast, ref Service.Configuration.DontHideOptionsDisabled);
         DrawUtil.Checkbox(UIStrings.Hide_Tab_Description, ref Service.Configuration.HideTabDescription);
         DrawUtil.Checkbox(UIStrings.Show_Current_Status_Header, ref Service.Configuration.ShowStatus);
         DrawUtil.Checkbox(UIStrings.Show_Chat_Logs, ref Service.Configuration.ShowChatLogs, UIStrings.Show_Chat_Logs_HelpText);
-
         DrawUtil.Checkbox(UIStrings.Dtr_Show, ref Service.Configuration.DtrBarEnabled, UIStrings.Dtr_Settings_Help_Text);
         DrawUtil.Checkbox(UIStrings.Dtr_Show_Preset, ref Service.Configuration.DtrPresetBarEnabled, UIStrings.Dtr_Preset_Setting_Help);
         DrawUtil.TextV(UIStrings.Dtr_Help);
+    }
+
+    private void DrawFishingSettings() {
+        if (ImGui.TreeNodeEx(UIStrings.DelaySettings, ImGuiTreeNodeFlags.FramePadding)) {
+            using (ImRaii.PushIndent()) {
+                DrawDelayHook();
+                DrawDelayCasts();
+                DrawDelayCancel();
+            }
+            ImGui.TreePop();
+        }
+
+        DrawUtil.Checkbox(UIStrings.AutoStartFishing, ref Service.Configuration.AutoStartFishing, UIStrings.AutoStartFishingHelpText);
+        DrawUtil.Checkbox(UIStrings.SpectralRestOnGain, ref Service.Configuration.SpectralRest, UIStrings.SpectralRestOnGainHelpText);
+        DrawUtil.Checkbox(UIStrings.AutoHandleCollectables, ref Service.Configuration.AutoCollectablesEnabled, UIStrings.AutoHandleCollectablesHelpText);
+    }
+
+    private void DrawSpearfishingSettings() {
+        DrawUtil.Checkbox(UIStrings.HideOverlayDuringSpearfishing, ref _gigCfg.AutoGigHideOverlay, UIStrings.AutoGigHideOverlayHelpMarker);
+        DrawUtil.Checkbox(UIStrings.DrawFishHitbox, ref _gigCfg.AutoGigDrawFishHitbox);
+        DrawUtil.Checkbox(UIStrings.DrawGigHitbox, ref _gigCfg.AutoGigDrawGigHitbox);
+    }
+
+    private void DrawOceanFishingSettings() {
+        DrawUtil.Checkbox(UIStrings.AutoOceanFish, ref Service.Configuration.AutoOceanFish, UIStrings.AutoOceanFishHelpText);
+        if (!Service.Configuration.AutoOceanFish)
+            return;
+
+        using (ImRaii.PushIndent()) {
+            DrawAutoOceanFishGoal();
+            DrawUtil.Checkbox(UIStrings.AutoOceanFish_Fallthrough, ref Service.Configuration.AOF_Fallthrough);
+            DrawUtil.Checkbox(UIStrings.AutoOceanFish_AllowMovement, ref Service.Configuration.AOF_WalkToRailing, UIStrings.AutoOceanFish_AllowMovementHelpText);
+        }
     }
 
     private static void DrawAutoOceanFishGoal() {
@@ -179,6 +215,5 @@ public class TabSettings : BaseTab {
         Service.Configuration.CurrentLanguage = languages[currentLanguage];
         UIStrings.Culture = new CultureInfo(Service.Configuration.CurrentLanguage);
         Service.Save();
-        //Service.Chat.Print("Saved");
     }
 }

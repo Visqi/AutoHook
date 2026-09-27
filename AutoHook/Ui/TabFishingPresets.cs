@@ -654,7 +654,25 @@ public class TabFishingPresets : BaseTab {
         ImGui.SameLine(0, 3.Scaled());
         DrawUtil.DrawAddNewPresetButton(_basePreset);
         ImGui.SameLine(0, 3.Scaled());
+
+        using (ImRaii.Disabled(_basePreset.SelectedPreset == null)) {
+            if (ImGuiComponents.IconButton(FontAwesomeIcon.FileExport)) {
+                ImGui.SetClipboardText(Configuration.ExportPreset(_basePreset.SelectedPreset!));
+                Notify.Success(UIStrings.PresetExportedToTheClipboard);
+            }
+        }
+        ImGui.TooltipOnHover(UIStrings.ExportPresetToClipboard);
+
+        ImGui.SameLine(0, 3.Scaled());
         DrawCombinedImport();
+        ImGui.SameLine(0, 3.Scaled());
+        DrawUtil.DrawDeletePresetButton(_basePreset);
+
+        if (displayed != null
+            && displayed != _basePreset.DefaultPreset
+            && _basePreset.GetPreset(displayed.UniqueId) == null) {
+            displayed = _basePreset.SelectedPreset ?? _basePreset.DefaultPreset;
+        }
     }
 
     private void ClearFolderImportSelectionState() {
@@ -1026,7 +1044,7 @@ public class TabFishingPresets : BaseTab {
         using (var disabled = ImRaii.Disabled(!ImGui.GetIO().KeyShift)) {
             if (ImGui.Selectable(UIStrings.Delete, false, ImGuiSelectableFlags.DontClosePopups)) {
                 _basePreset.RemovePreset(preset.UniqueId);
-                displayed = null;
+                displayed = _basePreset.SelectedPreset ?? _basePreset.DefaultPreset;
                 Service.Save();
             }
         }

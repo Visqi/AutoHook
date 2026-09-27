@@ -33,7 +33,11 @@ public class AutoHookIPC {
 
     [EzIPC]
     public void SetAutoGigState(bool state) {
-        WriteConfig(() => _cfg.AutoGigConfig.AutoGigEnabled = state);
+        WriteConfig(() => {
+            if (!state)
+                _cfg.AutoGigConfig.SelectedPreset = null;
+            _cfg.AutoGigConfig.AutoGigEnabled = state;
+        });
         Service.Save();
     }
 

@@ -2,9 +2,12 @@ using AutoHook.Spearfishing;
 using AutoHook.Spearfishing.Enums;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Colors;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Newtonsoft.Json;
 using System.ComponentModel;
+using System.Numerics;
 using System.Runtime.Serialization;
 
 namespace AutoHook.Configurations;
@@ -94,55 +97,147 @@ public class AutoGigConfig : BasePresetConfig {
     }
 
     public override void DrawOptions() {
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X / 2 - ImGui.CalcTextSize(PresetName).X / 2);
+        ImGui.TextColored(ImGuiColors.DalamudOrange, $" {PresetName}");
+
+        using var tabs = ImRaii.TabBar("###GigPresetTabs", ImGuiTabBarFlags.NoTooltip);
+        if (!tabs)
+            return;
+
+        using (var tab = ImRaii.TabItem(UIStrings.FishCaught)) {
+            if (tab)
+                DrawFishTab();
+        }
+
+        using (var tab = ImRaii.TabItem(UIStrings.Auto_Casts)) {
+            if (tab)
+                DrawActionsTab();
+        }
+
+        using (var tab = ImRaii.TabItem(UIStrings.ExtraOptions)) {
+            if (tab)
+                DrawExtraTab();
+        }
+    }
+
+    private void DrawFishTab() {
+        var poolIds = new List<uint> { 0 };
+        poolIds.AddRange(GameRes.SpearfishingPoolsByNotebookId.Keys.Where(id => id != 0).OrderBy(GetPoolName));
+
+        if (ImGui.Button(UIStrings.Add)) {
+            if (!Gigs.Any(gig => gig.SpearfishingNotebookId == SelectedAddPoolId && gig.Fish == null))
+                AddItem(new BaseGig(0) { SpearfishingNotebookId = SelectedAddPoolId });
+            Service.Save();
+        }
+
+        ImGui.SameLine();
+        ImGui.Text($"{UIStrings.Add_new_fish} ({Gigs.Count})");
+        ImGui.SameLine();
+        DrawUtil.DrawComboSelector(poolIds, GetPoolName, GetPoolName(SelectedAddPoolId), id => SelectedAddPoolId = id);
+
+        using var item = ImRaii.Child("###GigFishItems", new Vector2(0, 0), false);
+        DrawFishList();
+    }
+
+    private void DrawActionsTab() {
+        var actionX = ImGui.GetCursorPosX();
+        ImGui.SetCursorPosX(actionX);
+        Collect.DrawConfig();
+        ImGui.SetCursorPosX(actionX);
+        ThaliaksFavor.DrawConfig();
+        ImGui.SetCursorPosX(actionX);
+        Cordial.DrawConfigWithLabel("Cordials");
+        ImGui.SetCursorPosX(actionX);
+        BaitedBreath.DrawConfig();
+        ImGui.SetCursorPosX(actionX);
+        VitalSight.DrawConfig();
+        ImGui.SetCursorPosX(actionX);
+        ElectricCurrent.DrawConfig();
+    }
+
+    private void DrawExtraTab() {
+        ImGui.SetNextItemWidth(90.Scaled());
+        if (ImGui.InputInt(UIStrings.GigHitbox, ref HitboxSize)) {
+            HitboxSize = Math.Max(0, Math.Min(HitboxSize, 300));
+            Service.Save();
+        }
+
+        DrawUtil.Checkbox("Retain counters between pools", ref RetainCountersBetweenSessions);
+        if (ImGui.Button("Reset caught counters"))
+            ResetCounter();
+    }
+
+    private void DrawFishList() {
         if (Gigs.Count == 0)
             return;
 
         foreach (var group in Gigs.ToList().GroupBy(gig => gig.SpearfishingNotebookId).OrderBy(group => group.Key == 0 ? 0 : 1).ThenBy(group => GetPoolName(group.Key))) {
             using var poolId = ImRaii.PushId($"pool_{group.Key}");
-            if (!ImGui.TreeNodeEx(GetPoolName(group.Key), ImGuiTreeNodeFlags.DefaultOpen))
-                continue;
+            var gigs = group.ToList();
+            var poolEnabled = gigs.All(gig => gig.Enabled);
+            var wasEnabled = poolEnabled;
 
-            if (ImGui.SmallIconButton(FontAwesomeIcon.Plus))
-                AddItem(new BaseGig(0) { SpearfishingNotebookId = group.Key });
-            DrawUtil.HoveredTooltip("Add fish");
+            DrawUtil.DrawCheckboxHeader(GetPoolName(group.Key), ref poolEnabled, ImGuiTreeNodeFlags.DefaultOpen, () => {
+                ImGui.Spacing();
+                if (ImGui.Button(UIStrings.Add)) {
+                    AddItem(new BaseGig(0) { SpearfishingNotebookId = group.Key });
+                    Service.Save();
+                }
 
-            foreach (var gig in group)
-                DrawGig(gig);
-            ImGui.TreePop();
+                ImGui.SameLine();
+                ImGui.Text($"{UIStrings.Add_new_fish} ({gigs.Count})");
+                ImGui.Spacing();
+
+                foreach (var gig in gigs)
+                    DrawGig(gig);
+            });
+
+            if (poolEnabled != wasEnabled) {
+                foreach (var gig in gigs)
+                    gig.Enabled = poolEnabled;
+                Service.Save();
+            }
+
+            ImGui.Spacing();
         }
     }
 
     private void DrawGig(BaseGig gig) {
         using var gigId = ImRaii.PushId(gig.UniqueId.ToString());
+
+        var count = SpearfishingCounterHelper.GetFishCount(gig.UniqueId);
+        var fishCount = count > 0 ? $"({UIStrings.Caught_Counter} {count})" : "";
+
+        DrawUtil.DrawCheckboxHeader($"{gig.Fish?.Name ?? UIStrings.None} {fishCount}", ref gig.Enabled, ImGuiTreeNodeFlags.FramePadding, () => {
+            ImGui.Spacing();
+            DrawFishSearchBar(gig);
+            DrawDeleteButton(gig);
+            DrawUtil.SpacingSeparator();
+            gig.DrawOptions();
+        });
+
+        ImGui.Spacing();
+    }
+
+    private void DrawFishSearchBar(BaseGig gig) {
+        using var _ = ImRaii.PushId("DrawFishSearchBar");
+        var choices = gig.SpearfishingNotebookId == 0 || !GameRes.SpearfishingPoolsByNotebookId.TryGetValue(gig.SpearfishingNotebookId, out var pool)
+            ? GameRes.SpearfishFishes
+            : [.. pool.ItemIds.Select(id => GameRes.SpearfishFishesByItemId.GetValueOrDefault(id)).Where(fish => fish != null).Select(fish => fish!)];
+
+        DrawUtil.DrawComboSelector(choices, fish => fish.Name, gig.Fish?.Name ?? UIStrings.None, fish => gig.Fish = fish);
+    }
+
+    private void DrawDeleteButton(BaseGig gig) {
+        ImGui.SameLine();
         using (ImRaii.PushFont(UiBuilder.IconFont)) {
-            var icon = FontAwesomeIcon.Trash.ToIconString();
-            var buttonSize = ImGui.CalcTextSize(icon) + ImGui.GetStyle().FramePadding * 2;
-            if (ImGui.Button(@$"{icon}", buttonSize) &&
-                ImGui.GetIO().KeyShift) {
+            if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash) && ImGui.GetIO().KeyShift) {
                 RemoveItem(gig.UniqueId);
                 Service.Save();
-                return;
             }
         }
 
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(UIStrings.HoldShiftToDelete);
-
-        ImGui.SameLine(0, 3.Scaled());
-
-        DrawUtil.Checkbox(@$"", ref gig.Enabled);
-
-        ImGui.SameLine(0, 3.Scaled());
-
-        var x = ImGui.GetCursorPosX();
-        if (ImGui.TreeNodeEx($"{gig.Fish?.Name ?? UIStrings.None}", ImGuiTreeNodeFlags.FramePadding)) {
-            ImGui.SetCursorPosX(x);
-            using (ImRaii.Group()) {
-                gig.DrawOptions();
-                ImGui.TextDisabled($"Caught: {SpearfishingCounterHelper.GetFishCount(gig.UniqueId)}");
-            }
-            ImGui.TreePop();
-        }
+        ImGui.TooltipOnHover(UIStrings.HoldShiftToDelete);
     }
 
     public static string GetPoolName(uint notebookId)

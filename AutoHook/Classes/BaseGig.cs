@@ -40,14 +40,19 @@ public class BaseGig(int itemId) : BaseOption {
     public SpearfishSize Size => Fish?.Size ?? SpearfishSize.Unknown;
 
     public override void DrawOptions() {
-        var choices = SpearfishingNotebookId == 0 || !GameRes.SpearfishingPoolsByNotebookId.TryGetValue(SpearfishingNotebookId, out var pool)
-            ? GameRes.SpearfishFishes : [.. pool.ItemIds.Select(id => GameRes.SpearfishFishesByItemId.GetValueOrDefault(id)).Where(fish => fish != null).Select(fish => fish!)];
-        DrawUtil.DrawComboSelector(choices, item => item.Name, Fish?.Name ?? UIStrings.None, item => Fish = item);
+        DrawUtil.DrawTreeNodeEx(UIStrings.Conditions, () => {
+            GigConditionSet = ConditionUi.DrawConditionSet("", GigConditionSet, ConditionScope.Spearfishing, showAdvanced: true);
+        });
 
-        GigConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, GigConditionSet, ConditionScope.Spearfishing, showAdvanced: true);
-        NaturesBounty.DrawConfig();
-        VeteranTrade.DrawConfig();
+        ImGui.Spacing();
+        DrawUtil.DrawTreeNodeEx(UIStrings.Auto_Casts, () => {
+            var x = ImGui.GetCursorPosX();
+            NaturesBounty.DrawConfig();
+            ImGui.SetCursorPosX(x);
+            VeteranTrade.DrawConfig();
+        });
 
+        ImGui.Spacing();
         DrawUtil.DrawTreeNodeEx(UIStrings.Fish_Hitbox_Offset, () => {
             var x = ImGui.GetCursorPosX();
             ImGui.SetCursorPosX(x);
@@ -64,7 +69,6 @@ public class BaseGig(int itemId) : BaseOption {
                 Service.Save();
             }
         }, UIStrings.FishHitboxHelpText);
-
     }
 
     public override bool Equals(object? obj) {

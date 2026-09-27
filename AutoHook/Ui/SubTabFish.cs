@@ -15,7 +15,7 @@ public class SubTabFish {
 
         DrawDescription(listOfFish);
 
-        using var item = ImRaii.Child("###FishItems", new Vector2(0, 0), true);
+        using var item = ImRaii.Child("###FishItems", new Vector2(0, 0), false);
         for (var idx = 0; idx < listOfFish.Count; idx++) {
             var fish = listOfFish[idx];
             using var id = ImRaii.PushId($"fishTab###{idx}");
@@ -23,46 +23,38 @@ public class SubTabFish {
             var count = FishingManager.FishingHelper.GetFishCount(fish.UniqueId);
             var fishCount = count > 0 ? $"({UIStrings.Caught_Counter} {count})" : "";
 
-            DrawUtil.Checkbox($"###checkbox{idx}", ref fish.Enabled);
+            DrawUtil.DrawCheckboxHeader($"{fish.Fish.Name} {fishCount}", ref fish.Enabled, ImGuiTreeNodeFlags.FramePadding, () => {
+                ImGui.Spacing();
+                DrawFishSearchBar(fish);
+                DrawDeleteButton(fish);
+                DrawUtil.SpacingSeparator();
 
-            ImGui.SameLine(0, 6.Scaled());
-            var x = ImGui.GetCursorPosX();
-            if (ImGui.CollapsingHeader($"{fish.Fish.Name} {fishCount}###a{idx}")) {
-                ImGui.SetCursorPosX(x);
-                using (ImRaii.Group()) {
-                    ImGui.Spacing();
-                    DrawFishSearchBar(fish);
-                    DrawDeleteButton(fish);
-                    DrawUtil.SpacingSeparator();
+                DrawSurfaceSlapIdenticalCast(fish);
+                ImGui.Spacing();
 
-                    DrawSurfaceSlapIdenticalCast(fish);
-                    ImGui.Spacing();
+                DrawMultihook(fish);
+                ImGui.Spacing();
 
-                    DrawMultihook(fish);
-                    ImGui.Spacing();
+                DrawMooch(fish);
+                ImGui.Spacing();
 
-                    DrawMooch(fish);
-                    ImGui.Spacing();
+                DrawSparefulHand(fish);
+                ImGui.Spacing();
 
-                    DrawSparefulHand(fish);
-                    ImGui.Spacing();
+                DrawSwapBait(fish);
+                ImGui.Spacing();
 
-                    DrawSwapBait(fish);
-                    ImGui.Spacing();
+                DrawSwapPreset(fish);
+                ImGui.Spacing();
 
-                    DrawSwapPreset(fish);
-                    ImGui.Spacing();
+                DrawStopAfter(fish);
+                ImGui.Spacing();
 
-                    DrawStopAfter(fish);
-                    ImGui.Spacing();
+                fish.NotifyOnSuccess.DrawConfig($"Fish caught: {fish.Fish.Name}!");
+                ImGui.Spacing();
 
-                    fish.NotifyOnSuccess.DrawConfig($"Fish caught: {fish.Fish.Name}!");
-                    ImGui.Spacing();
-
-                    fish.IgnoreConditionSet = ConditionUi.DrawConditionSet(UIStrings.IgnoreFishSettingWhen, fish.IgnoreConditionSet, ConditionScope.FishIgnore, showAdvanced: true, showSubPrefix: true);
-
-                }
-            }
+                fish.IgnoreConditionSet = ConditionUi.DrawConditionSet(UIStrings.IgnoreFishSettingWhen, fish.IgnoreConditionSet, ConditionScope.FishIgnore, showAdvanced: true);
+            });
 
             ImGui.Spacing();
         }
@@ -123,42 +115,30 @@ public class SubTabFish {
     }
 
     private static void DrawSurfaceSlapIdenticalCast(FishConfig fishConfig) {
-        using var _ = ImRaii.PushId($"{UIStrings.SurfaceSlapIdenticalCast}");
-
-        if (ImGui.TreeNodeEx(UIStrings.SurfaceSlapIdenticalCast, ImGuiTreeNodeFlags.FramePadding)) {
-            DrawUtil.DrawSurfaceSlapAndIdenticalCast(fishConfig.SurfaceSlap, fishConfig.IdenticalCast);
-            ImGui.TreePop();
-        }
+        DrawUtil.DrawTreeNodeEx(UIStrings.SurfaceSlapIdenticalCast,
+            () => DrawUtil.DrawSurfaceSlapAndIdenticalCast(fishConfig.SurfaceSlap, fishConfig.IdenticalCast));
     }
 
     private static void DrawMultihook(FishConfig fishConfig) {
-        using var _ = ImRaii.PushId("DrawMultihook");
-        using var tree = ImRaii.TreeNode(UIStrings.Multihook_Settings, ImGuiTreeNodeFlags.FramePadding);
-        if (!tree) return;
-        fishConfig.Multihook.DrawConfig();
+        DrawUtil.DrawTreeNodeEx(UIStrings.Multihook_Settings, () => fishConfig.Multihook.DrawConfig());
     }
 
     private static void DrawMooch(FishConfig fishConfig) {
-        using var _ = ImRaii.PushId(@"DrawMooch");
-        if (ImGui.TreeNodeEx(UIStrings.Mooch_Setting, ImGuiTreeNodeFlags.FramePadding)) {
+        DrawUtil.DrawTreeNodeEx(UIStrings.Mooch_Setting, () => {
             fishConfig.Mooch.SuppressHelpText = true;
             fishConfig.Mooch.DrawConfig();
             fishConfig.Mooch.SuppressHelpText = false;
 
             if (DrawUtil.Checkbox(UIStrings.Never_Mooch, ref fishConfig.NeverMooch, UIStrings.NeverMoochHelpText))
                 fishConfig.Mooch.Enabled = false;
-
-            ImGui.TreePop();
-        }
+        });
     }
 
     private static void DrawSparefulHand(FishConfig fishConfig) {
-        using var _ = ImRaii.PushId("DrawSparefulHand");
-        using var tree = ImRaii.TreeNode(UIStrings.SparefulHand_Settings, ImGuiTreeNodeFlags.FramePadding);
-        if (!tree) return;
-
-        fishConfig.SparefulHand.FishIdToCheck = (uint)fishConfig.Fish.Id;
-        fishConfig.SparefulHand.DrawConfig();
+        DrawUtil.DrawTreeNodeEx(UIStrings.SparefulHand_Settings, () => {
+            fishConfig.SparefulHand.FishIdToCheck = (uint)fishConfig.Fish.Id;
+            fishConfig.SparefulHand.DrawConfig();
+        });
     }
 
     private static void DrawStopAfter(FishConfig fishConfig) {

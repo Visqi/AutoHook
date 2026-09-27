@@ -1,9 +1,7 @@
 using AutoHook.Spearfishing;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
-using FFXIVClientStructs.FFXIV.Common.Math;
 
 namespace AutoHook.Ui;
 
@@ -15,24 +13,67 @@ internal class TabAutoGig : BaseTab {
 
     private readonly SpearFishingPresets _gigCfg = Service.Configuration.AutoGigConfig;
 
+    // null = viewing Catch Everything (Global)
+    private AutoGigConfig? _displayed;
+    private bool _viewingGlobal = true;
+    private bool _displayInitialized;
+
     public override void DrawHeader() {
         DrawTabDescription(UIStrings.TabAutoGigDescription);
+    }
 
-        DrawUtil.DrawCheckboxTree(UIStrings.EnableAutoGig, ref _gigCfg.AutoGigEnabled, () => {
-            if (_gigCfg is { AutoGigEnabled: true, AutoGigHideOverlay: true }) {
-                _gigCfg.AutoGigHideOverlay = false;
-                Service.Save();
+    public override void Draw() {
+        if (!_displayInitialized) {
+            _displayInitialized = true;
+            if (_gigCfg.SelectedPreset is { } active) {
+                _displayed = active;
+                _viewingGlobal = false;
             }
+        }
 
-            DrawUtil.Checkbox(UIStrings.HideOverlayDuringSpearfishing, ref _gigCfg.AutoGigHideOverlay,
-                UIStrings.AutoGigHideOverlayHelpMarker);
+        using var table = ImRaii.Table("###GigPresetTable", 2, ImGuiTableFlags.Resizable);
+        if (!table)
+            return;
 
-            DrawUtil.Checkbox(UIStrings.DrawFishHitbox, ref _gigCfg.AutoGigDrawFishHitbox);
+        ImGui.TableSetupColumn("###GigOptionColumn", ImGuiTableColumnFlags.WidthStretch, 2f);
+        ImGui.TableSetupColumn("###GigPresetColumn", ImGuiTableColumnFlags.WidthStretch, 1f);
 
-            DrawUtil.Checkbox(UIStrings.DrawGigHitbox, ref _gigCfg.AutoGigDrawGigHitbox);
+        ImGui.TableNextColumn();
+        using (ImRaii.Child("###GigOptionSide"))
+            DrawLeftPane();
 
-            DrawUtil.DrawTreeNodeEx("Automatic actions", () => {
+        ImGui.TableNextColumn();
+        using (ImRaii.Child("###GigPresetSide"))
+            DrawRightPane();
+    }
+
+    private void DrawLeftPane() {
+        if (_viewingGlobal || _displayed == null) {
+            DrawCatchEverythingOptions();
+            return;
+        }
+
+        _displayed.DrawOptions();
+    }
+
+    private void DrawCatchEverythingOptions() {
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X / 2 - ImGui.CalcTextSize(UIStrings.CatchEverything).X / 2);
+        ImGui.TextColored(ImGuiColors.DalamudOrange, $" {UIStrings.CatchEverything}");
+
+        using var tabs = ImRaii.TabBar("###CatchAllTabs", ImGuiTabBarFlags.NoTooltip);
+        if (!tabs)
+            return;
+
+        using (var tab = ImRaii.TabItem(UIStrings.Conditions)) {
+            if (tab)
+                _gigCfg.CatchAllConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, _gigCfg.CatchAllConditionSet, ConditionScope.Spearfishing, showAdvanced: true);
+        }
+
+        using (var tab = ImRaii.TabItem(UIStrings.Auto_Casts)) {
+            if (tab) {
                 var actionX = ImGui.GetCursorPosX();
+                ImGui.SetCursorPosX(actionX);
+                _gigCfg.Collect.DrawConfig();
                 ImGui.SetCursorPosX(actionX);
                 _gigCfg.ThaliaksFavor.DrawConfig();
                 ImGui.SetCursorPosX(actionX);
@@ -43,85 +84,80 @@ internal class TabAutoGig : BaseTab {
                 _gigCfg.VitalSight.DrawConfig();
                 ImGui.SetCursorPosX(actionX);
                 _gigCfg.ElectricCurrent.DrawConfig();
-                ImGui.SetCursorPosX(actionX);
-                _gigCfg.NatureBountyBeforeFishAction.DrawConfigWithLabel(UIStrings.UseNaturesBounty);
-            });
-
-            DrawUtil.DrawCheckboxTree(UIStrings.CatchEverything, ref _gigCfg.CatchAll, () => {
-                _gigCfg.CatchAllConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, _gigCfg.CatchAllConditionSet, ConditionScope.Spearfishing, showAdvanced: true);
-                _gigCfg.CatchAllNaturesBountyAction.DrawConfigWithLabel(UIStrings.UseNaturesBounty);
-                _gigCfg.CatchAllVeteranTradeAction.DrawConfig();
-            }, UIStrings.IgnoresPresets);
-        });
-
-        ImGui.Spacing();
-        ImGui.TextWrapped(UIStrings.Current_Selected_Preset);
-        DrawPresetSelector();
-    }
-
-    public override void Draw() {
-        using var items = ImRaii.Child($"###ag_cfg1", Vector2.Zero, true);
-        if (_gigCfg.SelectedPreset is { } selectedPreset) {
-            if (_gigCfg.CatchAll) {
-                ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.CatchAllNotice);
             }
+        }
 
-            var poolIds = new List<uint> { 0 };
-            poolIds.AddRange(GameRes.SpearfishingPoolsByNotebookId.Keys.Where(id => id != 0).OrderBy(AutoGigConfig.GetPoolName));
-            DrawUtil.DrawComboSelector(poolIds, AutoGigConfig.GetPoolName, AutoGigConfig.GetPoolName(selectedPreset.SelectedAddPoolId), id => selectedPreset.SelectedAddPoolId = id);
-            ImGui.SameLine();
-
-            var poolAlreadyAdded = selectedPreset.Gigs.Any(gig => gig.SpearfishingNotebookId == selectedPreset.SelectedAddPoolId);
-            using (ImRaii.Disabled(poolAlreadyAdded)) {
-                if (ImGui.SmallIconButton(FontAwesomeIcon.Plus)) {
-                    selectedPreset.AddItem(new BaseGig(0) {
-                        SpearfishingNotebookId = selectedPreset.SelectedAddPoolId,
-                    });
+        using (var tab = ImRaii.TabItem(UIStrings.ExtraOptions)) {
+            if (tab) {
+                ImGui.SetNextItemWidth(90.Scaled());
+                if (ImGui.InputInt(UIStrings.GigHitbox, ref _gigCfg.GlobalHitboxSize)) {
+                    _gigCfg.GlobalHitboxSize = Math.Max(0, Math.Min(_gigCfg.GlobalHitboxSize, 300));
                     Service.Save();
                 }
+
+                ImGui.Spacing();
+                var x = ImGui.GetCursorPosX();
+                _gigCfg.NatureBountyBeforeFishAction.DrawConfigWithLabel(UIStrings.UseNaturesBounty);
+                ImGui.SetCursorPosX(x);
+                _gigCfg.CatchAllNaturesBountyAction.DrawConfig();
+                ImGui.SetCursorPosX(x);
+                _gigCfg.CatchAllVeteranTradeAction.DrawConfig();
             }
-            DrawUtil.HoveredTooltip("Add pool");
-
-            ImGui.SameLine();
-
-            ImGui.SetNextItemWidth(90.Scaled());
-            if (ImGui.InputInt(UIStrings.GigHitbox, ref selectedPreset.HitboxSize)) {
-                selectedPreset.HitboxSize = Math.Max(0, Math.Min(selectedPreset.HitboxSize, 300));
-                Service.Save();
-            }
-
-            DrawUtil.DrawTreeNodeEx("Preset actions", () => {
-                var actionX = ImGui.GetCursorPosX();
-                ImGui.SetCursorPosX(actionX);
-                selectedPreset.Collect.DrawConfig();
-                ImGui.SetCursorPosX(actionX);
-                selectedPreset.ThaliaksFavor.DrawConfig();
-                ImGui.SetCursorPosX(actionX);
-                selectedPreset.Cordial.DrawConfigWithLabel("Cordials");
-                ImGui.SetCursorPosX(actionX);
-                selectedPreset.BaitedBreath.DrawConfig();
-                ImGui.SetCursorPosX(actionX);
-                selectedPreset.VitalSight.DrawConfig();
-                ImGui.SetCursorPosX(actionX);
-                selectedPreset.ElectricCurrent.DrawConfig();
-            });
-            DrawUtil.Checkbox("Retain counters between pools", ref selectedPreset.RetainCountersBetweenSessions);
-            if (ImGui.Button("Reset caught counters"))
-                selectedPreset.ResetCounter();
-
-            DrawUtil.SpacingSeparator();
-
-            selectedPreset.DrawOptions();
         }
     }
 
-    public void DrawPresetSelector() {
-        DrawUtil.DrawComboSelectorPreset(_gigCfg);
-        ImGui.SameLine();
+    private void DrawRightPane() {
         DrawUtil.DrawAddNewPresetButton(_gigCfg);
-        ImGui.SameLine();
+        ImGui.SameLine(0, 3.Scaled());
         DrawUtil.DrawImportExport(_gigCfg);
-        ImGui.SameLine();
+        ImGui.SameLine(0, 3.Scaled());
         DrawUtil.DrawDeletePresetButton(_gigCfg);
+
+        if (_displayed != null && _gigCfg.GetPreset(_displayed.UniqueId) == null) {
+            _displayed = null;
+            _viewingGlobal = true;
+        }
+
+        ImGui.Spacing();
+
+        using var list = ImRaii.ListBox("###GigPresetList", ImGui.GetContentRegionAvail());
+        if (!list)
+            return;
+
+        DrawCatchEverythingListItem();
+        ImGui.Separator();
+
+        foreach (var preset in _gigCfg.Presets) {
+            using var id = ImRaii.PushId(preset.UniqueId.ToString());
+            var isActive = _gigCfg.SelectedGuid == preset.UniqueId.ToString();
+            var color = isActive ? ImGuiColors.DalamudOrange : ImGuiColors.DalamudWhite;
+            using (ImRaii.PushColor(ImGuiCol.Text, color)) {
+                if (ImGui.Selectable((isActive ? "> " : "") + preset.PresetName, !_viewingGlobal && _displayed?.UniqueId == preset.UniqueId, ImGuiSelectableFlags.AllowDoubleClick)) {
+                    _displayed = preset;
+                    _viewingGlobal = false;
+
+                    if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
+                        _gigCfg.SelectedPreset = isActive ? null : preset;
+                        Service.Save();
+                    }
+                }
+            }
+        }
+    }
+
+    private void DrawCatchEverythingListItem() {
+        var globalActive = _gigCfg.IsCatchAllActive;
+        var color = globalActive ? ImGuiColors.DalamudOrange : ImGuiColors.DalamudWhite;
+        using (ImRaii.PushColor(ImGuiCol.Text, color)) {
+            if (ImGui.Selectable((globalActive ? "> " : "") + UIStrings.CatchEverything, _viewingGlobal, ImGuiSelectableFlags.AllowDoubleClick)) {
+                _viewingGlobal = true;
+                _displayed = null;
+
+                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
+                    _gigCfg.SelectedPreset = null;
+                    Service.Save();
+                }
+            }
+        }
     }
 }

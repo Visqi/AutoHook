@@ -52,7 +52,7 @@ public class SubTabExtra {
     }
 
     public static void DrawBody(ExtraConfig config) {
-        using var item = ImRaii.Child("###ExtraItems", new Vector2(0, 0), true);
+        using var item = ImRaii.Child("###ExtraItems", new Vector2(0, 0), false);
         using (ImRaii.Group()) {
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.BaitPresetPriorityWarning);
 
