@@ -51,7 +51,7 @@ public static class ConditionUi {
         // Either slim view or advanced view, never both. Toggle via SlimAdvancedExpanded.
         // Multi-group sets and sets with an expression always use the advanced editor.
         if (set.SlimAdvancedExpanded || RequiresComplexConditionUi(set)) {
-            DrawSlimAdvancedEditor(set, scope, drawHeaderExtras);
+            DrawSlimAdvancedEditor(label, set, scope, showSubPrefix, drawHeaderExtras);
             return set;
         }
 
@@ -127,7 +127,17 @@ public static class ConditionUi {
         return set;
     }
 
-    private static void DrawSlimAdvancedEditor(ConditionSet set, ConditionScope scope, Action? drawHeaderExtras) {
+    private static void DrawSlimAdvancedEditor(string label, ConditionSet set, ConditionScope scope, bool showSubPrefix, Action? drawHeaderExtras) {
+        if (!label.IsNullOrEmpty()) {
+            if (showSubPrefix) {
+                ImGui.Text(" └");
+                ImGui.SameLine();
+            }
+
+            ImGui.Text(label);
+            ImGui.SameLine();
+        }
+
         // Back icon inline with advanced editor controls (set header).
         if (!RequiresComplexConditionUi(set)) {
             if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowLeft)) {
