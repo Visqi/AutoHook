@@ -93,8 +93,8 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
         foreach (var (command, _) in CommandHelp)
             ICommandManager.Get().RemoveHandler(command);
 
-        await CLibMain.DisposeAsync();
         ECommonsMain.Dispose();
+        await CLibMain.DisposeAsync();
     }
 
     private void OnCommand(string command, string args) {
