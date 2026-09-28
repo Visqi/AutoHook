@@ -13,7 +13,7 @@ using AchievementStruct = FFXIVClientStructs.FFXIV.Client.Game.UI.Achievement;
 
 namespace AutoHook.World.UpdateModules;
 
-public sealed class HooksUpdateModule : IDisposable {
+public sealed class HooksUpdateModule : IAsyncDisposable {
     private const byte GpGain = 13;
 
     private delegate void EffectResultDetourDelegate(uint targetId, byte* packet, byte replaying);
@@ -48,14 +48,14 @@ public sealed class HooksUpdateModule : IDisposable {
         _effectResultHook?.Enable();
     }
 
-    public void Dispose() {
-        _useActionHook?.Dispose();
-        _updateCatchHook?.Dispose();
-        _playAnimationHook?.Dispose();
-        _handleActorControlPacketHook?.Dispose();
-        _receiveAchievementProgressHook?.Dispose();
-        _receiveActionEffectHook?.Dispose();
-        _effectResultHook?.Dispose();
+    public async ValueTask DisposeAsync() {
+        await _useActionHook.DisposeAsync();
+        await _updateCatchHook.DisposeAsync();
+        await _playAnimationHook.DisposeAsync();
+        await _handleActorControlPacketHook.DisposeAsync();
+        await _receiveAchievementProgressHook.DisposeAsync();
+        await _receiveActionEffectHook.DisposeAsync();
+        await _effectResultHook.DisposeAsync();
     }
 
     private unsafe bool UseActionDetour(ActionManager* thisPtr, ActionType actionType, uint actionId, ulong targetId, uint extraParam, ActionManager.UseActionMode mode, uint comboRouteId, bool* outOptAreaTargeted) {

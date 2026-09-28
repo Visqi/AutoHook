@@ -4,7 +4,7 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 
 namespace AutoHook.World;
 
-public sealed class WorldStateUpdater : IPluginService, IDisposable {
+public sealed class WorldStateUpdater : IPluginService, IAsyncDisposable {
     private readonly DateTime _startTime = DateTime.UtcNow;
     private readonly long _startQpc;
 
@@ -24,14 +24,14 @@ public sealed class WorldStateUpdater : IPluginService, IDisposable {
         IGameInventory.Get().InventoryChanged += OnInventoryChanged;
     }
 
-    public void Dispose() {
-        _hooks.Dispose();
+    public async ValueTask DisposeAsync() {
+        await _hooks.DisposeAsync();
         IGameInventory.Get().InventoryChanged -= OnInventoryChanged;
     }
 
     // push current game state into WorldState. call every frame.
     public unsafe void Update() {
-        if (Player.ClassJob.RowId is not 18 || IObjectTable.Get().LocalPlayer is null)
+        if (Player.ClassJob.RowId is not 18 || IObjectTable.Get().LocalPlayer is not { } lp)
             return;
 
         var ws = WorldState.Get();
@@ -47,13 +47,12 @@ public sealed class WorldStateUpdater : IPluginService, IDisposable {
             fwk->FrameDeltaTime,
             fwk->GameSpeedMultiplier)));
 
-        var lp = IObjectTable.Get().LocalPlayer;
-        var gp = lp?.CurrentGp ?? 0;
-        var maxGp = lp?.MaxGp ?? 0;
+        var gp = lp.CurrentGp;
+        var maxGp = lp.MaxGp;
         if (ws.Player.CurrentGp != gp || ws.Player.MaxGp != maxGp)
             ws.Execute(new PlayerState.OpGp(gp, maxGp));
 
-        var level = lp?.Level ?? 0;
+        var level = lp.Level;
         if (ws.Player.Level != level)
             ws.Execute(new PlayerState.OpLevel(level));
 
