@@ -36,7 +36,7 @@ public sealed class FishingSessionManager : IDisposable {
 
             var sf = Ws.Spearfishing;
             if (sf.SessionActive || sf.WindowOpen || !sf.Spot.IsEmpty || sf.Wariness != 0)
-                Ws.Execute(new SpearfishingInfo.OpEndSession());
+                Ws.Execute(new SpearfishingState.OpEndSession());
             return;
         }
 

@@ -25,10 +25,10 @@ public static class ReplayTimelineMarkers {
                 case WorldState.OpEndedSession:
                     markers.Add(new(op.Timestamp, 0xff0000ff, "Session end"));
                     break;
-                case SpearfishingInfo.OpSessionActive { Active: true }:
+                case SpearfishingState.OpSessionActive { Active: true }:
                     markers.Add(new(op.Timestamp, 0xff00ff00, "Spearfishing session start"));
                     break;
-                case SpearfishingInfo.OpEndSession:
+                case SpearfishingState.OpEndSession:
                     markers.Add(new(op.Timestamp, 0xff0000ff, "Spearfishing session end"));
                     break;
                 case WorldState.OpDecision d when HasTimelineMarker(d): {
@@ -40,33 +40,33 @@ public static class ReplayTimelineMarkers {
                         markers.Add(new(op.Timestamp, d.Success ? 0xffffff00 : 0xff808080, label));
                         break;
                     }
-                case FishingInfo.OpPlayerUsedAction act when act.Value.ActionId != 0: {
+                case RodState.OpPlayerUsedAction act when act.Value.ActionId != 0: {
                         var decision = FindNearestSuccessfulAutoCast(decisions, op.Timestamp, maxDeltaMs: 500);
                         markers.Add(new(op.Timestamp, ActionColor, $"Action: {ActionLabel(act.Value.ActionId)}", string.IsNullOrEmpty(decision?.Detail) ? null : decision!.Detail));
                         break;
                     }
-                case FishingInfo.OpTugType tug when tug.HookStrength != 0:
+                case RodState.OpTugType tug when tug.HookStrength != 0:
                     markers.Add(new(op.Timestamp, 0xff0080ff, $"Bite: {tug.HookStrength}"));
                     break;
-                case FishingInfo.OpSetLastCatch catchOp when catchOp.Value.FishId > 0: {
+                case RodState.OpSetLastCatch catchOp when catchOp.Value.FishId > 0: {
                         var c = catchOp.Value;
                         markers.Add(new(op.Timestamp, 0xffff00ff, $"Catch: {Item.GetRow(c.FishId).Name} ×{c.Amount}"));
                         break;
                     }
-                case FishingInfo.OpFishingState fish when fish.Bait.BaitId != prevBaitId && fish.Bait.BaitId != 0:
+                case RodState.OpFishingState fish when fish.Bait.BaitId != prevBaitId && fish.Bait.BaitId != 0:
                     markers.Add(new(op.Timestamp, 0xffa0522d, prevBaitId == 0 ? $"Bait: {Item.GetRow(fish.Bait.BaitId).Name}" : $"Bait change: {Item.GetRow(fish.Bait.BaitId).Name}"));
                     prevBaitId = fish.Bait.BaitId;
                     break;
-                case FishingInfo.OpSetFishingStep step:
+                case RodState.OpSetFishingStep step:
                     if (step.Step.HasFlag(FishingSteps.PresetSwapped))
                         markers.Add(new(op.Timestamp, 0xffcc66ff, "Preset swapped"));
                     if (step.Step.HasFlag(FishingSteps.BaitSwapped))
                         markers.Add(new(op.Timestamp, 0xff66ccff, "Bait swapped (fish-caught rule)"));
                     break;
-                case FishingInfo.OpAddFishCaught fc when fc.FishId > 0:
+                case RodState.OpAddFishCaught fc when fc.FishId > 0:
                     markers.Add(new(op.Timestamp, 0xff44dd44, $"Fish counter +{fc.Amount}: {Item.GetRow(fc.FishId).Name}"));
                     break;
-                case SpearfishingInfo.OpAddFishCaught fc when fc.FishId > 0:
+                case SpearfishingState.OpAddFishCaught fc when fc.FishId > 0:
                     markers.Add(new(op.Timestamp, 0xff44dd44, $"Spearfish counter +{fc.Amount}: {Item.GetRow(fc.FishId).Name}"));
                     break;
             }
@@ -88,7 +88,7 @@ public static class ReplayTimelineMarkers {
 
         foreach (var op in replay.Ops) {
             switch (op) {
-                case FishingInfo.OpIntuition i: {
+                case RodState.OpIntuition i: {
                         var active = i.Value.IsActive;
                         if (!intuitionActive && active)
                             intuitionStart = op.Timestamp;
@@ -110,7 +110,7 @@ public static class ReplayTimelineMarkers {
                         spectralStart = null;
                     }
                     break;
-                case OceanFishInfo.OpOceanFishing ocean: {
+                case OceanState.OpOceanFishing ocean: {
                         var active = ocean.State?.SpectralCurrentActive ?? false;
                         if (!spectralActive && active)
                             spectralStart = op.Timestamp;

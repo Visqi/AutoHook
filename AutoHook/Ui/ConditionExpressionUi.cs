@@ -2,8 +2,8 @@ using AutoHook.Conditions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
-using ExprToken = AutoHook.Conditions.ConditionExpression.Token;
-using ExprTokenKind = AutoHook.Conditions.ConditionExpression.TokenKind;
+using ExprToken = AutoHook.Conditions.Model.ConditionExpression.Token;
+using ExprTokenKind = AutoHook.Conditions.Model.ConditionExpression.TokenKind;
 
 namespace AutoHook.Ui;
 

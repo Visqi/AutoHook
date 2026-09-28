@@ -18,13 +18,7 @@ public sealed class ActionHintsResolver {
             return false;
 
         if (hints.PreferRest) {
-            var rest = new ActionRequest(
-                IDs.Actions.Rest,
-                ActionType.Action,
-                UIStrings.Hook,
-                ActionDelayMode.Delayed,
-                DelayBeforeMs: hints.PreferRestDelayMs,
-                UseRaw: hints.PreferRestDelayMs > 0);
+            var rest = new ActionRequest(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook, ActionDelayMode.Delayed, DelayBeforeMs: hints.PreferRestDelayMs, UseRaw: hints.PreferRestDelayMs > 0);
             var detail = string.IsNullOrEmpty(hints.PreferRestDetail) ? "PreferRest" : hints.PreferRestDetail;
             ws.Decide(hints.PreferRestContext, false, "Rest", detail);
             return EnqueueWinner(rest, chain: null, afterExecute: null);
@@ -43,8 +37,7 @@ public sealed class ActionHintsResolver {
             if (detailBuilder.Length > 0)
                 detailBuilder.Append('\n');
             detailBuilder.Append("Rejected: ");
-            detailBuilder.Append(string.Join(", ",
-                rejected.Select(r => $"{r.Request.Name}/{r.Source}/{r.Priority}")));
+            detailBuilder.Append(string.Join(", ", rejected.Select(r => $"{r.Request.Name}/{r.Source}/{r.Priority}")));
         }
 
         var decideDetail = detailBuilder.Length > 0 ? detailBuilder.ToString() : null;
@@ -72,9 +65,9 @@ public sealed class ActionHintsResolver {
         switch (effect) {
             case StopFishingHint stop:
                 if (stop.Action == ExtraStopAction.StopOnly)
-                    ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.None));
+                    ws.Execute(new RodState.OpSetFishingStep(FishingSteps.None));
                 else if (stop.Action == ExtraStopAction.QuitFishing)
-                    ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.Quitting));
+                    ws.Execute(new RodState.OpSetFishingStep(FishingSteps.Quitting));
                 break;
 
             case ResetCounterHint:
@@ -83,17 +76,20 @@ public sealed class ActionHintsResolver {
                 break;
 
             case SwapPresetHint swap:
-                ApplySwapPreset(ws, swap.PresetName);
+                PresetSwapHelpers.TrySwapPreset(
+                    ws,
+                    swap.PresetName,
+                    FishingPresets.ReasonExtraTrigger,
+                    @$"[Extra] Trigger: Swapping preset to {swap.PresetName}",
+                    !string.IsNullOrEmpty(swap.PresetName) && swap.PresetName != @"-" ? @$"[Extra] Trigger: Preset {swap.PresetName} not found." : null,
+                    clearExtraTriggerStates: true);
                 break;
 
             case SwapBaitHint swapBait:
-                if (!ws.Fishing.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
-                    var result = BaitComponent.ChangeBait(swapBait.Bait);
-                    ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.BaitSwapped, Or: true));
-                    if (result is ChangeBaitReturn.Success or ChangeBaitReturn.AlreadyEquipped) {
-                        Service.PrintChat(@$"[Extra] Trigger: Swapping bait to {swapBait.Bait.Name}");
-                        Service.Save();
-                    }
+                var baitResult = PresetSwapHelpers.TrySwapBait(ws, swapBait.Bait, skipIfAlreadySwapped: true);
+                if (baitResult is ChangeBaitReturn.Success or ChangeBaitReturn.AlreadyEquipped) {
+                    Service.PrintChat(@$"[Extra] Trigger: Swapping bait to {swapBait.Bait.Name}");
+                    Service.Save();
                 }
                 break;
 
@@ -105,10 +101,7 @@ public sealed class ActionHintsResolver {
                 break;
 
             case StartFishingHint:
-                if (!rod.ShouldSuppressAutoStartFishing()
-                    && ws.Fishing.FishingState is FishingState.None or FishingState.PoleReady
-                    && ws.IsCastAvailable()
-                    && EzThrottler.Throttle("ExtraStartFishingRule", 1000)) {
+                if (!rod.ShouldSuppressAutoStartFishing() && ws.Fishing.FishingState is FishingState.None or FishingState.PoleReady && ws.IsCastAvailable() && EzThrottler.Throttle("ExtraStartFishingRule", 1000)) {
                     rod.StartFishing();
                 }
                 break;
@@ -126,47 +119,8 @@ public sealed class ActionHintsResolver {
         }
     }
 
-    private static void ApplySwapPreset(WorldState ws, string presetName) {
-        if (ws.Fishing.FishingStep.HasFlag(FishingSteps.PresetSwapped))
-            return;
-
-        var presets = RodFishingModule.Presets;
-        if (presets.CurrentPreset.PresetName == presetName) {
-            ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
-            FindPresetByName(presetName)?.TryResetCounter();
-            return;
-        }
-
-        var preset = FindPresetByName(presetName);
-        ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
-
-        if (preset != null) {
-            Service.Save();
-            presets.Select(preset, FishingPresets.ReasonExtraTrigger);
-            preset.ExtraCfg.LastTriggerStates.Clear();
-            Service.PrintChat(@$"[Extra] Trigger: Swapping preset to {presetName}");
-            Service.Save();
-        }
-        else if (!string.IsNullOrEmpty(presetName) && presetName != @"-") {
-            Service.PrintChat(@$"[Extra] Trigger: Preset {presetName} not found.");
-        }
-    }
-
     private static CustomPresetConfig GetExtraOwnerPreset()
-        => RodFishingModule.Presets.SelectedPreset?.ExtraCfg.Enabled == true
-            ? RodFishingModule.Presets.SelectedPreset
-            : RodFishingModule.Presets.DefaultPreset;
-
-    private static CustomPresetConfig? FindPresetByName(string presetName) {
-        if (string.IsNullOrEmpty(presetName) || presetName == @"-")
-            return null;
-
-        var presets = RodFishingModule.Presets;
-        if (presets.DefaultPreset.PresetName == presetName)
-            return presets.DefaultPreset;
-
-        return presets.CustomPresets.FirstOrDefault(p => p.PresetName == presetName);
-    }
+        => RodFishingModule.Presets.SelectedPreset?.ExtraCfg.Enabled == true ? RodFishingModule.Presets.SelectedPreset : RodFishingModule.Presets.DefaultPreset;
 
     public bool ExecuteImmediate(ActionRequest request)
         => Service.ActionExecutor.ExecuteRequest(request);

@@ -1,9 +1,4 @@
-using AutoHook.Replay;
 using AutoHook.Ui;
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
-using Dalamud.Interface.Components;
-using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
@@ -12,7 +7,7 @@ using System.Reflection;
 using System.Threading;
 using TerritoryIntendedUse = FFXIVClientStructs.FFXIV.Client.Enums.TerritoryIntendedUse;
 
-namespace AutoHook;
+namespace AutoHook.Replay;
 
 public sealed class ReplayManager : IDisposable {
     private const int MaxReplayFiles = 10;
@@ -61,8 +56,6 @@ public sealed class ReplayManager : IDisposable {
     private ReplayRecorder? _recorder;
     private readonly EventSubscriptions _subs;
     private readonly List<ReplayEntry> _entries = [];
-    private string _path = "";
-    private string _fileDialogStartPath;
     private AutoGigConfig? _recordingSpearfishingPreset;
     private int _stopAfterFrames;
     private uint _lastTerritoryId;
@@ -70,13 +63,16 @@ public sealed class ReplayManager : IDisposable {
     public bool IsRecording => _recorder != null;
     public string? LastRecordedPath { get; private set; }
     public DirectoryInfo ReplayDirectory { get; }
+    public IReadOnlyList<ReplayEntry> Entries => _entries;
+    public string BrowserPath { get; set; } = "";
+    public string FileDialogStartPath { get; set; }
 
     public ReplayManager() {
         var dir = Path.Combine(Svc.Interface.GetPluginConfigDirectory(), "replays");
         ReplayDirectory = new DirectoryInfo(dir);
         ReplayDirectory.Create();
-        _fileDialogStartPath = ReplayDirectory.FullName;
-        _path = ReplayDirectory.FullName;
+        FileDialogStartPath = ReplayDirectory.FullName;
+        BrowserPath = ReplayDirectory.FullName;
 
         var ws = Service.WorldState;
         _subs = new(
@@ -117,12 +113,6 @@ public sealed class ReplayManager : IDisposable {
         }
     }
 
-    public void Draw() {
-        DrawNewEntry();
-        DrawEntries();
-        DrawEntriesOperations();
-    }
-
     public void StartRecording(bool manual = true) {
         if (_recorder != null)
             return;
@@ -149,101 +139,14 @@ public sealed class ReplayManager : IDisposable {
         Service.PrintDebug($"[Replay] Recording stopped: {LastRecordedPath}");
     }
 
-    private void DrawNewEntry() {
-        ImGui.InputText("###path", ref _path, 500);
-        ImGui.SameLine();
-        if (ImGuiComponents.IconButton(FontAwesomeIcon.File)) {
-            Service.FileDialog.OpenFileDialog("Select replay", ".ahlog", (confirmed, paths) => {
-                if (confirmed && paths.Count > 0) {
-                    _path = paths[0];
-                    _fileDialogStartPath = new FileInfo(_path).Directory!.FullName;
-                }
-            }, 1, _fileDialogStartPath);
-        }
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip("Open file");
-        ImGui.SameLine();
-        using (ImRaii.Disabled(_path.Length == 0 || _entries.Any(e => e.Path == _path))) {
-            if (ImGui.Button("Open"))
-                AddEntry(_path, autoShow: true);
-        }
-    }
-
-    private void DrawEntries() {
-        using var table = ImRaii.Table("replay_entries", 3, ImGuiTableFlags.Resizable);
-        if (!table)
-            return;
-
-        ImGui.TableSetupColumn("op", ImGuiTableColumnFlags.WidthFixed, 100);
-        ImGui.TableSetupColumn("unload", ImGuiTableColumnFlags.WidthFixed, 50);
-
-        foreach (var e in _entries) {
-            using var idScope = ImRaii.PushId(e.Path);
-
-            ImGui.TableNextColumn();
-            if (!e.Replay.IsCompleted) {
-                ImGui.ProgressBar(e.Progress, new System.Numerics.Vector2(100, 0));
-            }
-            else if (e.Replay.IsFaulted || e.Replay.Result.Ops.Count == 0) {
-                using var color = ImRaii.PushColor(ImGuiCol.Text, 0xff0000ff);
-                ImGui.Text("(failed)");
-            }
-            else {
-                if (ImGui.Button("Actions...", new System.Numerics.Vector2(100, 0)))
-                    ImGui.OpenPopup("ctx");
-                using var popup = ImRaii.Popup("ctx");
-                if (popup) {
-                    if (ImGui.MenuItem("Show"))
-                        e.Show();
-                }
-            }
-
-            ImGui.TableNextColumn();
-            if (ImGui.Button(e.Replay.IsCompleted ? "Unload" : "Cancel", new System.Numerics.Vector2(50, 0)))
-                e.Dispose();
-
-            ImGui.TableNextColumn();
-            ImGui.Checkbox($"{e.Path}", ref e.Selected);
-        }
-    }
-
-    private void DrawEntriesOperations() {
-        if (_entries.Count == 0)
-            return;
-
-        var numSelected = _entries.Count(e => e.Selected);
-        var shouldSelectAll = numSelected < _entries.Count;
-        if (ImGui.Button(shouldSelectAll ? "Select all" : "Unselect all", new System.Numerics.Vector2(80, 0))) {
-            foreach (var e in _entries)
-                e.Selected = shouldSelectAll;
-        }
-        using (ImRaii.Disabled(numSelected == 0)) {
-            ImGui.SameLine();
-            if (ImGui.Button("Show selected")) {
-                foreach (var e in _entries.Where(e => e.Selected))
-                    e.Show();
-            }
-            ImGui.SameLine();
-            if (ImGui.Button("Unload selected")) {
-                foreach (var e in _entries.Where(e => e.Selected).ToList())
-                    e.Dispose();
-            }
-        }
-        ImGui.SameLine();
-        if (ImGui.Button("Unload all")) {
-            foreach (var e in _entries.ToList())
-                e.Dispose();
-        }
-    }
-
-    private void AddEntry(string path, bool autoShow) {
+    public void AddEntry(string path, bool autoShow) {
         CleanPath(ref path);
         if (path.Length == 0 || _entries.Any(e => e.Path == path))
             return;
         if (!File.Exists(path))
             return;
         _entries.Add(new ReplayEntry(path, autoShow));
-        _path = path;
+        BrowserPath = path;
     }
 
     private static void CleanPath(ref string path) {

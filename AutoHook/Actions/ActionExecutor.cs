@@ -9,15 +9,7 @@ public enum ActionDelayMode {
     NoDelay,
 }
 
-public readonly record struct ActionRequest(
-    uint Id,
-    ActionType Type = ActionType.Action,
-    string Name = "",
-    ActionDelayMode DelayMode = ActionDelayMode.Delayed,
-    int DelayBeforeMs = 0,
-    bool UseRaw = false,
-    bool StellarHookset = false,
-    DecisionContext? DecisionContext = null);
+public readonly record struct ActionRequest(uint Id, ActionType Type = ActionType.Action, string Name = "", ActionDelayMode DelayMode = ActionDelayMode.Delayed, int DelayBeforeMs = 0, bool UseRaw = false, bool StellarHookset = false, DecisionContext? DecisionContext = null);
 
 public sealed class ActionExecutor : IDisposable {
     private readonly record struct QueueItem(ActionRequest? Request, Action? Callback, long ReadyAtMs);

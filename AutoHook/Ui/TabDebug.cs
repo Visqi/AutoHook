@@ -265,7 +265,7 @@ public class TabDebug : BaseTab {
             ? "—"
             : $"Size={fish.Size}, Speed={fish.Speed}, Dir={(fish.InverseDirection ? "L←R" : "L→R")}{(fish.GuaranteedLarge ? ", Large*" : "")}";
 
-    private static void DrawFishCaughtData(FishingInfo f) {
+    private static void DrawFishCaughtData(RodState f) {
         if (f.FishCaughtCounts.Count > 0) {
             ImGui.Spacing();
             ImGui.Text("Preset fish counters");

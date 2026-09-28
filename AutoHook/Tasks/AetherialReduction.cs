@@ -67,7 +67,7 @@ public sealed class AetherialReduction() : AutoTask, IAutoTaskHooks {
         if (ws.Fishing.FishingState == FishingState.None)
             return;
 
-        ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.Quitting));
+        ws.Execute(new RodState.OpSetFishingStep(FishingSteps.Quitting));
 
         await WaitUntil(() => {
             if (ws.Fishing.FishingState == FishingState.None)

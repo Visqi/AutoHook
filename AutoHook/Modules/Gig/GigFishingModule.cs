@@ -42,19 +42,19 @@ public sealed class GigFishingModule : FishingModule {
     }
 
     private void OnWorldStateModified(WorldState.Operation op) {
-        if (op is SpearfishingInfo.OpAddFishCaught caught) {
+        if (op is SpearfishingState.OpAddFishCaught caught) {
             OnFishCaught(caught);
         }
-        else if (op is SpearfishingInfo.OpEndSession) {
+        else if (op is SpearfishingState.OpEndSession) {
             LastGigEntryId = Guid.Empty;
             if (GigCfg.SelectedPreset is not { RetainCountersBetweenSessions: true }) {
                 SpearfishingCounterHelper.ResetAll();
-                Ws.Execute(new SpearfishingInfo.OpResetFishCaught());
+                Ws.Execute(new SpearfishingState.OpResetFishCaught());
             }
         }
     }
 
-    private void OnFishCaught(SpearfishingInfo.OpAddFishCaught caught) {
+    private void OnFishCaught(SpearfishingState.OpAddFishCaught caught) {
         var preset = GigCfg.SelectedPreset;
         AutoVeteranTrade? veteranTrade = null;
 

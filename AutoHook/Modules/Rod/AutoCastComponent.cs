@@ -14,7 +14,7 @@ public sealed class AutoCastComponent(RodFishingModule module) : RodComponent(mo
             var elapsed = Math.Truncate(Rod.FishingTimer.ElapsedMilliseconds / 1000.0 * 100) / 100;
             var chum = Ws.Player.HasStatus(IDs.Status.Chum);
             if (Math.Abs(Ws.Fishing.BiteInfo.BiteTimeSeconds - elapsed) >= 0.01 || Ws.Fishing.ChumActive != chum)
-                Ws.Execute(new FishingInfo.OpBiteContext(elapsed, chum));
+                Ws.Execute(new RodState.OpBiteContext(elapsed, chum));
         }
 
         if (!EzThrottler.Throttle("CheckWhileFishingActions", 200) || Rod.SpectralRestPending)

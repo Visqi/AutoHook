@@ -57,47 +57,47 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
             "TRTY" => new WorldState.OpTerritory(_reader.ReadUInt32()),
             "WTHR" => new WorldState.OpWeather(_reader.ReadByte(), _reader.ReadByte(), _reader.ReadByte(), _reader.ReadByte()),
             "ZONE" => new WorldState.OpZone(_reader.ReadByte(), _reader.ReadUInt32()),
-            "GP  " => new PlayerInfo.OpGp(_reader.ReadUInt32(), _reader.ReadUInt32()),
-            "LVL " => new PlayerInfo.OpLevel(_reader.ReadByte()),
+            "GP  " => new PlayerState.OpGp(_reader.ReadUInt32(), _reader.ReadUInt32()),
+            "LVL " => new PlayerState.OpLevel(_reader.ReadByte()),
             "STAT" => ParseStatuses(),
             "INVT" => ParseInventory(),
-            "INVS" => new PlayerInfo.OpInventoryStats(_reader.ReadInt32(), _reader.ReadInt32()),
-            "POT " => new PlayerInfo.OpPotCooldown(_reader.ReadBoolean()),
+            "INVS" => new PlayerState.OpInventoryStats(_reader.ReadInt32(), _reader.ReadInt32()),
+            "POT " => new PlayerState.OpPotCooldown(_reader.ReadBoolean()),
             "CLCD" => ParseCooldowns(),
             "ACTS" => ParseActionStates(),
             "DTYA" => ParseDutyActions(),
             "BLKC" => new WorldState.OpSetBlockCasting(_reader.ReadBoolean()),
             "FISH" => ParseFishingState(),
-            "BITE" => new FishingInfo.OpBiteContext(_reader.ReadDouble(), _reader.ReadBoolean()),
-            "INTU" => new FishingInfo.OpIntuition(new IntuitionInfo((IntuitionStatus)_reader.ReadByte(), _reader.ReadSingle())),
+            "BITE" => new RodState.OpBiteContext(_reader.ReadDouble(), _reader.ReadBoolean()),
+            "INTU" => new RodState.OpIntuition(new IntuitionInfo((IntuitionStatus)_reader.ReadByte(), _reader.ReadSingle())),
             "CTCH" => ParseCatch(),
-            "FSTP" => new FishingInfo.OpSetFishingStep((FishingSteps)_reader.ReadUInt32(), _reader.ReadBoolean()),
-            "FCLR" => new FishingInfo.OpClearFishingStepFlag((FishingSteps)_reader.ReadUInt32()),
-            "ACTU" => new FishingInfo.OpPlayerUsedAction(new UsedAction(_reader.ReadUInt32(), (ActionType)_reader.ReadByte())),
-            "LURE" => new FishingInfo.OpSetLureSuccess(_reader.ReadBoolean()),
-            "CWIN" => new FishingInfo.OpSetCollectableWindowOpen(_reader.ReadBoolean()),
+            "FSTP" => new RodState.OpSetFishingStep((FishingSteps)_reader.ReadUInt32(), _reader.ReadBoolean()),
+            "FCLR" => new RodState.OpClearFishingStepFlag((FishingSteps)_reader.ReadUInt32()),
+            "ACTU" => new RodState.OpPlayerUsedAction(new UsedAction(_reader.ReadUInt32(), (ActionType)_reader.ReadByte())),
+            "LURE" => new RodState.OpSetLureSuccess(_reader.ReadBoolean()),
+            "CWIN" => new RodState.OpSetCollectableWindowOpen(_reader.ReadBoolean()),
             "LCBT" => ParseLastLureCastBiteTime(),
-            "PFST" => new FishingInfo.OpSetPreviousFishingState((FishingState)_reader.ReadByte()),
-            "FCNT" => new FishingInfo.OpAddFishCaught(_reader.ReadUInt32(), _reader.ReadByte()),
-            "FCRS" => new FishingInfo.OpResetFishCaught(),
-            "FSCC" => new FishingInfo.OpClearSessionCatches(),
-            "TUG " => new FishingInfo.OpTugType((FishingHookStrength)_reader.ReadUInt16()),
+            "PFST" => new RodState.OpSetPreviousFishingState((FishingState)_reader.ReadByte()),
+            "FCNT" => new RodState.OpAddFishCaught(_reader.ReadUInt32(), _reader.ReadByte()),
+            "FCRS" => new RodState.OpResetFishCaught(),
+            "FSCC" => new RodState.OpClearSessionCatches(),
+            "TUG " => new RodState.OpTugType((FishingHookStrength)_reader.ReadUInt16()),
             "FHND" => ParseFishingHandler(),
             "SWIM" => ParseSwimbait(),
-            "CSNP" => new FishingInfo.OpUpdateCastSnapshot((FishingState)_reader.ReadByte()),
-            "CSNI" => new FishingInfo.OpInvalidateCastSnapshot(),
+            "CSNP" => new RodState.OpUpdateCastSnapshot((FishingState)_reader.ReadByte()),
+            "CSNI" => new RodState.OpInvalidateCastSnapshot(),
             "OCNF" => ParseOcean(),
-            "SPTM" => new OceanFishInfo.OpSpectralTimer(new OceanSpectralTimerInfo(_reader.ReadSingle(), _reader.ReadBoolean(), _reader.ReadSingle())),
+            "SPTM" => new OceanState.OpSpectralTimer(new OceanSpectralTimerInfo(_reader.ReadSingle(), _reader.ReadBoolean(), _reader.ReadSingle())),
             "WKST" => ParseWks(),
-            "SPFN" => new SpearfishingInfo.OpHud(_reader.ReadBoolean(), _reader.ReadInt32(), _reader.ReadInt32()),
-            "SPSA" => new SpearfishingInfo.OpSessionActive(_reader.ReadBoolean()),
-            "SPST" => new SpearfishingInfo.OpSpot(new SpearfishingSpotState(_reader.ReadUInt32(), _reader.ReadUInt32(), _reader.ReadUInt32(), _reader.ReadBoolean())),
+            "SPFN" => new SpearfishingState.OpHud(_reader.ReadBoolean(), _reader.ReadInt32(), _reader.ReadInt32()),
+            "SPSA" => new SpearfishingState.OpSessionActive(_reader.ReadBoolean()),
+            "SPST" => new SpearfishingState.OpSpot(new SpearfishingSpotState(_reader.ReadUInt32(), _reader.ReadUInt32(), _reader.ReadUInt32(), _reader.ReadBoolean())),
             "SPFL" => ParseSpearfishingFishLanes(),
             "SPLO" => ParseSpearfishingFishLayout(),
-            "SPFC" => new SpearfishingInfo.OpAddFishCaught(_reader.ReadUInt32(), _reader.ReadByte()),
-            "SPLC" => new SpearfishingInfo.OpSetLastCatch(_reader.ReadUInt32(), _reader.ReadByte()),
-            "SPRS" => new SpearfishingInfo.OpResetFishCaught(),
-            "SPES" => new SpearfishingInfo.OpEndSession(),
+            "SPFC" => new SpearfishingState.OpAddFishCaught(_reader.ReadUInt32(), _reader.ReadByte()),
+            "SPLC" => new SpearfishingState.OpSetLastCatch(_reader.ReadUInt32(), _reader.ReadByte()),
+            "SPRS" => new SpearfishingState.OpResetFishCaught(),
+            "SPES" => new SpearfishingState.OpEndSession(),
             "DECN" => ParseDecision(),
             "FBGN" => new WorldState.OpBeganSession(),
             "FEND" => new WorldState.OpEndedSession(),
@@ -161,32 +161,32 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
 
     private TimeOnly ParseTimeOnly() => new(_reader.ReadInt64());
 
-    private PlayerInfo.OpStatuses ParseStatuses() {
+    private PlayerState.OpStatuses ParseStatuses() {
         var count = _reader.ReadUInt16();
         var dict = new Dictionary<uint, (float, int)>();
         for (var n = 0; n < count; n++)
             dict[_reader.ReadUInt32()] = (_reader.ReadSingle(), _reader.ReadInt32());
-        return new PlayerInfo.OpStatuses(dict);
+        return new PlayerState.OpStatuses(dict);
     }
 
-    private PlayerInfo.OpItemCounts ParseInventory() {
+    private PlayerState.OpItemCounts ParseInventory() {
         var count = _reader.ReadUInt16();
         var dict = new Dictionary<uint, int>();
         for (var n = 0; n < count; n++)
             dict[_reader.ReadUInt32()] = _reader.ReadInt32();
-        return new PlayerInfo.OpItemCounts(dict);
+        return new PlayerState.OpItemCounts(dict);
     }
 
-    private PlayerInfo.OpCooldown ParseCooldowns() {
+    private PlayerState.OpCooldown ParseCooldowns() {
         var reset = _reader.ReadBoolean();
         var count = _reader.ReadByte();
         var changes = new List<(int, Cooldown)>();
         for (var n = 0; n < count; n++)
             changes.Add((_reader.ReadByte(), new Cooldown(_reader.ReadSingle(), _reader.ReadSingle())));
-        return new PlayerInfo.OpCooldown(reset, changes);
+        return new PlayerState.OpCooldown(reset, changes);
     }
 
-    private PlayerInfo.OpActionStates ParseActionStates() {
+    private PlayerState.OpActionStates ParseActionStates() {
         var count = _reader.ReadUInt16();
         var statuses = new Dictionary<ulong, uint>();
         var groups = new Dictionary<ulong, int>();
@@ -195,52 +195,52 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
             statuses[key] = _reader.ReadUInt32();
             groups[key] = _reader.ReadInt32();
         }
-        return new PlayerInfo.OpActionStates(statuses, groups);
+        return new PlayerState.OpActionStates(statuses, groups);
     }
 
-    private PlayerInfo.OpDutyActions ParseDutyActions() {
+    private PlayerState.OpDutyActions ParseDutyActions() {
         var active = _reader.ReadBoolean();
         var count = _reader.ReadByte();
         var charges = new Dictionary<uint, ushort>();
         for (var n = 0; n < count; n++)
             charges[_reader.ReadUInt32()] = _reader.ReadUInt16();
-        return new PlayerInfo.OpDutyActions(active, charges);
+        return new PlayerState.OpDutyActions(active, charges);
     }
 
-    private FishingInfo.OpFishingState ParseFishingState() {
+    private RodState.OpFishingState ParseFishingState() {
         var state = (FishingState)_reader.ReadByte();
         var baitId = _reader.ReadUInt32();
         var swimbait = _reader.ReadUInt32();
         var moochId = _reader.ReadUInt32();
         var isMooching = _reader.ReadBoolean();
         uint? sw = swimbait == 0 ? null : swimbait;
-        return new FishingInfo.OpFishingState(state, new BaitInfo(baitId, sw, moochId, isMooching));
+        return new RodState.OpFishingState(state, new BaitInfo(baitId, sw, moochId, isMooching));
     }
 
-    private FishingInfo.OpSetLastCatch ParseCatch()
+    private RodState.OpSetLastCatch ParseCatch()
         => new(new CatchInfo(
             _reader.ReadUInt32(), _reader.ReadByte(), _reader.ReadBoolean(), _reader.ReadUInt16(),
             _reader.ReadByte(), _reader.ReadByte(), _reader.ReadByte(),
             _reader.ReadBoolean(), _reader.ReadBoolean()));
 
-    private FishingInfo.OpFishingHandlerState ParseFishingHandler()
+    private RodState.OpFishingHandlerState ParseFishingHandler()
         => new(
             new PreviousCatchInfo(_reader.ReadBoolean(), _reader.ReadBoolean(), _reader.ReadBoolean(), _reader.ReadBoolean(), _reader.ReadBoolean()),
             _reader.ReadBoolean(), _reader.ReadBoolean(), (FishingBaitFlags)_reader.ReadUInt32(),
             _reader.ReadSByte(), _reader.ReadInt64(), _reader.ReadInt64());
 
-    private FishingInfo.OpSwimbaitIds ParseSwimbait() {
+    private RodState.OpSwimbaitIds ParseSwimbait() {
         var count = _reader.ReadByte();
         var ids = new List<uint>();
         for (var n = 0; n < count; n++)
             ids.Add(_reader.ReadUInt32());
-        return new FishingInfo.OpSwimbaitIds(ids);
+        return new RodState.OpSwimbaitIds(ids);
     }
 
-    private SpearfishingInfo.OpFishLanes ParseSpearfishingFishLanes()
+    private SpearfishingState.OpFishLanes ParseSpearfishingFishLanes()
         => new(ParseSpearfishingFishLane(), ParseSpearfishingFishLane(), ParseSpearfishingFishLane());
 
-    private SpearfishingInfo.OpFishLayout ParseSpearfishingFishLayout() {
+    private SpearfishingState.OpFishLayout ParseSpearfishingFishLayout() {
         var lane = new SpearLaneLayout(
             _reader.ReadSingle(),
             _reader.ReadSingle(),
@@ -248,7 +248,7 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
             _reader.ReadSingle(),
             _reader.ReadSingle(),
             _reader.ReadSingle());
-        return new SpearfishingInfo.OpFishLayout(lane, ParseSpearFishLayout(), ParseSpearFishLayout(), ParseSpearFishLayout());
+        return new SpearfishingState.OpFishLayout(lane, ParseSpearFishLayout(), ParseSpearFishLayout(), ParseSpearFishLayout());
     }
 
     private SpearFishLayout ParseSpearFishLayout()
@@ -263,14 +263,14 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
             Speed = _reader.ReadInt16(),
         };
 
-    private FishingInfo.OpSetLastLureCastBiteTime ParseLastLureCastBiteTime() {
+    private RodState.OpSetLastLureCastBiteTime ParseLastLureCastBiteTime() {
         var has = _reader.ReadBoolean();
-        return new FishingInfo.OpSetLastLureCastBiteTime(has ? _reader.ReadDouble() : null);
+        return new RodState.OpSetLastLureCastBiteTime(has ? _reader.ReadDouble() : null);
     }
 
-    private OceanFishInfo.OpOceanFishing ParseOcean() {
+    private OceanState.OpOceanFishing ParseOcean() {
         if (_reader.ReadInt32() == 0)
-            return new OceanFishInfo.OpOceanFishing(null);
+            return new OceanState.OpOceanFishing(null);
 
         var state = new OceanFishingState {
             SpectralCurrentActive = _reader.ReadBoolean(),
@@ -299,7 +299,7 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
             });
         }
 
-        return new OceanFishInfo.OpOceanFishing(new OceanFishingState {
+        return new OceanState.OpOceanFishing(new OceanFishingState {
             SpectralCurrentActive = state.SpectralCurrentActive,
             CurrentRoute = state.CurrentRoute,
             TimeOfDay = state.TimeOfDay,
@@ -316,7 +316,7 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
         });
     }
 
-    private WKSInfo.OpState ParseWks()
+    private WksState.OpState ParseWks()
         => new(
             _reader.ReadUInt16(), _reader.ReadUInt16(), _reader.ReadUInt16(), _reader.ReadUInt16(),
             _reader.ReadUInt32(), (WKSMissionModule.MissionRank)_reader.ReadByte(),

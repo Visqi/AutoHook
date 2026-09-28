@@ -36,7 +36,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
             return;
 
         Service.Status = UIStrings.SpectralRestOnGain;
-        Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.Reeling));
+        Ws.Execute(new RodState.OpSetFishingStep(FishingSteps.Reeling));
     }
 
     public unsafe void UpdateStatusAndTimer(bool forceMooching = false) {
@@ -66,11 +66,11 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         if (Ws.Fishing.FishingStep.HasFlag(FishingSteps.BeganFishing) && Ws.Fishing.PreviousFishingState != FishingState.PoleReady && Ws.Fishing.PreviousFishingState != FishingState.None)
             return;
 
-        Ws.Execute(new FishingInfo.OpSetLureSuccess(false));
-        Ws.Execute(new FishingInfo.OpSetLastLureCastBiteTime(null));
-        Ws.Execute(new FishingInfo.OpBiteContext(0, Ws.Player.HasStatus(IDs.Status.Chum)));
+        Ws.Execute(new RodState.OpSetLureSuccess(false));
+        Ws.Execute(new RodState.OpSetLastLureCastBiteTime(null));
+        Ws.Execute(new RodState.OpBiteContext(0, Ws.Player.HasStatus(IDs.Status.Chum)));
 
-        Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.BeganFishing));
+        Ws.Execute(new RodState.OpSetFishingStep(FishingSteps.BeganFishing));
         if (Rod.StopAfterNextFish == RodFishingModule.StopAfterState.Pending)
             Rod.StopAfterNextFish = RodFishingModule.StopAfterState.Armed;
 
@@ -100,7 +100,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         var hints = new ActionHints();
         hints.AddCast(HintPriority.TimeoutRest, new ActionRequest(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook), HintSource.Timeout, detail: "Timeout", context: DecisionContext.Hook);
         if (Rod.Resolver.Resolve(Ws, hints))
-            Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.TimeOut));
+            Ws.Execute(new RodState.OpSetFishingStep(FishingSteps.TimeOut));
     }
 
     public void OnBite() {
@@ -116,7 +116,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
             HookFish(Ws.Fishing.BiteInfo.TugType.ToBiteType(), currentHook);
         }
         finally {
-            Ws.Execute(new FishingInfo.OpInvalidateCastSnapshot());
+            Ws.Execute(new RodState.OpInvalidateCastSnapshot());
         }
     }
 
@@ -127,9 +127,9 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         var delay = Rod.Rng.Next(Service.Configuration.DelayBetweenHookMin, Service.Configuration.DelayBetweenHookMax);
         var timePassed = Rod.FishTimerSecs;
         var ws = Service.WorldState;
-        ws.Execute(new FishingInfo.OpBiteContext(timePassed, ws.Player.HasStatus(IDs.Status.Chum)));
-        ws.Execute(new FishingInfo.OpIntuition(new IntuitionInfo(ws.Fishing.Intuition.Status, ws.Player.GetStatusTime(IDs.Status.FishersIntuition))));
-        ws.Execute(new OceanFishInfo.OpOceanFishing(ws.Ocean.OceanFishing));
+        ws.Execute(new RodState.OpBiteContext(timePassed, ws.Player.HasStatus(IDs.Status.Chum)));
+        ws.Execute(new RodState.OpIntuition(new IntuitionInfo(ws.Fishing.Intuition.Status, ws.Player.GetStatusTime(IDs.Status.FishersIntuition))));
+        ws.Execute(new OceanState.OpOceanFishing(ws.Ocean.OceanFishing));
 
         var hook = currentHook.GetHook(Ws, bite, timePassed);
         var hints = new ActionHints();
@@ -159,7 +159,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         var fishId = lastCatch.FishId;
         var amount = lastCatch.Amount;
         var lastCatchFish = GameRes.Fishes.FirstOrDefault(fish => fish.Id == fishId) ?? new BaitFishClass(@"-", -1);
-        Ws.Execute(new FishingInfo.OpAddFishCaught(fishId, amount));
+        Ws.Execute(new RodState.OpAddFishCaught(fishId, amount));
         var lastFishCatchCfg = Rod.FishCaught.GetLastCatchConfig();
         var currentHook = Rod.GetHookCfg();
 
@@ -196,7 +196,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
             return;
 
         Service.PrintChat(string.Format(chatMessageFormat, @$"{name}: {limitCount}"));
-        Ws.Execute(new FishingInfo.OpSetFishingStep(stopStep, Or: true));
+        Ws.Execute(new RodState.OpSetFishingStep(stopStep, Or: true));
         if (resetCount)
             FishingCounters.QueueRemove(uniqueId);
     }
@@ -205,15 +205,15 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         Rod.ClearStopAfterNextFish();
         Rod.SpectralRestPending = false;
 
-        Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.None));
+        Ws.Execute(new RodState.OpSetFishingStep(FishingSteps.None));
 
         var retainCounters = Rod.GetExtraCfg() is { Enabled: true, RetainCountersBetweenSessions: true };
         if (!retainCounters) {
-            Ws.Execute(new FishingInfo.OpResetFishCaught());
+            Ws.Execute(new RodState.OpResetFishCaught());
             FishingCounters.Reset();
         }
 
-        Ws.Execute(new FishingInfo.OpClearSessionCatches());
+        Ws.Execute(new RodState.OpClearSessionCatches());
 
         if (Rod.FishingTimer.IsRunning)
             Rod.FishingTimer.Reset();

@@ -1,4 +1,5 @@
 using AutoHook.IPC;
+using AutoHook.Replay;
 using AutoHook.Ui;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;

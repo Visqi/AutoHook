@@ -92,22 +92,16 @@ public sealed class FishCaughtComponent(RodFishingModule module) : RodComponent(
 
         if (swapPresetEnabled && lastCatchCfg.SwapPresetLimit.BackingSet.Passes(Ws) && !FishingCounters.SwappedPreset(guid) && !Ws.Fishing.FishingStep.HasFlag(FishingSteps.PresetSwapped)) {
             if (lastCatchCfg.PresetToSwap == presets.CurrentPreset.PresetName) {
-                Rod.Extra.FindPresetByName(lastCatchCfg.PresetToSwap)?.TryResetCounter();
+                PresetSwapHelpers.FindPresetByName(lastCatchCfg.PresetToSwap)?.TryResetCounter();
             }
             else if (lastCatchCfg.PresetToSwap != presets.CurrentPreset.PresetName) {
-                var preset = Rod.Extra.FindPresetByName(lastCatchCfg.PresetToSwap);
-
                 FishingCounters.AddPresetSwap(guid);
-                Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
-
-                if (preset == null)
-                    Service.PrintChat(@$"Preset {lastCatchCfg.PresetToSwap} not found.");
-                else {
-                    Service.Save();
-                    presets.Select(preset, FishingPresets.ReasonFishCaught);
-                    Service.PrintChat(@$"[Fish Caught] Swapping current preset to {lastCatchCfg.PresetToSwap}");
-                    Service.Save();
-                }
+                PresetSwapHelpers.TrySwapPreset(
+                    Ws,
+                    lastCatchCfg.PresetToSwap,
+                    FishingPresets.ReasonFishCaught,
+                    @$"[Fish Caught] Swapping current preset to {lastCatchCfg.PresetToSwap}",
+                    @$"[Fish Caught] Preset {lastCatchCfg.PresetToSwap} not found.");
             }
         }
 
@@ -115,10 +109,8 @@ public sealed class FishCaughtComponent(RodFishingModule module) : RodComponent(
 
         if (swapBaitEnabled && lastCatchCfg.SwapBaitLimit.BackingSet.Passes(Ws) && !FishingCounters.SwappedBait(guid) && !Ws.Fishing.FishingStep.HasFlag(FishingSteps.BaitSwapped)) {
             if (lastCatchCfg.BaitToSwap.Id != Ws.Fishing.BaitInfo.BaitId) {
-                var result = BaitComponent.ChangeBait(lastCatchCfg.BaitToSwap);
-
                 FishingCounters.AddBaitSwap(guid);
-                Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.BaitSwapped, Or: true));
+                var result = PresetSwapHelpers.TrySwapBait(Ws, lastCatchCfg.BaitToSwap);
                 if (result == ChangeBaitReturn.Success) {
                     Service.PrintChat(@$"[Fish Caught] Swapping bait to {lastCatchCfg.BaitToSwap.Name}");
                     Service.Save();

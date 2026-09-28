@@ -1,4 +1,3 @@
-using AutoHook.Conditions;
 using AutoHook.Conditions.Definitions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
@@ -8,7 +7,7 @@ using Dalamud.Interface.Utility.Raii;
 using Newtonsoft.Json;
 using System.Numerics;
 using static AutoHook.Conditions.ConditionRegistry;
-using static AutoHook.Conditions.ConditionParams;
+using static AutoHook.Conditions.Params.ConditionParams;
 
 namespace AutoHook.Ui;
 

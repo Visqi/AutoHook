@@ -16,7 +16,7 @@ public sealed class LureChatComponent(RodFishingModule module) : RodComponent(mo
         var isGenericLure = message.LogMessageId is LogMessageIds.AmbLureSuccess or LogMessageIds.ModLureSuccess;
         var active = Rod.GetHookCfg().GetHookset().CastLures.GetActiveOption(Ws);
         if (active != null && AutoLures.MatchesLureSuccess(active.Value.Target, isGenericLure, isSpecialLure: false))
-            Ws.Execute(new FishingInfo.OpSetLureSuccess(true));
+            Ws.Execute(new RodState.OpSetLureSuccess(true));
 
         if (message.LogMessageId is LogMessageIds.CantFish)
             Service.Status = UIStrings.CantFishHere;
@@ -27,6 +27,6 @@ public sealed class LureChatComponent(RodFishingModule module) : RodComponent(mo
         var isSpecialLure = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == message.Message.TextValue) != null;
         var active = Rod.GetHookCfg().GetHookset().CastLures.GetActiveOption(Ws);
         if (active != null && AutoLures.MatchesLureSuccess(active.Value.Target, isGenericLure: false, isSpecialLure))
-            Ws.Execute(new FishingInfo.OpSetLureSuccess(true));
+            Ws.Execute(new RodState.OpSetLureSuccess(true));
     }
 }

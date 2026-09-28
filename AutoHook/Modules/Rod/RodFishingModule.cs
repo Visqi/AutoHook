@@ -1,3 +1,4 @@
+using AutoHook.Modules.Ocean;
 using AutoHook.Tasks;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -126,13 +127,13 @@ public sealed class RodFishingModule : FishingModule {
             return;
 
         switch (op) {
-            case FishingInfo.OpPlayerUsedAction(var ua):
+            case RodState.OpPlayerUsedAction(var ua):
                 if (ua.ActionType == ActionType.Action && Ws.ActionAvailable(ua.ActionId, ua.ActionType)) {
                     switch (ua.ActionId) {
                         case IDs.Actions.Rest:
                             if (Ws.Player.HasStatus(IDs.Status.CollectorsGlove))
                                 LureChat.AnimationCancel();
-                            Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.Reeling));
+                            Ws.Execute(new RodState.OpSetFishingStep(FishingSteps.Reeling));
                             break;
                         case IDs.Actions.Cast:
                             BiteHook.OnBeganFishing(false);
@@ -143,17 +144,17 @@ public sealed class RodFishingModule : FishingModule {
                             break;
                         case IDs.Actions.AmbitiousLure:
                         case IDs.Actions.ModestLure:
-                            Ws.Execute(new FishingInfo.OpSetLastLureCastBiteTime(FishTimerSecs));
+                            Ws.Execute(new RodState.OpSetLastLureCastBiteTime(FishTimerSecs));
                             break;
                     }
                 }
                 break;
-            case FishingInfo.OpSetLastCatch:
+            case RodState.OpSetLastCatch:
                 BiteHook.OnCatch();
                 break;
             case WorldState.OpAchievementProgress:
                 if (Ws.OceanFishing != OceanFishingState.Empty)
-                    Extra.TryApplyOceanFishingPreset();
+                    OceanPresetSelector.TryApply();
                 break;
         }
     }
@@ -164,7 +165,7 @@ public sealed class RodFishingModule : FishingModule {
             return;
         }
 
-        Extra.TryApplyOceanFishingPreset();
+        OceanPresetSelector.TryApply();
         Hints.Clear();
         Extra.ProcessExtraActions(Hints, Resolver);
 
@@ -180,7 +181,7 @@ public sealed class RodFishingModule : FishingModule {
                 Service.PrintChat(@$"[AutoHook] Failed to change bait for forced bait swap. Result: {result}");
         }
 
-        Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.StartedCasting));
+        Ws.Execute(new RodState.OpSetFishingStep(FishingSteps.StartedCasting));
         AutoCast.UseAutoCasts();
     }
 
@@ -268,12 +269,12 @@ public sealed class RodFishingModule : FishingModule {
         if (Ws.Fishing.PreviousFishingState == currentState)
             return;
 
-        Ws.Execute(new FishingInfo.OpSetPreviousFishingState(currentState));
+        Ws.Execute(new RodState.OpSetPreviousFishingState(currentState));
 
         switch (currentState) {
             case FishingState.PullingPoleIn:
                 if (Ws.Fishing.FishingStep.HasFlag(FishingSteps.BeganFishing))
-                    Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.None));
+                    Ws.Execute(new RodState.OpSetFishingStep(FishingSteps.None));
                 else LureChat.AnimationCancel();
                 FishingTimer.Reset();
                 break;
@@ -285,7 +286,7 @@ public sealed class RodFishingModule : FishingModule {
                 break;
             case FishingState.Quitting:
                 if (!Ws.Fishing.FishingStep.HasFlag(FishingSteps.Quitting))
-                    Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.Quitting));
+                    Ws.Execute(new RodState.OpSetFishingStep(FishingSteps.Quitting));
                 BiteHook.OnFishingStop();
                 break;
         }
@@ -345,11 +346,11 @@ public sealed class RodFishingModule : FishingModule {
             return;
 
         Ws.Execute(new WorldState.OpSetBlockCasting(false));
-        Ws.Execute(new FishingInfo.OpSetFishingStep(FishingSteps.None));
-        Ws.Execute(new FishingInfo.OpSetPreviousFishingState(FishingState.None));
-        Ws.Execute(new FishingInfo.OpFishingState(FishingState.None, new BaitInfo(0, null, 0, false)));
+        Ws.Execute(new RodState.OpSetFishingStep(FishingSteps.None));
+        Ws.Execute(new RodState.OpSetPreviousFishingState(FishingState.None));
+        Ws.Execute(new RodState.OpFishingState(FishingState.None, new BaitInfo(0, null, 0, false)));
 
         if (sf.SessionActive || sf.WindowOpen || !sf.Spot.IsEmpty || sf.Wariness != 0)
-            Ws.Execute(new SpearfishingInfo.OpEndSession());
+            Ws.Execute(new SpearfishingState.OpEndSession());
     }
 }

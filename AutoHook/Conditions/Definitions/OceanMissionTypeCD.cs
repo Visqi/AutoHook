@@ -1,5 +1,5 @@
 using Lumina.Excel.Sheets;
-using static AutoHook.Conditions.ConditionParams;
+using static AutoHook.Conditions.Params.ConditionParams;
 
 namespace AutoHook.Conditions.Definitions;
 
