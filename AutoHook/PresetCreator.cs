@@ -34,19 +34,13 @@ public class PresetCreator {
         ImGui.AlignTextToFramePadding();
         ImGui.Text("Fish");
         ImGui.SameLine(48.Scaled());
-        DrawUtil.DrawComboSelector(
-            GameRes.ImportedFishes.Where(f => !f.IsSpearFish).ToList(),
-            item => item.Name,
-            _selectedTargetFish?.Name ?? UIStrings.None,
-            SetSelectedFish);
+        DrawUtil.DrawComboSelector(GameRes.ImportedFishes.Where(f => !f.IsSpearFish).ToList(), item => item.Name, _selectedTargetFish?.Name ?? UIStrings.None, SetSelectedFish);
 
         ImGui.AlignTextToFramePadding();
         ImGui.Text("Name");
         ImGui.SameLine(48.Scaled());
         ImGui.SetNextItemWidth(-1);
-        var hint = _selectedTargetFish == null
-            ? $"{AutoV1Tag}/{AutoV2Tag} - FishName"
-            : $"{AutoV1Tag}/{AutoV2Tag} - {_selectedTargetFish.Name}";
+        var hint = _selectedTargetFish == null ? $"{AutoV1Tag}/{AutoV2Tag} - FishName" : $"{AutoV1Tag}/{AutoV2Tag} - {_selectedTargetFish.Name}";
         ImGui.InputTextWithHint("###presetName", hint, ref _newPresetName, 64, ImGuiInputTextFlags.AutoSelectAll);
     }
 
@@ -294,7 +288,7 @@ public class PresetCreator {
         newPreset.AutoCastsCfg.CastLine.ConditionSet = Configuration.ConditionSetBuilder.SingleStatus(IDs.Status.FishEyes);
         newPreset.AutoCastsCfg.CastCordial.Enabled = true;
         newPreset.AutoCastsCfg.CastFishEyes.Enabled = true;
-        newPreset.AutoCastsCfg.CastFishEyes.IgnoreMooch = true;
+        newPreset.AutoCastsCfg.CastFishEyes.DontCancelMooch = false;
 
         if (_selectedTargetFish!.Mooches.Count > 0) {
             newPreset.AutoCastsCfg.CastFishEyes.ConditionSet = Configuration.ConditionSetBuilder.SingleStatus(IDs.Status.MakeshiftBait);

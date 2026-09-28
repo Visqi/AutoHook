@@ -412,6 +412,10 @@ public sealed class WorldStateUpdater : IDisposable {
         AddonSpearFishing.FishInfo lane0 = default;
         AddonSpearFishing.FishInfo lane1 = default;
         AddonSpearFishing.FishInfo lane2 = default;
+        SpearLaneLayout laneLayout = default;
+        SpearFishLayout fishLayout0 = default;
+        SpearFishLayout fishLayout1 = default;
+        SpearFishLayout fishLayout2 = default;
 
         if (Svc.GameGui.TryGetAddon<AddonSpearFishing>("SpearFishing", out var addon)
             && addon != null
@@ -426,6 +430,16 @@ public sealed class WorldStateUpdater : IDisposable {
             lane0 = addon->Fish[0];
             lane1 = addon->Fish[1];
             lane2 = addon->Fish[2];
+
+            var uiScale = addon->AtkUnitBase.Scale;
+            var fishLines = addon->GetNodeById(43);
+            if (fishLines != null) {
+                laneLayout = new SpearLaneLayout(fishLines->X, fishLines->Y, fishLines->Width, fishLines->Height, fishLines->ScaleX, uiScale);
+            }
+
+            fishLayout0 = ReadFishLayout(addon, lane0, 61);
+            fishLayout1 = ReadFishLayout(addon, lane1, 60);
+            fishLayout2 = ReadFishLayout(addon, lane2, 59);
         }
 
         var sf = ws.Spearfishing;
@@ -444,12 +458,34 @@ public sealed class WorldStateUpdater : IDisposable {
                 ws.Execute(new SpearfishingInfo.OpSpot(spot));
         }
 
-        if (!FishInfoEquals(lane0, sf.Lane0) || !FishInfoEquals(lane1, sf.Lane1) || !FishInfoEquals(lane2, sf.Lane2))
-            ws.Execute(new SpearfishingInfo.OpFishLanes(lane0, lane1, lane2));
+        if (!FishLayoutEquals(fishLayout0, sf.FishLayout0) || !FishLayoutEquals(fishLayout1, sf.FishLayout1) || !FishLayoutEquals(fishLayout2, sf.FishLayout2) || !LaneLayoutEquals(laneLayout, sf.LaneLayout)) {
+            ws.Execute(new SpearfishingInfo.OpFishLayout(laneLayout, fishLayout0, fishLayout1, fishLayout2));
+        }
+    }
+
+    private static unsafe SpearFishLayout ReadFishLayout(AddonSpearFishing* addon, AddonSpearFishing.FishInfo fish, uint nodeId) {
+        var node = addon->GetNodeById(nodeId);
+        if (node == null)
+            return new SpearFishLayout(fish, 0, 0, 0);
+        return new SpearFishLayout(fish, node->X, node->Width, node->ScaleX);
     }
 
     private static bool FishInfoEquals(AddonSpearFishing.FishInfo a, AddonSpearFishing.FishInfo b)
         => a.Available == b.Available && a.InverseDirection == b.InverseDirection && a.GuaranteedLarge == b.GuaranteedLarge && a.Size == b.Size && a.Speed == b.Speed;
+
+    private static bool FishLayoutEquals(SpearFishLayout a, SpearFishLayout b)
+        => FishInfoEquals(a.Fish, b.Fish)
+           && Math.Abs(a.FishNodeX - b.FishNodeX) < 0.01f
+           && Math.Abs(a.FishNodeWidth - b.FishNodeWidth) < 0.01f
+           && Math.Abs(a.FishNodeScaleX - b.FishNodeScaleX) < 0.01f;
+
+    private static bool LaneLayoutEquals(SpearLaneLayout a, SpearLaneLayout b)
+        => Math.Abs(a.LaneX - b.LaneX) < 0.01f
+           && Math.Abs(a.LaneY - b.LaneY) < 0.01f
+           && Math.Abs(a.LaneWidth - b.LaneWidth) < 0.01f
+           && Math.Abs(a.LaneHeight - b.LaneHeight) < 0.01f
+           && Math.Abs(a.LaneScaleX - b.LaneScaleX) < 0.01f
+           && Math.Abs(a.UiScale - b.UiScale) < 0.01f;
 
     private static SpearfishingSpotState ResolveCurrentSpearfishingSpot() {
         if (Svc.Targets.Target is not { ObjectKind: Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint, BaseId: var pointId })
@@ -588,12 +624,7 @@ public sealed class WorldStateUpdater : IDisposable {
                     swimbaitId = handler->SwimBaitItemIds[handler->CurrentSelectedSwimBait];
                 var flags = handler->CurrentCastBaitFlags;
                 isMooching = (flags & (FishingBaitFlags.Mooch | FishingBaitFlags.Swimbait)) != 0;
-                previousCatch = new PreviousCatchInfo(
-                    handler->CanMoochPreviousCatch,
-                    handler->CanMooch2PreviousCatch,
-                    handler->CanReleasePreviousCatch,
-                    handler->CanIdenticalCastPreviousCatch,
-                    handler->CanSurfaceSlapPreviousCatch);
+                previousCatch = new PreviousCatchInfo(handler->CanMoochPreviousCatch, handler->CanMooch2PreviousCatch, handler->CanReleasePreviousCatch, handler->CanIdenticalCastPreviousCatch, handler->CanSurfaceSlapPreviousCatch);
                 canFish = handler->CanFish;
                 changingPosition = handler->ChangingPosition;
                 castFlags = handler->CurrentCastBaitFlags;
@@ -610,8 +641,7 @@ public sealed class WorldStateUpdater : IDisposable {
         if (ws.Fishing.FishingState != state || ws.Fishing.BaitInfo != bait)
             ws.Execute(new FishingInfo.OpFishingState(state, bait));
 
-        var handlerState = new FishingInfo.OpFishingHandlerState(
-            previousCatch, canFish, changingPosition, castFlags, selectedSwimbait, moochExpire, catchExpire);
+        var handlerState = new FishingInfo.OpFishingHandlerState(previousCatch, canFish, changingPosition, castFlags, selectedSwimbait, moochExpire, catchExpire);
         var f = ws.Fishing;
         if (f.PreviousCatch != previousCatch || f.CanFish != canFish || f.ChangingPosition != changingPosition ||
             f.CurrentCastBaitFlags != castFlags || f.CurrentSelectedSwimbait != selectedSwimbait ||

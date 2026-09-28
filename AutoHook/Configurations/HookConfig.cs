@@ -146,7 +146,7 @@ public class HookConfig : BaseOption {
         return intuitionActive && IntuitionHook.UseCustomStatusHook;
     }
 
-    public HookType? GetHook(BiteType bite, double timePassed) {
+    public HookType? GetHook(WorldState ws, BiteType bite, double timePassed) {
         var hookset = GetHookset();
 
         var hookDictionary = new Dictionary<BiteType, (BaseBiteConfig th, BaseBiteConfig dh, BaseBiteConfig ph)>
@@ -161,11 +161,11 @@ public class HookConfig : BaseOption {
         if (hookDictionary.TryGetValue(bite, out var hook)) {
             // Triple Hook
             if (hookset.UseTripleHook && hook.th.HooksetEnabled) {
-                if (hook.th.ConditionSet.PassesOrUnconfigured())
-                    if (GetHookTypeForTime(hook.th, timePassed) is { } ht && IsHookAvailable(hook.th, timePassed))
+                if (hook.th.ConditionSet.PassesOrUnconfigured(ws))
+                    if (GetHookTypeForTime(ws, hook.th, timePassed) is { } ht && IsHookAvailable(ws, hook.th, timePassed))
                         return ht;
 
-                if (hookset.LetFishEscapeTripleHook && Service.WorldState.Player.CurrentGp < 700) {
+                if (hookset.LetFishEscapeTripleHook && ws.Player.CurrentGp < 700) {
                     Service.Status = "Not enough GP to use Triple Hook, Letting fish escape is enabled";
                     return HookType.None;
                 }
@@ -175,11 +175,11 @@ public class HookConfig : BaseOption {
 
             // Double Hook
             if (hookset.UseDoubleHook && hook.dh.HooksetEnabled) {
-                if (hook.dh.ConditionSet.PassesOrUnconfigured())
-                    if (GetHookTypeForTime(hook.dh, timePassed) is { } ht && IsHookAvailable(hook.dh, timePassed))
+                if (hook.dh.ConditionSet.PassesOrUnconfigured(ws))
+                    if (GetHookTypeForTime(ws, hook.dh, timePassed) is { } ht && IsHookAvailable(ws, hook.dh, timePassed))
                         return ht;
 
-                if (hookset.LetFishEscapeDoubleHook && Service.WorldState.Player.CurrentGp < 400) {
+                if (hookset.LetFishEscapeDoubleHook && ws.Player.CurrentGp < 400) {
                     Service.Status = "Not enough GP to use Double Hook, Letting fish escape is enabled";
                     return HookType.None;
                 }
@@ -189,15 +189,15 @@ public class HookConfig : BaseOption {
 
             // Normal - Patience
             if (hook.ph.HooksetEnabled) {
-                if (hook.ph.ConditionSet.PassesOrUnconfigured()) {
-                    if (GetHookTypeForTime(hook.ph, timePassed) is { } ht) {
-                        if (IsHookAvailable(hook.ph, timePassed)) return ht;
+                if (hook.ph.ConditionSet.PassesOrUnconfigured(ws)) {
+                    if (GetHookTypeForTime(ws, hook.ph, timePassed) is { } ht) {
+                        if (IsHookAvailable(ws, hook.ph, timePassed)) return ht;
                         var fallback = ht switch {
                             HookType.Stellar when bite is BiteType.Weak => HookType.Precision,
                             HookType.Stellar when bite is not BiteType.Weak => HookType.Powerful,
                             _ => HookType.Normal
                         };
-                        return fallback != ht && Service.WorldState.ActionAvailable((uint)fallback, ActionType.Action) ? fallback : HookType.Normal;
+                        return fallback != ht && ws.ActionAvailable((uint)fallback, ActionType.Action) ? fallback : HookType.Normal;
                     }
                     Service.Status = "(Normal/Patience Hook) No hook type for current bite timer.";
                 }
@@ -212,14 +212,14 @@ public class HookConfig : BaseOption {
         return HookType.None;
     }
 
-    private HookType? GetHookTypeForTime(BaseBiteConfig hookType, double timePassed)
+    private HookType? GetHookTypeForTime(WorldState ws, BaseBiteConfig hookType, double timePassed)
         => hookType.UseMultipleHookTypesByTimer
-            ? GetTimedHookType(hookType, timePassed) is { } timedHook ? timedHook : null
-            : hookType.HookTypeConditionSet.PassesOrUnconfigured()
+            ? GetTimedHookType(ws, hookType, timePassed) is { } timedHook ? timedHook : null
+            : hookType.HookTypeConditionSet.PassesOrUnconfigured(ws)
                 ? hookType.HooksetType
                 : null;
 
-    private HookType? GetTimedHookType(BaseBiteConfig hookType, double timePassed) {
+    private HookType? GetTimedHookType(WorldState ws, BaseBiteConfig hookType, double timePassed) {
         bool InRange(bool enabled, double min, double max) {
             if (!enabled)
                 return false;
@@ -232,37 +232,37 @@ public class HookConfig : BaseOption {
 
         // Highest value hook types first if multiple windows overlap
         if (InRange(hookType.UseStellarHookTypeByTimer, hookType.StellarHookTypeMin, hookType.StellarHookTypeMax)
-            && hookType.StellarHookTypeConditionSet.PassesOrUnconfigured())
+            && hookType.StellarHookTypeConditionSet.PassesOrUnconfigured(ws))
             return HookType.Stellar;
 
         if (InRange(hookType.UsePowerfulHookTypeByTimer, hookType.PowerfulHookTypeMin, hookType.PowerfulHookTypeMax)
-            && hookType.PowerfulHookTypeConditionSet.PassesOrUnconfigured())
+            && hookType.PowerfulHookTypeConditionSet.PassesOrUnconfigured(ws))
             return HookType.Powerful;
 
         if (InRange(hookType.UsePrecisionHookTypeByTimer, hookType.PrecisionHookTypeMin, hookType.PrecisionHookTypeMax)
-            && hookType.PrecisionHookTypeConditionSet.PassesOrUnconfigured())
+            && hookType.PrecisionHookTypeConditionSet.PassesOrUnconfigured(ws))
             return HookType.Precision;
 
         if (InRange(hookType.UseNormalHookTypeByTimer, hookType.NormalHookTypeMin, hookType.NormalHookTypeMax)
-            && hookType.NormalHookTypeConditionSet.PassesOrUnconfigured())
+            && hookType.NormalHookTypeConditionSet.PassesOrUnconfigured(ws))
             return HookType.Normal;
 
         return null;
     }
 
-    private bool IsHookAvailable(BaseBiteConfig hookType, double timePassed) {
-        if (GetHookTypeForTime(hookType, timePassed) is not { } timedHook)
+    private bool IsHookAvailable(WorldState ws, BaseBiteConfig hookType, double timePassed) {
+        if (GetHookTypeForTime(ws, hookType, timePassed) is not { } timedHook)
             return false;
 
         if (timedHook == HookType.Stellar) {
-            if (Service.WorldState.IsStellarHooksetAvailable())
+            if (ws.IsStellarHooksetAvailable())
                 return true;
 
             Service.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
             return false;
         }
 
-        if (!Service.WorldState.ActionAvailable((uint)timedHook, ActionType.Action)) {
+        if (!ws.ActionAvailable((uint)timedHook, ActionType.Action)) {
             Service.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
             return false;
         }

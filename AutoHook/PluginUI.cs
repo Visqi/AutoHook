@@ -102,7 +102,7 @@ public class PluginUi : Window, IDisposable {
             using (ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f)))
             using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight }, false, ImGuiWindowFlags.NoDecoration)) {
                 if (ImGui.Selectable(UIStrings.StartActions))
-                    Service.FishManager.StartFishing();
+                    Service.FishingSessions.StartFishing();
 
                 using (var c = ImRaii.Child("logo", new(0, 125.Scaled()))) {
                     if (Svc.Texture.GetFromManifestResource(Assembly.GetExecutingAssembly(), $"AutoHook.Assets.Fishy{(Service.Configuration.PluginEnabled ? "" : "_g")}.png").TryGetWrap(out var image, out var _)) {
@@ -111,7 +111,7 @@ public class PluginUi : Window, IDisposable {
 
                             if (ImGui.IsItemClicked(ImGuiMouseButton.Left)) {
                                 if (ImGui.GetIO().KeyShift && Service.Configuration.PluginEnabled)
-                                    Service.FishManager.RequestStopAfterNextFish();
+                                    Service.FishingSessions.RequestStopAfterNextFish();
                                 else
                                     Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;
                             }

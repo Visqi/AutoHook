@@ -53,8 +53,8 @@ public abstract class BaseActionCast {
 
     public ConditionSet? ConditionSet { get; set; }
 
-    protected bool EvaluateConditionSet()
-        => ConditionSet.PassesOrUnconfigured();
+    protected bool EvaluateConditionSet(WorldState ws)
+        => ConditionSet.PassesOrUnconfigured(ws);
 
     protected void DrawAutoCastConditions(bool showSubPrefix = true)
         => ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ConditionSet, IsSpearFishing ? ConditionScope.Spearfishing : ConditionScope.AutoCast, showAdvanced: true, showSubPrefix: showSubPrefix);
@@ -68,27 +68,27 @@ public abstract class BaseActionCast {
         Service.Save();
     }
 
-    public bool IsAvailableToCast(bool ignoreCurrentMooch = false)
-        => DescribeUnavailable(ignoreCurrentMooch) == null;
+    public bool IsAvailableToCast(WorldState ws, bool ignoreCurrentMooch = false)
+        => DescribeUnavailable(ws, ignoreCurrentMooch) == null;
 
     // null if castable; else short reason for replay decision log.
-    public string? DescribeUnavailable(bool ignoreCurrentMooch = false) {
+    public string? DescribeUnavailable(WorldState ws, bool ignoreCurrentMooch = false) {
         if (!Enabled)
             return "Disabled";
 
-        if (DoesCancelMooch() && Service.WorldState.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch)
+        if (DoesCancelMooch() && ws.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch)
             return "Would cancel mooch";
 
         if (RestoresGp && Service.WorldStateUpdater.HasPendingGp)
             return "GP pending";
 
-        var condition = CastCondition();
-        var currentGp = Service.WorldState.Player.CurrentGp;
+        var condition = CastCondition(ws);
+        var currentGp = ws.Player.CurrentGp;
         var hasGp = GpThresholdAbove ? currentGp >= GpThreshold : currentGp <= GpThreshold;
-        var actionAvailable = Service.WorldState.ActionAvailable(Id, ActionType);
+        var actionAvailable = ws.ActionAvailable(Id, ActionType);
 
         if (!condition) {
-            if (ConditionSet != null && !ConditionSet.PassesOrUnconfigured())
+            if (ConditionSet != null && !ConditionSet.PassesOrUnconfigured(ws))
                 return "Condition set failed";
             return "Cast conditions not met";
         }
@@ -102,24 +102,24 @@ public abstract class BaseActionCast {
         return null;
     }
 
-    public bool IsGpBlocked(bool ignoreCurrentMooch = false) {
+    public bool IsGpBlocked(WorldState ws, bool ignoreCurrentMooch = false) {
         if (!Enabled)
             return false;
 
-        if (DoesCancelMooch() && Service.WorldState.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch)
+        if (DoesCancelMooch() && ws.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch)
             return false;
 
-        if (!CastCondition())
+        if (!CastCondition(ws))
             return false;
 
-        if (!Service.WorldState.ActionAvailable(Id, ActionType))
+        if (!ws.ActionAvailable(Id, ActionType))
             return false;
 
-        var currentGp = Service.WorldState.Player.CurrentGp;
+        var currentGp = ws.Player.CurrentGp;
         return GpThresholdAbove ? currentGp < GpThreshold : currentGp > GpThreshold;
     }
 
-    public abstract bool CastCondition();
+    public abstract bool CastCondition(WorldState ws);
 
     public abstract string GetName();
 

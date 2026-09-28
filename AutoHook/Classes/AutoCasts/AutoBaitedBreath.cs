@@ -10,7 +10,7 @@ public sealed class AutoBaitedBreath : BaseActionCast {
 
     public override string GetName() => UIStrings.BaitedBreath;
 
-    public override bool CastCondition() => EvaluateConditionSet();
+    public override bool CastCondition(WorldState ws) => EvaluateConditionSet(ws);
 
     protected override DrawOptionsDelegate DrawOptions => () => DrawAutoCastConditions();
 

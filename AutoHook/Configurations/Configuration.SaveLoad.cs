@@ -41,8 +41,7 @@ public partial class Configuration {
 
             if (file.Exists) {
                 var json = await File.ReadAllTextAsync(file.FullName, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
-                var configDirectory = Path.GetDirectoryName(file.FullName);
-                var migratedJson = ConfigurationJsonMigrator.MigrateToLatest(json, configDirectory);
+                var migratedJson = ConfigurationJsonMigrator.MigrateToLatest(json);
 
                 Configuration? config;
                 try {

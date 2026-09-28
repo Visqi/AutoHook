@@ -14,7 +14,7 @@ public sealed class HookCountCD : IConditionDefinition, ISimpleConditionValue<(b
         if (guid == Guid.Empty)
             return args.Invert;
 
-        var count = FishingManager.FishingHelper.GetFishCount(guid);
+        var count = FishingCounters.GetFishCount(guid);
         return args.Apply(CompareInt(count, args.Value, args.Op));
     }
 

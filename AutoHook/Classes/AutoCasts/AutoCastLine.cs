@@ -3,10 +3,7 @@ using System.ComponentModel;
 namespace AutoHook.Classes.AutoCasts;
 
 public sealed class AutoCastLine : BaseActionCast {
-    [DefaultValue(true)]
-    public bool IgnoreMooch = true;
-
-    public override bool DoesCancelMooch() => !IgnoreMooch;
+    public override bool DoesCancelMooch() => false;
 
     public override bool RequiresTimeWindow() => true;
 
@@ -22,12 +19,9 @@ public sealed class AutoCastLine : BaseActionCast {
     [DefaultValue(true)]
     public override bool IsExcludedPriority { get; set; } = true;
 
-    public override bool CastCondition() => EvaluateConditionSet();
+    public override bool CastCondition(WorldState ws) => EvaluateConditionSet(ws);
 
     protected override DrawOptionsDelegate DrawOptions => () => {
         DrawAutoCastConditions();
-
-        DrawUtil.Checkbox(UIStrings.IgnoreMooch, ref IgnoreMooch,
-            UIStrings.IgnoreMoochHelpText);
     };
 }

@@ -11,7 +11,7 @@ public sealed class AutoChum : BaseActionCast {
 
     public override string GetHelpText() => UIStrings.CancelsCurrentMooch;
 
-    public override bool CastCondition() => EvaluateConditionSet();
+    public override bool CastCondition(WorldState ws) => EvaluateConditionSet(ws);
 
     protected override DrawOptionsDelegate DrawOptions => () => DrawAutoCastConditions();
 

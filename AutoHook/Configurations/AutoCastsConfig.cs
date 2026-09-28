@@ -31,8 +31,7 @@ public class AutoCastsConfig {
     public AutoMultiHook CastMultihook = new();
 
     private List<BaseActionCast> GetAutoCastOrder() {
-        var output = new List<BaseActionCast>
-        {
+        var output = new List<BaseActionCast> {
             CastThaliaksFavor,
             CastCordial,
             CastPatience,
@@ -49,19 +48,19 @@ public class AutoCastsConfig {
         return output;
     }
 
-    public BaseActionCast? GetNextAutoCast(bool ignoreCurrentMooch)
-        => GetNextAutoCast(GetAutoCastOrder(), ignoreCurrentMooch);
+    public BaseActionCast? GetNextAutoCast(WorldState ws, bool ignoreCurrentMooch)
+        => GetNextAutoCast(ws, GetAutoCastOrder(), ignoreCurrentMooch);
 
-    public BaseActionCast? GetNextGpRestoringCast(bool ignoreCurrentMooch)
-        => GetNextAutoCast(GetAutoCastOrder().Where(action => action.RestoresGp), ignoreCurrentMooch);
+    public BaseActionCast? GetNextGpRestoringCast(WorldState ws, bool ignoreCurrentMooch)
+        => GetNextAutoCast(ws, GetAutoCastOrder().Where(action => action.RestoresGp), ignoreCurrentMooch);
 
-    private BaseActionCast? GetNextAutoCast(IEnumerable<BaseActionCast> order, bool ignoreCurrentMooch) {
+    private BaseActionCast? GetNextAutoCast(WorldState ws, IEnumerable<BaseActionCast> order, bool ignoreCurrentMooch) {
         if (!EnableAll)
             return null;
 
-        foreach (var action in order.Where(action => action.IsAvailableToCast(ignoreCurrentMooch))) {
-            if (action.RequiresTimeWindow() && !TimeWindow.BackingSet.PassesOrUnconfigured()) {
-                LogAutoCastDecision(action, "Time window blocked");
+        foreach (var action in order.Where(action => action.IsAvailableToCast(ws, ignoreCurrentMooch))) {
+            if (action.RequiresTimeWindow() && !TimeWindow.BackingSet.PassesOrUnconfigured(ws)) {
+                LogAutoCastDecision(ws, action, "Time window blocked");
                 continue;
             }
 
@@ -71,50 +70,17 @@ public class AutoCastsConfig {
         return null;
     }
 
-    public bool TryCastGpRestoringAction(bool ignoreCurrentMooch = false)
-        => TryCastAction(GetNextGpRestoringCast(ignoreCurrentMooch), ignoreCurrentMooch: ignoreCurrentMooch);
-
     [JsonProperty("TimeWindowConditionSet")]
     [JsonConverter(typeof(SingleConditionConverter))]
     public SingleCondition<TimeWindowCD, (bool Enabled, TimeOnly Start, TimeOnly End)> TimeWindow { get; set; } = new SingleCondition<TimeWindowCD, (bool Enabled, TimeOnly Start, TimeOnly End)>();
 
-    public bool TryCastAction(BaseActionCast? action, bool noDelay = false, bool ignoreCurrentMooch = false) {
-        if (action == null || !EnableAll)
-            return false;
+    public void LogAutoCastDecision(WorldState ws, BaseActionCast action, string? failureReason = null) {
+        // this is only for logging failures
+        // success Decide in ActionHintsResolve
+        if (failureReason == null)
+            return;
 
-        if (action.RequiresTimeWindow() && !TimeWindow.BackingSet.PassesOrUnconfigured()) {
-            LogAutoCastDecision(action, "Time window blocked");
-            return false;
-        }
-
-        if (action.DescribeUnavailable(ignoreCurrentMooch) is { } unavailable) {
-            LogAutoCastDecision(action, unavailable);
-            return false;
-        }
-
-        if (action.Id == IDs.Actions.Chum && ChumAnimationCancel) {
-            TryChumAnimationCancel();
-            LogAutoCastDecision(action);
-            return true;
-        }
-
-        if (noDelay) {
-            if (!Service.ActionExecutor.TryCastNoDelay(action.Id, action.ActionType, action.GetName())) {
-                LogAutoCastDecision(action, "Cast rejected by game");
-                return false;
-            }
-        }
-        else if (!Service.ActionExecutor.TryCastDelayed(action.Id, action.ActionType, action.GetName())) {
-            LogAutoCastDecision(action, "Cast rejected by game");
-            return false;
-        }
-
-        LogAutoCastDecision(action);
-        return true;
-    }
-
-    private void LogAutoCastDecision(BaseActionCast action, string? failureReason = null) {
-        var detail = failureReason ?? "";
+        var detail = failureReason;
         var cond = action.ConditionSet?.Describe() ?? "";
         if (action.RequiresTimeWindow() && TimeWindow.BackingSet is { } timeWindow) {
             var global = timeWindow.Describe();
@@ -125,17 +91,6 @@ public class AutoCastsConfig {
         if (!string.IsNullOrEmpty(cond))
             detail = string.IsNullOrEmpty(detail) ? cond : $"{detail}\n{cond}";
 
-        Service.WorldState.Decide(DecisionContext.AutoCast, failureReason == null, action.GetName(),
-            string.IsNullOrEmpty(detail) ? null : detail);
-    }
-
-    private void TryChumAnimationCancel() {
-        // Make sure Salvage is disabled before chum
-        Service.TaskManager.EnqueueDelay(40);
-        Service.TaskManager.Enqueue(() => Service.ActionExecutor.UseAction(IDs.Actions.Chum));
-
-        // Recast Salvage a few ms's later, maybe 500 is enough?
-        Service.TaskManager.EnqueueDelay(465);
-        Service.TaskManager.Enqueue(() => Service.ActionExecutor.UseAction(IDs.Actions.Salvage));
+        ws.Decide(DecisionContext.AutoCast, false, action.GetName(), string.IsNullOrEmpty(detail) ? null : detail);
     }
 }

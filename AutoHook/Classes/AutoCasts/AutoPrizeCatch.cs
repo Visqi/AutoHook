@@ -12,17 +12,17 @@ public sealed class AutoPrizeCatch : BaseActionCast {
 
     public override string GetHelpText() => UIStrings.Use_Prize_Catch_HelpText;
 
-    public override bool CastCondition() {
-        if (!EvaluateConditionSet())
+    public override bool CastCondition(WorldState ws) {
+        if (!EvaluateConditionSet(ws))
             return false;
 
         if (!Enabled)
             return false;
 
-        if (Service.WorldState.BlocksFortune())
+        if (ws.BlocksFortune())
             return false;
 
-        return Service.WorldState.ActionAvailable(IDs.Actions.PrizeCatch);
+        return ws.ActionAvailable(IDs.Actions.PrizeCatch);
     }
 
     protected override DrawOptionsDelegate DrawOptions => () => DrawAutoCastConditions();

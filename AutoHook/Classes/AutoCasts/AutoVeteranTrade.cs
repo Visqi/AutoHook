@@ -10,8 +10,8 @@ public sealed class AutoVeteranTrade : BaseActionCast {
 
     public override string GetName() => UIStrings.VeteranTrade;
 
-    public override bool CastCondition()
-        => EvaluateConditionSet() && !Service.WorldState.Player.HasStatus(IDs.Status.VeteranTrade);
+    public override bool CastCondition(WorldState ws)
+        => EvaluateConditionSet(ws) && !ws.Player.HasStatus(IDs.Status.VeteranTrade);
 
     protected override DrawOptionsDelegate DrawOptions => () => DrawAutoCastConditions();
 

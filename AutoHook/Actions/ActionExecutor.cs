@@ -9,11 +9,22 @@ public enum ActionDelayMode {
     NoDelay,
 }
 
-public readonly record struct ActionRequest(uint Id, ActionType Type = ActionType.Action, string Name = "", ActionDelayMode DelayMode = ActionDelayMode.Delayed);
+public readonly record struct ActionRequest(
+    uint Id,
+    ActionType Type = ActionType.Action,
+    string Name = "",
+    ActionDelayMode DelayMode = ActionDelayMode.Delayed,
+    int DelayBeforeMs = 0,
+    bool UseRaw = false,
+    bool StellarHookset = false,
+    DecisionContext? DecisionContext = null);
 
 public sealed class ActionExecutor : IDisposable {
+    private readonly record struct QueueItem(ActionRequest? Request, Action? Callback, long ReadyAtMs);
+
     private readonly WorldState _ws;
     private readonly Random _rng = new();
+    private readonly Queue<QueueItem> _queue = new();
     private long _unblockAtTickMs;
 
     public ActionExecutor(WorldState worldState) {
@@ -21,8 +32,11 @@ public sealed class ActionExecutor : IDisposable {
         Svc.Framework.Update += OnFrameworkUpdate;
     }
 
+    public bool IsBusy => _queue.Count > 0 || _ws.Player.BlockCasting || _unblockAtTickMs != 0;
+
     public void Dispose() {
         Svc.Framework.Update -= OnFrameworkUpdate;
+        _queue.Clear();
         _unblockAtTickMs = 0;
         if (_ws.Player.BlockCasting)
             _ws.Execute(new WorldState.OpSetBlockCasting(false));
@@ -31,12 +45,95 @@ public sealed class ActionExecutor : IDisposable {
     private void OnFrameworkUpdate(IFramework _) => Update();
 
     public void Update() {
-        if (_unblockAtTickMs == 0 || Environment.TickCount64 < _unblockAtTickMs)
-            return;
+        if (_unblockAtTickMs != 0 && Environment.TickCount64 >= _unblockAtTickMs) {
+            _unblockAtTickMs = 0;
+            if (_ws.Player.BlockCasting)
+                _ws.Execute(new WorldState.OpSetBlockCasting(false));
+        }
 
-        _unblockAtTickMs = 0;
-        if (_ws.Player.BlockCasting)
-            _ws.Execute(new WorldState.OpSetBlockCasting(false));
+        DrainQueue();
+    }
+
+    private void DrainQueue() {
+        while (_queue.Count > 0) {
+            var head = _queue.Peek();
+            if (head.ReadyAtMs > Environment.TickCount64)
+                return;
+
+            if (head.Callback != null) {
+                _queue.Dequeue();
+                try {
+                    head.Callback();
+                }
+                catch (Exception e) {
+                    Svc.Log.Error(e, "Error running ActionExecutor callback");
+                }
+                continue;
+            }
+
+            var request = head.Request!.Value;
+            // Match old TaskManager: try ExecuteRequest when ready; non-raw casts still
+            // gate on BlockCasting inside TryCastDelayed/TryCastNoDelay (retry next frame).
+            if (!request.UseRaw && _ws.Player.BlockCasting)
+                return;
+
+            if (!ExecuteRequest(request)) {
+                // BlockCasting or unavailable — keep head and retry next frame.
+                if (!request.UseRaw && _ws.Player.BlockCasting)
+                    return;
+                _queue.Dequeue();
+                continue;
+            }
+
+            _queue.Dequeue();
+        }
+    }
+
+    public bool Enqueue(ActionRequest request, bool forceQueue = false) {
+        if (request.DelayBeforeMs > 0 || forceQueue) {
+            Push(request, Environment.TickCount64 + Math.Max(0, request.DelayBeforeMs));
+            return true;
+        }
+
+        return ExecuteRequest(request);
+    }
+
+    public bool Enqueue(ActionRequest request, params ActionRequest[] followUps) {
+        if (followUps.Length == 0)
+            return Enqueue(request);
+
+        var readyAt = Environment.TickCount64;
+        readyAt += Math.Max(0, request.DelayBeforeMs);
+        Push(request, readyAt);
+        foreach (var followUp in followUps) {
+            readyAt += Math.Max(0, followUp.DelayBeforeMs);
+            Push(followUp, readyAt);
+        }
+        return true;
+    }
+
+    public void EnqueueCallback(Action callback, int delayMs = 0) {
+        _queue.Enqueue(new QueueItem(null, callback, Environment.TickCount64 + Math.Max(0, delayMs)));
+    }
+
+    private void Push(ActionRequest request, long readyAtMs)
+        => _queue.Enqueue(new QueueItem(request, null, readyAtMs));
+
+    public bool ExecuteRequest(ActionRequest request) {
+        if (request.UseRaw) {
+            try {
+                return UseAction(request.Id, request.Type);
+            }
+            catch (Exception e) {
+                Svc.Log.Error(e, $"Error casting raw action: {request.Name}, Id: {request.Id}");
+                return false;
+            }
+        }
+
+        if (request.StellarHookset)
+            return TryUseStellarHookset(string.IsNullOrEmpty(request.Name) ? "Stellar Hookset" : request.Name);
+
+        return TryCast(request);
     }
 
     public bool TryCast(ActionRequest request)

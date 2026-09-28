@@ -18,7 +18,7 @@ public sealed class FishCaughtCounterCD : IConditionDefinition {
         var total = presets
             .SelectMany(p => p.ListOfFish)
             .Where(f => f.Fish.Id == fishId)
-            .Sum(f => FishingManager.FishingHelper.GetFishCount(f.UniqueId));
+            .Sum(f => FishingCounters.GetFishCount(f.UniqueId));
 
         var result = CompareInt(total, args.Value, args.Op);
         return args.Apply(result);

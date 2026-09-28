@@ -12,7 +12,7 @@ public sealed class AutoElectricCurrent : BaseActionCast {
 
     public override bool ShowGpThreshold => false;
 
-    public override bool CastCondition() => EvaluateConditionSet();
+    public override bool CastCondition(WorldState ws) => EvaluateConditionSet(ws);
 
     protected override DrawOptionsDelegate DrawOptions => () => DrawAutoCastConditions();
 

@@ -12,7 +12,7 @@ using Lumina.Excel.Sheets;
 
 namespace AutoHook.Tasks;
 
-public sealed class AetherialReduction(FishingManager fishingManager) : AutoTask, IAutoTaskHooks {
+public sealed class AetherialReduction() : AutoTask, IAutoTaskHooks {
     public void DrawDebug() {
         ImGui.Text($"Reduction unlocked: {IsUnlocked()}");
         ImGui.Text($"Reduceable fish (slots): {CountReduceableFish()}");
@@ -74,7 +74,7 @@ public sealed class AetherialReduction(FishingManager fishingManager) : AutoTask
                 return true;
 
             if (ws.ActionAvailable(IDs.Actions.Quit, ActionType.Action) && !ws.Player.BlockCasting)
-                Service.ActionExecutor.TryCastDelayed(IDs.Actions.Quit, ActionType.Action, "Quit");
+                Service.ActionExecutor.Enqueue(new ActionRequest(IDs.Actions.Quit, ActionType.Action, "Quit"));
 
             return false;
         }, nameof(QuitFishing), checkFrequency: 5);
@@ -125,7 +125,7 @@ public sealed class AetherialReduction(FishingManager fishingManager) : AutoTask
 
         await WaitUntil(() => ws.Fishing.FishingState == FishingState.None && ws.IsCastAvailable() && !IsBlockedForReduction() && !IsPurifyResultOpen(), nameof(ResumeFishing), checkFrequency: 5);
 
-        fishingManager.StartFishing();
+        Service.FishingSessions.StartFishing();
     }
 
     private unsafe void OnPurifyResultSetup(AddonEvent type, AddonArgs args) {

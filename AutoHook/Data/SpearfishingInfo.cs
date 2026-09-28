@@ -7,6 +7,26 @@ public readonly record struct SpearfishingSpotState(uint GatheringPointId, uint 
     public bool IsEmpty => GatheringPointId == 0 && GatheringPointBaseId == 0 && NotebookId == 0;
 }
 
+public readonly record struct SpearLaneLayout(
+    float LaneX,
+    float LaneY,
+    float LaneWidth,
+    float LaneHeight,
+    float LaneScaleX,
+    float UiScale) {
+    public static SpearLaneLayout Empty => default;
+    public bool IsEmpty => LaneWidth == 0 && LaneHeight == 0 && UiScale == 0;
+}
+
+public readonly record struct SpearFishLayout(
+    FishInfo Fish,
+    float FishNodeX,
+    float FishNodeWidth,
+    float FishNodeScaleX) {
+    public static SpearFishLayout Empty => default;
+    public bool Available => Fish.Available;
+}
+
 public sealed class SpearfishingInfo {
     public bool WindowOpen;
     public bool SessionActive;
@@ -17,6 +37,10 @@ public sealed class SpearfishingInfo {
     public FishInfo Lane0;
     public FishInfo Lane1;
     public FishInfo Lane2;
+    public SpearLaneLayout LaneLayout;
+    public SpearFishLayout FishLayout0;
+    public SpearFishLayout FishLayout1;
+    public SpearFishLayout FishLayout2;
 
     public readonly Dictionary<uint, int> FishCaughtCounts = [];
     public uint LastCatchFishId;
@@ -34,6 +58,13 @@ public sealed class SpearfishingInfo {
         _ => default,
     };
 
+    public SpearFishLayout GetFishLayout(int index) => index switch {
+        0 => FishLayout0,
+        1 => FishLayout1,
+        2 => FishLayout2,
+        _ => default,
+    };
+
     public IEnumerable<WorldState.Operation> CompareToInitial() {
         if (WindowOpen || Wariness != 0 || WarinessMax != 0)
             yield return new OpHud(WindowOpen, Wariness, WarinessMax);
@@ -41,8 +72,8 @@ public sealed class SpearfishingInfo {
             yield return new OpSessionActive(true);
         if (!Spot.IsEmpty)
             yield return new OpSpot(Spot);
-        if (Lane0.Available || Lane1.Available || Lane2.Available)
-            yield return new OpFishLanes(Lane0, Lane1, Lane2);
+        if (Lane0.Available || Lane1.Available || Lane2.Available || !LaneLayout.IsEmpty)
+            yield return new OpFishLayout(LaneLayout, FishLayout0, FishLayout1, FishLayout2);
         foreach (var (fishId, count) in FishCaughtCounts) {
             if (fishId == 0 || count <= 0)
                 continue;
@@ -116,6 +147,37 @@ public sealed class SpearfishingInfo {
                 .Emit(lane.Speed);
     }
 
+    public sealed record OpFishLayout(SpearLaneLayout Lane, SpearFishLayout Fish0, SpearFishLayout Fish1, SpearFishLayout Fish2) : WorldState.Operation {
+        protected override void Exec(WorldState ws) {
+            var sf = ws.Spearfishing;
+            sf.LaneLayout = Lane;
+            sf.FishLayout0 = Fish0;
+            sf.FishLayout1 = Fish1;
+            sf.FishLayout2 = Fish2;
+            sf.Lane0 = Fish0.Fish;
+            sf.Lane1 = Fish1.Fish;
+            sf.Lane2 = Fish2.Fish;
+        }
+
+        public override void Write(Replay.ReplayOutput output) {
+            output.EmitFourCC("SPLO")
+                .Emit(Lane.LaneX).Emit(Lane.LaneY).Emit(Lane.LaneWidth).Emit(Lane.LaneHeight).Emit(Lane.LaneScaleX).Emit(Lane.UiScale);
+            WriteFish(output, Fish0);
+            WriteFish(output, Fish1);
+            WriteFish(output, Fish2);
+        }
+
+        private static void WriteFish(Replay.ReplayOutput output, SpearFishLayout fish)
+            => output.Emit(fish.Fish.Available)
+                .Emit(fish.Fish.InverseDirection)
+                .Emit(fish.Fish.GuaranteedLarge)
+                .Emit((sbyte)fish.Fish.Size)
+                .Emit(fish.Fish.Speed)
+                .Emit(fish.FishNodeX)
+                .Emit(fish.FishNodeWidth)
+                .Emit(fish.FishNodeScaleX);
+    }
+
     public sealed record OpAddFishCaught(uint FishId, byte Amount) : WorldState.Operation {
         protected override void Exec(WorldState ws) {
             if (FishId <= 0 || Amount <= 0)
@@ -160,6 +222,10 @@ public sealed class SpearfishingInfo {
             sf.Lane0 = default;
             sf.Lane1 = default;
             sf.Lane2 = default;
+            sf.LaneLayout = default;
+            sf.FishLayout0 = default;
+            sf.FishLayout1 = default;
+            sf.FishLayout2 = default;
             sf.LastCatchFishId = 0;
             sf.LastCatchAmount = 0;
             ws.SpearfishingSessionEnded.Fire(this);

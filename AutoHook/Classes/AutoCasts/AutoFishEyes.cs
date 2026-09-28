@@ -8,9 +8,7 @@ public sealed class AutoFishEyes : BaseActionCast {
     public override int Priority { get; set; } = 6;
     public override bool IsExcludedPriority { get; set; } = false;
 
-    public bool IgnoreMooch;
-
-    public override bool DoesCancelMooch() => !IgnoreMooch;
+    public override bool DoesCancelMooch() => true;
 
     public override bool RequiresTimeWindow() => true;
 
@@ -20,10 +18,9 @@ public sealed class AutoFishEyes : BaseActionCast {
 
     public override string GetHelpText() => UIStrings.CancelsCurrentMooch;
 
-    public override bool CastCondition() => EvaluateConditionSet() && !Service.WorldState.Player.HasStatus(IDs.Status.FishEyes);
+    public override bool CastCondition(WorldState ws) => EvaluateConditionSet(ws) && !ws.Player.HasStatus(IDs.Status.FishEyes);
 
     protected override DrawOptionsDelegate DrawOptions => () => {
-        DrawUtil.Checkbox(UIStrings.IgnoreMooch, ref IgnoreMooch, UIStrings.IgnoreMoochFishEyes);
         DrawAutoCastConditions();
     };
 }

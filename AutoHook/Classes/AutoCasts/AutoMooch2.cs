@@ -15,5 +15,5 @@ public sealed class AutoMooch2 : BaseActionCast {
 
     public override string GetHelpText() => UIStrings.AutoMooch_HelpText;
 
-    public override bool CastCondition() => true;
+    public override bool CastCondition(WorldState ws) => true;
 }

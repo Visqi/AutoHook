@@ -160,7 +160,7 @@ public class AutoHookIPC {
 
     [EzIPC]
     public bool SwapBaitById(uint baitId)
-        => FishingManager.ChangeBait(baitId) is FishingManager.ChangeBaitReturn.Success or FishingManager.ChangeBaitReturn.AlreadyEquipped;
+        => BaitComponent.ChangeBait(baitId) is ChangeBaitReturn.Success or ChangeBaitReturn.AlreadyEquipped;
 
     [EzIPC]
     public bool SwapBait(string baitNameOrId) {
@@ -175,12 +175,12 @@ public class AutoHookIPC {
         if (bait == null || bait.Id <= 0)
             return false;
 
-        return FishingManager.ChangeBait((uint)bait.Id) is FishingManager.ChangeBaitReturn.Success or FishingManager.ChangeBaitReturn.AlreadyEquipped;
+        return BaitComponent.ChangeBait((uint)bait.Id) is ChangeBaitReturn.Success or ChangeBaitReturn.AlreadyEquipped;
     }
 
     [EzIPC]
     public bool SwapSwimbaitByIndex(byte index)
-        => FishingManager.ChangeSwimbait(index) is FishingManager.ChangeBaitReturn.Success or FishingManager.ChangeBaitReturn.AlreadyEquipped;
+        => BaitComponent.ChangeSwimbait(index) is ChangeBaitReturn.Success or ChangeBaitReturn.AlreadyEquipped;
 
     private static void WriteConfig(Action action) {
         Configuration.MutateSerialized(action);

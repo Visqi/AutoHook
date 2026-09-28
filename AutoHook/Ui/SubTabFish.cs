@@ -20,7 +20,7 @@ public class SubTabFish {
             var fish = listOfFish[idx];
             using var id = ImRaii.PushId($"fishTab###{idx}");
 
-            var count = FishingManager.FishingHelper.GetFishCount(fish.UniqueId);
+            var count = FishingCounters.GetFishCount(fish.UniqueId);
             var fishCount = count > 0 ? $"({UIStrings.Caught_Counter} {count})" : "";
 
             DrawUtil.DrawCheckboxHeader($"{fish.Fish.Name} {fishCount}", ref fish.Enabled, ImGuiTreeNodeFlags.FramePadding, () => {
@@ -145,7 +145,7 @@ public class SubTabFish {
         using var _ = ImRaii.PushId("DrawSwapBait");
 
         var alreadySwapped = "";
-        if (FishingManager.FishingHelper.SwappedBait(fishConfig.UniqueId))
+        if (FishingCounters.SwappedBait(fishConfig.UniqueId))
             alreadySwapped = UIStrings.AlreadySwapped;
 
         DrawUtil.DrawCaughtCountLimitTree($"{UIStrings.Swap_Bait} {alreadySwapped}", fishConfig.SwapBaitLimit,
@@ -159,7 +159,7 @@ public class SubTabFish {
         using var _ = ImRaii.PushId("DrawSwapPreset");
 
         var alreadySwapped = "";
-        if (FishingManager.FishingHelper.SwappedPreset(fishConfig.UniqueId))
+        if (FishingCounters.SwappedPreset(fishConfig.UniqueId))
             alreadySwapped = UIStrings.AlreadySwapped;
 
         DrawUtil.DrawCaughtCountLimitTree($"{UIStrings.Swap_Preset} {alreadySwapped}", fishConfig.SwapPresetLimit, () => DrawUtil.DrawPresetSwapSelector(fishConfig.PresetToSwap, preset => fishConfig.PresetToSwap = preset));

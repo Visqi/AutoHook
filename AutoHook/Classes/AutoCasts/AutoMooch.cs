@@ -17,16 +17,16 @@ public sealed class AutoMooch : BaseActionCast {
 
     public override string GetHelpText() => SuppressHelpText ? string.Empty : UIStrings.AutoMooch_HelpText;
 
-    public override bool CastCondition() {
-        if (!EvaluateConditionSet())
+    public override bool CastCondition(WorldState ws) {
+        if (!EvaluateConditionSet(ws))
             return false;
 
-        if (Mooch2.IsAvailableToCast()) {
+        if (Mooch2.IsAvailableToCast(ws)) {
             Id = IDs.Actions.Mooch2;
             return true;
         }
 
-        if (Service.WorldState.ActionAvailable(IDs.Actions.Mooch)) {
+        if (ws.ActionAvailable(IDs.Actions.Mooch)) {
             Id = IDs.Actions.Mooch;
             return true;
         }

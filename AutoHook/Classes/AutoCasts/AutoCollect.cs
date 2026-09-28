@@ -15,8 +15,8 @@ public sealed class AutoCollect : BaseActionCast {
     public override string GetHelpText() => UIStrings.CollectHelpText;
     public override bool ShowGpThreshold => false;
 
-    public override bool CastCondition()
-        => EvaluateConditionSet() && !Service.WorldState.Player.HasStatus(IDs.Status.CollectorsGlove);
+    public override bool CastCondition(WorldState ws)
+        => EvaluateConditionSet(ws) && !ws.Player.HasStatus(IDs.Status.CollectorsGlove);
 
     protected override DrawOptionsDelegate DrawOptions => () => DrawAutoCastConditions();
 }

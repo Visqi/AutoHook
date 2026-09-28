@@ -53,13 +53,13 @@ public class BaseHookset(uint requiredStatus) {
         return _uniqueId;
     }
 
-    public double GetEffectiveTimeoutMax(bool chumActive) {
+    public double GetEffectiveTimeoutMax(WorldState ws, bool chumActive) {
         var timeout = chumActive ? ChumTimeoutMax : TimeoutMax;
         if (timeout <= 0)
             return 0;
 
         var set = chumActive ? ChumTimeoutConditionSet : TimeoutConditionSet;
-        return set.Fails() ? 0 : timeout;
+        return set.Fails(ws) ? 0 : timeout;
     }
 
     public void DrawOptions() {

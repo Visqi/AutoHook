@@ -10,8 +10,8 @@ public sealed class AutoNaturesBounty : BaseActionCast {
 
     public override string GetName() => UIStrings.Use_Natures_Bounty;
 
-    public override bool CastCondition()
-        => EvaluateConditionSet() && !Service.WorldState.Player.HasStatus(IDs.Status.NaturesBounty);
+    public override bool CastCondition(WorldState ws)
+        => EvaluateConditionSet(ws) && !ws.Player.HasStatus(IDs.Status.NaturesBounty);
 
     protected override DrawOptionsDelegate DrawOptions => () => DrawAutoCastConditions();
 

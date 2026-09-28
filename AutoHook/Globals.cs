@@ -1,10 +1,12 @@
-﻿global using AutoHook.Actions;
+global using AutoHook.Actions;
 global using AutoHook.Classes;
 global using AutoHook.Classes.AutoCasts;
 global using AutoHook.Configurations;
 global using AutoHook.Data;
 global using AutoHook.Enums;
 global using AutoHook.Fishing;
+global using AutoHook.Modules;
+global using AutoHook.Modules.Rod;
 global using AutoHook.Resources.Localization;
 global using AutoHook.Utils;
 global using clib.Extensions;

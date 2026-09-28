@@ -35,7 +35,7 @@ public class LureTargetConfig {
     public bool ForceAttemptLimit;
     public ConditionSet? ConditionSet { get; set; }
 
-    public bool ConditionsPass() => ConditionSet.PassesOrUnconfigured();
+    public bool ConditionsPass(WorldState ws) => ConditionSet.PassesOrUnconfigured(ws);
 }
 
 public sealed class AutoLures : BaseActionCast {
@@ -46,21 +46,21 @@ public sealed class AutoLures : BaseActionCast {
 
     public override string GetName() => UIStrings.UseLures;
 
-    public LureActiveOption? GetActiveOption() {
-        foreach (var option in EnumerateValidOptions())
+    public LureActiveOption? GetActiveOption(WorldState ws) {
+        foreach (var option in EnumerateValidOptions(ws))
             return option;
         return null;
     }
 
-    public int CountValidOptions() => EnumerateValidOptions().Count();
+    public int CountValidOptions(WorldState ws) => EnumerateValidOptions(ws).Count();
 
-    private IEnumerable<LureActiveOption> EnumerateValidOptions() {
+    private IEnumerable<LureActiveOption> EnumerateValidOptions(WorldState ws) {
         foreach (var (type, actionId, statusId) in EnumerateLureTypes()) {
             if (!type.Enabled)
                 continue;
 
             foreach (var (target, config) in type.EnumerateTargets()) {
-                if (!config.Enabled || !config.ConditionsPass())
+                if (!config.Enabled || !config.ConditionsPass(ws))
                     continue;
 
                 yield return new LureActiveOption(actionId, statusId, target, config);
@@ -91,21 +91,21 @@ public sealed class AutoLures : BaseActionCast {
         Id = actionId;
     }
 
-    public override bool CastCondition() {
-        var option = GetActiveOption();
+    public override bool CastCondition(WorldState ws) {
+        var option = GetActiveOption(ws);
         if (option == null)
             return false;
 
         Id = option.Value.ActionId;
 
-        if (Service.WorldState.Player.GetStatusStacks(option.Value.StatusId) >= option.Value.Config.LureStacks)
+        if (ws.Player.GetStatusStacks(option.Value.StatusId) >= option.Value.Config.LureStacks)
             return false;
 
-        return Service.WorldState.Fishing.FishingState is FishingState.AmbitiousLure or FishingState.ModestLure or FishingState.LineInWater;
+        return ws.Fishing.FishingState is FishingState.AmbitiousLure or FishingState.ModestLure or FishingState.LineInWater;
     }
 
     protected override DrawOptionsDelegate DrawOptions => () => {
-        if (CountValidOptions() > 1) {
+        if (CountValidOptions(Service.WorldState) > 1) {
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.LureMultipleOptionsWarning);
             ImGui.Spacing();
         }
@@ -174,19 +174,21 @@ public sealed class AutoLures : BaseActionCast {
         config.ConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, config.ConditionSet, ConditionScope.AutoCast, showAdvanced: true, showSubPrefix: false);
     }
 
-    public void TryCasting(bool lureSuccess) {
+    public void TryCasting(WorldState ws, bool lureSuccess) {
         if (!EzThrottler.Check("CastingLure"))
             return;
 
-        var option = GetActiveOption();
+        var option = GetActiveOption(ws);
         if (option == null)
             return;
 
         var config = option.Value.Config;
-        var stacks = Service.WorldState.Player.GetStatusStacks(option.Value.StatusId);
+        var stacks = ws.Player.GetStatusStacks(option.Value.StatusId);
+
+        var rod = Service.FishingSessions.Rod;
 
         if (stacks >= config.LureStacks && config.CancelAttempt && !lureSuccess) {
-            Service.ActionExecutor.TryCastDelayed(IDs.Actions.Rest);
+            rod.Enqueue(new ActionRequest(IDs.Actions.Rest));
             return;
         }
 
@@ -195,10 +197,10 @@ public sealed class AutoLures : BaseActionCast {
 
         Id = option.Value.ActionId;
 
-        if (!IsAvailableToCast())
+        if (!IsAvailableToCast(ws))
             return;
 
-        if (!Service.ActionExecutor.TryCastNoDelay(Id, ActionType.Action, GetName()))
+        if (!rod.Enqueue(new ActionRequest(Id, ActionType.Action, GetName(), ActionDelayMode.NoDelay)))
             return;
 
         EzThrottler.Throttle("CastingLure", 2500);

@@ -15,14 +15,14 @@ public sealed class AutoVitalSight : BaseActionCast {
 
     public override bool ShowGpThreshold => false;
 
-    public override bool CastCondition() {
-        if (!EvaluateConditionSet())
+    public override bool CastCondition(WorldState ws) {
+        if (!EvaluateConditionSet(ws))
             return false;
 
-        if (Service.WorldState.Player.HasStatus(IDs.Status.VitalSight))
+        if (ws.Player.HasStatus(IDs.Status.VitalSight))
             return false;
 
-        return Service.WorldState.Player.GetStatusStacks(IDs.Status.AnglersArt) >= RequiredStacks;
+        return ws.Player.GetStatusStacks(IDs.Status.AnglersArt) >= RequiredStacks;
     }
 
     protected override DrawOptionsDelegate DrawOptions => () => {

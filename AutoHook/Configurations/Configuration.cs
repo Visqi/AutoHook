@@ -12,7 +12,7 @@ namespace AutoHook.Configurations;
 
 [Serializable]
 public partial class Configuration : IPluginConfiguration {
-    public const int LatestVersion = 10;
+    public const int LatestVersion = 11;
 
     public int Version { get; set; } = LatestVersion;
     public string CurrentLanguage { get; set; } = @"en";
@@ -52,27 +52,6 @@ public partial class Configuration : IPluginConfiguration {
     public bool AutoCollectablesEnabled = true;
     public ConditionSet? AutoCollectablesConditions { get; set; }
 
-    private void WriteVersionBackup(int fromVersion) {
-        try {
-            var dir = Svc.Interface.GetPluginConfigDirectory();
-            var fileName = $"autohook_v{fromVersion}_backup.json";
-            var path = Path.Combine(dir, fileName);
-
-            if (File.Exists(path)) {
-                var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                path = Path.Combine(dir, $"autohook_v{fromVersion}_backup_{stamp}.json");
-            }
-
-            var json = JsonConvert.SerializeObject(this, new JsonSerializerSettings { Formatting = Formatting.Indented, DefaultValueHandling = DefaultValueHandling.Include });
-
-            File.WriteAllText(path, json, Encoding.UTF8);
-            Service.PrintDebug(@$"[Configuration] Wrote backup to {path}");
-        }
-        catch (Exception e) {
-            Svc.Log.Warning(@$"[Configuration] Failed to write v{fromVersion} backup: {e.Message}");
-        }
-    }
-
     public void Initiate() {
         if (HookPresets.DefaultPreset.ListOfBaits.Count != 0)
             return;
@@ -102,6 +81,7 @@ public partial class Configuration : IPluginConfiguration {
         new(7, "AH7_", UseBrotli: true),
         new(8, "AH8_", UseBrotli: true),
         new(9, "AH9_", UseBrotli: true),
+        new(11, "AH11_", UseBrotli: true),
     ];
 
     private static readonly ExportSchema[] FolderExportSchemas =

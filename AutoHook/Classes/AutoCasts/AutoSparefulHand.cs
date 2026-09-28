@@ -12,12 +12,11 @@ public sealed class AutoSparefulHand : BaseActionCast {
 
     public uint? FishIdToCheck { get; set; }
 
-    public override bool CastCondition() {
-        var ws = Service.WorldState;
+    public override bool CastCondition(WorldState ws) {
         if (FishIdToCheck is { } fishId)
             ws.SwimbaitEvaluationFishId = fishId;
         try {
-            return EvaluateConditionSet();
+            return EvaluateConditionSet(ws);
         }
         finally {
             ws.SwimbaitEvaluationFishId = 0;

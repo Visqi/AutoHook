@@ -17,14 +17,14 @@ public sealed class AutoPatience : BaseActionCast {
 
     public override string GetHelpText() => UIStrings.CancelsCurrentMooch;
 
-    public override bool CastCondition() {
-        if (!EvaluateConditionSet())
+    public override bool CastCondition(WorldState ws) {
+        if (!EvaluateConditionSet(ws))
             return false;
 
-        if (Service.WorldState.Player.HasStatus(IDs.Status.AnglersFortune) && Service.WorldState.Player.GetStatusTime(IDs.Status.AnglersFortune) > RefreshEarlyTime)
+        if (ws.Player.HasStatus(IDs.Status.AnglersFortune) && ws.Player.GetStatusTime(IDs.Status.AnglersFortune) > RefreshEarlyTime)
             return false;
 
-        if (Service.WorldState.Player.HasStatus(IDs.Status.MakeshiftBait) || Service.WorldState.Player.HasStatus(IDs.Status.PrizeCatch))
+        if (ws.Player.HasStatus(IDs.Status.MakeshiftBait) || ws.Player.HasStatus(IDs.Status.PrizeCatch))
             return false;
 
         return true;

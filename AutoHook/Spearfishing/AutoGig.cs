@@ -1,11 +1,9 @@
-using AutoHook.Conditions;
+using AutoHook.Modules.Gig;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using ECommons.Automation;
-using ECommons.Automation.NeoTaskManager;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System.Numerics;
@@ -31,26 +29,21 @@ internal class AutoGig : Window, IDisposable {
     private Vector2 _uiSize = Vector2.Zero;
 
     private int currentNode = 0;
-    private Guid _lastGigEntryId;
 
     private readonly SpearFishingPresets _gigCfg = Service.Configuration.AutoGigConfig;
 
     public static string Gig = "Gig";
 
-    private readonly TaskManager _taskManager = new() {
-        DefaultConfiguration = { TimeLimitMS = 10000, ShowDebug = false }
-    };
+    private GigFishingModule GigFishing => Service.FishingSessions.Gig;
 
     public AutoGig() : base(@"SpearfishingHelper", WindowFlags, true) {
         _gigCfg.PrepareActions();
         Service.WindowSystem.AddWindow(this);
-        Service.WorldState.Modified += OnWorldStateModified;
         IsOpen = true;
         Gig = LuminaAction.GetRow(IDs.Actions.Gig).Name.ToString();
     }
 
     public void Dispose() {
-        Service.WorldState.Modified -= OnWorldStateModified;
         Service.WindowSystem.RemoveWindow(this);
         Configuration.FlushAsync().GetAwaiter().GetResult();
     }
@@ -112,15 +105,12 @@ internal class AutoGig : Window, IDisposable {
         if (!Service.Configuration.PluginEnabled)
             return;
 
-        var selectedPreset = _gigCfg.SelectedPreset;
-
-        TrySessionActions(selectedPreset);
-        GigFish(addon, addon->Fish[0], addon->GetNodeById(Fish1NodeId));
-        GigFish(addon, addon->Fish[1], addon->GetNodeById(Fish2NodeId));
-        GigFish(addon, addon->Fish[2], addon->GetNodeById(Fish3NodeId));
+        DrawFishHitboxes(addon, addon->Fish[0], addon->GetNodeById(Fish1NodeId));
+        DrawFishHitboxes(addon, addon->Fish[1], addon->GetNodeById(Fish2NodeId));
+        DrawFishHitboxes(addon, addon->Fish[2], addon->GetNodeById(Fish3NodeId));
     }
 
-    private unsafe void GigFish(AddonSpearFishing* addon, AddonSpearFishing.FishInfo info, AtkResNode* node) {
+    private unsafe void DrawFishHitboxes(AddonSpearFishing* addon, AddonSpearFishing.FishInfo info, AtkResNode* node) {
         if (node == null)
             return;
 
@@ -135,90 +125,15 @@ internal class AutoGig : Window, IDisposable {
         if (!info.Available)
             return;
 
-        var useCatchAll = _gigCfg.IsCatchAllActive;
-        var fish = useCatchAll ? GetCatchAllGig() : CheckFish(info);
-
-        if (fish == null || !fish.Enabled || !fish.GigConditionSet.PassesOrUnconfigured())
+        var fish = GigFishing.Gig.FindGigForFish(info);
+        if (fish == null || !GigFishing.Gig.ShouldGig(fish))
             return;
 
-        var naturesBounty = useCatchAll ? _gigCfg.CatchAllNaturesBountyAction : fish.NaturesBounty;
-        if (naturesBounty.IsAvailableToCast())
-            Service.ActionExecutor.TryCastDelayed(naturesBounty.Id, naturesBounty.ActionType, naturesBounty.GetName());
-
         var laneOriginX = fishLines->X * _uiScale;
-        var centerX = laneOriginX + fishLines->Width * fishLines->ScaleX * _uiScale / 2f;
         var anchor = info.InverseDirection ? 0.5f + fish.RightOffset / 10 : 0.4f - fish.LeftOffset / 10;
         var fishHitbox = laneOriginX + node->X * _uiScale + node->Width * node->ScaleX * _uiScale * anchor;
 
         DrawFishHitbox(fishLines, drawList, fishHitbox);
-
-        if (fishHitbox >= centerX - gigHitbox && fishHitbox <= centerX + gigHitbox) {
-            _lastGigEntryId = useCatchAll ? Guid.Empty : fish.UniqueId;
-            _taskManager.Enqueue(() => { Chat.ExecuteCommand($"/ac \"{Gig}\""); });
-        }
-    }
-
-    private BaseGig? CheckFish(AddonSpearFishing.FishInfo info) {
-        var notebookId = Service.WorldState.Spearfishing.Spot.NotebookId;
-        return _gigCfg.SelectedPreset?.FindGigForPool(notebookId, (Enums.SpearfishSpeed)info.Speed, (Enums.SpearfishSize)info.Size);
-    }
-
-    private BaseGig? GetCatchAllGig() => _gigCfg.CatchAllConditionSet.PassesOrUnconfigured() ? new BaseGig(0) { Enabled = true } : null;
-
-    private void TrySessionActions(AutoGigConfig? selectedPreset) {
-        var collect = selectedPreset is { Collect.Enabled: true } ? selectedPreset.Collect : _gigCfg.Collect;
-        if (collect.IsAvailableToCast())
-            Service.ActionExecutor.TryCastDelayed(collect.Id, collect.ActionType, collect.GetName());
-        if (_gigCfg.NatureBountyBeforeFishAction.IsAvailableToCast())
-            Service.ActionExecutor.TryCastDelayed(_gigCfg.NatureBountyBeforeFishAction.Id, _gigCfg.NatureBountyBeforeFishAction.ActionType, _gigCfg.NatureBountyBeforeFishAction.GetName());
-
-        var baitedBreath = selectedPreset is { BaitedBreath.Enabled: true } ? selectedPreset.BaitedBreath : _gigCfg.BaitedBreath;
-        if (baitedBreath.IsAvailableToCast())
-            Service.ActionExecutor.TryCastDelayed(baitedBreath.Id, baitedBreath.ActionType, baitedBreath.GetName());
-
-        var vitalSight = selectedPreset is { VitalSight.Enabled: true } ? selectedPreset.VitalSight : _gigCfg.VitalSight;
-        if (vitalSight.IsAvailableToCast())
-            Service.ActionExecutor.TryCastDelayed(vitalSight.Id, vitalSight.ActionType, vitalSight.GetName());
-
-        var electricCurrent = selectedPreset is { ElectricCurrent.Enabled: true } ? selectedPreset.ElectricCurrent : _gigCfg.ElectricCurrent;
-        if (electricCurrent.IsAvailableToCast())
-            Service.ActionExecutor.TryCastDelayed(electricCurrent.Id, electricCurrent.ActionType, electricCurrent.GetName());
-
-        var thaliaksFavor = selectedPreset is { ThaliaksFavor.Enabled: true } ? selectedPreset.ThaliaksFavor : _gigCfg.ThaliaksFavor;
-        if (thaliaksFavor.IsAvailableToCast())
-            Service.ActionExecutor.TryCastDelayed(thaliaksFavor.Id, thaliaksFavor.ActionType, thaliaksFavor.GetName());
-
-        var cordial = selectedPreset is { Cordial.Enabled: true } ? selectedPreset.Cordial : _gigCfg.Cordial;
-        if (cordial.IsAvailableToCast())
-            Service.ActionExecutor.TryCastDelayed(cordial.Id, cordial.ActionType, cordial.GetName());
-    }
-
-    private void OnWorldStateModified(WorldState.Operation op) {
-        if (op is SpearfishingInfo.OpAddFishCaught caught) {
-            var preset = _gigCfg.SelectedPreset;
-            if (preset != null) {
-                var matched = _lastGigEntryId == Guid.Empty ? null : preset.Gigs.FirstOrDefault(gig => gig.UniqueId == _lastGigEntryId && gig.Fish?.ItemId == caught.FishId);
-                matched ??= preset.GetGigsForPool(Service.WorldState.Spearfishing.Spot.NotebookId).FirstOrDefault(gig => gig.Fish?.ItemId == caught.FishId);
-                if (matched != null)
-                    SpearfishingCounterHelper.AddFishCount(matched.UniqueId, caught.Amount);
-
-                var veteranTrade = matched?.VeteranTrade;
-                if (veteranTrade?.IsAvailableToCast() == true)
-                    Service.ActionExecutor.TryCastDelayed(veteranTrade.Id, veteranTrade.ActionType, veteranTrade.GetName());
-            }
-            else if (_gigCfg.CatchAllVeteranTradeAction.IsAvailableToCast()) {
-                Service.ActionExecutor.TryCastDelayed(_gigCfg.CatchAllVeteranTradeAction.Id, _gigCfg.CatchAllVeteranTradeAction.ActionType, _gigCfg.CatchAllVeteranTradeAction.GetName());
-            }
-
-            _lastGigEntryId = Guid.Empty;
-        }
-        else if (op is SpearfishingInfo.OpEndSession) {
-            _lastGigEntryId = Guid.Empty;
-            if (_gigCfg.SelectedPreset is not { RetainCountersBetweenSessions: true }) {
-                SpearfishingCounterHelper.ResetAll();
-                Service.WorldState.Execute(new SpearfishingInfo.OpResetFishCaught());
-            }
-        }
     }
 
     private unsafe void DrawGigHitbox(AtkResNode* fishLines, ImDrawListPtr drawList, int gigHitbox) {

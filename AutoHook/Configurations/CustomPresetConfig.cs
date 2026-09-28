@@ -143,15 +143,15 @@ public class CustomPresetConfig : BasePresetConfig {
 
     public void ResetCounter() {
         foreach (var item in ListOfBaits) {
-            FishingManager.FishingHelper.RemoveId(item.UniqueId);
+            FishingCounters.RemoveId(item.UniqueId);
         }
 
         foreach (var item in ListOfMooch) {
-            FishingManager.FishingHelper.RemoveId(item.UniqueId);
+            FishingCounters.RemoveId(item.UniqueId);
         }
 
         foreach (var item in ListOfFish) {
-            FishingManager.FishingHelper.RemoveId(item.UniqueId);
+            FishingCounters.RemoveId(item.UniqueId);
         }
     }
 

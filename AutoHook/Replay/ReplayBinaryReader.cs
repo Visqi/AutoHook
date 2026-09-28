@@ -93,6 +93,7 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
             "SPSA" => new SpearfishingInfo.OpSessionActive(_reader.ReadBoolean()),
             "SPST" => new SpearfishingInfo.OpSpot(new SpearfishingSpotState(_reader.ReadUInt32(), _reader.ReadUInt32(), _reader.ReadUInt32(), _reader.ReadBoolean())),
             "SPFL" => ParseSpearfishingFishLanes(),
+            "SPLO" => ParseSpearfishingFishLayout(),
             "SPFC" => new SpearfishingInfo.OpAddFishCaught(_reader.ReadUInt32(), _reader.ReadByte()),
             "SPLC" => new SpearfishingInfo.OpSetLastCatch(_reader.ReadUInt32(), _reader.ReadByte()),
             "SPRS" => new SpearfishingInfo.OpResetFishCaught(),
@@ -238,6 +239,20 @@ internal sealed class ReplayBinaryReader(Stream stream, FishingReplay replay, Ca
 
     private SpearfishingInfo.OpFishLanes ParseSpearfishingFishLanes()
         => new(ParseSpearfishingFishLane(), ParseSpearfishingFishLane(), ParseSpearfishingFishLane());
+
+    private SpearfishingInfo.OpFishLayout ParseSpearfishingFishLayout() {
+        var lane = new SpearLaneLayout(
+            _reader.ReadSingle(),
+            _reader.ReadSingle(),
+            _reader.ReadSingle(),
+            _reader.ReadSingle(),
+            _reader.ReadSingle(),
+            _reader.ReadSingle());
+        return new SpearfishingInfo.OpFishLayout(lane, ParseSpearFishLayout(), ParseSpearFishLayout(), ParseSpearFishLayout());
+    }
+
+    private SpearFishLayout ParseSpearFishLayout()
+        => new(ParseSpearfishingFishLane(), _reader.ReadSingle(), _reader.ReadSingle(), _reader.ReadSingle());
 
     private AddonSpearFishing.FishInfo ParseSpearfishingFishLane()
         => new() {

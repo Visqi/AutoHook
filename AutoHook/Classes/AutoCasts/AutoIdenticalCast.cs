@@ -10,9 +10,9 @@ public sealed class AutoIdenticalCast : BaseActionCast {
 
     public override string GetHelpText() => UIStrings.OverridesSurfaceSlap;
 
-    public override bool CastCondition() => EvaluateConditionSet()
-        && !Service.WorldState.Player.HasStatus(IDs.Status.IdenticalCast)
-        && !Service.WorldState.Player.HasStatus(IDs.Status.SurfaceSlap);
+    public override bool CastCondition(WorldState ws) => EvaluateConditionSet(ws)
+        && !ws.Player.HasStatus(IDs.Status.IdenticalCast)
+        && !ws.Player.HasStatus(IDs.Status.SurfaceSlap);
 
     protected override DrawOptionsDelegate DrawOptions => () => DrawAutoCastConditions();
 

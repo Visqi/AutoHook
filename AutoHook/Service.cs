@@ -1,4 +1,3 @@
-using AutoHook.Actions;
 using AutoHook.IPC;
 using AutoHook.Ui;
 using Dalamud.Interface.ImGuiFileDialog;
@@ -21,7 +20,7 @@ public class Service {
     public static WindowSystem WindowSystem { get; } = new(PluginName);
     public static BaitFishClass LastCatch { get; set; } = new(@"-", -1);
     public static AutoCollectables AutoCollectables { get; set; } = null!;
-    public static FishingManager FishManager { get; set; } = null!;
+    public static FishingSessionManager FishingSessions { get; set; } = null!;
     public static AutoHookIPC Ipc { get; set; } = null!;
     public static NotificationMasterAPI.NotificationMasterApi NotificationMaster { get; set; } = null!;
     public static ReplayManager ReplayManager { get; set; } = null!;
@@ -39,13 +38,13 @@ public class Service {
         NotificationMaster = new(Svc.Interface);
         WorldStateUpdater = new WorldStateUpdater();
         ActionExecutor = new ActionExecutor(WorldState);
-        FishManager = new FishingManager();
+        FishingSessions = new FishingSessionManager();
         Ipc = new AutoHookIPC();
         ReplayManager = new ReplayManager();
     }
 
     public static async ValueTask DisposeAsync() {
-        FishManager.Dispose();
+        FishingSessions.Dispose();
         ReplayManager.Dispose();
         ActionExecutor.Dispose();
         await Configuration.FlushAsync();

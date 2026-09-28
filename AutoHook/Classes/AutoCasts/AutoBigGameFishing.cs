@@ -10,15 +10,8 @@ public sealed class AutoBigGameFishing : BaseActionCast {
 
     public override string GetName() => UIStrings.BigGameFishing;
 
-    public override bool CastCondition() {
-        if (!EvaluateConditionSet())
-            return false;
-
-        if (Service.WorldState.Player.HasStatus(IDs.Status.BigGameFishing))
-            return false;
-
-        return Service.WorldState.HasAnglersArtStacks(AnglersStacks);
-    }
+    public override bool CastCondition(WorldState ws)
+        => EvaluateConditionSet(ws) && !ws.Player.HasStatus(IDs.Status.BigGameFishing) && ws.HasAnglersArtStacks(AnglersStacks);
 
     protected override DrawOptionsDelegate DrawOptions => () => {
         var stack = AnglersStacks;

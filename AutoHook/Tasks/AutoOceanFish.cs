@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace AutoHook.Tasks;
 
-public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex) : TaskBase {
+public sealed class AutoOceanFish(uint zoneIndex) : TaskBase {
     public uint ZoneIndex { get; } = zoneIndex;
     private static readonly Random Rng = new();
 
@@ -30,7 +30,7 @@ public sealed class AutoOceanFish(FishingManager fishingManager, uint zoneIndex)
 
         Status = "Starting fishing";
         await WaitUntil(() => Service.WorldState.Fishing.CanFish, "WaitForCanFish", checkFrequency: 50);
-        fishingManager.StartFishing();
+        Service.FishingSessions.StartFishing();
     }
 
     // https://github.com/Knightmore/Henchman/blob/4aa8cf33b6164536acca81afefa0df5da6740e89/Henchman/Features/OnABoat/OnABoat.cs#L120

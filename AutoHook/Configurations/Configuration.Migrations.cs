@@ -31,7 +31,7 @@ public partial class Configuration {
         }
     }
 
-    // v1→v2: backup only.
+    // v1→v2: version bump (clib handles config backups).
     private sealed class V2Migration : IConfigMigration {
         public int Version => 2;
 
@@ -39,7 +39,6 @@ public partial class Configuration {
             if (config.Version != 1)
                 return;
 
-            config.WriteVersionBackup(1);
             config.Version = 2;
         }
     }
@@ -51,12 +50,11 @@ public partial class Configuration {
         public void Apply(Configuration config) {
             if (config.Version != 2)
                 return;
-            config.WriteVersionBackup(2);
             config.Version = 3;
         }
     }
 
-    // v3→v4: backup then re-save under new schema.
+    // v3→v4: re-save under new schema.
     private sealed class V4Migration : IConfigMigration {
         public int Version => 4;
 
@@ -65,7 +63,6 @@ public partial class Configuration {
                 return;
 
             Service.PrintDebug(@$"[Configuration] Updating to v4");
-            config.WriteVersionBackup(3);
             WriteJsonToDisk(CaptureSnapshot(config), Svc.Interface.ConfigFile.FullName, CancellationToken.None);
             config.Version = 4;
         }
@@ -81,7 +78,6 @@ public partial class Configuration {
 
             Service.PrintDebug(@$"[Configuration] Updating to v5");
 
-            config.WriteVersionBackup(4);
             foreach (var gig in config.AutoGigConfig.Presets) {
                 Service.PrintDebug($"Renaming {gig.PresetName} to {gig.Name}");
                 gig.PresetName = gig.Name;

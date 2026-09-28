@@ -52,10 +52,8 @@ public class SubTabBaitMooch {
             var hook = list[idx];
             using var id = ImRaii.PushId(@$"id###{idx}");
 
-            var baitName = !_preset.IsGlobal ? hook.BaitFish.Name :
-                isMooch ? UIStrings.All_Mooches : UIStrings.All_Baits;
-
-            var count = FishingManager.FishingHelper.GetFishCount(hook.UniqueId);
+            var baitName = !_preset.IsGlobal ? hook.BaitFish.Name : isMooch ? UIStrings.All_Mooches : UIStrings.All_Baits;
+            var count = FishingCounters.GetFishCount(hook.UniqueId);
             var hookCounter = count > 0 ? @$"({UIStrings.Hooked_Counter} {count})" : "";
 
             if (DrawUtil.DrawCheckboxHeader(@$"{baitName} {hookCounter}", ref hook.Enabled, ImGuiTreeNodeFlags.FramePadding, () => {

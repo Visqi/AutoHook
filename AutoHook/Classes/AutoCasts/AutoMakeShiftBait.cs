@@ -16,15 +16,15 @@ public sealed class AutoMakeShiftBait : BaseActionCast {
 
     public override string GetHelpText() => UIStrings.TabAutoCasts_DrawMakeShiftBait_HelpText;
 
-    public override bool CastCondition() {
-        if (!EvaluateConditionSet())
+    public override bool CastCondition(WorldState ws) {
+        if (!EvaluateConditionSet(ws))
             return false;
 
-        if (Service.WorldState.BlocksFortune())
+        if (ws.BlocksFortune())
             return false;
 
-        var available = Service.WorldState.ActionAvailable(IDs.Actions.MakeshiftBait);
-        var hasStacks = Service.WorldState.HasAnglersArtStacks(MakeshiftBaitStacks);
+        var available = ws.ActionAvailable(IDs.Actions.MakeshiftBait);
+        var hasStacks = ws.HasAnglersArtStacks(MakeshiftBaitStacks);
 
         return hasStacks && available;
     }

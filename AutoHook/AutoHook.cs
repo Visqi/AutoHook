@@ -13,7 +13,6 @@ namespace AutoHook;
 
 /* 
  * TODO: 
- * get rid of all other configs that could be conditions in auto casts et al. Migrate them to conditions.
  * stop movement while fishing
  * auto extract materia
  * move around to reduce fish weary
@@ -128,7 +127,7 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
                 SetPreset(args);
                 break;
             case CmdAhStart:
-                Service.FishManager.StartFishing();
+                Service.FishingSessions.StartFishing();
                 break;
             case CmdBait:
             case CmdAhBait:
@@ -145,8 +144,8 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
     }
 
     private static void SwapBait(string args) {
-        var bait = GameRes.Baits.FirstOrDefault(f => f.Name.ToLower() == args.ToLower() || f.Id.ToString() == args);
-        FishingManager.ChangeBait((uint)bait?.Id!);
+        var bait = GameRes.Baits.FirstOrDefault(f => f.Name.Equals(args, StringComparison.CurrentCultureIgnoreCase) || f.Id.ToString() == args);
+        BaitComponent.ChangeBait((uint)bait?.Id!);
     }
 
     private static void SetPreset(string presetName) {

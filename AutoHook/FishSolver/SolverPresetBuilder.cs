@@ -477,7 +477,7 @@ public static class SolverPresetBuilder {
             Configuration.ConditionSetBuilder.Gp(gpMax, "<"),
         };
         ac.CastCordial.Enabled = true;
-        ac.CastCordial.IgnoreTimeWindow = true;
+        ac.CastCordial.SkipGlobalTimeWindow = true;
         ac.CastCordial.GpThresholdAbove = false;
         ac.CastCordial.GpThreshold = Math.Max(0, gpMax - 1);
         ac.CastCordial.ConditionSet = new Conditions.ConditionSet {

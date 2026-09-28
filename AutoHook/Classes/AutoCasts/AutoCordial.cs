@@ -14,11 +14,11 @@ public sealed class AutoCordial : BaseActionCast {
 
     public bool InvertCordialPriority;
 
-    public bool IgnoreTimeWindow;
+    public bool SkipGlobalTimeWindow;
 
     public ConditionSet? OvercapConditionSet { get; set; }
 
-    public override bool RequiresTimeWindow() => !IgnoreTimeWindow;
+    public override bool RequiresTimeWindow() => !SkipGlobalTimeWindow;
 
     [NonSerialized]
     public readonly List<(uint, uint)> _cordialList =
@@ -48,8 +48,8 @@ public sealed class AutoCordial : BaseActionCast {
 
     public override bool RestoresGp => true;
 
-    public override bool CastCondition() {
-        if (!EvaluateConditionSet())
+    public override bool CastCondition(WorldState ws) {
+        if (!EvaluateConditionSet(ws))
             return false;
 
         var cordialList = _cordialList;
@@ -58,11 +58,11 @@ public sealed class AutoCordial : BaseActionCast {
             cordialList = _invertedList;
 
         foreach (var (id, recovery) in cordialList) {
-            if (!CheckNotOvercaped(recovery))
+            if (!CheckNotOvercaped(ws, recovery))
                 continue;
 
             // TODO log this in replay and remove
-            if (!Service.WorldState.Player.HaveCordialInInventory(id)) {
+            if (!ws.Player.HaveCordialInInventory(id)) {
                 //Svc.Log.Debug($"No cordial (#{id}) in inventory");
                 continue;
             }
@@ -81,18 +81,18 @@ public sealed class AutoCordial : BaseActionCast {
             GpThreshold = newCost;
     }
 
-    private bool CheckNotOvercaped(uint recovery) {
-        if (ConditionSetUtil.EvaluateAllowsOvercap(OvercapConditionSet, Service.WorldState))
+    private bool CheckNotOvercaped(WorldState ws, uint recovery) {
+        if (ConditionSetUtil.EvaluateAllowsOvercap(OvercapConditionSet, ws))
             return true;
 
-        return Service.WorldState.Player.CurrentGp + recovery <= Service.WorldState.Player.MaxGp;
+        return ws.Player.CurrentGp + recovery <= ws.Player.MaxGp;
     }
 
     protected override DrawOptionsDelegate DrawOptions => () => {
         DrawUtil.Checkbox(UIStrings.AutoCastCordialPriority, ref InvertCordialPriority);
 
         if (!IsSpearFishing)
-            DrawUtil.Checkbox(UIStrings.CordialOutsideTimeWindow, ref IgnoreTimeWindow, UIStrings.CordialOutsideTimeWindowHelpText);
+            DrawUtil.Checkbox(UIStrings.CordialOutsideTimeWindow, ref SkipGlobalTimeWindow, UIStrings.CordialOutsideTimeWindowHelpText);
 
         using (ImRaii.PushId("CastConditions"))
             DrawAutoCastConditions();

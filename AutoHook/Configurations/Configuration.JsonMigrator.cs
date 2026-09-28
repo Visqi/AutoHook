@@ -3,14 +3,13 @@ using AutoHook.Conditions.Definitions;
 using AutoHook.Configurations.Legacy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.IO;
 using static AutoHook.Conditions.ConditionRegistry;
 
 namespace AutoHook.Configurations;
 
 // bumps raw JSON to latest cfg version before deserializing into Configuration.
 public static class ConfigurationJsonMigrator {
-    public static string MigrateToLatest(string json, string? configDirectory = null) {
+    public static string MigrateToLatest(string json) {
         JObject root;
         try {
             root = JObject.Parse(json);
@@ -45,8 +44,6 @@ public static class ConfigurationJsonMigrator {
 
         // v5 -> v6: JSON-based, converting all trigger based bools into ConditionSets
         if (version < 6) {
-            if (!string.IsNullOrEmpty(configDirectory))
-                WriteV5Backup(configDirectory, root);
             MigrateV6(root);
             root["Version"] = 6;
             version = 6;
@@ -74,28 +71,19 @@ public static class ConfigurationJsonMigrator {
         }
 
         // v9 -> v10: spearfishing rework
-        if (version < Configuration.LatestVersion) {
+        if (version < 10) {
             MigrateV10(root);
+            root["Version"] = 10;
+            version = 10;
+        }
+
+        // v10 -> v11: bool→condition cleanup (IgnoreTimeWindow / IgnoreMooch)
+        if (version < 11) {
+            MigrateV11(root);
             root["Version"] = Configuration.LatestVersion;
         }
 
         return root.ToString(Formatting.None);
-    }
-
-    private static void WriteV5Backup(string configDirectory, JObject root) {
-        try {
-            var path = Path.Combine(configDirectory, "autohook_v5_backup.json");
-            if (File.Exists(path)) {
-                var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                path = Path.Combine(configDirectory, $"autohook_v5_backup_{stamp}.json");
-            }
-
-            File.WriteAllText(path, root.ToString(Formatting.Indented), Encoding.UTF8);
-            Svc.Log.Information(@$"[Configuration] Wrote v5 backup before v6 migration to {path}");
-        }
-        catch (Exception e) {
-            Svc.Log.Warning(@$"[Configuration] Failed to write v5 backup before v6 migration: {e.Message}");
-        }
     }
 
     // migrate up to LatestFishingPresetSchema, fromVersion is from the prefix
@@ -186,6 +174,7 @@ public static class ConfigurationJsonMigrator {
         }),
         new PresetImportMigration(8, MigratePresetLuresToNested),
         new PresetImportMigration(9, MigratePresetActionCooldownChecks),
+        new PresetImportMigration(11, MigratePresetV11Bools),
     ];
 
     private static void MigrateV2ToV3Json(JObject root) {
@@ -310,6 +299,57 @@ public static class ConfigurationJsonMigrator {
                     MigrateSpearfishingPreset(preset);
             }
         }
+    }
+
+    private static void MigrateV11(JObject root) {
+        if (root["HookPresets"] is JObject hookPresets) {
+            MigratePresetV11Bools(hookPresets["DefaultPreset"] as JObject);
+            foreach (var token in EnumerateArray(hookPresets["CustomPresets"])) {
+                if (token is JObject preset)
+                    MigratePresetV11Bools(preset);
+            }
+        }
+
+        if (root["AutoGigConfig"] is JObject autoGig) {
+            MigrateAutoCastsV11Bools(autoGig);
+            foreach (var token in EnumerateArray(autoGig["Presets"])) {
+                if (token is JObject preset)
+                    MigrateAutoCastsV11Bools(preset);
+            }
+        }
+    }
+
+    private static void MigratePresetV11Bools(JObject? preset) {
+        if (preset == null)
+            return;
+        if (preset["AutoCastsCfg"] is JObject autoCasts)
+            MigrateAutoCastsV11Bools(autoCasts);
+    }
+
+    private static void MigrateAutoCastsV11Bools(JObject owner) {
+        // Cordial may live on AutoCastsCfg or spearfishing owner directly
+        MigrateCordialIgnoreTimeWindow(owner["CastCordial"] as JObject ?? owner["Cordial"] as JObject);
+        (owner["CastLine"] as JObject)?.Remove("IgnoreMooch");
+        MigrateCastLineIgnoreMooch(owner["CastLine"] as JObject);
+        MigrateFishEyesIgnoreMooch(owner["CastFishEyes"] as JObject);
+    }
+
+    private static void MigrateCordialIgnoreTimeWindow(JObject? cordial) {
+        if (cordial == null)
+            return;
+        if ((bool?)cordial["IgnoreTimeWindow"] == true)
+            cordial["SkipGlobalTimeWindow"] = true;
+        cordial.Remove("IgnoreTimeWindow");
+    }
+
+    private static void MigrateCastLineIgnoreMooch(JObject? castLine) => castLine?.Remove("IgnoreMooch");
+
+    private static void MigrateFishEyesIgnoreMooch(JObject? fishEyes) {
+        if (fishEyes == null)
+            return;
+        if ((bool?)fishEyes["IgnoreMooch"] == true)
+            fishEyes["DontCancelMooch"] = false;
+        fishEyes.Remove("IgnoreMooch");
     }
 
     private static void MigrateSpearfishingPreset(JObject preset) {
@@ -520,7 +560,7 @@ public static class ConfigurationJsonMigrator {
                 hook["StopAfterResetCount"] = hookset["StopAfterResetCount"];
 
             var hookGuid = hook["UniqueId"]?.ToString();
-            Guid guid = Guid.Empty;
+            var guid = Guid.Empty;
             if (!string.IsNullOrEmpty(hookGuid))
                 Guid.TryParse(hookGuid, out guid);
 
