@@ -212,7 +212,7 @@ public static class DrawUtil {
                     Service.Save();
                 }
                 catch (Exception e) {
-                    Svc.Log.Error(e.ToString());
+                    IPluginLog.Get().Error(e.ToString());
                 }
             }
         }
@@ -280,7 +280,7 @@ public static class DrawUtil {
             }
         }
         catch (Exception e) {
-            Svc.Log.Error(e.ToString());
+            IPluginLog.Get().Error(e.ToString());
             Notify.Error(e.Message);
         }
     }

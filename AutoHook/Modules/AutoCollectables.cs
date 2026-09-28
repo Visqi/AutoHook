@@ -13,13 +13,13 @@ public class AutoCollectables : IDisposable {
     private bool _pendingForceNo;
 
     public AutoCollectables() {
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SelectYesno", HandleAddon); // onupdate instead of setup since the pending can trigger before setup fires
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SelectYesno", HandleAddon);
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PreFinalize, "SelectYesno", HandleAddon);
+        IAddonLifecycle.Get().RegisterListener(AddonEvent.PostUpdate, "SelectYesno", HandleAddon); // onupdate instead of setup since the pending can trigger before setup fires
+        IAddonLifecycle.Get().RegisterListener(AddonEvent.PostSetup, "SelectYesno", HandleAddon);
+        IAddonLifecycle.Get().RegisterListener(AddonEvent.PreFinalize, "SelectYesno", HandleAddon);
     }
 
     public void Dispose() {
-        Svc.AddonLifecycle.UnregisterListener(HandleAddon);
+        IAddonLifecycle.Get().UnregisterListener(HandleAddon);
     }
 
     // TODO: handle new line characters in the string. Large ui scale changes the actual string in the addon

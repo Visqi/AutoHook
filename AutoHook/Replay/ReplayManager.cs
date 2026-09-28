@@ -83,7 +83,7 @@ public sealed class ReplayManager : IDisposable {
             ws.SpearfishingSessionStarted.Subscribe(_ => TryAutoStart()),
             ws.SpearfishingSessionEnded.Subscribe(_ => TryAutoStop()));
 
-        Svc.Framework.Update += OnFrameworkUpdate;
+        IFramework.Get().Update += OnFrameworkUpdate;
         PruneOldReplays();
     }
 
@@ -95,7 +95,7 @@ public sealed class ReplayManager : IDisposable {
     }
 
     public void Dispose() {
-        Svc.Framework.Update -= OnFrameworkUpdate;
+        IFramework.Get().Update -= OnFrameworkUpdate;
         _stopAfterFrames = 0;
         StopRecording();
         _subs.Dispose();
@@ -192,7 +192,7 @@ public sealed class ReplayManager : IDisposable {
                 Service.PrintDebug($"[Replay] Pruned old replay: {file.Name}");
             }
             catch (Exception e) {
-                Svc.Log.Warning($"[Replay] Failed to delete {file.FullName}: {e.Message}");
+                IPluginLog.Get().Warning($"[Replay] Failed to delete {file.FullName}: {e.Message}");
             }
         }
     }
@@ -215,7 +215,7 @@ public sealed class ReplayManager : IDisposable {
             return JsonConvert.SerializeObject(preset);
         }
         catch (Exception e) {
-            Svc.Log.Warning($"[Replay] Failed to serialize preset snapshot: {e.Message}");
+            IPluginLog.Get().Warning($"[Replay] Failed to serialize preset snapshot: {e.Message}");
             return string.Empty;
         }
     }

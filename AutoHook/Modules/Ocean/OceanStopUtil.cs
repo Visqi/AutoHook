@@ -18,7 +18,7 @@ public static class OceanStopUtil {
 
     public static IEnumerable<OceanStopKey> GetUniqueStops() {
         var seen = new HashSet<(uint SpotId, uint TimeId)>();
-        foreach (var route in Svc.Data.GetExcelSheet<IKDRoute>()) {
+        foreach (var route in IDataManager.Get().GetExcelSheet<IKDRoute>()) {
             if (route.RowId == 0)
                 continue;
             for (var z = 0; z < 3; z++) {

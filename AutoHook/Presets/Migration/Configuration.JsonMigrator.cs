@@ -14,7 +14,7 @@ public static class ConfigurationJsonMigrator {
             root = JObject.Parse(json);
         }
         catch {
-            Svc.Log.Warning("Failed to parse config during migration. Using defaults.");
+            IPluginLog.Get().Warning("Failed to parse config during migration. Using defaults.");
             return json;
         }
 
@@ -202,7 +202,7 @@ public static class ConfigurationJsonMigrator {
                     customPresets.Add(JObject.FromObject(converted, JsonSerializer.Create(settings)));
             }
             catch {
-                Svc.Log.Warning("Failed to migrate a bait preset during v2->v3 migration. Skipping.");
+                IPluginLog.Get().Warning("Failed to migrate a bait preset during v2->v3 migration. Skipping.");
             }
         }
 

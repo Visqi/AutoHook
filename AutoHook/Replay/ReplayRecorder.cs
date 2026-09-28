@@ -86,7 +86,7 @@ public sealed class ReplayRecorder : IDisposable {
                 WriteOpDirect(op, op.Timestamp);
             }
             catch (Exception e) {
-                Svc.Log.Error(e, "[Replay] Failed to log operation");
+                IPluginLog.Get().Error(e, "[Replay] Failed to log operation");
             }
         }
     }

@@ -20,7 +20,7 @@ public sealed class OceanMissionTypeCD : IConditionDefinition {
         var ids = GetIds(condition.Params);
         var currentId = ids.Count > 0 ? ids[0] : 0;
 
-        var sheet = Svc.Data.GetExcelSheet<IKDPlayerMissionCondition>();
+        var sheet = IDataManager.Get().GetExcelSheet<IKDPlayerMissionCondition>();
         if (sheet == null) {
             DrawIdsParams(condition, "Mission type IDs");
             return;
@@ -55,7 +55,7 @@ public sealed class OceanMissionTypeCD : IConditionDefinition {
         if (ids.Count == 0)
             return "any mission";
         var id = ids[0];
-        var sheet = Svc.Data.GetExcelSheet<IKDPlayerMissionCondition>();
+        var sheet = IDataManager.Get().GetExcelSheet<IKDPlayerMissionCondition>();
         if (sheet != null && sheet.TryGetRow(id, out var row)) {
             var name = row.Unknown0.ToString();
             return string.IsNullOrEmpty(name) ? $"mission type {id}" : $"{id}: {name}";

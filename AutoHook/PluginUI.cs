@@ -60,7 +60,7 @@ public class PluginUi : Window, IDisposable {
             DrawNewLayout();
         }
         catch (Exception e) {
-            Svc.Log.Error(e, "[PluginUI] Draw failed.");
+            IPluginLog.Get().Error(e, "[PluginUI] Draw failed.");
         }
     }
     private void Debug() {
@@ -105,7 +105,7 @@ public class PluginUi : Window, IDisposable {
                     Service.FishingSessions.StartFishing();
 
                 using (var c = ImRaii.Child("logo", new(0, 125.Scaled()))) {
-                    if (Svc.Texture.GetFromManifestResource(Assembly.GetExecutingAssembly(), $"AutoHook.Assets.Fishy{(Service.Configuration.PluginEnabled ? "" : "_g")}.png").TryGetWrap(out var image, out var _)) {
+                    if (ITextureProvider.Get().GetFromManifestResource(Assembly.GetExecutingAssembly(), $"AutoHook.Assets.Fishy{(Service.Configuration.PluginEnabled ? "" : "_g")}.png").TryGetWrap(out var image, out var _)) {
                         ImGuiEx.LineCentered("###AHLogo", () => {
                             ImGui.Image(image.Handle, new Vector2(125.Scaled(), 125.Scaled()));
 
@@ -198,7 +198,7 @@ public class PluginUi : Window, IDisposable {
                     }
                 }
                 catch (Exception e) {
-                    Svc.Log.Error(e, "[PluginUI] DrawStatus failed.");
+                    IPluginLog.Get().Error(e, "[PluginUI] DrawStatus failed.");
                 }
             }
             else

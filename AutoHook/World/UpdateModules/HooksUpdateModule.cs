@@ -33,13 +33,13 @@ public sealed class HooksUpdateModule : IDisposable {
 
     public unsafe HooksUpdateModule(Action markInventoryDirty) {
         _markInventoryDirty = markInventoryDirty;
-        _updateCatchHook = Svc.Hook.HookFromAddress<AgentCatch.Delegates.UpdateCatch>((nint)AgentCatch.MemberFunctionPointers.UpdateCatch, UpdateCatchDetour);
-        _useActionHook = Svc.Hook.HookFromAddress<ActionManager.Delegates.UseAction>((nint)ActionManager.MemberFunctionPointers.UseAction, UseActionDetour);
-        _playAnimationHook = Svc.Hook.HookFromAddress<FishingEventHandler.Delegates.PlayAnimation>((nint)FishingEventHandler.StaticVirtualTablePointer->PlayAnimation, PlayAnimationDetour);
-        _handleActorControlPacketHook = Svc.Hook.HookFromAddress<PacketDispatcher.Delegates.HandleActorControlPacket>((nint)PacketDispatcher.MemberFunctionPointers.HandleActorControlPacket, HandleActorControlPacketDetour);
-        _receiveAchievementProgressHook = Svc.Hook.HookFromAddress<AchievementStruct.Delegates.ReceiveAchievementProgress>((nint)AchievementStruct.MemberFunctionPointers.ReceiveAchievementProgress, ReceiveAchievementProgressDetour);
-        _receiveActionEffectHook = Svc.Hook.HookFromAddress<ActionEffectHandler.Delegates.Receive>((nint)ActionEffectHandler.MemberFunctionPointers.Receive, ActionEffectDetour);
-        _effectResultHook = Svc.Hook.HookFromSignature<EffectResultDetourDelegate>("48 8B C4 44 88 40 18 89 48 08", EffectResultDetour);
+        _updateCatchHook = IGameInteropProvider.Get().HookFromAddress<AgentCatch.Delegates.UpdateCatch>((nint)AgentCatch.MemberFunctionPointers.UpdateCatch, UpdateCatchDetour);
+        _useActionHook = IGameInteropProvider.Get().HookFromAddress<ActionManager.Delegates.UseAction>((nint)ActionManager.MemberFunctionPointers.UseAction, UseActionDetour);
+        _playAnimationHook = IGameInteropProvider.Get().HookFromAddress<FishingEventHandler.Delegates.PlayAnimation>((nint)FishingEventHandler.StaticVirtualTablePointer->PlayAnimation, PlayAnimationDetour);
+        _handleActorControlPacketHook = IGameInteropProvider.Get().HookFromAddress<PacketDispatcher.Delegates.HandleActorControlPacket>((nint)PacketDispatcher.MemberFunctionPointers.HandleActorControlPacket, HandleActorControlPacketDetour);
+        _receiveAchievementProgressHook = IGameInteropProvider.Get().HookFromAddress<AchievementStruct.Delegates.ReceiveAchievementProgress>((nint)AchievementStruct.MemberFunctionPointers.ReceiveAchievementProgress, ReceiveAchievementProgressDetour);
+        _receiveActionEffectHook = IGameInteropProvider.Get().HookFromAddress<ActionEffectHandler.Delegates.Receive>((nint)ActionEffectHandler.MemberFunctionPointers.Receive, ActionEffectDetour);
+        _effectResultHook = IGameInteropProvider.Get().HookFromSignature<EffectResultDetourDelegate>("48 8B C4 44 88 40 18 89 48 08", EffectResultDetour);
         _updateCatchHook?.Enable();
         _useActionHook?.Enable();
         _playAnimationHook?.Enable();
@@ -65,7 +65,7 @@ public sealed class HooksUpdateModule : IDisposable {
                 Service.WorldState.Execute(new RodState.OpPlayerUsedAction(new UsedAction(actionId, actionType)));
         }
         catch (Exception e) {
-            Svc.Log.Warning(e, "[WorldStateUpdater] UseAction");
+            IPluginLog.Get().Warning(e, "[WorldStateUpdater] UseAction");
         }
         return _useActionHook!.Original(thisPtr, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
     }

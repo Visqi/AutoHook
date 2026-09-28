@@ -20,7 +20,7 @@ public static class AchievementProgressSnapshot {
             results.Add(new WorldState.OpAchievementProgress(id, progress.Current, progress.Max));
         }
 
-        foreach (var row in Svc.Data.GetExcelSheet<AchievementSheet>()) {
+        foreach (var row in IDataManager.Get().GetExcelSheet<AchievementSheet>()) {
             var id = row.RowId;
             if (id == 0 || emitted.Contains(id))
                 continue;

@@ -21,13 +21,13 @@ public sealed class ActionExecutor : IDisposable {
 
     public ActionExecutor(WorldState worldState) {
         _ws = worldState;
-        Svc.Framework.Update += OnFrameworkUpdate;
+        IFramework.Get().Update += OnFrameworkUpdate;
     }
 
     public bool IsBusy => _queue.Count > 0 || _ws.Player.BlockCasting || _unblockAtTickMs != 0;
 
     public void Dispose() {
-        Svc.Framework.Update -= OnFrameworkUpdate;
+        IFramework.Get().Update -= OnFrameworkUpdate;
         _queue.Clear();
         _unblockAtTickMs = 0;
         if (_ws.Player.BlockCasting)
@@ -58,7 +58,7 @@ public sealed class ActionExecutor : IDisposable {
                     head.Callback();
                 }
                 catch (Exception e) {
-                    Svc.Log.Error(e, "Error running ActionExecutor callback");
+                    IPluginLog.Get().Error(e, "Error running ActionExecutor callback");
                 }
                 continue;
             }
@@ -117,7 +117,7 @@ public sealed class ActionExecutor : IDisposable {
                 return UseAction(request.Id, request.Type);
             }
             catch (Exception e) {
-                Svc.Log.Error(e, $"Error casting raw action: {request.Name}, Id: {request.Id}");
+                IPluginLog.Get().Error(e, $"Error casting raw action: {request.Name}, Id: {request.Id}");
                 return false;
             }
         }
@@ -146,7 +146,7 @@ public sealed class ActionExecutor : IDisposable {
             UseAction(actionId, actionType);
         }
         catch (Exception e) {
-            Svc.Log.Error(e, $"Error casting action: {actionName}, Id: {actionId}");
+            IPluginLog.Get().Error(e, $"Error casting action: {actionName}, Id: {actionId}");
         }
 
         BeginPostCastDelay();
@@ -164,7 +164,7 @@ public sealed class ActionExecutor : IDisposable {
             return UseAction(actionId, actionType);
         }
         catch (Exception e) {
-            Svc.Log.Error(e, $"Error casting action: {actionName}, Id: {actionId}");
+            IPluginLog.Get().Error(e, $"Error casting action: {actionName}, Id: {actionId}");
             return false;
         }
     }
@@ -197,7 +197,7 @@ public sealed class ActionExecutor : IDisposable {
             return _rng.Next(min, max + 1);
         }
         catch (Exception e) {
-            Svc.Log.Error(@$"Error getting delay between casts: {e}");
+            IPluginLog.Get().Error(@$"Error getting delay between casts: {e}");
             return 0;
         }
     }

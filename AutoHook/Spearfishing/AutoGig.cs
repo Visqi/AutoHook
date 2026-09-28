@@ -88,7 +88,7 @@ internal class AutoGig : Window, IDisposable {
     }
 
     private unsafe void DrawFishOverlay() {
-        if (!Svc.GameGui.TryGetAddon<AddonSpearFishing>("SpearFishing", out var addon)) return;
+        if (!IGameGui.Get().TryGetAddon<AddonSpearFishing>("SpearFishing", out var addon)) return;
         var isOpen = addon != null && addon->AtkUnitBase.WindowNode != null;
 
         if (!isOpen)
@@ -168,7 +168,7 @@ internal class AutoGig : Window, IDisposable {
     public override unsafe bool DrawConditions() {
         var lastOpen = _isOpen;
 
-        if (!Svc.GameGui.TryGetAddon<AtkUnitBase>("SpearFishing", out var addon)) {
+        if (!IGameGui.Get().TryGetAddon<AtkUnitBase>("SpearFishing", out var addon)) {
             _isOpen = false;
             return false;
         }
@@ -186,12 +186,12 @@ internal class AutoGig : Window, IDisposable {
 
     private void SetFishTargets() {
         currentNode = 0;
-        if (Svc.Targets.Target is { ObjectKind: ObjectKind.GatheringPoint, BaseId: var id })
+        if (ITargetManager.Get().Target is { ObjectKind: ObjectKind.GatheringPoint, BaseId: var id })
             currentNode = (int)id;
     }
 
     public override unsafe void PreDraw() {
-        if (!Svc.GameGui.TryGetAddon<AtkUnitBase>("SpearFishing", out var addon)) return;
+        if (!IGameGui.Get().TryGetAddon<AtkUnitBase>("SpearFishing", out var addon)) return;
         _uiScale = addon->Scale;
         _uiPos = new Vector2(addon->X, addon->Y);
         _uiSize = new Vector2(addon->WindowNode->AtkResNode.Width * _uiScale, addon->WindowNode->AtkResNode.Height * _uiScale);

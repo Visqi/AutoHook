@@ -46,7 +46,7 @@ public sealed class AutoOceanFish(uint zoneIndex) : TaskBase {
         var rotation = position.X > 0 ? 1.5f : -1.5f;
         await MoveToDirectly(position, () => Player.DistanceTo(position) < 0.25f || ShouldCancelMovement());
         unsafe {
-            Svc.Objects.LocalPlayer?.Character->SetRotation(rotation);
+            IObjectTable.Get().LocalPlayer?.Character->SetRotation(rotation);
         }
         await AvoidStacking(rotation);
     }
@@ -56,7 +56,7 @@ public sealed class AutoOceanFish(uint zoneIndex) : TaskBase {
     private async Task AvoidStacking(float rotation, int maxAttempts = 3) {
         using var scope = BeginScope(nameof(AvoidStacking));
         for (var attempt = 0; attempt < maxAttempts; attempt++) {
-            var blockers = Svc.Objects.OfType<IPlayerCharacter>().Where(x => x.EntityId != Player.Object?.GameObjectId).Where(x => Vector3.Distance(Player.Position, x.Position) < MinFishingSpotDistance).ToList();
+            var blockers = IObjectTable.Get().OfType<IPlayerCharacter>().Where(x => x.EntityId != Player.Object?.GameObjectId).Where(x => Vector3.Distance(Player.Position, x.Position) < MinFishingSpotDistance).ToList();
             if (blockers.Count == 0) return;
 
             var centroid = blockers.Aggregate(Vector3.Zero, (sum, x) => sum + x.Position) / blockers.Count;
@@ -69,7 +69,7 @@ public sealed class AutoOceanFish(uint zoneIndex) : TaskBase {
 
             await MoveToDirectly(step, () => Player.DistanceTo(step) < 0.1f || ShouldCancelMovement());
             unsafe {
-                Svc.Objects.LocalPlayer?.Character->SetRotation(rotation);
+                IObjectTable.Get().LocalPlayer?.Character->SetRotation(rotation);
             }
         }
     }

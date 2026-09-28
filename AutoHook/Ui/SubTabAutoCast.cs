@@ -147,7 +147,7 @@ public class SubTabAutoCast {
                 action.DrawConfig(_actionsAvailable);
             }
             catch (Exception e) {
-                Svc.Log.Error(e.ToString());
+                IPluginLog.Get().Error(e.ToString());
             }
         }
     }

@@ -66,7 +66,7 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
         _replayManagement = new ReplayManagementWindow();
 
         foreach (var (command, help) in CommandHelp) {
-            Svc.Commands.AddHandler(command, new CommandInfo(OnCommand) {
+            ICommandManager.Get().AddHandler(command, new CommandInfo(OnCommand) {
                 HelpMessage = help
             });
         }
@@ -80,7 +80,7 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
         SetupDtr();
 
 #if DEBUG
-        if (Svc.ClientState.IsLoggedIn)
+        if (IClientState.Get().IsLoggedIn)
             _pluginUi.Toggle();
 #endif
     }
@@ -94,7 +94,7 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
         Svc.Interface.UiBuilder.OpenMainUi -= _pluginUi.Toggle;
 
         foreach (var (command, _) in CommandHelp)
-            Svc.Commands.RemoveHandler(command);
+            ICommandManager.Get().RemoveHandler(command);
 
         await Service.DisposeAsync();
         CLibMain.Dispose();
@@ -108,19 +108,19 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
                 _pluginUi.Toggle();
                 break;
             case CmdAhOn:
-                Svc.Chat.Print(UIStrings.AutoHook_Enabled);
+                IChatGui.Get().Print(UIStrings.AutoHook_Enabled);
                 Service.Configuration.PluginEnabled = true;
                 break;
             case CmdAhOff:
-                Svc.Chat.Print(UIStrings.AutoHook_Disabled);
+                IChatGui.Get().Print(UIStrings.AutoHook_Disabled);
                 Service.Configuration.PluginEnabled = false;
                 break;
             case CmdAhtg when Service.Configuration.PluginEnabled:
-                Svc.Chat.Print(UIStrings.AutoHook_Disabled);
+                IChatGui.Get().Print(UIStrings.AutoHook_Disabled);
                 Service.Configuration.PluginEnabled = false;
                 break;
             case CmdAhtg:
-                Svc.Chat.Print(UIStrings.AutoHook_Enabled);
+                IChatGui.Get().Print(UIStrings.AutoHook_Enabled);
                 Service.Configuration.PluginEnabled = true;
                 break;
             case CmdAhPreset:
@@ -151,12 +151,12 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
     private static void SetPreset(string presetName) {
         var preset = Service.Configuration.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == presetName);
         if (preset == null) {
-            Svc.Chat.Print(UIStrings.Preset_not_found);
+            IChatGui.Get().Print(UIStrings.Preset_not_found);
             return;
         }
 
         Service.Configuration.HookPresets.Select(preset, FishingPresets.ReasonManual);
-        Svc.Chat.Print(@$"{UIStrings.Preset_set_to_} {preset.PresetName}");
+        IChatGui.Get().Print(@$"{UIStrings.Preset_set_to_} {preset.PresetName}");
         Configuration.FlushAsync().GetAwaiter().GetResult();
     }
 
@@ -164,16 +164,16 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
         try {
             var preset = Service.Configuration.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == presetName);
             if (preset == null) {
-                Svc.Chat.Print(@$"{UIStrings.Preset_not_found} - {presetName}");
+                IChatGui.Get().Print(@$"{UIStrings.Preset_not_found} - {presetName}");
                 return;
             }
 
             Service.Configuration.AutoGigConfig.SelectedPreset = preset;
-            Svc.Chat.Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
+            IChatGui.Get().Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
             Configuration.FlushAsync().GetAwaiter().GetResult();
         }
         catch (Exception e) {
-            Svc.Log.Error(e, "[AutoHook] SetGigPreset failed.");
+            IPluginLog.Get().Error(e, "[AutoHook] SetGigPreset failed.");
         }
     }
 

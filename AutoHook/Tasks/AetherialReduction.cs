@@ -53,10 +53,10 @@ public sealed class AetherialReduction() : AutoTask, IAutoTaskHooks {
     public void SetupHooks() { }
 
     public void EnableHooks()
-        => Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "PurifyResult", OnPurifyResultSetup);
+        => IAddonLifecycle.Get().RegisterListener(AddonEvent.PostSetup, "PurifyResult", OnPurifyResultSetup);
 
     public void DisableHooks()
-        => Svc.AddonLifecycle.UnregisterListener(AddonEvent.PostSetup, "PurifyResult", OnPurifyResultSetup);
+        => IAddonLifecycle.Get().UnregisterListener(AddonEvent.PostSetup, "PurifyResult", OnPurifyResultSetup);
 
     public void DisposeHooks() { }
 
@@ -160,7 +160,7 @@ public sealed class AetherialReduction() : AutoTask, IAutoTaskHooks {
         => TryGetAddonByName<AtkUnitBase>("PurifyResult", out var addon) && addon->IsVisible;
 
     private static bool IsBlockedForReduction()
-        => IsOccupied() || Svc.Condition[ConditionFlag.Occupied39];
+        => IsOccupied() || ICondition.Get()[ConditionFlag.Occupied39];
 
     private static bool TryGetNextPurifyableItem(out Pointer<InventoryItem> item) {
         item = default;
@@ -180,11 +180,11 @@ public sealed class AetherialReduction() : AutoTask, IAutoTaskHooks {
     private static unsafe void PurifyItem(Pointer<InventoryItem> item) {
         var agent = AgentPurify.Instance();
         if (agent == null) {
-            Svc.Log.Debug("[AetherialReduction] AgentPurify is null");
+            IPluginLog.Get().Debug("[AetherialReduction] AgentPurify is null");
             return;
         }
 
         agent->ReduceItem(item);
-        Svc.Log.Debug($"[AetherialReduction] Reducing [{item.Value->ItemId}] {item.Value->Container}/{item.Value->Slot}");
+        IPluginLog.Get().Debug($"[AetherialReduction] Reducing [{item.Value->ItemId}] {item.Value->Container}/{item.Value->Slot}");
     }
 }

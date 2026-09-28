@@ -176,9 +176,9 @@ public class FishingPresets : BasePreset {
 
         if (newPreset is CustomPresetConfig { ListOfFish: var fishCaught }) {
             if (fishCaught.Any(c => c.Fish.IsLocked))
-                Svc.Chat.PrintError($"[AutoHook] Unable to catch one or more fish under Fish Caught. Folklore tome not unlocked.");
+                IChatGui.Get().PrintError($"[AutoHook] Unable to catch one or more fish under Fish Caught. Folklore tome not unlocked.");
             if (fishCaught.Any(c => c.Fish.MinGathering > GamePlayerState.Instance()->GetAttributeByIndex(PlayerAttribute.Gathering)))
-                Svc.Chat.PrintError($"[AutoHook] Unable to catch one or more fish under Fish Caught. Gathering attribute is too low.");
+                IChatGui.Get().PrintError($"[AutoHook] Unable to catch one or more fish under Fish Caught. Gathering attribute is too low.");
         }
     }
 

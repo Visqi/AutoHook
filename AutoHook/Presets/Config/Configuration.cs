@@ -255,7 +255,7 @@ public partial class Configuration : IPluginConfiguration {
             return (root, allFolders, allPresets);
         }
         catch (Exception e) {
-            Svc.Log.Error($"Failed to import folder: {e.Message}");
+            IPluginLog.Get().Error($"Failed to import folder: {e.Message}");
             return null;
         }
     }
@@ -343,7 +343,7 @@ public partial class Configuration : IPluginConfiguration {
             return Encoding.UTF8.GetString(bytes, 1, bytes.Length - 1);
         }
         catch (Exception e) {
-            Svc.Log.Error(@$"Failed to DecompressBase64: {e.Message}");
+            IPluginLog.Get().Error(@$"Failed to DecompressBase64: {e.Message}");
             return "";
         }
     }

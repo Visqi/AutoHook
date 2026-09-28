@@ -65,15 +65,15 @@ public sealed class RodFishingModule : FishingModule {
         LureChat = AddComponent(new LureChatComponent(this));
 
         _eventSubs = new(Ws.OceanZoneStarted.Subscribe(OnOceanZoneStarted), Ws.SpectralCurrentChanged.Subscribe(BiteHook.OnSpectralCurrentChanged));
-        Svc.Chat.LogMessage += LureChat.OnLogMessage;
-        Svc.Chat.ChatMessage += LureChat.CheckForSpecialLure;
+        IChatGui.Get().LogMessage += LureChat.OnLogMessage;
+        IChatGui.Get().ChatMessage += LureChat.CheckForSpecialLure;
         Ws.Modified += OnWorldStateModified;
     }
 
     public override void Dispose() {
         _eventSubs.Dispose();
-        Svc.Chat.ChatMessage -= LureChat.CheckForSpecialLure;
-        Svc.Chat.LogMessage -= LureChat.OnLogMessage;
+        IChatGui.Get().ChatMessage -= LureChat.CheckForSpecialLure;
+        IChatGui.Get().LogMessage -= LureChat.OnLogMessage;
         Ws.Modified -= OnWorldStateModified;
     }
 

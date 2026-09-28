@@ -16,11 +16,11 @@ public sealed class FishingSessionManager : IDisposable {
     public FishingSessionManager() {
         Rod = new RodFishingModule(Service.WorldState);
         Gig = new GigFishingModule(Service.WorldState);
-        Svc.Framework.Update += OnFrameworkUpdate;
+        IFramework.Get().Update += OnFrameworkUpdate;
     }
 
     public void Dispose() {
-        Svc.Framework.Update -= OnFrameworkUpdate;
+        IFramework.Get().Update -= OnFrameworkUpdate;
         Rod.Dispose();
         Gig.Dispose();
     }
@@ -30,7 +30,7 @@ public sealed class FishingSessionManager : IDisposable {
     public void RequestStopAfterNextFish() => Rod.RequestStopAfterNextFish();
 
     private void OnFrameworkUpdate(IFramework _) {
-        if (!Service.Configuration.PluginEnabled || !Svc.ClientState.IsLoggedIn || Svc.Objects.LocalPlayer == null) {
+        if (!Service.Configuration.PluginEnabled || !IClientState.Get().IsLoggedIn || IObjectTable.Get().LocalPlayer == null) {
             if (!Service.Configuration.PluginEnabled && Svc.Automation.CurrentTask is AutoOceanFish)
                 Svc.Automation.Stop();
 

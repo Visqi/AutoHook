@@ -66,7 +66,7 @@ public sealed class PlayerUpdateModule : IWorldUpdateModule {
 
     private void UpdateStatuses(WorldState ws) {
         _statusScratch.Clear();
-        if (Svc.Objects.LocalPlayer is { StatusList: var statuses }) {
+        if (IObjectTable.Get().LocalPlayer is { StatusList: var statuses }) {
             foreach (var buff in statuses)
                 _statusScratch[buff.StatusId] = (buff.RemainingTime, buff.Param);
         }

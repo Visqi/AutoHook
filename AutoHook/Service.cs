@@ -31,7 +31,7 @@ public class Service {
     public static async ValueTask InitAsync(IDalamudPluginInterface pluginInterface) {
         pluginInterface.Create<Service>();
         unsafe {
-            WorldState = new WorldState((ulong)FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->PerformanceCounterFrequency, Svc.Data.GameData.Repositories["ffxiv"].Version);
+            WorldState = new WorldState((ulong)FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->PerformanceCounterFrequency, IDataManager.Get().GameData.Repositories["ffxiv"].Version);
         }
         Configuration = await Configuration.LoadAsync();
         UIStrings.Culture = new CultureInfo(Configuration.CurrentLanguage);
@@ -70,7 +70,7 @@ public class Service {
         }
 
         LogMessages.Enqueue(msg);
-        Svc.Log.Debug(msg);
+        IPluginLog.Get().Debug(msg);
     }
 
     public static void PrintVerbose(string msg) {
@@ -79,14 +79,14 @@ public class Service {
         }
 
         LogMessages.Enqueue(msg);
-        Svc.Log.Verbose(msg);
+        IPluginLog.Get().Verbose(msg);
     }
 
     public static void PrintChat(string msg) {
         Status = msg;
 
         if (Configuration.ShowChatLogs)
-            Svc.Chat.Print(msg);
+            IChatGui.Get().Print(msg);
     }
 }
 
@@ -103,12 +103,12 @@ public static class NotificationMasterApiExtensions {
 
             try {
                 if (cfg.EchoChatMessage && !string.IsNullOrWhiteSpace(chatMessage)) {
-                    Svc.Chat.Print(new Dalamud.Game.Text.XivChatEntry() { Message = $"[AutoHook] {chatMessage}", Type = Dalamud.Game.Text.XivChatType.Echo });
+                    IChatGui.Get().Print(new Dalamud.Game.Text.XivChatEntry() { Message = $"[AutoHook] {chatMessage}", Type = Dalamud.Game.Text.XivChatType.Echo });
                     success = true;
                 }
 
                 if (cfg.DisplayGameToast && !string.IsNullOrWhiteSpace(gameToastMessage)) {
-                    Svc.Toasts.ShowQuest(gameToastMessage);
+                    IToastGui.Get().ShowQuest(gameToastMessage);
                     success = true;
                 }
 
@@ -124,7 +124,7 @@ public static class NotificationMasterApiExtensions {
                 }
             }
             catch (Exception e) {
-                Svc.Log.Warning($"[AutoHook] Notification failed: {e.Message}");
+                IPluginLog.Get().Warning($"[AutoHook] Notification failed: {e.Message}");
             }
 
             if (cfg.BeepOnSuccess) {

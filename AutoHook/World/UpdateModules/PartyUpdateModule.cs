@@ -16,7 +16,7 @@ public sealed class PartyUpdateModule : IWorldUpdateModule {
     }
 
     private static void UpdateTerritory(WorldState ws) {
-        var territory = Svc.ClientState.TerritoryType;
+        var territory = IClientState.Get().TerritoryType;
         if (ws.TerritoryId != territory)
             ws.Execute(new WorldState.OpTerritory(territory));
     }

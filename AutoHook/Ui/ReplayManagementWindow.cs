@@ -32,7 +32,7 @@ public sealed class ReplayManagementWindow : Window, IDisposable {
             DrawReplayBrowser(Service.ReplayManager);
         }
         catch (Exception e) {
-            Svc.Log.Error($"[ReplayManagement] {e.Message}");
+            IPluginLog.Get().Error($"[ReplayManagement] {e.Message}");
         }
     }
 
@@ -163,7 +163,7 @@ public sealed class ReplayManagementWindow : Window, IDisposable {
             return "";
         }
         catch (Exception e) {
-            Svc.Log.Error($"[Replay] Failed to open {dir}: {e.Message}");
+            IPluginLog.Get().Error($"[Replay] Failed to open {dir}: {e.Message}");
             return $"Failed to open folder; open it manually.";
         }
     }

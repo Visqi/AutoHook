@@ -63,7 +63,7 @@ public sealed class AutoCordial : BaseActionCast {
 
             // TODO log this in replay and remove
             if (!ws.Player.HaveCordialInInventory(id)) {
-                //Svc.Log.Debug($"No cordial (#{id}) in inventory");
+                //IPluginLog.Get().Debug($"No cordial (#{id}) in inventory");
                 continue;
             }
 

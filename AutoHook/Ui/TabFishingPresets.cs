@@ -60,7 +60,7 @@ public class TabFishingPresets : BaseTab {
             DrawList();
         }
         catch (Exception e) {
-            Svc.Log.Error(e, "[TabFishingPresets] Draw failed.");
+            IPluginLog.Get().Error(e, "[TabFishingPresets] Draw failed.");
         }
     }
 
@@ -524,7 +524,7 @@ public class TabFishingPresets : BaseTab {
                 }
             }
             catch (Exception ex) {
-                Svc.Log.Error(ex, "[TabFishingPresets] Error reordering presets.");
+                IPluginLog.Get().Error(ex, "[TabFishingPresets] Error reordering presets.");
             }
         }
 
@@ -778,7 +778,7 @@ public class TabFishingPresets : BaseTab {
             }
         }
         catch (Exception e) {
-            Svc.Log.Error(e.ToString());
+            IPluginLog.Get().Error(e.ToString());
             Notify.Error(e.Message);
         }
     }

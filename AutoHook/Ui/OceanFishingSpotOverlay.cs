@@ -16,9 +16,9 @@ public static class OceanFishingSpotOverlay {
 
     public static void Draw() {
         if (!Enabled) return;
-        if (Svc.PlayerState.TerritoryIntendedUse is not FFXIVClientStructs.FFXIV.Client.Enums.TerritoryIntendedUse.OceanFishing) return;
+        if (IPlayerState.Get().TerritoryIntendedUse is not FFXIVClientStructs.FFXIV.Client.Enums.TerritoryIntendedUse.OceanFishing) return;
         var dl = ImGui.GetBackgroundDrawList(ImGuiHelpers.MainViewport);
-        var player = Svc.Objects.LocalPlayer;
+        var player = IObjectTable.Get().LocalPlayer;
         var inAnySpot = false;
 
         foreach (var region in AutoOceanFish.ValidFishingRegions) {
@@ -27,7 +27,7 @@ public static class OceanFishingSpotOverlay {
             DrawRegion(dl, region);
         }
 
-        if (player != null && Svc.GameGui.WorldToScreen(player.Position, out var playerScreen, out var inFront) && inFront) {
+        if (player != null && IGameGui.Get().WorldToScreen(player.Position, out var playerScreen, out var inFront) && inFront) {
             var color = inAnySpot ? InSpotColor : OutSpotColor;
             dl.AddCircleFilled(playerScreen, 6f, color);
             dl.AddCircle(playerScreen, 10f, color, 0, 2f);
@@ -40,14 +40,14 @@ public static class OceanFishingSpotOverlay {
         var corners = region.Corners;
         Span<Vector2> screen = stackalloc Vector2[4];
         for (var i = 0; i < 4; i++) {
-            if (!Svc.GameGui.WorldToScreen(corners[i], out screen[i], out var inFront) || !inFront)
+            if (!IGameGui.Get().WorldToScreen(corners[i], out screen[i], out var inFront) || !inFront)
                 return;
         }
 
         dl.AddQuadFilled(screen[0], screen[1], screen[2], screen[3], FillColor);
         dl.AddQuad(screen[0], screen[1], screen[2], screen[3], OutlineColor, 2.5f);
 
-        if (Svc.GameGui.WorldToScreen(region.Centroid, out var labelPos, out var labelFront) && labelFront) {
+        if (IGameGui.Get().WorldToScreen(region.Centroid, out var labelPos, out var labelFront) && labelFront) {
             var label = $"{region.Name}\nX[{region.MinX:0.##},{region.MaxX:0.##}] Z[{region.MinZ:0.##},{region.MaxZ:0.##}]";
             var size = ImGui.CalcTextSize(label);
             dl.AddRectFilled(labelPos - new Vector2(4f, 2f), labelPos + size + new Vector2(4f, 2f), ImGui.ColorConvertFloat4ToU32(new Vector4(0f, 0f, 0f, 0.55f)));

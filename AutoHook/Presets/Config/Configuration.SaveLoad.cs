@@ -48,7 +48,7 @@ public partial class Configuration {
                     config = JsonConvert.DeserializeObject<Configuration>(migratedJson, LoadSettings);
                 }
                 catch (Exception ex) {
-                    Svc.Log.Error(@$"[Configuration] Failed to deserialize migrated config JSON: {ex.Message}");
+                    IPluginLog.Get().Error(@$"[Configuration] Failed to deserialize migrated config JSON: {ex.Message}");
                     config = null;
                 }
 
@@ -61,7 +61,7 @@ public partial class Configuration {
 
                 BackupUnreadableConfigFile(file.FullName);
                 TryDeleteConfigFile(file.FullName);
-                Svc.Log.Warning(@"[Configuration] Config file exists but could not be deserialized; recreating defaults.");
+                IPluginLog.Get().Warning(@"[Configuration] Config file exists but could not be deserialized; recreating defaults.");
             }
 
             var fresh = new Configuration();
@@ -70,7 +70,7 @@ public partial class Configuration {
             return fresh;
         }
         catch (Exception e) {
-            Svc.Log.Error(@$"[Configuration] {e.Message}");
+            IPluginLog.Get().Error(@$"[Configuration] {e.Message}");
             throw;
         }
     }
@@ -113,7 +113,7 @@ public partial class Configuration {
             }
         }
         catch (Exception ex) {
-            Svc.Log.Error(ex, "[Configuration] Save failed.");
+            IPluginLog.Get().Error(ex, "[Configuration] Save failed.");
         }
         finally {
             lock (_lock) {
@@ -131,7 +131,7 @@ public partial class Configuration {
                 File.Delete(configPath);
         }
         catch (Exception e) {
-            Svc.Log.Warning(@$"[Configuration] Could not delete unreadable config before rewrite: {e.Message}");
+            IPluginLog.Get().Warning(@$"[Configuration] Could not delete unreadable config before rewrite: {e.Message}");
         }
     }
 
@@ -148,10 +148,10 @@ public partial class Configuration {
             }
 
             File.Copy(configPath, path, overwrite: false);
-            Svc.Log.Warning(@$"[Configuration] Backed up unreadable config to {path}");
+            IPluginLog.Get().Warning(@$"[Configuration] Backed up unreadable config to {path}");
         }
         catch (Exception e) {
-            Svc.Log.Warning(@$"[Configuration] Failed to back up unreadable config: {e.Message}");
+            IPluginLog.Get().Warning(@$"[Configuration] Failed to back up unreadable config: {e.Message}");
         }
     }
 
@@ -177,7 +177,7 @@ public partial class Configuration {
 
             var tempPath = path + ".new";
             if (File.Exists(tempPath)) {
-                Svc.Log.Warning($"[Configuration] Removing stale temp file {tempPath}");
+                IPluginLog.Get().Warning($"[Configuration] Removing stale temp file {tempPath}");
                 File.Delete(tempPath);
             }
 

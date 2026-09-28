@@ -19,7 +19,7 @@ public sealed class SpearfishingUpdateModule : IWorldUpdateModule {
         SpearFishLayout fishLayout1 = default;
         SpearFishLayout fishLayout2 = default;
 
-        if (Svc.GameGui.TryGetAddon<AddonSpearFishing>("SpearFishing", out var addon)
+        if (IGameGui.Get().TryGetAddon<AddonSpearFishing>("SpearFishing", out var addon)
             && addon != null
             && addon->AtkUnitBase.WindowNode != null) {
             windowOpen = true;
@@ -133,7 +133,7 @@ public sealed class SpearfishingUpdateModule : IWorldUpdateModule {
            && Math.Abs(a.UiScale - b.UiScale) < 0.01f;
 
     private static SpearfishingSpotState ResolveCurrentSpearfishingSpot() {
-        if (Svc.Targets.Target is not { ObjectKind: Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint, BaseId: var pointId })
+        if (ITargetManager.Get().Target is not { ObjectKind: Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint, BaseId: var pointId })
             return SpearfishingSpotState.Empty;
 
         if (!GameRes.SpearfishingSpotsByPointId.TryGetValue(pointId, out var spot))

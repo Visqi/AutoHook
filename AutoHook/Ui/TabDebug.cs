@@ -29,7 +29,7 @@ public class TabDebug : BaseTab {
                 DrawTools();
         }
         catch (Exception e) {
-            Svc.Log.Error(e, "[TabDebug] Draw failed.");
+            IPluginLog.Get().Error(e, "[TabDebug] Draw failed.");
         }
     }
 

@@ -21,7 +21,7 @@ public sealed class OceanRouteCD : IConditionDefinition {
         var currentId = ids.Count > 0 ? ids[0] : 0;
 
         var unique = new Dictionary<string, uint>();
-        foreach (var row in Svc.Data.GetExcelSheet<IKDRoute>()) {
+        foreach (var row in IDataManager.Get().GetExcelSheet<IKDRoute>()) {
             if (row.RowId == 0) continue;
             var name = row.Name.ToString();
             if (string.IsNullOrEmpty(name)) continue;
@@ -30,7 +30,7 @@ public sealed class OceanRouteCD : IConditionDefinition {
         }
 
         var routes = unique.OrderBy(k => k.Key).Select(k => (Id: k.Value, Name: k.Key)).ToList();
-        var label = currentId != 0 && Svc.Data.GetExcelSheet<IKDRoute>().TryGetRow(currentId, out var currentRow)
+        var label = currentId != 0 && IDataManager.Get().GetExcelSheet<IKDRoute>().TryGetRow(currentId, out var currentRow)
             ? $"{currentRow.RowId}: {currentRow.Name}"
             : "Select route";
 
@@ -42,7 +42,7 @@ public sealed class OceanRouteCD : IConditionDefinition {
         if (ids.Count == 0)
             return "any route";
         var id = ids[0];
-        return Svc.Data.GetExcelSheet<IKDRoute>().TryGetRow(id, out var row)
+        return IDataManager.Get().GetExcelSheet<IKDRoute>().TryGetRow(id, out var row)
             ? $"{row.RowId}: {row.Name}"
             : $"route {id}";
     }

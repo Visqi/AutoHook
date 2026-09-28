@@ -15,7 +15,7 @@ public class BaitFishClass : IComparable<BaitFishClass> {
     };
 
     [JsonIgnore]
-    public bool IsLocked => FishRow.FirstOrNull(r => r.Item.RowId == Id) is { GatheringSubCategory.ValueNullable.Item.RowId: not 0, GatheringSubCategory.ValueNullable.Item.Value: var book } && !Svc.UnlockState.IsItemUnlocked(book);
+    public bool IsLocked => FishRow.FirstOrNull(r => r.Item.RowId == Id) is { GatheringSubCategory.ValueNullable.Item.RowId: not 0, GatheringSubCategory.ValueNullable.Item.Value: var book } && !IUnlockState.Get().IsItemUnlocked(book);
 
     [JsonIgnore]
     public int MinGathering => GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == Id)?.MinGathering ?? 0;

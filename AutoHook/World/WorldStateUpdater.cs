@@ -22,17 +22,17 @@ public sealed class WorldStateUpdater : IDisposable {
     public unsafe WorldStateUpdater() {
         _startQpc = Framework.Instance()->PerformanceCounterValue;
         _hooks = new HooksUpdateModule(() => _player.MarkInventoryDirty());
-        Svc.GameInventory.InventoryChanged += OnInventoryChanged;
+        IGameInventory.Get().InventoryChanged += OnInventoryChanged;
     }
 
     public void Dispose() {
         _hooks.Dispose();
-        Svc.GameInventory.InventoryChanged -= OnInventoryChanged;
+        IGameInventory.Get().InventoryChanged -= OnInventoryChanged;
     }
 
     // push current game state into WorldState. call every frame.
     public unsafe void Update() {
-        if (Player.ClassJob.RowId is not 18 || Svc.Objects.LocalPlayer is null)
+        if (Player.ClassJob.RowId is not 18 || IObjectTable.Get().LocalPlayer is null)
             return;
 
         var ws = Service.WorldState;
@@ -48,7 +48,7 @@ public sealed class WorldStateUpdater : IDisposable {
             fwk->FrameDeltaTime,
             fwk->GameSpeedMultiplier)));
 
-        var lp = Svc.Objects.LocalPlayer;
+        var lp = IObjectTable.Get().LocalPlayer;
         var gp = lp?.CurrentGp ?? 0;
         var maxGp = lp?.MaxGp ?? 0;
         if (ws.Player.CurrentGp != gp || ws.Player.MaxGp != maxGp)
@@ -89,7 +89,7 @@ public sealed class WorldStateUpdater : IDisposable {
         => previous != FishingState.LineInWater && current == FishingState.LineInWater;
 
     public void RefreshFishingStateSnapshot() {
-        if (Player.ClassJob.RowId is not 18 || Svc.Objects.LocalPlayer is null)
+        if (Player.ClassJob.RowId is not 18 || IObjectTable.Get().LocalPlayer is null)
             return;
 
         _fishing.Refresh(Service.WorldState);

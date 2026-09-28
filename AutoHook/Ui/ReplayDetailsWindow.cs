@@ -76,7 +76,7 @@ public sealed class ReplayDetailsWindow : Window, IDisposable {
                 DrawWorldStatePanel();
         }
         catch (Exception e) {
-            Svc.Log.Error($"[ReplayDetails] {e.Message}");
+            IPluginLog.Get().Error($"[ReplayDetails] {e.Message}");
         }
     }
 

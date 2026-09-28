@@ -92,7 +92,7 @@ public class PresetCreator {
             DrawAutoV1Section();
         }
         catch (Exception e) {
-            Svc.Log.Error(e, "[PresetCreator] Draw failed.");
+            IPluginLog.Get().Error(e, "[PresetCreator] Draw failed.");
         }
     }
 
@@ -113,7 +113,7 @@ public class PresetCreator {
 
         var ws = Service.WorldState;
         var cordials = FishSolverBridge.ReadCordialInventory(ws.Player.GetItemCount);
-        var fisherLevel = Svc.PlayerState.GetClassJobLevel(ClassJob.GetRow(18));
+        var fisherLevel = IPlayerState.Get().GetClassJobLevel(ClassJob.GetRow(18));
         var plan = GameRes.FishSolver.Solve(
             _selectedTargetFish!.ItemId,
             fisherLevel,
@@ -194,7 +194,7 @@ public class PresetCreator {
         var ws = Service.WorldState;
         var cordials = FishSolverBridge.ReadCordialInventory(ws.Player.GetItemCount);
         var presetName = ResolvePresetName(AutoV2Tag);
-        var fisherLevel = Svc.PlayerState.GetClassJobLevel(ClassJob.GetRow(18));
+        var fisherLevel = IPlayerState.Get().GetClassJobLevel(ClassJob.GetRow(18));
 
         var preset = GameRes.FishSolver.BuildPreset(_selectedTargetFish.ItemId, fisherLevel, (int)ws.Player.MaxGp, presetName, cordials);
         if (preset == null) {
@@ -203,7 +203,7 @@ public class PresetCreator {
         }
 
         Presets.RegisterPreset(preset);
-        Svc.Log.Information($"[FishSolver] Created preset '{preset.PresetName}'");
+        IPluginLog.Get().Information($"[FishSolver] Created preset '{preset.PresetName}'");
         TabFishingPresets.OpenPresetGen = false;
     }
 

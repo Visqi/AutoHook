@@ -59,7 +59,7 @@ public static class GameRes {
                 FishSolver.EnsureLoaded(fishList);
             }
 
-            var spearfishingRows = Svc.Data.GetExcelSheet<SpearfishingItem>()
+            var spearfishingRows = IDataManager.Get().GetExcelSheet<SpearfishingItem>()
                 .Where(row => row.Item.RowId != 0)
                 .ToList();
 
@@ -85,7 +85,7 @@ public static class GameRes {
         }
         catch (Exception e) {
             ImGui.SetClipboardText(e.Message);
-            Svc.Log.Error(e, "[GameRes] Init failed.");
+            IPluginLog.Get().Error(e, "[GameRes] Init failed.");
         }
     }
 
@@ -93,7 +93,7 @@ public static class GameRes {
         var itemIdBySpearfishingRowId = spearfishingRows.GroupBy(row => row.RowId).ToDictionary(group => group.Key, group => group.First().Item.RowId);
 
         var pools = new Dictionary<uint, SpearfishingPoolRef>();
-        foreach (var notebook in Svc.Data.GetExcelSheet<SpearfishingNotebook>()) {
+        foreach (var notebook in IDataManager.Get().GetExcelSheet<SpearfishingNotebook>()) {
             var baseId = notebook.GatheringPointBase.RowId;
             if (baseId == 0)
                 continue;
@@ -125,7 +125,7 @@ public static class GameRes {
             .ToDictionary(group => group.Key, group => group.First());
 
         var map = new Dictionary<uint, SpearfishingSpotRef>();
-        foreach (var point in Svc.Data.GetExcelSheet<GatheringPoint>()) {
+        foreach (var point in IDataManager.Get().GetExcelSheet<GatheringPoint>()) {
             var baseId = point.GatheringPointBase.RowId;
             if (baseId == 0 || !poolByBaseId.TryGetValue(baseId, out var pool))
                 continue;

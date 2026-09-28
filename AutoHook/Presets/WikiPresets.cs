@@ -54,7 +54,7 @@ public static class WikiPresets {
                     newPresetsSf.Add(key, listsf);
                 }
                 catch (Exception e) {
-                    Svc.Log.Debug($"Can probably ignore: {e.Message}");
+                    IPluginLog.Get().Debug($"Can probably ignore: {e.Message}");
                 }
             }
 
@@ -62,7 +62,7 @@ public static class WikiPresets {
             PresetsSf = newPresetsSf;
         }
         catch (Exception e) {
-            Svc.Log.Error(e, "Failed to fetch wiki presets.");
+            IPluginLog.Get().Error(e, "Failed to fetch wiki presets.");
         }
     }
 
