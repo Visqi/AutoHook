@@ -122,7 +122,7 @@ public class ExtraTrigger {
     }
 
     private static string SummarizeCondition(AhCondition cond) {
-        var inv = ConditionParams.GetBool(cond.Params, "inv", false);
+        var inv = GetBool(cond.Params, "inv", false);
         switch (cond.TypeId) {
             case "IntuitionActive" or nameof(IntuitionActiveCD):
                 return inv ? "While Fisher's Intuition inactive" : "While Fisher's Intuition";
@@ -134,23 +134,23 @@ public class ExtraTrigger {
                 if (cond.Params.TryGetValue("ids", out var idsObj) && idsObj is List<object> list && list.Count == 1) {
                     var id = Convert.ToUInt32(list[0]);
                     if (id == IDs.Status.AnglersArt) {
-                        var stacks = ConditionParams.GetInt(cond.Params, "minStacks", 1);
+                        var stacks = GetInt(cond.Params, "minStacks", 1);
                         return $"Angler's Art ≥ {stacks} Stacks";
                     }
                 }
                 return "Status Stacks";
             case "SwimbaitCountCD" or "SwimbaitCount":
-                var fishId = ConditionParams.GetInt(cond.Params, "id", 0);
+                var fishId = GetInt(cond.Params, "id", 0);
                 var fishLabel = fishId == 0 ? "Slot Fish" : Item.GetRow((uint)fishId).Name.ToString();
                 return $"Swimbaits ({fishLabel}) {FormatIntCompare(cond.Params)}";
             default:
-                var desc = cond.Describe(ConditionRegistry.Registry);
+                var desc = cond.Describe(Registry);
                 return inv ? $"NOT {desc}" : desc;
         }
     }
 
     private static string FormatIntCompare(IReadOnlyDictionary<string, object> p) {
-        var args = ConditionParams.GetIntCompareParams(p);
+        var args = GetIntCompareParams(p);
         var cmp = args.Op switch {
             ">" => ">",
             "<" => "<",

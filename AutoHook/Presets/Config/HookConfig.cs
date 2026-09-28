@@ -77,7 +77,7 @@ public class HookConfig : BaseOption {
         if (!hookDictionary.TryGetValue(bite, out var hook)) return;
 
         var maxSec = max + 1;
-        var biteTimerId = ConditionRegistry.Registry.GetId<BiteTimerCD>();
+        var biteTimerId = Registry.GetId<BiteTimerCD>();
         foreach (var biteCfg in HookConfigsForTimer(hookset, hook))
             SetBiteTimerInConditionSet(biteCfg, biteTimerId, min, maxSec);
     }

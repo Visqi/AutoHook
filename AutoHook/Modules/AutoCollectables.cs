@@ -84,12 +84,12 @@ public class AutoCollectables : IDisposable {
 
     private bool IsWaitingOnConditions() {
         var sets = GetTriggers().Select(t => t.ConditionSet!).Where(set => set.HasAnyCondition());
-        return sets.Any() && sets.All(set => !set.Evaluate(Service.WorldState, ConditionRegistry.Registry));
+        return sets.Any() && sets.All(set => !set.Evaluate(Service.WorldState, Registry));
     }
 
     private bool TryGetPresetResolve(out bool forceNo) {
         forceNo = false;
-        if (GetTriggers().FirstOrDefault(t => t.ConditionSet!.Evaluate(Service.WorldState, ConditionRegistry.Registry)) is not { } match)
+        if (GetTriggers().FirstOrDefault(t => t.ConditionSet!.Evaluate(Service.WorldState, Registry)) is not { } match)
             return false;
         forceNo = match.ResolveCollectablesForceNo;
         return true;

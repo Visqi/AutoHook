@@ -24,7 +24,7 @@ public static class PresetConditionHelper {
     public static bool IsPresetType(string typeId) => TryParseTypeId(typeId, out _);
 
     public static CustomPresetConfig? GetEvaluationPreset()
-        => Ui.ConditionUi.EvaluationPreset ?? Service.Configuration.HookPresets.CurrentPreset;
+        => ConditionUi.EvaluationPreset ?? Service.Configuration.HookPresets.CurrentPreset;
 
     public static NamedConditionConfig? FindNamed(CustomPresetConfig preset, Guid id)
         => preset.NamedConditions.FirstOrDefault(n => n.UniqueId == id);
@@ -80,7 +80,7 @@ public static class PresetConditionHelper {
 
         try {
             var named = FindNamed(preset, id);
-            return named != null && named.ConditionSet.Evaluate(world, ConditionRegistry.Registry);
+            return named != null && named.ConditionSet.Evaluate(world, Registry);
         }
         finally {
             _evalStack.Remove(id);

@@ -24,7 +24,7 @@ public sealed class ExtraComponent(RodFishingModule module) : RodComponent(modul
             if (trig is not { Enabled: true, ResolveCollectablesWindow: true, ConditionSet: not null })
                 continue;
 
-            if (!trig.ConditionSet.Evaluate(Ws, ConditionRegistry.Registry))
+            if (!trig.ConditionSet.Evaluate(Ws, Registry))
                 continue;
 
             Service.AutoCollectables.RequestResolve(trig.ResolveCollectablesForceNo);
@@ -102,7 +102,7 @@ public sealed class ExtraComponent(RodFishingModule module) : RodComponent(modul
             if (extraCfg.Triggers[i] is not { Enabled: true, ConditionSet: not null } trig)
                 continue;
 
-            var current = trig.ConditionSet.Evaluate(Ws, ConditionRegistry.Registry);
+            var current = trig.ConditionSet.Evaluate(Ws, Registry);
             var last = i < extraCfg.LastTriggerStates.Count && extraCfg.LastTriggerStates[i];
             var fire = current && (!last || ExtraSwapStillNeeded(trig));
 

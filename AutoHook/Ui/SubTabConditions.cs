@@ -101,5 +101,5 @@ public static class SubTabConditions {
     }
 
     private static bool IsNamedConditionTrue(NamedConditionConfig named)
-        => named.ConditionSet is { Groups.Count: > 0 } && named.ConditionSet.Evaluate(Service.WorldState, ConditionRegistry.Registry);
+        => named.ConditionSet is { Groups.Count: > 0 } && named.ConditionSet.Evaluate(Service.WorldState, Registry);
 }

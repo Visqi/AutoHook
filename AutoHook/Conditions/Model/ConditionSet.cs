@@ -69,7 +69,7 @@ public class ConditionSet {
             return "";
 
         world ??= Service.WorldState;
-        registry ??= ConditionRegistry.Registry;
+        registry ??= Registry;
 
         var lines = new List<string>();
         for (var i = 0; i < Groups.Count; i++) {

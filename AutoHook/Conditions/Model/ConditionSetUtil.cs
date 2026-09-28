@@ -12,15 +12,15 @@ public static class ConditionSetUtil {
 
     // null/empty = pass. otherwise evaluate.
     public static bool PassesOrUnconfigured(this ConditionSet? set, WorldState ws)
-        => set is not { Groups.Count: > 0 } || set.Evaluate(ws, ConditionRegistry.Registry);
+        => set is not { Groups.Count: > 0 } || set.Evaluate(ws, Registry);
 
     // has groups and eval passes. unconfigured = false.
     public static bool Passes([NotNullWhen(true)] this ConditionSet? set, WorldState ws)
-        => set is { Groups.Count: > 0 } && set.Evaluate(ws, ConditionRegistry.Registry);
+        => set is { Groups.Count: > 0 } && set.Evaluate(ws, Registry);
 
     // has groups and eval fails. unconfigured = false.
     public static bool Fails([NotNullWhen(true)] this ConditionSet? set, WorldState ws)
-        => set is { Groups.Count: > 0 } && !set.Evaluate(ws, ConditionRegistry.Registry);
+        => set is { Groups.Count: > 0 } && !set.Evaluate(ws, Registry);
 
     // --- single-condition binding (typed SingleCondition facade) ---
 
@@ -88,5 +88,5 @@ public static class ConditionSetUtil {
 
     // true = cordial may overcap GP; false = default GP math.
     public static bool EvaluateAllowsOvercap(ConditionSet? set, WorldState world)
-        => HasAnyEnabledCondition(set) && set!.Evaluate(world, ConditionRegistry.Registry);
+        => HasAnyEnabledCondition(set) && set!.Evaluate(world, Registry);
 }

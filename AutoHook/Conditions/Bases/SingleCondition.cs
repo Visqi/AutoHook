@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 
-namespace AutoHook.Conditions.Binding;
+namespace AutoHook.Conditions.Bases;
 
 public sealed class SingleCondition<TCD, TValue>(Func<object?>? context = null) where TCD : class, IConditionDefinition, ISimpleConditionValue<TValue> where TValue : struct {
     // serialized as ConditionSet via SingleConditionConverter.
     public ConditionSet? BackingSet { get; set; }
 
-    private ISimpleConditionValue<TValue> Definition => field ??= ConditionRegistry.Registry.GetDefinition<TCD>()!;
+    private ISimpleConditionValue<TValue> Definition => field ??= Registry.GetDefinition<TCD>()!;
 
     public TValue Value {
         get => Get();

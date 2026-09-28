@@ -99,7 +99,7 @@ public sealed class AutoCordial : BaseActionCast {
 
         if (!IsSpearFishing) {
             using (ImRaii.PushId("OvercapConditions"))
-                OvercapConditionSet = Ui.ConditionUi.DrawConditionSet("Overcap conditions", OvercapConditionSet, Ui.ConditionScope.AutoCordial, showAdvanced: true, showSubPrefix: true);
+                OvercapConditionSet = ConditionUi.DrawConditionSet("Overcap conditions", OvercapConditionSet, ConditionScope.AutoCordial, showAdvanced: true, showSubPrefix: true);
         }
     };
 

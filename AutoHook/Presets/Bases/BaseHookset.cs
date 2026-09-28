@@ -124,13 +124,13 @@ public class BaseHookset(uint requiredStatus) {
             DrawTimeoutField(UIStrings.TimeLimit, ref TimeoutMax, UIStrings.DoesntHaveAffectUnderChum);
             if (TimeoutMax > 0) {
                 using (ImRaii.PushId("TimeoutConditions"))
-                    TimeoutConditionSet = Ui.ConditionUi.DrawConditionSet(UIStrings.Conditions, TimeoutConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
+                    TimeoutConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, TimeoutConditionSet, ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
             }
 
             DrawTimeoutField(UIStrings.ChumTimeLimit, ref ChumTimeoutMax);
             if (ChumTimeoutMax > 0) {
                 using (ImRaii.PushId("ChumTimeoutConditions"))
-                    ChumTimeoutConditionSet = Ui.ConditionUi.DrawConditionSet(UIStrings.Conditions, ChumTimeoutConditionSet, Ui.ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
+                    ChumTimeoutConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, ChumTimeoutConditionSet, ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
             }
             ImGui.TreePop();
         }
