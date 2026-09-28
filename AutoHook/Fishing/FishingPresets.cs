@@ -1,3 +1,4 @@
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Newtonsoft.Json;
 
 namespace AutoHook.Fishing;
@@ -163,7 +164,7 @@ public class FishingPresets : BasePreset {
         Service.Save();
     }
 
-    private void NotifyPresetSelected(BasePresetConfig? newPreset, BasePresetConfig? oldPreset) {
+    private unsafe void NotifyPresetSelected(BasePresetConfig? newPreset, BasePresetConfig? oldPreset) {
         if (oldPreset is CustomPresetConfig old)
             old.TryResetCounter();
 
@@ -173,8 +174,11 @@ public class FishingPresets : BasePreset {
             Service.WorldState.Decide(DecisionContext.PresetSwitch, true, $"{from} -> {to}", $"Reason: {_selectReason ?? ReasonManual}", to);
         }
 
-        if (newPreset is CustomPresetConfig { ListOfFish: var fishCaught } && fishCaught.Any(c => c.Fish.IsLocked)) {
-            Svc.Chat.PrintError($"[AutoHook] Unable to catch one or more fish under Fish Caught. Folklore tome not unlocked.");
+        if (newPreset is CustomPresetConfig { ListOfFish: var fishCaught }) {
+            if (fishCaught.Any(c => c.Fish.IsLocked))
+                Svc.Chat.PrintError($"[AutoHook] Unable to catch one or more fish under Fish Caught. Folklore tome not unlocked.");
+            if (fishCaught.Any(c => c.Fish.MinGathering > PlayerState.Instance()->GetAttributeByIndex(PlayerAttribute.Gathering)))
+                Svc.Chat.PrintError($"[AutoHook] Unable to catch one or more fish under Fish Caught. Gathering attribute is too low.");
         }
     }
 
