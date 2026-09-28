@@ -20,7 +20,7 @@ public sealed class WorldStateUpdater : IPluginService, IDisposable {
 
     public unsafe WorldStateUpdater() {
         _startQpc = Framework.Instance()->PerformanceCounterValue;
-        _hooks = new HooksUpdateModule(() => _player.MarkInventoryDirty());
+        _hooks = new HooksUpdateModule(_player.MarkInventoryDirty);
         IGameInventory.Get().InventoryChanged += OnInventoryChanged;
     }
 

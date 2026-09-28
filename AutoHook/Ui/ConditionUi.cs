@@ -90,30 +90,32 @@ public static class ConditionUi {
         }
 
         var toRemove = new List<int>();
-        for (var ci = 0; ci < group.Conditions.Count; ci++) {
-            var cond = group.Conditions[ci];
-            cond.EnsureUiId();
-            using var _ = ImRaii.PushId($"slim_cond{cond.UiId}");
-            var rowLabel = ResolveTypeLabel(cond.TypeId, types);
-            var enabled = cond.Enabled;
+        using (ImRaii.PushIndent()) {
+            for (var ci = 0; ci < group.Conditions.Count; ci++) {
+                var cond = group.Conditions[ci];
+                cond.EnsureUiId();
+                using var _ = ImRaii.PushId($"slim_cond{cond.UiId}");
+                var rowLabel = ResolveTypeLabel(cond.TypeId, types);
+                var enabled = cond.Enabled;
 
-            var forceOpen = ci == newlyAddedIndex || cond.UiId == _forceOpenConditionUiId;
+                var forceOpen = ci == newlyAddedIndex || cond.UiId == _forceOpenConditionUiId;
 
-            DrawUtil.DrawCheckboxTree(rowLabel, ref enabled, () => {
-                if (DrawConditionContent(cond, scope, types)) {
-                    _forceOpenConditionUiId = cond.UiId;
-                    Configuration.Save();
-                }
-                ImGui.SameLine();
-                if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash))
-                    toRemove.Add(ci);
-                ImGui.TooltipOnHover("Delete condition");
-            }, forceOpen: forceOpen, highlightLabel: IsConditionCurrentlyTrue(cond));
+                DrawUtil.DrawCheckboxTree(rowLabel, ref enabled, () => {
+                    if (DrawConditionContent(cond, scope, types)) {
+                        _forceOpenConditionUiId = cond.UiId;
+                        Configuration.Save();
+                    }
+                    ImGui.SameLine();
+                    if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash))
+                        toRemove.Add(ci);
+                    ImGui.TooltipOnHover("Delete condition");
+                }, forceOpen: forceOpen, highlightLabel: IsConditionCurrentlyTrue(cond));
 
-            if (cond.UiId == _forceOpenConditionUiId && forceOpen)
-                _forceOpenConditionUiId = 0;
-            if (enabled != cond.Enabled)
-                cond.Enabled = enabled;
+                if (cond.UiId == _forceOpenConditionUiId && forceOpen)
+                    _forceOpenConditionUiId = 0;
+                if (enabled != cond.Enabled)
+                    cond.Enabled = enabled;
+            }
         }
         foreach (var idx in toRemove.OrderByDescending(x => x)) {
             group.Conditions.RemoveAt(idx);

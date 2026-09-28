@@ -274,7 +274,7 @@ public static class DrawUtil {
             using var popup = ImRaii.Popup("import_new_preset");
 
             if (popup.Success && _tempImport != null) {
-                if (DrawPendingImportPreset(_tempImport, p => basePreset.AddNewPreset(p)))
+                if (DrawPendingImportPreset(_tempImport, basePreset.AddNewPreset))
                     _tempImport = null;
             }
         }
@@ -297,6 +297,40 @@ public static class DrawUtil {
 
     }
 
+    private static IDisposable AlignTreeContentColumn(float contentX) {
+        var y = ImGui.GetCursorPosY();
+        ImGui.NewLine();
+        var lineStartX = ImGui.GetCursorPosX();
+        ImGui.SetCursorPos(new Vector2(contentX, y));
+
+        var pad = contentX - lineStartX;
+        if (pad > 0.5f)
+            ImGui.Indent(pad);
+
+        return new TreeContentColumnScope(pad);
+    }
+
+    private readonly struct TreeContentColumnScope(float pad) : IDisposable {
+        public void Dispose() {
+            if (pad > 0.5f)
+                ImGui.Unindent(pad);
+        }
+    }
+
+    private static void DrawTreeBody(float labelX, Action body, bool trailingSeparator) {
+        ImGui.SetCursorPosX(labelX);
+        TextV(" └");
+        ImGui.SameLine();
+        var contentX = ImGui.GetCursorPosX();
+        using (AlignTreeContentColumn(contentX)) {
+            using (ImRaii.Group()) {
+                body();
+                if (trailingSeparator)
+                    ImGui.Separator();
+            }
+        }
+    }
+
     public static void DrawCheckboxTree(string treeName, ref bool enable, Action? action = null, string helpText = "", bool forceOpen = false, bool highlightLabel = false, Action? drawLabelExtras = null) {
         using var id = ImRaii.PushId(treeName);
         if (ImGui.Checkbox("###checkbox", ref enable)) {
@@ -309,7 +343,7 @@ public static class DrawUtil {
 
         ImGui.SameLine(0, 3.Scaled());
 
-        var x = ImGui.GetCursorPosX();
+        var labelX = ImGui.GetCursorPosX();
 
         if (action == null) {
             using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
@@ -326,20 +360,10 @@ public static class DrawUtil {
         using (highlightLabel ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
             if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding)) {
                 drawLabelExtras?.Invoke();
-                ImGui.SetCursorPosX(x);
-                TextV($" └");
-                ImGui.SameLine();
-
-                x = ImGui.GetCursorPosX();
                 if (helpText != string.Empty)
                     ImGui.TooltipOnHover(helpText);
 
-                ImGui.SetCursorPosX(x);
-                using (ImRaii.Group()) {
-                    action();
-                    ImGui.Separator();
-                }
-
+                DrawTreeBody(labelX, action, trailingSeparator: true);
                 ImGui.TreePop();
             }
             else {
@@ -371,17 +395,12 @@ public static class DrawUtil {
     public static void DrawTreeNodeEx(string treeName, Action action, string helpText = "") {
         using var id = ImRaii.PushId(treeName);
 
-        var x = ImGui.GetCursorPosX();
+        var labelX = ImGui.GetCursorPosX();
         if (ImGui.TreeNodeEx(treeName, ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.AllowItemOverlap)) {
             if (helpText != string.Empty)
                 ImGui.TooltipOnHover(helpText);
 
-            ImGui.SetCursorPosX(x);
-            using (ImRaii.Group()) {
-                TextV($" └");
-                ImGui.SameLine();
-                action();
-            }
+            DrawTreeBody(labelX, action, trailingSeparator: false);
             ImGui.TreePop();
         }
         else if (helpText != string.Empty)
