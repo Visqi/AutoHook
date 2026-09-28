@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using AutoHook.Conditions;
 using System.ComponentModel;
 using System.Runtime.Serialization;
 
@@ -89,7 +88,7 @@ public class SpearFishingPresets : BasePreset {
         Presets.Add(newPreset);
         InvalidatePresetListCache();
         SelectedGuid = newPreset.UniqueId.ToString();
-        Service.Save();
+        Configuration.Save();
     }
 
     public override void AddNewPreset(BasePresetConfig preset) {
@@ -100,7 +99,7 @@ public class SpearFishingPresets : BasePreset {
         Presets.Add(copy);
         InvalidatePresetListCache();
         SelectedGuid = copy.UniqueId.ToString();
-        Service.Save();
+        Configuration.Save();
     }
 
     public override void RemovePreset(Guid value) {
@@ -110,7 +109,7 @@ public class SpearFishingPresets : BasePreset {
 
         Presets.Remove(preset);
         InvalidatePresetListCache();
-        Service.Save();
+        Configuration.Save();
     }
 
     public override void SwapIndex(int itemIndex, int targetIndex) {
@@ -122,6 +121,6 @@ public class SpearFishingPresets : BasePreset {
         RemovePreset(moved.UniqueId);
         Presets.Insert(targetIndex, moved);
         InvalidatePresetListCache();
-        Service.Save();
+        Configuration.Save();
     }
 }

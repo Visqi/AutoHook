@@ -1,8 +1,5 @@
-using AutoHook.Conditions.Definitions;
-using AutoHook.Presets.Migration.Legacy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using static AutoHook.Conditions.ConditionRegistry;
 
 namespace AutoHook.Presets.Migration;
 
@@ -176,7 +173,7 @@ public static class ConfigurationJsonMigrator {
         new PresetImportMigration(11, MigratePresetV11Bools),
     ];
 
-    private static void MigrateV2ToV3Json(JObject root) {
+    internal static void MigrateV2ToV3Json(JObject root) {
         if (root["BaitPresetList"] is not JArray baitPresetList || baitPresetList.Count == 0) {
             root.Remove("BaitPresetList");
             return;
@@ -209,7 +206,7 @@ public static class ConfigurationJsonMigrator {
         root.Remove("BaitPresetList");
     }
 
-    private static string RunRuntimeMigrationsUpTo5(JObject root) {
+    internal static string RunRuntimeMigrationsUpTo5(JObject root) {
         Configuration? config;
         try {
             config = root.ToObject<Configuration>(JsonSerializer.Create(new JsonSerializerSettings {
@@ -232,7 +229,7 @@ public static class ConfigurationJsonMigrator {
         });
     }
 
-    private static void MigrateV6(JObject root) {
+    internal static void MigrateV6(JObject root) {
         if (root["HookPresets"] is not JObject hookPresets)
             return;
 
@@ -252,13 +249,13 @@ public static class ConfigurationJsonMigrator {
         }
     }
 
-    private static void MigrateV7(JObject root) {
+    internal static void MigrateV7(JObject root) {
         MigrateSwimbaitCountThresholdToConditions(root);
         MigrateSparefulHandSwimbaitLimits(root);
         MigrateFishCaughtActionEnabledPresets(root);
     }
 
-    private static void MigrateV8(JObject root) {
+    internal static void MigrateV8(JObject root) {
         if (root["HookPresets"] is not JObject hookPresets)
             return;
 
@@ -280,10 +277,10 @@ public static class ConfigurationJsonMigrator {
         }
     }
 
-    private static void MigrateV9(JObject root)
+    internal static void MigrateV9(JObject root)
         => MigrateActionCooldownChecks(root);
 
-    private static void MigrateV10(JObject root) {
+    internal static void MigrateV10(JObject root) {
         if (root["AutoGigConfig"] is not JObject autoGig)
             return;
 
@@ -300,7 +297,7 @@ public static class ConfigurationJsonMigrator {
         }
     }
 
-    private static void MigrateV11(JObject root) {
+    internal static void MigrateV11(JObject root) {
         if (root["HookPresets"] is JObject hookPresets) {
             MigratePresetV11Bools(hookPresets["DefaultPreset"] as JObject);
             foreach (var token in EnumerateArray(hookPresets["CustomPresets"])) {

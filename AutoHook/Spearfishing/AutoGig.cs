@@ -1,4 +1,3 @@
-using AutoHook.Modules.Gig;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface.Colors;
@@ -30,21 +29,21 @@ internal class AutoGig : Window, IDisposable {
 
     private int currentNode = 0;
 
-    private readonly SpearFishingPresets _gigCfg = Service.Configuration.AutoGigConfig;
+    private readonly SpearFishingPresets _gigCfg = Configuration.C.AutoGigConfig;
 
     public static string Gig = "Gig";
 
-    private GigFishingModule GigFishing => Service.FishingSessions.Gig;
+    private GigFishingModule GigFishing => FishingSessionManager.Get().Gig;
 
     public AutoGig() : base(@"SpearfishingHelper", WindowFlags, true) {
         _gigCfg.PrepareActions();
-        Service.WindowSystem.AddWindow(this);
+        WindowsService.Get().WindowSystem.AddWindow(this);
         IsOpen = true;
         Gig = LuminaAction.GetRow(IDs.Actions.Gig).Name.ToString();
     }
 
     public void Dispose() {
-        Service.WindowSystem.RemoveWindow(this);
+        WindowsService.Get().WindowSystem.RemoveWindow(this);
         Configuration.FlushAsync().GetAwaiter().GetResult();
     }
 
@@ -80,7 +79,7 @@ internal class AutoGig : Window, IDisposable {
                 selectedPreset.HitboxSize = hitbox;
             else
                 _gigCfg.GlobalHitboxSize = hitbox;
-            Service.Save();
+            Configuration.Save();
         }
 
         if (_gigCfg.IsCatchAllActive)
@@ -102,7 +101,7 @@ internal class AutoGig : Window, IDisposable {
             }
         }
 
-        if (!Service.Configuration.PluginEnabled)
+        if (!Configuration.C.PluginEnabled)
             return;
 
         DrawFishHitboxes(addon, addon->Fish[0], addon->GetNodeById(Fish1NodeId));

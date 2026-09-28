@@ -15,8 +15,8 @@ public class TabCommunity : BaseTab {
     public override bool Enabled { get; } = true;
     public override OpenWindow Type { get; } = OpenWindow.Community;
 
-    private static readonly SpearFishingPresets _gigPreset = Service.Configuration.AutoGigConfig;
-    private static readonly FishingPresets _fishingPreset = Service.Configuration.HookPresets;
+    private static readonly SpearFishingPresets _gigPreset = Configuration.C.AutoGigConfig;
+    private static readonly FishingPresets _fishingPreset = Configuration.C.HookPresets;
 
     // Keep per-category folder names while popups are open
     private readonly Dictionary<string, string> _importAllFolderNames = [];
@@ -140,7 +140,7 @@ public class TabCommunity : BaseTab {
             var folderName = _importAllFolderNames.TryGetValue(tab, out var n) && !string.IsNullOrWhiteSpace(n) ? n : tab;
             var result = PresetImport.ImportPresetsIntoNewFolder(_fishingPreset, folderName, fishingPresets, CommunityOptions());
             if (result.ImportedPresets > 0) {
-                Service.Save();
+                Configuration.Save();
                 Notify.Success($"Imported {result.ImportedPresets} preset(s) into folder '{folderName}'{(result.SkippedPresets > 0 ? $", skipped {result.SkippedPresets} duplicate(s)" : string.Empty)}.");
             }
             else {
@@ -185,7 +185,7 @@ public class TabCommunity : BaseTab {
             return;
         }
 
-        Service.Save();
+        Configuration.Save();
         Notify.Success($"Imported {totalImported} preset(s) into {totalFolders} folder(s){(totalSkipped > 0 ? $", skipped {totalSkipped} duplicate(s)" : string.Empty)}.");
     }
 
@@ -280,7 +280,7 @@ public class TabCommunity : BaseTab {
                     CommunityOptions());
 
                 if (result.ImportedPresets > 0) {
-                    Service.Save();
+                    Configuration.Save();
                     Notify.Success($"Imported {result.ImportedPresets} preset(s) into {result.FoldersAdded} folder(s){(result.SkippedPresets > 0 ? $", skipped {result.SkippedPresets} duplicate(s)" : string.Empty)}.");
                 }
                 else {

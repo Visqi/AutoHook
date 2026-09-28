@@ -1,4 +1,4 @@
-using AutoHook.Modules.Ocean;
+using AutoHook.Extensions;
 using AutoHook.Tasks;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -32,27 +32,27 @@ public sealed class RodFishingModule : FishingModule {
     public StopAfterState StopAfterNextFish { get; set; }
     public bool SpectralRestPending { get; set; }
 
-    public bool IsBusy => Service.ActionExecutor.IsBusy;
+    public bool IsBusy => ActionExecutor.Get().IsBusy;
 
     public bool Enqueue(ActionRequest request, bool forceQueue = false)
-        => Service.ActionExecutor.Enqueue(request, forceQueue);
+        => ActionExecutor.Get().Enqueue(request, forceQueue);
 
     public bool Enqueue(ActionRequest request, params ActionRequest[] followUps)
-        => Service.ActionExecutor.Enqueue(request, followUps);
+        => ActionExecutor.Get().Enqueue(request, followUps);
 
     public void EnqueueCallback(System.Action callback, int delayMs = 0)
-        => Service.ActionExecutor.EnqueueCallback(callback, delayMs);
+        => ActionExecutor.Get().EnqueueCallback(callback, delayMs);
 
     public bool ExecuteImmediate(ActionRequest request)
         => Resolver.ExecuteImmediate(request);
 
-    public void BeginPostCastDelay() => Service.ActionExecutor.BeginPostCastDelay();
+    public void BeginPostCastDelay() => ActionExecutor.Get().BeginPostCastDelay();
 
-    public int GetPostCastDelayMs() => Service.ActionExecutor.GetPostCastDelayMs();
+    public int GetPostCastDelayMs() => ActionExecutor.Get().GetPostCastDelayMs();
 
     public double FishTimerSecs => Math.Truncate(FishingTimer.ElapsedMilliseconds / 1000.0 * 100) / 100;
 
-    public static FishingPresets Presets => Service.Configuration.HookPresets;
+    public static FishingPresets Presets => Configuration.C.HookPresets;
 
     private WorldState Ws => WorldState;
 
@@ -78,7 +78,7 @@ public sealed class RodFishingModule : FishingModule {
     }
 
     public void RequestStopAfterNextFish() {
-        if (!Service.Configuration.PluginEnabled)
+        if (!Configuration.C.PluginEnabled)
             return;
 
         StopAfterNextFish = Ws.Fishing.FishingStep.HasFlag(FishingSteps.BeganFishing) ? StopAfterState.Armed : StopAfterState.Pending;
@@ -91,7 +91,7 @@ public sealed class RodFishingModule : FishingModule {
             return false;
 
         ClearStopAfterNextFish();
-        Service.Configuration.PluginEnabled = false;
+        Configuration.C.PluginEnabled = false;
         return true;
     }
 
@@ -101,12 +101,12 @@ public sealed class RodFishingModule : FishingModule {
         if (ocean != OceanFishingState.Empty)
             OceanGoalCatalog.PrefetchRouteAchievements(ocean.CurrentRoute);
 
-        if (!Service.Configuration.PluginEnabled) {
+        if (!Configuration.C.PluginEnabled) {
             Ws.Decide(DecisionContext.OceanPreset, false, "Task not started", "plugin disabled");
             return;
         }
 
-        if (!Service.Configuration.AutoOceanFish) {
+        if (!Configuration.C.AutoOceanFish) {
             Ws.Decide(DecisionContext.OceanPreset, false, "Task not started", "Auto ocean fishing disabled");
             return;
         }
@@ -123,7 +123,7 @@ public sealed class RodFishingModule : FishingModule {
     }
 
     private void OnWorldStateModified(WorldState.Operation op) {
-        if (!Service.Configuration.PluginEnabled)
+        if (!Configuration.C.PluginEnabled)
             return;
 
         switch (op) {
@@ -161,7 +161,7 @@ public sealed class RodFishingModule : FishingModule {
 
     public void StartFishing() {
         if (!(Ws.ActionAvailable(IDs.Actions.Cast, ActionType.Action) && !Ws.Player.BlockCasting)) {
-            Service.PrintChat(@"[AutoHook] You can't cast right now.");
+            IChatGui.Get().PrintStatus(@"[AutoHook] You can't cast right now.");
             return;
         }
 
@@ -174,11 +174,11 @@ public sealed class RodFishingModule : FishingModule {
             var result = BaitComponent.ChangeBait((uint)extraCfg.ForcedBaitId);
 
             if (result == ChangeBaitReturn.Success) {
-                Service.PrintChat(@$"[AutoHook] Starting with bait: {Item.GetRow((uint)extraCfg.ForcedBaitId).Name}");
-                Service.Save();
+                IChatGui.Get().PrintStatus(@$"[AutoHook] Starting with bait: {Item.GetRow((uint)extraCfg.ForcedBaitId).Name}");
+                Configuration.Save();
             }
             else if (result != ChangeBaitReturn.AlreadyEquipped)
-                Service.PrintChat(@$"[AutoHook] Failed to change bait for forced bait swap. Result: {result}");
+                IChatGui.Get().PrintStatus(@$"[AutoHook] Failed to change bait for forced bait swap. Result: {result}");
         }
 
         Ws.Execute(new RodState.OpSetFishingStep(FishingSteps.StartedCasting));
@@ -219,7 +219,7 @@ public sealed class RodFishingModule : FishingModule {
     public static uint ResolveHookCfgId(BaitInfo bait, bool isMooching) {
         if (bait.SelectedSwimbaitId is { } sb)
             return sb;
-        return isMooching && Service.WorldState.Fishing.LastCatch?.FishId is { } fishId and > 0 ? fishId : bait.MoochId;
+        return isMooching && WorldState.Get().Fishing.LastCatch?.FishId is { } fishId and > 0 ? fishId : bait.MoochId;
     }
 
     public AutoCastsConfig GetAutoCastCfg() => AutoCast.GetAutoCastCfg();
@@ -238,7 +238,7 @@ public sealed class RodFishingModule : FishingModule {
             if (Ws.Fishing.FishingStep.HasFlag(FishingSteps.StartedCasting) && !Ws.Fishing.FishingStep.HasFlag(FishingSteps.BeganFishing))
                 CheckPluginActions();
 
-            if (Service.Configuration.AutoStartFishing && !ShouldSuppressAutoStartFishing() && EzThrottler.Throttle("AutoStartFishing", 1000)) {
+            if (Configuration.C.AutoStartFishing && !ShouldSuppressAutoStartFishing() && EzThrottler.Throttle("AutoStartFishing", 1000)) {
                 var autoCastCfg = GetAutoCastCfg();
                 if (autoCastCfg.EnableAll && autoCastCfg.CastLine.IsAvailableToCast(Ws) && Ws.IsCastAvailable()) {
                     StartFishing();
@@ -316,7 +316,7 @@ public sealed class RodFishingModule : FishingModule {
 
             if (!Hints.HasCastProposal && lastCatchCfg is { Enabled: true } && FishCaughtComponent.HasGpBlockedFishCaughtAction(lastCatchCfg)) {
                 var ignoreMooch = lastCatchCfg.NeverMooch;
-                if (!AutoCast.ContributeGpRestoreHints(Hints, ignoreMooch) && Service.WorldStateUpdater.HasPendingGp)
+                if (!AutoCast.ContributeGpRestoreHints(Hints, ignoreMooch) && WorldStateUpdater.Get().HasPendingGp)
                     Hints.HoldForPendingGp = true;
             }
 
@@ -335,7 +335,7 @@ public sealed class RodFishingModule : FishingModule {
     }
 
     public bool ShouldSuppressAutoStartFishing()
-        => Service.Configuration.AutoOceanFish && (Svc.Automation.CurrentTask is AutoOceanFish || Ws.OceanFishing != OceanFishingState.Empty);
+        => Configuration.C.AutoOceanFish && (Svc.Automation.CurrentTask is AutoOceanFish || Ws.OceanFishing != OceanFishingState.Empty);
 
     public void ClearWorldState() {
         var f = Ws.Fishing;

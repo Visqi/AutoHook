@@ -1,3 +1,5 @@
+using AutoHook.Extensions;
+using AutoHook.Services;
 using AutoHook.Tasks;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
@@ -24,7 +26,7 @@ public class TabDebug : BaseTab {
     public override void Draw() {
         try {
             if (ImGui.CollapsingHeader("WorldState", ImGuiTreeNodeFlags.DefaultOpen))
-                DrawWorldState(Service.WorldState);
+                DrawWorldState(WorldState.Get());
             if (ImGui.CollapsingHeader("Tools"))
                 DrawTools();
         }
@@ -171,7 +173,7 @@ public class TabDebug : BaseTab {
                         ("Route / zone", $"{of.CurrentRoute} / {of.CurrentZone}"),
                         ("Time in zone", $"{of.TimeLeftInZone:F1}s"),
                         ("Zone time max", $"{of.ZoneTimeMax:F1}s"),
-                        ("Auto ocean", Service.Configuration.AutoOceanFish.ToString()),
+                        ("Auto ocean", Configuration.C.AutoOceanFish.ToString()),
                         ("Mission 1", $"{of.Mission1.Type} ({of.Mission1.Progress})"),
                         ("Mission 2", $"{of.Mission2.Type} ({of.Mission2.Progress})"),
                         ("Mission 3", $"{of.Mission3.Type} ({of.Mission3.Progress})"),
@@ -494,7 +496,7 @@ public class TabDebug : BaseTab {
         ImGui.Text("NotificationMaster");
         using (ImRaii.PushIndent()) {
             var hasPlugin = Svc.Interface.IsPluginLoaded("NotificationMaster");
-            var ipcReady = Service.NotificationMaster.IsIPCReady();
+            var ipcReady = NotificationMasterService.Get().Api.IsIPCReady();
             DrawKvTable("ws_nm", [
                 ("Plugin loaded", hasPlugin.ToString()),
                 ("IPC ready", ipcReady.ToString()),
@@ -508,16 +510,16 @@ public class TabDebug : BaseTab {
             ImGui.InputText("Toast text", ref _nmToastText, 260);
 
             if (ImGui.Button("IsIPCReady"))
-                SetNmResult(Service.NotificationMaster.IsIPCReady());
+                SetNmResult(NotificationMasterService.Get().Api.IsIPCReady());
             ImGui.SameLine();
             if (ImGui.Button("Tray notification"))
-                SetNmResult(Service.NotificationMaster.DisplayTrayNotification(_nmToastTitle, _nmToastText));
+                SetNmResult(NotificationMasterService.Get().Api.DisplayTrayNotification(_nmToastTitle, _nmToastText));
             ImGui.SameLine();
             if (ImGui.Button("Flash taskbar"))
-                SetNmResult(Service.NotificationMaster.FlashTaskbarIcon());
+                SetNmResult(NotificationMasterService.Get().Api.FlashTaskbarIcon());
             ImGui.SameLine();
             if (ImGui.Button("Bring foreground"))
-                SetNmResult(Service.NotificationMaster.TryBringGameForeground());
+                SetNmResult(NotificationMasterService.Get().Api.TryBringGameForeground());
 
             ImGui.Spacing();
             DrawUtil.Checkbox("Enabled", ref _nmTestConfig.Enabled);
@@ -528,7 +530,7 @@ public class TabDebug : BaseTab {
             DrawUtil.Checkbox("Bring foreground", ref _nmTestConfig.BringGameForeground);
             DrawUtil.Checkbox("Beep on success", ref _nmTestConfig.BeepOnSuccess);
             if (ImGui.Button("Notify()"))
-                SetNmResult(Service.NotificationMaster.TryNotify(_nmTestConfig, _nmToastText));
+                SetNmResult(NotificationMasterService.Get().Api.TryNotify(_nmTestConfig, _nmToastText));
 
             if (!string.IsNullOrEmpty(_nmLastResult))
                 ImGui.TextWrapped($"Last result: {_nmLastResult}");

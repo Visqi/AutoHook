@@ -1,5 +1,4 @@
 using AutoHook.Spearfishing;
-using AutoHook.Ui;
 using clib;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui.Dtr;
@@ -7,21 +6,20 @@ using Dalamud.Game.Text;
 using Dalamud.Plugin;
 using ECommons.EzDTR;
 using PunishLib;
+using System.Globalization;
 using System.Threading;
 
 namespace AutoHook;
 
-/* 
- * TODO: 
+/*
+ * TODO:
  * stop movement while fishing
  * auto extract materia
  * move around to reduce fish weary
  */
 
 public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin {
-    public string Name => UIStrings.AutoHook;
-
-    internal static AutoHook Plugin = null!;
+    public const string GlobalPresetName = "Global Preset";
 
     private const string CmdAhCfg = "/ahcfg";
     private const string CmdAh = "/autohook";
@@ -52,18 +50,17 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
 
     private static PluginUi _pluginUi = null!;
     private static AutoGig _autoGig = null!;
-    private static ReplayManagementWindow _replayManagement = null!;
 
     public async Task LoadAsync(CancellationToken cancellationToken) {
         ECommonsMain.Init(pluginInterface, this, Module.DalamudReflector, Module.ObjectFunctions);
         CLibMain.Init(pluginInterface, this, CLibModule.Automation);
         PunishLibMain.Init(pluginInterface, "AutoHook", new AboutPlugin() { Developer = "InitialDet & croizat", Sponsor = "https://ko-fi.com/initialdet" });
-        await Service.InitAsync(pluginInterface);
 
-        Plugin = this;
+        Configuration.C.Initiate();
+        UIStrings.Culture = new CultureInfo(Configuration.C.CurrentLanguage);
+
         _pluginUi = new PluginUi();
         _autoGig = new AutoGig();
-        _replayManagement = new ReplayManagementWindow();
 
         foreach (var (command, help) in CommandHelp) {
             ICommandManager.Get().AddHandler(command, new CommandInfo(OnCommand) {
@@ -86,9 +83,9 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
     }
 
     public async ValueTask DisposeAsync() {
+        await Configuration.FlushAsync();
         _pluginUi.Dispose();
         _autoGig.Dispose();
-        _replayManagement.Dispose();
         Svc.Interface.UiBuilder.Draw -= DrawUi;
         Svc.Interface.UiBuilder.OpenConfigUi -= _pluginUi.Toggle;
         Svc.Interface.UiBuilder.OpenMainUi -= _pluginUi.Toggle;
@@ -96,8 +93,7 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
         foreach (var (command, _) in CommandHelp)
             ICommandManager.Get().RemoveHandler(command);
 
-        await Service.DisposeAsync();
-        CLibMain.Dispose();
+        await CLibMain.DisposeAsync();
         ECommonsMain.Dispose();
     }
 
@@ -109,25 +105,25 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
                 break;
             case CmdAhOn:
                 IChatGui.Get().Print(UIStrings.AutoHook_Enabled);
-                Service.Configuration.PluginEnabled = true;
+                Configuration.C.PluginEnabled = true;
                 break;
             case CmdAhOff:
                 IChatGui.Get().Print(UIStrings.AutoHook_Disabled);
-                Service.Configuration.PluginEnabled = false;
+                Configuration.C.PluginEnabled = false;
                 break;
-            case CmdAhtg when Service.Configuration.PluginEnabled:
+            case CmdAhtg when Configuration.C.PluginEnabled:
                 IChatGui.Get().Print(UIStrings.AutoHook_Disabled);
-                Service.Configuration.PluginEnabled = false;
+                Configuration.C.PluginEnabled = false;
                 break;
             case CmdAhtg:
                 IChatGui.Get().Print(UIStrings.AutoHook_Enabled);
-                Service.Configuration.PluginEnabled = true;
+                Configuration.C.PluginEnabled = true;
                 break;
             case CmdAhPreset:
                 SetPreset(args);
                 break;
             case CmdAhStart:
-                Service.FishingSessions.StartFishing();
+                FishingSessionManager.Get().StartFishing();
                 break;
             case CmdBait:
             case CmdAhBait:
@@ -135,10 +131,10 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
                 break;
             case CmdAgPreset:
                 SetGigPreset(args);
-                Service.ReplayManagement.Toggle();
+                WindowsService.Get().ReplayManagement.Toggle();
                 break;
             case CmdAhReplay:
-                _replayManagement.Toggle();
+                WindowsService.Get().ReplayManagement.Toggle();
                 break;
         }
     }
@@ -149,26 +145,26 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
     }
 
     private static void SetPreset(string presetName) {
-        var preset = Service.Configuration.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == presetName);
+        var preset = Configuration.C.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == presetName);
         if (preset == null) {
             IChatGui.Get().Print(UIStrings.Preset_not_found);
             return;
         }
 
-        Service.Configuration.HookPresets.Select(preset, FishingPresets.ReasonManual);
+        Configuration.C.HookPresets.Select(preset, FishingPresets.ReasonManual);
         IChatGui.Get().Print(@$"{UIStrings.Preset_set_to_} {preset.PresetName}");
         Configuration.FlushAsync().GetAwaiter().GetResult();
     }
 
     private static void SetGigPreset(string presetName) {
         try {
-            var preset = Service.Configuration.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == presetName);
+            var preset = Configuration.C.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == presetName);
             if (preset == null) {
                 IChatGui.Get().Print(@$"{UIStrings.Preset_not_found} - {presetName}");
                 return;
             }
 
-            Service.Configuration.AutoGigConfig.SelectedPreset = preset;
+            Configuration.C.AutoGigConfig.SelectedPreset = preset;
             IChatGui.Get().Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
             Configuration.FlushAsync().GetAwaiter().GetResult();
         }
@@ -178,35 +174,36 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
     }
 
     private static void DrawUi() {
-        Service.WindowSystem.Draw();
-        Service.FileDialog.Draw();
+        var windows = WindowsService.Get();
+        windows.WindowSystem.Draw();
+        windows.FileDialog.Draw();
         OceanFishingSpotOverlay.Draw();
     }
 
     private void SetupDtr() {
-        _ = new EzDtr(() => $"{((SeIconChar)0xE05E).ToIconString()} {(Service.Configuration.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled)}",
+        _ = new EzDtr(() => $"{((SeIconChar)0xE05E).ToIconString()} {(Configuration.C.PluginEnabled ? UIStrings.Enabled : UIStrings.Disabled)}",
                 evt => {
                     if (evt.ClickType is MouseClickType.Left) {
-                        Service.Configuration.PluginEnabled ^= true;
-                        Service.Save();
+                        Configuration.C.PluginEnabled ^= true;
+                        Configuration.Save();
                     }
                     else if (evt.ClickType is MouseClickType.Right)
                         _pluginUi.Toggle();
                 },
-                showCondition: () => Service.Configuration.DtrBarEnabled && Player.Job is ECommons.ExcelServices.Job.FSH
+                showCondition: () => Configuration.C.DtrBarEnabled && Player.Job is ECommons.ExcelServices.Job.FSH
             );
 
-        _ = new EzDtr(() => $"{SeIconChar.Collectible.ToIconString()} {Service.Configuration.HookPresets.SelectedPreset?.PresetName ?? $"{UIStrings.GlobalPreset}"}",
+        _ = new EzDtr(() => $"{SeIconChar.Collectible.ToIconString()} {Configuration.C.HookPresets.SelectedPreset?.PresetName ?? $"{UIStrings.GlobalPreset}"}",
             evt => {
-                if (Service.Configuration.HookPresets.SelectedPreset == null) return;
-                var presets = Service.Configuration.HookPresets.CustomPresets;
-                var index = presets.IndexOf(Service.Configuration.HookPresets.SelectedPreset);
+                if (Configuration.C.HookPresets.SelectedPreset == null) return;
+                var presets = Configuration.C.HookPresets.CustomPresets;
+                var index = presets.IndexOf(Configuration.C.HookPresets.SelectedPreset);
                 var direction = evt.ClickType == MouseClickType.Left ? 1 : -1;
-                Service.Configuration.HookPresets.SelectedPreset = presets[(index + direction + presets.Count) % presets.Count];
-                Service.Save();
+                Configuration.C.HookPresets.SelectedPreset = presets[(index + direction + presets.Count) % presets.Count];
+                Configuration.Save();
             },
-            $"{Name}Presets",
-            () => Service.Configuration.DtrPresetBarEnabled && Player.Job is ECommons.ExcelServices.Job.FSH && Service.Configuration.HookPresets.SelectedPreset != null
+            $"{Svc.Interface.Manifest.Name}Presets",
+            () => Configuration.C.DtrPresetBarEnabled && Player.Job is ECommons.ExcelServices.Job.FSH && Configuration.C.HookPresets.SelectedPreset != null
         );
     }
 }

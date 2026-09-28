@@ -13,7 +13,7 @@ public class TabSettings : BaseTab {
 
     public override OpenWindow Type => OpenWindow.Settings;
 
-    private readonly SpearFishingPresets _gigCfg = Service.Configuration.AutoGigConfig;
+    private readonly SpearFishingPresets _gigCfg = Configuration.C.AutoGigConfig;
 
     public override void DrawHeader() {
         DrawLanguageSelector();
@@ -54,13 +54,13 @@ public class TabSettings : BaseTab {
     }
 
     private void DrawGeneralSettings() {
-        DrawUtil.Checkbox(UIStrings.Plugin_Enabled, ref Service.Configuration.PluginEnabled, UIStrings.PluginEnabledHelp);
-        DrawUtil.Checkbox(UIStrings.AntiAfkOption, ref Service.Configuration.ResetAfkTimer);
-        DrawUtil.Checkbox(UIStrings.Hide_Tab_Description, ref Service.Configuration.HideTabDescription);
-        DrawUtil.Checkbox(UIStrings.Show_Current_Status_Header, ref Service.Configuration.ShowStatus);
-        DrawUtil.Checkbox(UIStrings.Show_Chat_Logs, ref Service.Configuration.ShowChatLogs, UIStrings.Show_Chat_Logs_HelpText);
-        DrawUtil.Checkbox(UIStrings.Dtr_Show, ref Service.Configuration.DtrBarEnabled, UIStrings.Dtr_Settings_Help_Text);
-        DrawUtil.Checkbox(UIStrings.Dtr_Show_Preset, ref Service.Configuration.DtrPresetBarEnabled, UIStrings.Dtr_Preset_Setting_Help);
+        DrawUtil.Checkbox(UIStrings.Plugin_Enabled, ref Configuration.C.PluginEnabled, UIStrings.PluginEnabledHelp);
+        DrawUtil.Checkbox(UIStrings.AntiAfkOption, ref Configuration.C.ResetAfkTimer);
+        DrawUtil.Checkbox(UIStrings.Hide_Tab_Description, ref Configuration.C.HideTabDescription);
+        DrawUtil.Checkbox(UIStrings.Show_Current_Status_Header, ref Configuration.C.ShowStatus);
+        DrawUtil.Checkbox(UIStrings.Show_Chat_Logs, ref Configuration.C.ShowChatLogs, UIStrings.Show_Chat_Logs_HelpText);
+        DrawUtil.Checkbox(UIStrings.Dtr_Show, ref Configuration.C.DtrBarEnabled, UIStrings.Dtr_Settings_Help_Text);
+        DrawUtil.Checkbox(UIStrings.Dtr_Show_Preset, ref Configuration.C.DtrPresetBarEnabled, UIStrings.Dtr_Preset_Setting_Help);
         DrawUtil.TextV(UIStrings.Dtr_Help);
     }
 
@@ -74,9 +74,9 @@ public class TabSettings : BaseTab {
             ImGui.TreePop();
         }
 
-        DrawUtil.Checkbox(UIStrings.AutoStartFishing, ref Service.Configuration.AutoStartFishing, UIStrings.AutoStartFishingHelpText);
-        DrawUtil.Checkbox(UIStrings.SpectralRestOnGain, ref Service.Configuration.SpectralRest, UIStrings.SpectralRestOnGainHelpText);
-        DrawUtil.Checkbox(UIStrings.AutoHandleCollectables, ref Service.Configuration.AutoCollectablesEnabled, UIStrings.AutoHandleCollectablesHelpText);
+        DrawUtil.Checkbox(UIStrings.AutoStartFishing, ref Configuration.C.AutoStartFishing, UIStrings.AutoStartFishingHelpText);
+        DrawUtil.Checkbox(UIStrings.SpectralRestOnGain, ref Configuration.C.SpectralRest, UIStrings.SpectralRestOnGainHelpText);
+        DrawUtil.Checkbox(UIStrings.AutoHandleCollectables, ref Configuration.C.AutoCollectablesEnabled, UIStrings.AutoHandleCollectablesHelpText);
     }
 
     private void DrawSpearfishingSettings() {
@@ -86,14 +86,14 @@ public class TabSettings : BaseTab {
     }
 
     private void DrawOceanFishingSettings() {
-        DrawUtil.Checkbox(UIStrings.AutoOceanFish, ref Service.Configuration.AutoOceanFish, UIStrings.AutoOceanFishHelpText);
-        if (!Service.Configuration.AutoOceanFish)
+        DrawUtil.Checkbox(UIStrings.AutoOceanFish, ref Configuration.C.AutoOceanFish, UIStrings.AutoOceanFishHelpText);
+        if (!Configuration.C.AutoOceanFish)
             return;
 
         using (ImRaii.PushIndent()) {
             DrawAutoOceanFishGoal();
-            DrawUtil.Checkbox(UIStrings.AutoOceanFish_Fallthrough, ref Service.Configuration.AOF_Fallthrough);
-            DrawUtil.Checkbox(UIStrings.AutoOceanFish_AllowMovement, ref Service.Configuration.AOF_WalkToRailing, UIStrings.AutoOceanFish_AllowMovementHelpText);
+            DrawUtil.Checkbox(UIStrings.AutoOceanFish_Fallthrough, ref Configuration.C.AOF_Fallthrough);
+            DrawUtil.Checkbox(UIStrings.AutoOceanFish_AllowMovement, ref Configuration.C.AOF_WalkToRailing, UIStrings.AutoOceanFish_AllowMovementHelpText);
         }
     }
 
@@ -101,26 +101,26 @@ public class TabSettings : BaseTab {
         ImGui.TextV($"{UIStrings.Prioritise}:");
         ImGui.SameLine();
 
-        var goal = Service.Configuration.AutoOceanFishGoal;
+        var goal = Configuration.C.AutoOceanFishGoal;
 
         if (ImGui.RadioButton(UIStrings.OceanFishGoal_Levelling, goal == OceanFishGoalKind.Levelling)) {
-            Service.Configuration.AutoOceanFishGoal = OceanFishGoalKind.Levelling;
-            Service.Save();
+            Configuration.C.AutoOceanFishGoal = OceanFishGoalKind.Levelling;
+            Configuration.Save();
         }
         ImGui.SameLine();
         if (ImGui.RadioButton(UIStrings.OceanFishGoal_Achievements, goal == OceanFishGoalKind.Achievement)) {
-            Service.Configuration.AutoOceanFishGoal = OceanFishGoalKind.Achievement;
-            Service.Save();
+            Configuration.C.AutoOceanFishGoal = OceanFishGoalKind.Achievement;
+            Configuration.Save();
         }
         ImGui.SameLine();
         if (ImGui.RadioButton(UIStrings.OceanFishGoal_Legendary, goal == OceanFishGoalKind.Legendary)) {
-            Service.Configuration.AutoOceanFishGoal = OceanFishGoalKind.Legendary;
-            Service.Save();
+            Configuration.C.AutoOceanFishGoal = OceanFishGoalKind.Legendary;
+            Configuration.Save();
         }
         ImGui.SameLine();
         if (ImGui.RadioButton(UIStrings.OceanFishGoal_Points, goal == OceanFishGoalKind.Points)) {
-            Service.Configuration.AutoOceanFishGoal = OceanFishGoalKind.Points;
-            Service.Save();
+            Configuration.C.AutoOceanFishGoal = OceanFishGoalKind.Points;
+            Configuration.Save();
         }
     }
 
@@ -129,13 +129,13 @@ public class TabSettings : BaseTab {
 
         ImGui.TextWrapped(UIStrings.Delay_when_hooking);
 
-        ref var min = ref Service.Configuration.DelayBetweenHookMin;
-        ref var max = ref Service.Configuration.DelayBetweenHookMax;
+        ref var min = ref Configuration.C.DelayBetweenHookMin;
+        ref var max = ref Configuration.C.DelayBetweenHookMax;
 
         ImGui.SetNextItemWidth(45.Scaled());
         if (ImGui.InputInt(UIStrings.DrawConfigs_Min_, ref min, 0)) {
             min = Math.Clamp(min, 0, max);
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGui.SameLine();
@@ -143,7 +143,7 @@ public class TabSettings : BaseTab {
         ImGui.SetNextItemWidth(45.Scaled());
         if (ImGui.InputInt(UIStrings.DrawConfigs_Max_, ref max, 0)) {
             max = Math.Clamp(max, min, 9999);
-            Service.Save();
+            Configuration.Save();
         }
     }
 
@@ -152,20 +152,20 @@ public class TabSettings : BaseTab {
 
         ImGui.TextWrapped(UIStrings.Delay_Between_Casts);
 
-        ref var min = ref Service.Configuration.DelayBetweenCastsMin;
-        ref var max = ref Service.Configuration.DelayBetweenCastsMax;
+        ref var min = ref Configuration.C.DelayBetweenCastsMin;
+        ref var max = ref Configuration.C.DelayBetweenCastsMax;
 
         ImGui.SetNextItemWidth(45.Scaled());
         if (ImGui.InputInt(UIStrings.DrawConfigs_Min_, ref min, 0)) {
             min = Math.Clamp(min, 0, max);
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(45.Scaled());
         if (ImGui.InputInt(UIStrings.DrawConfigs_Max_, ref max, 0)) {
             max = Math.Clamp(max, min, 9999);
-            Service.Save();
+            Configuration.Save();
         }
     }
 
@@ -176,20 +176,20 @@ public class TabSettings : BaseTab {
         ImGui.SameLine();
         DrawUtil.Info(UIStrings.DelayBeforeCancelInfo);
 
-        ref var min = ref Service.Configuration.DelayBeforeCancelMin;
-        ref var max = ref Service.Configuration.DelayBeforeCancelMax;
+        ref var min = ref Configuration.C.DelayBeforeCancelMin;
+        ref var max = ref Configuration.C.DelayBeforeCancelMax;
 
         ImGui.SetNextItemWidth(45.Scaled());
         if (ImGui.InputInt(UIStrings.DrawConfigs_Min_, ref min, 0)) {
             min = Math.Clamp(min, 0, max);
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(45.Scaled());
         if (ImGui.InputInt(UIStrings.DrawConfigs_Max_, ref max, 0)) {
             max = Math.Clamp(max, min, 9999);
-            Service.Save();
+            Configuration.Save();
         }
     }
 
@@ -206,13 +206,13 @@ public class TabSettings : BaseTab {
             @"ru",
             @"zh"
         };
-        var currentLanguage = languages.IndexOf(Service.Configuration.CurrentLanguage);
+        var currentLanguage = languages.IndexOf(Configuration.C.CurrentLanguage);
 
         if (!ImGui.Combo("Language###currentLanguage", ref currentLanguage, languages.ToArray(), languages.Count))
             return;
 
-        Service.Configuration.CurrentLanguage = languages[currentLanguage];
-        UIStrings.Culture = new CultureInfo(Service.Configuration.CurrentLanguage);
-        Service.Save();
+        Configuration.C.CurrentLanguage = languages[currentLanguage];
+        UIStrings.Culture = new CultureInfo(Configuration.C.CurrentLanguage);
+        Configuration.Save();
     }
 }

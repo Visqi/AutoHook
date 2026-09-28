@@ -34,7 +34,7 @@ public sealed class AutoThaliaksFavor : BaseActionCast {
         var stack = ThaliaksFavorStacks;
         if (DrawUtil.EditNumberField(UIStrings.TabAutoCasts_DrawExtraOptionsThaliaksFavor_, ref stack)) {
             ThaliaksFavorStacks = Math.Max(3, Math.Min(stack, 10));
-            Service.Save();
+            Configuration.Save();
         }
         DrawAutoCastConditions();
     };

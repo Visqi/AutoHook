@@ -1,10 +1,11 @@
+using AutoHook.Extensions;
 using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace AutoHook.Modules.Rod;
 
 public sealed class BaitComponent(RodFishingModule module) : RodComponent(module) {
     public static ChangeBaitReturn ChangeBait(uint baitId) {
-        var ws = Service.WorldState;
+        var ws = WorldState.Get();
         if (baitId == ws.Fishing.BaitInfo.BaitId) return ChangeBaitReturn.AlreadyEquipped;
         if (baitId == 0 || GameRes.Baits.All(b => b.Id != baitId)) return ChangeBaitReturn.InvalidBait;
         if (ws.Player.GetItemCount(baitId) <= 0) return ChangeBaitReturn.NotInInventory;
@@ -17,17 +18,17 @@ public sealed class BaitComponent(RodFishingModule module) : RodComponent(module
     }
 
     public static ChangeBaitReturn ChangeBait(BaitFishClass bait) {
-        var ws = Service.WorldState;
+        var ws = WorldState.Get();
         if (bait.Id == ws.Fishing.BaitInfo.BaitId) {
-            Service.PrintChat($"Bait \"{bait.Name}\" is already equipped.");
+            IChatGui.Get().PrintStatus($"Bait \"{bait.Name}\" is already equipped.");
             return ChangeBaitReturn.AlreadyEquipped;
         }
         if (bait.Id == 0 || GameRes.Baits.All(b => b.Id != bait.Id)) {
-            Service.PrintChat($"Bait \"{bait.Name}\" is not a valid bait.");
+            IChatGui.Get().PrintStatus($"Bait \"{bait.Name}\" is not a valid bait.");
             return ChangeBaitReturn.InvalidBait;
         }
         if (ws.Player.GetItemCount((uint)bait.Id) <= 0) {
-            Service.PrintChat($"Bait \"{bait.Name}\" is not in your inventory.");
+            IChatGui.Get().PrintStatus($"Bait \"{bait.Name}\" is not in your inventory.");
             return ChangeBaitReturn.NotInInventory;
         }
         return GameMain.ExecuteCommand(701, 4, bait.Id, 0, 0) ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;

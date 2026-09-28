@@ -1,3 +1,4 @@
+using AutoHook.Extensions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
@@ -20,15 +21,15 @@ public sealed class AetherialReduction() : AutoTask, IAutoTaskHooks {
         ImGui.Text($"CanPurifyAny: {CanPurifyAny()}");
         ImGui.Text($"PurifyResult open: {IsPurifyResultOpen()}");
         ImGui.Text($"Blocked for reduction: {IsBlockedForReduction()}");
-        ImGui.Text($"FishingState: {Service.WorldState.Fishing.FishingState}");
-        ImGui.Text($"FishingStep: {Service.WorldState.Fishing.FishingStep}");
-        ImGui.Text($"IsCastAvailable: {Service.WorldState.IsCastAvailable()}");
-        ImGui.Text($"BlockCasting: {Service.WorldState.Player.BlockCasting}");
+        ImGui.Text($"FishingState: {WorldState.Get().Fishing.FishingState}");
+        ImGui.Text($"FishingStep: {WorldState.Get().Fishing.FishingStep}");
+        ImGui.Text($"IsCastAvailable: {WorldState.Get().IsCastAvailable()}");
+        ImGui.Text($"BlockCasting: {WorldState.Get().Player.BlockCasting}");
     }
 
     protected override async Task Execute() {
         if (!IsUnlocked()) {
-            Service.PrintChat(UIStrings.AetherialReduction_NotUnlocked);
+            IChatGui.Get().PrintStatus(UIStrings.AetherialReduction_NotUnlocked);
             return;
         }
 
@@ -47,7 +48,7 @@ public sealed class AetherialReduction() : AutoTask, IAutoTaskHooks {
 
         Status = UIStrings.AetherialReduction_Status_Resuming;
         await ResumeFishing();
-        Service.PrintChat(UIStrings.AetherialReduction_Complete);
+        IChatGui.Get().PrintStatus(UIStrings.AetherialReduction_Complete);
     }
 
     public void SetupHooks() { }
@@ -62,7 +63,7 @@ public sealed class AetherialReduction() : AutoTask, IAutoTaskHooks {
 
     private async Task QuitFishing() {
         using var scope = BeginScope(nameof(QuitFishing));
-        var ws = Service.WorldState;
+        var ws = WorldState.Get();
 
         if (ws.Fishing.FishingState == FishingState.None)
             return;
@@ -74,7 +75,7 @@ public sealed class AetherialReduction() : AutoTask, IAutoTaskHooks {
                 return true;
 
             if (ws.ActionAvailable(IDs.Actions.Quit, ActionType.Action) && !ws.Player.BlockCasting)
-                Service.ActionExecutor.Enqueue(new ActionRequest(IDs.Actions.Quit, ActionType.Action, "Quit"));
+                ActionExecutor.Get().Enqueue(new ActionRequest(IDs.Actions.Quit, ActionType.Action, "Quit"));
 
             return false;
         }, nameof(QuitFishing), checkFrequency: 5);
@@ -121,11 +122,11 @@ public sealed class AetherialReduction() : AutoTask, IAutoTaskHooks {
 
     private async Task ResumeFishing() {
         using var scope = BeginScope(nameof(ResumeFishing));
-        var ws = Service.WorldState;
+        var ws = WorldState.Get();
 
         await WaitUntil(() => ws.Fishing.FishingState == FishingState.None && ws.IsCastAvailable() && !IsBlockedForReduction() && !IsPurifyResultOpen(), nameof(ResumeFishing), checkFrequency: 5);
 
-        Service.FishingSessions.StartFishing();
+        FishingSessionManager.Get().StartFishing();
     }
 
     private unsafe void OnPurifyResultSetup(AddonEvent type, AddonArgs args) {

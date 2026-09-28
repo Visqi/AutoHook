@@ -1,4 +1,3 @@
-using AutoHook.Conditions.Definitions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -6,8 +5,6 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Newtonsoft.Json;
 using System.Numerics;
-using static AutoHook.Conditions.ConditionRegistry;
-using static AutoHook.Conditions.Params.ConditionParams;
 
 namespace AutoHook.Ui;
 
@@ -30,12 +27,12 @@ public static class ConditionUi {
     public static Guid? ExcludeNamedConditionId { get; set; }
 
     public static bool IsConditionCurrentlyTrue(Condition cond)
-        => cond.Enabled && cond.Evaluate(Service.WorldState, Registry);
+        => cond.Enabled && cond.Evaluate(WorldState.Get(), Registry);
 
     public static bool IsGroupCurrentlyTrue(ConditionGroup group)
         => group.Enabled
            && group.Conditions.Any(c => c.Enabled)
-           && group.Evaluate(Service.WorldState, Registry);
+           && group.Evaluate(WorldState.Get(), Registry);
 
     private static bool RequiresComplexConditionUi(ConditionSet set)
         => set.Groups.Count > 1 || !string.IsNullOrWhiteSpace(set.Expression);
@@ -76,14 +73,14 @@ public static class ConditionUi {
         if (ImGuiComponents.IconButton(FontAwesomeIcon.Plus)) {
             newlyAddedIndex = group.Conditions.Count;
             group.Conditions.Add(new Condition { TypeId = defaultTypeId, Params = [] });
-            Service.Save();
+            Configuration.Save();
         }
         ImGui.TooltipOnHover("Add condition");
 
         ImGui.SameLine(0, 3.Scaled());
         if (showAdvanced && ImGuiComponents.IconButton(FontAwesomeIcon.Code)) {
             set.SlimAdvancedExpanded = true;
-            Service.Save();
+            Configuration.Save();
         }
         ImGui.TooltipOnHover("Advanced (groups, expression)");
 
@@ -105,7 +102,7 @@ public static class ConditionUi {
             DrawUtil.DrawCheckboxTree(rowLabel, ref enabled, () => {
                 if (DrawConditionContent(cond, scope, types)) {
                     _forceOpenConditionUiId = cond.UiId;
-                    Service.Save();
+                    Configuration.Save();
                 }
                 ImGui.SameLine();
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash))
@@ -122,7 +119,7 @@ public static class ConditionUi {
             group.Conditions.RemoveAt(idx);
         }
         if (toRemove.Count > 0)
-            Service.Save();
+            Configuration.Save();
 
         return set;
     }
@@ -142,7 +139,7 @@ public static class ConditionUi {
         if (!RequiresComplexConditionUi(set)) {
             if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowLeft)) {
                 set.SlimAdvancedExpanded = false;
-                Service.Save();
+                Configuration.Save();
             }
             ImGui.TooltipOnHover("Back to simple view");
             ImGui.SameLine();
@@ -173,7 +170,7 @@ public static class ConditionUi {
             set.Groups.RemoveAt(idx);
         }
         if (toRemoveGroup.Count > 0)
-            Service.Save();
+            Configuration.Save();
     }
 
     private static void DrawSetHeader(ConditionSet set) {
@@ -240,7 +237,7 @@ public static class ConditionUi {
                         var imported = JsonConvert.DeserializeObject<ConditionSet>(json);
                         if (imported != null && imported.Groups.Count > 0) {
                             ApplyClipboard(set, imported);
-                            Service.Save();
+                            Configuration.Save();
                         }
                     }
                     catch { }
@@ -253,7 +250,7 @@ public static class ConditionUi {
                         var data = Convert.FromBase64String(fromClipboard.Trim());
                         var expr = Encoding.UTF8.GetString(data);
                         set.Expression = string.IsNullOrWhiteSpace(expr) ? null : expr;
-                        Service.Save();
+                        Configuration.Save();
                     }
                     catch { }
                 }
@@ -343,7 +340,7 @@ public static class ConditionUi {
             using var _ = ImRaii.PushId($"cond{cond.UiId}");
             using (IsConditionCurrentlyTrue(cond) ? ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGreen) : null)
                 if (DrawConditionContent(cond, scope, defs))
-                    Service.Save();
+                    Configuration.Save();
             ImGui.SameLine();
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
                 group.Conditions.RemoveAt(ci);

@@ -14,13 +14,13 @@ public sealed class ReplayManagementWindow : Window, IDisposable {
     private string _folderError = "";
 
     public ReplayManagementWindow() : base("Replay recorder###AutoHookReplayRecorder") {
-        Service.WindowSystem.AddWindow(this);
+        WindowsService.Get().WindowSystem.AddWindow(this);
         Size = new Vector2(640, 360);
         SizeCondition = ImGuiCond.FirstUseEver;
         RespectCloseHotkey = false;
     }
 
-    public void Dispose() => Service.WindowSystem.RemoveWindow(this);
+    public void Dispose() => WindowsService.Get().WindowSystem.RemoveWindow(this);
 
     public override void Draw() {
         if (!IsOpen)
@@ -29,7 +29,7 @@ public sealed class ReplayManagementWindow : Window, IDisposable {
         try {
             DrawRecordingRow();
             ImGui.Separator();
-            DrawReplayBrowser(Service.ReplayManager);
+            DrawReplayBrowser(ReplayManager.Get());
         }
         catch (Exception e) {
             IPluginLog.Get().Error($"[ReplayManagement] {e.Message}");
@@ -37,7 +37,7 @@ public sealed class ReplayManagementWindow : Window, IDisposable {
     }
 
     private void DrawRecordingRow() {
-        var mgr = Service.ReplayManager;
+        var mgr = ReplayManager.Get();
 
         if (ImGui.Button(mgr.IsRecording ? "Stop recording" : "Start recording")) {
             if (mgr.IsRecording)
@@ -72,7 +72,7 @@ public sealed class ReplayManagementWindow : Window, IDisposable {
         mgr.BrowserPath = path;
         ImGui.SameLine();
         if (ImGuiComponents.IconButton(FontAwesomeIcon.File)) {
-            Service.FileDialog.OpenFileDialog("Select replay", ".ahlog", (confirmed, paths) => {
+            WindowsService.Get().FileDialog.OpenFileDialog("Select replay", ".ahlog", (confirmed, paths) => {
                 if (confirmed && paths.Count > 0) {
                     mgr.BrowserPath = paths[0];
                     mgr.FileDialogStartPath = new FileInfo(mgr.BrowserPath).Directory!.FullName;

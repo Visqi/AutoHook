@@ -66,7 +66,7 @@ public class SubTabFish {
                 list.Add(new FishConfig(new BaitFishClass()));
             }
 
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGui.SameLine();
@@ -74,14 +74,17 @@ public class SubTabFish {
 
         ImGui.SameLine();
 
-        if (ImGui.Button($"{UIStrings.AddLastCatch} {Service.LastCatch.Name ?? "-"}")) {
-            if (Service.LastCatch.Id is 0 or -1)
+        var lastCatchFish = WorldState.Get().Fishing.LastCatch is { FishId: > 0 } lc
+            ? GameRes.Fishes.FirstOrDefault(fish => fish.Id == lc.FishId) ?? new BaitFishClass(@"-", (int)lc.FishId) : null;
+
+        if (ImGui.Button($"{UIStrings.AddLastCatch} {lastCatchFish?.Name ?? "-"}")) {
+            if (lastCatchFish is null || lastCatchFish.Id is 0 or -1)
                 return;
-            if (list.Any(x => x.Fish.Id == Service.LastCatch.Id))
+            if (list.Any(x => x.Fish.Id == lastCatchFish.Id))
                 return;
 
-            list.Add(new FishConfig(Service.LastCatch));
-            Service.Save();
+            list.Add(new FishConfig(lastCatchFish));
+            Configuration.Save();
         }
     }
 
@@ -90,7 +93,7 @@ public class SubTabFish {
         using (ImRaii.PushFont(UiBuilder.IconFont)) {
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash) && ImGui.GetIO().KeyShift) {
                 _preset.RemoveItem(fishConfig.UniqueId);
-                Service.Save();
+                Configuration.Save();
             }
         }
 

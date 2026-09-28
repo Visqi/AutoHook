@@ -1,7 +1,6 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using Lumina.Excel.Sheets;
-using static AutoHook.Conditions.Params.ConditionParams;
 
 namespace AutoHook.Conditions.Definitions;
 

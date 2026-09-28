@@ -1,5 +1,3 @@
-using AutoHook.Conditions;
-using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
@@ -105,7 +103,7 @@ public sealed class AutoLures : BaseActionCast {
     }
 
     protected override DrawOptionsDelegate DrawOptions => () => {
-        if (CountValidOptions(Service.WorldState) > 1) {
+        if (CountValidOptions(WorldState.Get()) > 1) {
             ImGui.TextColored(ImGuiColors.DalamudYellow, UIStrings.LureMultipleOptionsWarning);
             ImGui.Spacing();
         }
@@ -134,7 +132,7 @@ public sealed class AutoLures : BaseActionCast {
         if (ImGui.Checkbox("###checkbox", ref config.Enabled)) {
             if (config.Enabled)
                 ImGui.SetNextItemOpen(true);
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGui.SameLine(0, 3.Scaled());
@@ -163,7 +161,7 @@ public sealed class AutoLures : BaseActionCast {
         var stack = config.LureStacks;
         if (DrawUtil.EditNumberField(UIStrings.MaxAttempts, ref stack, "", 1)) {
             config.LureStacks = Math.Clamp(stack, 1, 3);
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGui.SameLine();
@@ -185,7 +183,7 @@ public sealed class AutoLures : BaseActionCast {
         var config = option.Value.Config;
         var stacks = ws.Player.GetStatusStacks(option.Value.StatusId);
 
-        var rod = Service.FishingSessions.Rod;
+        var rod = FishingSessionManager.Get().Rod;
 
         if (stacks >= config.LureStacks && config.CancelAttempt && !lureSuccess) {
             rod.Enqueue(new ActionRequest(IDs.Actions.Rest));

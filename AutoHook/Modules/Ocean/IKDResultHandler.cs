@@ -8,7 +8,7 @@ public static class IKDResultHandler {
     public static void Enable() => IAddonLifecycle.Get().RegisterListener(AddonEvent.PostSetup, "IKDResult", OnResultsSetup);
     public static void Disable() => IAddonLifecycle.Get().UnregisterListener(OnResultsSetup);
     private static unsafe void OnResultsSetup(AddonEvent type, AddonArgs args) {
-        if (Service.Configuration.AutoOceanFish)
+        if (Configuration.C.AutoOceanFish)
             args.GetAddon<AtkUnitBase>()->Close(true);
     }
 }

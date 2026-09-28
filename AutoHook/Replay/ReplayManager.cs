@@ -1,5 +1,3 @@
-using AutoHook.Ui;
-using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 using System.IO;
@@ -9,7 +7,7 @@ using TerritoryIntendedUse = FFXIVClientStructs.FFXIV.Client.Enums.TerritoryInte
 
 namespace AutoHook.Replay;
 
-public sealed class ReplayManager : IDisposable {
+public sealed class ReplayManager : IPluginService, IDisposable {
     private const int MaxReplayFiles = 10;
 
     public sealed class ReplayEntry : IDisposable {
@@ -74,7 +72,7 @@ public sealed class ReplayManager : IDisposable {
         FileDialogStartPath = ReplayDirectory.FullName;
         BrowserPath = ReplayDirectory.FullName;
 
-        var ws = Service.WorldState;
+        var ws = WorldState.Get();
         _subs = new(
             ws.BeganSession.Subscribe(_ => TryAutoStart()),
             ws.TerritoryChanged.Subscribe(OnTerritoryChanged),
@@ -119,10 +117,10 @@ public sealed class ReplayManager : IDisposable {
 
         var prefix = manual ? "manual" : "session";
         _recordingSpearfishingPreset = GetActiveSpearfishingPreset();
-        _recorder = new ReplayRecorder(Service.WorldState, ReplayDirectory, prefix, logInitialState: true);
+        _recorder = new ReplayRecorder(WorldState.Get(), ReplayDirectory, prefix, logInitialState: true);
         _recorder.WritePresetSnapshot(SerializeCurrentPreset(_recordingSpearfishingPreset));
         LastRecordedPath = _recorder.FilePath;
-        Service.PrintDebug($"[Replay] Recording started: {_recorder.FilePath}");
+        IPluginLog.Get().Debug($"[Replay] Recording started: {_recorder.FilePath}");
     }
 
     public void StopRecording() {
@@ -136,7 +134,7 @@ public sealed class ReplayManager : IDisposable {
         _recorder = null;
         _recordingSpearfishingPreset = null;
         PruneOldReplays();
-        Service.PrintDebug($"[Replay] Recording stopped: {LastRecordedPath}");
+        IPluginLog.Get().Debug($"[Replay] Recording stopped: {LastRecordedPath}");
     }
 
     public void AddEntry(string path, bool autoShow) {
@@ -189,7 +187,7 @@ public sealed class ReplayManager : IDisposable {
                      .Skip(MaxReplayFiles)) {
             try {
                 file.Delete();
-                Service.PrintDebug($"[Replay] Pruned old replay: {file.Name}");
+                IPluginLog.Get().Debug($"[Replay] Pruned old replay: {file.Name}");
             }
             catch (Exception e) {
                 IPluginLog.Get().Warning($"[Replay] Failed to delete {file.FullName}: {e.Message}");
@@ -198,11 +196,11 @@ public sealed class ReplayManager : IDisposable {
     }
 
     private static ReplayMetadata BuildMetadata(AutoGigConfig? recordedSpearPreset) {
-        var cfg = Service.Configuration;
+        var cfg = Configuration.C;
         return new ReplayMetadata {
             PresetName = recordedSpearPreset?.PresetName ?? cfg.HookPresets.CurrentPreset.PresetName,
             PluginVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? string.Empty,
-            TerritoryId = Service.WorldState.TerritoryId,
+            TerritoryId = WorldState.Get().TerritoryId,
             PresetSnapshotJson = SerializeCurrentPreset(recordedSpearPreset),
         };
     }
@@ -210,7 +208,7 @@ public sealed class ReplayManager : IDisposable {
     private static string SerializeCurrentPreset(AutoGigConfig? spearPreset) {
         BasePresetConfig preset = spearPreset is not null
             ? spearPreset
-            : Service.Configuration.HookPresets.CurrentPreset;
+            : Configuration.C.HookPresets.CurrentPreset;
         try {
             return JsonConvert.SerializeObject(preset);
         }
@@ -221,5 +219,5 @@ public sealed class ReplayManager : IDisposable {
     }
 
     private static AutoGigConfig? GetActiveSpearfishingPreset()
-        => Service.WorldState.Spearfishing.SessionActive ? Service.Configuration.AutoGigConfig.SelectedPreset : null;
+        => WorldState.Get().Spearfishing.SessionActive ? Configuration.C.AutoGigConfig.SelectedPreset : null;
 }

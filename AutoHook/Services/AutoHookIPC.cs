@@ -1,9 +1,9 @@
 using ECommons.EzIpcManager;
 
-namespace AutoHook.IPC;
+namespace AutoHook.Services;
 
-public class AutoHookIPC {
-    private readonly Configuration _cfg = Service.Configuration;
+public class AutoHookIPC : IPluginService {
+    private readonly Configuration _cfg = Configuration.C;
 
     public AutoHookIPC() {
         EzIPC.Init(this, "AutoHook");
@@ -12,7 +12,7 @@ public class AutoHookIPC {
     [EzIPC]
     public void SetPluginState(bool state) {
         WriteConfig(() => _cfg.PluginEnabled = state);
-        Service.Save();
+        Configuration.Save();
     }
 
     [EzIPC]
@@ -28,7 +28,7 @@ public class AutoHookIPC {
     [EzIPC]
     public void SetAutoStartFishing(bool state) {
         WriteConfig(() => _cfg.AutoStartFishing = state);
-        Service.Save();
+        Configuration.Save();
     }
 
     [EzIPC]
@@ -38,18 +38,18 @@ public class AutoHookIPC {
                 _cfg.AutoGigConfig.SelectedPreset = null;
             _cfg.AutoGigConfig.AutoGigEnabled = state;
         });
-        Service.Save();
+        Configuration.Save();
     }
 
     [EzIPC]
     public void SetPreset(string preset) {
         WriteConfig(() => _cfg.HookPresets.Select(_cfg.HookPresets.CustomPresets.FirstOrDefault(x => x.PresetName == preset), FishingPresets.ReasonIpc));
-        Service.Save();
+        Configuration.Save();
     }
 
     public void SetPresetAutogig(string preset) {
         WriteConfig(() => _cfg.AutoGigConfig.SelectedPreset = _cfg.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == preset));
-        Service.Save();
+        Configuration.Save();
     }
 
     [EzIPC]
@@ -64,7 +64,7 @@ public class AutoHookIPC {
                 SelectFirst = true,
                 SelectReason = FishingPresets.ReasonIpc
             }));
-        Service.Save();
+        Configuration.Save();
     }
 
     [EzIPC]
@@ -80,7 +80,7 @@ public class AutoHookIPC {
                 SelectFirst = true,
                 SelectReason = FishingPresets.ReasonIpc
             }));
-        Service.Save();
+        Configuration.Save();
         return true;
     }
 
@@ -103,7 +103,7 @@ public class AutoHookIPC {
                 _cfg.AutoGigConfig.AddNewPreset(gigPreset);
             }
         });
-        Service.Save();
+        Configuration.Save();
     }
 
     [EzIPC]
@@ -120,7 +120,7 @@ public class AutoHookIPC {
                 SelectFirst = true,
                 SelectReason = FishingPresets.ReasonIpc
             }));
-        Service.Save();
+        Configuration.Save();
     }
 
     [EzIPC]
@@ -138,7 +138,7 @@ public class AutoHookIPC {
                 SelectFirst = true,
                 SelectReason = FishingPresets.ReasonIpc
             }));
-        Service.Save();
+        Configuration.Save();
     }
 
     [EzIPC]
@@ -149,13 +149,13 @@ public class AutoHookIPC {
             _cfg.HookPresets.RemovePreset(selected.UniqueId);
             _cfg.HookPresets.Select(null, FishingPresets.ReasonIpc);
         });
-        Service.Save();
+        Configuration.Save();
     }
 
     [EzIPC]
     public void DeleteAllAnonymousPresets() {
         WriteConfig(() => _cfg.HookPresets.CustomPresets.RemoveAll(p => p.IsAnonymous));
-        Service.Save();
+        Configuration.Save();
     }
 
     [EzIPC]

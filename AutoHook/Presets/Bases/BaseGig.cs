@@ -1,6 +1,4 @@
-using AutoHook.Conditions;
 using AutoHook.Spearfishing.Enums;
-using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using System.ComponentModel;
 
@@ -59,14 +57,14 @@ public class BaseGig(int itemId) : BaseOption {
             if (DrawUtil.EditFloatField(UIStrings.OffsetLR, ref LeftOffset,
                     UIStrings.OffsetLRHelpText, true)) {
                 LeftOffset = Math.Max(-10, Math.Min(LeftOffset, 10));
-                Service.Save();
+                Configuration.Save();
             }
 
             ImGui.SetCursorPosX(x);
             if (DrawUtil.EditFloatField(UIStrings.OffsetRL, ref RightOffset,
                     UIStrings.OffsetRLHelpText, true)) {
                 RightOffset = Math.Max(-10, Math.Min(RightOffset, 10));
-                Service.Save();
+                Configuration.Save();
             }
         }, UIStrings.FishHitboxHelpText);
     }

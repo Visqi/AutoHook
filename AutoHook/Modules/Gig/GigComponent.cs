@@ -1,4 +1,3 @@
-using AutoHook.Conditions;
 using AutoHook.Spearfishing;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -7,12 +6,12 @@ using SFEnums = AutoHook.Spearfishing.Enums;
 namespace AutoHook.Modules.Gig;
 
 public sealed class GigComponent(GigFishingModule module) : GigFishingComponent(module) {
-    private static SpearFishingPresets GigCfg => Service.Configuration.AutoGigConfig;
+    private static SpearFishingPresets GigCfg => Configuration.C.AutoGigConfig;
 
     public override void Update() {
-        if (!Service.Configuration.PluginEnabled)
+        if (!Configuration.C.PluginEnabled)
             return;
-        if (Service.ActionExecutor.IsBusy)
+        if (ActionExecutor.Get().IsBusy)
             return;
         TryGigFromWorldState();
     }
@@ -45,7 +44,7 @@ public sealed class GigComponent(GigFishingModule module) : GigFishingComponent(
 
         var useCatchAll = GigCfg.IsCatchAllActive;
         for (var i = 0; i < 3; i++) {
-            if (Service.ActionExecutor.IsBusy)
+            if (ActionExecutor.Get().IsBusy)
                 return;
 
             var layout = sf.GetFishLayout(i);

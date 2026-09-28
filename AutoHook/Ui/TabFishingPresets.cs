@@ -15,7 +15,7 @@ public class TabFishingPresets : BaseTab {
 
     public override OpenWindow Type => OpenWindow.FishingPreset;
 
-    private static readonly FishingPresets _basePreset = Service.Configuration.HookPresets;
+    private static readonly FishingPresets _basePreset = Configuration.C.HookPresets;
 
     public static bool OpenPresetGen;
     private readonly PresetCreator PresetCreator = new();
@@ -177,7 +177,7 @@ public class TabFishingPresets : BaseTab {
 
                 if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
                     _basePreset.SelectedPreset = null;
-                    Service.Save();
+                    Configuration.Save();
                 }
             }
         }
@@ -212,7 +212,7 @@ public class TabFishingPresets : BaseTab {
 
                 if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
                     _basePreset.SelectedPreset = selected ? null : preset;
-                    Service.Save();
+                    Configuration.Save();
                 }
             }
         }
@@ -340,7 +340,7 @@ public class TabFishingPresets : BaseTab {
             // Update folder expand state
             if (isOpen != folder.IsExpanded) {
                 folder.IsExpanded = isOpen;
-                Service.Save();
+                Configuration.Save();
             }
         }
 
@@ -389,7 +389,7 @@ public class TabFishingPresets : BaseTab {
 
         if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_ORDER", out int itemIndex) && ImGui.IsMouseReleased(ImGuiMouseButton.Left)) {
             folder.AddPreset(_basePreset.CustomPresets[itemIndex].UniqueId);
-            Service.Save();
+            Configuration.Save();
         }
 
         if (ImGuiDragDrop.AcceptDragDropPayload("PRESET_IN_FOLDER", out Guid presetId) && ImGui.IsMouseReleased(ImGuiMouseButton.Left))
@@ -412,11 +412,11 @@ public class TabFishingPresets : BaseTab {
             if (!folder.PresetIds.Contains(presetId))
                 folder.AddPreset(presetId);
 
-            Service.Save();
+            Configuration.Save();
         }
         else if (sourceFolder == null) {
             folder.AddPreset(presetId);
-            Service.Save();
+            Configuration.Save();
         }
     }
 
@@ -433,7 +433,7 @@ public class TabFishingPresets : BaseTab {
                 _basePreset.Folders.Add(movingFolder);
             else
                 _basePreset.Folders.Insert(targetIndex, movingFolder);
-            Service.Save();
+            Configuration.Save();
             return;
         }
 
@@ -441,13 +441,13 @@ public class TabFishingPresets : BaseTab {
             var oldParent = movingFolder.ParentFolderId;
             movingFolder.ParentFolderId = folder.UniqueId;
             folder.ParentFolderId = oldParent;
-            Service.Save();
+            Configuration.Save();
             return;
         }
 
         if (!IsFolderDescendantOf(movingFolder, folder)) {
             movingFolder.ParentFolderId = folder.UniqueId;
-            Service.Save();
+            Configuration.Save();
         }
     }
 
@@ -465,7 +465,7 @@ public class TabFishingPresets : BaseTab {
             return;
 
         movingFolder.ParentFolderId = targetFolder?.UniqueId;
-        Service.Save();
+        Configuration.Save();
     }
 
     private void DrawRootPresetDragDrop(CustomPresetConfig preset, int i) {
@@ -492,7 +492,7 @@ public class TabFishingPresets : BaseTab {
                     _basePreset.SwapIndex(draggedIndex, i);
             }
 
-            Service.Save();
+            Configuration.Save();
         }
 
         AcceptFolderReparentAtPresetLevel(preset);
@@ -519,7 +519,7 @@ public class TabFishingPresets : BaseTab {
                         newPresetIds.RemoveAt(currentIndex);
                         newPresetIds.Insert(targetIndex, presetId);
                         folder.PresetIds = newPresetIds;
-                        Service.Save();
+                        Configuration.Save();
                     }
                 }
             }
@@ -750,7 +750,7 @@ public class TabFishingPresets : BaseTab {
                         }
 
                         var result = PresetImport.ImportFolderTree(_basePreset, folder, folders, presets, new PresetImportOptions { SelectedPresetIds = selectedPresetIds });
-                        Service.Save();
+                        Configuration.Save();
                         Notify.Success($"Folder imported with {result.ImportedPresets} presets");
 
                         ClearFolderImportState();
@@ -839,7 +839,7 @@ public class TabFishingPresets : BaseTab {
                     var folder = _basePreset.Folders.FirstOrDefault(f => f.UniqueId == renameFolderId.Value);
                     if (folder != null) {
                         folder.FolderName = renameFolderName;
-                        Service.Save();
+                        Configuration.Save();
                     }
                     renameFolderName = string.Empty;
                     renameFolderId = null;
@@ -876,7 +876,7 @@ public class TabFishingPresets : BaseTab {
 
         if (ImGui.Selectable(UIStrings.MakeACopy, false)) {
             CopyFolderTree(folder, folder.ParentFolderId, prefixName: true);
-            Service.Save();
+            Configuration.Save();
         }
 
         if (ImGui.Selectable(UIStrings.ExportFolderClipboard, false)) {
@@ -895,7 +895,7 @@ public class TabFishingPresets : BaseTab {
                     _basePreset.RemoveFolderWithContents(folder.UniqueId);
                 else
                     _basePreset.RemoveFolder(folder.UniqueId);
-                Service.Save();
+                Configuration.Save();
             }
         }
 
@@ -914,7 +914,7 @@ public class TabFishingPresets : BaseTab {
         var alreadySelected = _basePreset.SelectedPreset?.PresetName == preset.PresetName;
         if (ImGui.Selectable(!alreadySelected ? UIStrings.SetActive : UIStrings.Deselect)) {
             _basePreset.SelectedPreset = alreadySelected ? null : (CustomPresetConfig)preset;
-            Service.Save();
+            Configuration.Save();
         }
 
         if (ImGui.Selectable(UIStrings.Rename, false, ImGuiSelectableFlags.DontClosePopups)) {
@@ -936,7 +936,7 @@ public class TabFishingPresets : BaseTab {
             if (ImGui.Selectable(UIStrings.Delete, false, ImGuiSelectableFlags.DontClosePopups)) {
                 _basePreset.RemovePreset(preset.UniqueId);
                 displayed = _basePreset.SelectedPreset ?? _basePreset.DefaultPreset;
-                Service.Save();
+                Configuration.Save();
             }
         }
 
@@ -950,6 +950,6 @@ public class TabFishingPresets : BaseTab {
         copy!.UniqueId = Guid.NewGuid();
         copy.PresetName = $"Copy_{preset.PresetName}";
         _basePreset.AddNewPreset(copy);
-        Service.Save();
+        Configuration.Save();
     }
 }

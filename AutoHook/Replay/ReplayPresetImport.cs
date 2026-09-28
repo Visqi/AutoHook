@@ -24,13 +24,13 @@ public static class ReplayPresetImport {
             }
 
             preset.UniqueId = Guid.NewGuid();
-            var baseName = preset.PresetName == Service.GlobalPresetName ? $"{preset.PresetName} (replay)" : preset.PresetName;
+            var baseName = preset.PresetName == AutoHook.GlobalPresetName ? $"{preset.PresetName} (replay)" : preset.PresetName;
             preset.RenamePreset(UniquePresetName(baseName));
 
-            var hooks = Service.Configuration.HookPresets;
+            var hooks = Configuration.C.HookPresets;
             hooks.AddNewPreset(preset);
             hooks.SelectedPreset = preset;
-            Service.Save();
+            Configuration.Save();
             return true;
         }
         catch (Exception e) {
@@ -50,15 +50,15 @@ public static class ReplayPresetImport {
         preset.UniqueId = Guid.NewGuid();
         preset.RegenerateNestedUniqueIds();
         preset.RenamePreset(UniqueSpearfishingPresetName(preset.PresetName));
-        Service.Configuration.AutoGigConfig.AddNewPreset(preset);
-        Service.Configuration.AutoGigConfig.SelectedPreset = preset;
-        Service.Save();
+        Configuration.C.AutoGigConfig.AddNewPreset(preset);
+        Configuration.C.AutoGigConfig.SelectedPreset = preset;
+        Configuration.Save();
         error = null;
         return true;
     }
 
     private static string UniquePresetName(string baseName) {
-        var presets = Service.Configuration.HookPresets.CustomPresets;
+        var presets = Configuration.C.HookPresets.CustomPresets;
         if (presets.All(p => p.PresetName != baseName))
             return baseName;
 
@@ -70,7 +70,7 @@ public static class ReplayPresetImport {
     }
 
     private static string UniqueSpearfishingPresetName(string baseName) {
-        var presets = Service.Configuration.AutoGigConfig.Presets;
+        var presets = Configuration.C.AutoGigConfig.Presets;
         if (presets.All(p => p.PresetName != baseName))
             return baseName;
 

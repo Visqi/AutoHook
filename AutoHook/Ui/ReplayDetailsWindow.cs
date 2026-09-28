@@ -30,7 +30,7 @@ public sealed class ReplayDetailsWindow : Window, IDisposable {
     }
 
     public ReplayDetailsWindow(FishingReplay replay, DateTime? initialTime) : base($"Replay: {Path.GetFileName(replay.SourcePath)}###{replay.SourcePath}") {
-        Service.WindowSystem.AddWindow(this);
+        WindowsService.Get().WindowSystem.AddWindow(this);
         Size = (ImGui.GetMainViewport().Size - new Vector2(150, 150)) / ImGuiHelpers.GlobalScale;
         SizeCondition = ImGuiCond.FirstUseEver;
 
@@ -45,7 +45,7 @@ public sealed class ReplayDetailsWindow : Window, IDisposable {
             SeekTo(_playTime);
     }
 
-    public void Dispose() => Service.WindowSystem.RemoveWindow(this);
+    public void Dispose() => WindowsService.Get().WindowSystem.RemoveWindow(this);
 
     public override void Draw() {
         if (!IsOpen)

@@ -1,4 +1,3 @@
-using AutoHook.Conditions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
@@ -152,7 +151,7 @@ public class BaseHookset(uint requiredStatus) {
                     break;
             }
 
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGui.SameLine();

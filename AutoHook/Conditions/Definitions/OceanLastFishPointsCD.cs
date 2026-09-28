@@ -1,5 +1,3 @@
-using static AutoHook.Conditions.Params.ConditionParams;
-
 namespace AutoHook.Conditions.Definitions;
 
 public sealed class OceanLastFishPointsCD : IConditionDefinition {

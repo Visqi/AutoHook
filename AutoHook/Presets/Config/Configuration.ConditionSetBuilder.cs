@@ -1,6 +1,3 @@
-using AutoHook.Conditions.Definitions;
-using static AutoHook.Conditions.ConditionRegistry;
-
 namespace AutoHook.Presets.Config;
 
 public partial class Configuration {

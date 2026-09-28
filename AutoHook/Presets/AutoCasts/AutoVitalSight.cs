@@ -29,7 +29,7 @@ public sealed class AutoVitalSight : BaseActionCast {
         var stack = RequiredStacks;
         if (DrawUtil.EditNumberField(UIStrings.TabAutoCasts_DrawExtraOptionsThaliaksFavor_, ref stack)) {
             RequiredStacks = Math.Max(2, Math.Min(stack, 10));
-            Service.Save();
+            Configuration.Save();
         }
         DrawAutoCastConditions();
     };

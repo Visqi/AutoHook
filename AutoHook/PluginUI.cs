@@ -1,4 +1,3 @@
-using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -17,6 +16,8 @@ using System.Reflection;
 namespace AutoHook;
 
 public class PluginUi : Window, IDisposable {
+    public static string Status { get; set; } = "";
+
     private static readonly List<BaseTab> _tabs =
     [
         new TabFishingPresets(),
@@ -26,11 +27,10 @@ public class PluginUi : Window, IDisposable {
     ];
 
     private readonly BaseTab debug = new TabDebug();
-
     private static OpenWindow _selectedTab = OpenWindow.FishingPreset;
 
-    public PluginUi() : base($"{Service.PluginName} {Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? ""}###MainAutoHook") {
-        Service.WindowSystem.AddWindow(this);
+    public PluginUi() : base($"{Svc.Interface.Manifest.Name} {Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? ""}###MainAutoHook") {
+        WindowsService.Get().WindowSystem.AddWindow(this);
 
         Flags |= ImGuiWindowFlags.NoScrollbar;
         Flags |= ImGuiWindowFlags.NoScrollWithMouse;
@@ -49,7 +49,7 @@ public class PluginUi : Window, IDisposable {
             tab.Dispose();
         }
 
-        Service.WindowSystem.RemoveWindow(this);
+        WindowsService.Get().WindowSystem.RemoveWindow(this);
     }
 
     public override void Draw() {
@@ -63,34 +63,14 @@ public class PluginUi : Window, IDisposable {
             IPluginLog.Get().Error(e, "[PluginUI] Draw failed.");
         }
     }
-    private void Debug() {
-        using var _ = ImRaii.PushId("debug");
-        ImGui.SetNextItemWidth(300.Scaled());
-        if (ImGui.Begin($"DebugWIndows", ref Service.OpenConsole)) {
-            var logs = Service.LogMessages.AsEnumerable().Reverse().ToList();
-            for (var i = 0; i < logs.Count; i++) {
-                using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudYellow, i == 0))
-                    ImGui.TextWrapped($"{i + 1} - {logs[i]}");
-
-                ImGui.Spacing();
-                ImGui.Separator();
-                ImGui.Spacing();
-            }
-        }
-
-        ImGui.End();
-    }
 
     private void DrawNewLayout() {
         var region = ImGui.GetContentRegionAvail();
         var topLeftSideHeight = region.Y;
 
-        if (Service.Configuration.ShowStatus) {
+        if (Configuration.C.ShowStatus) {
             DrawStatus();
         }
-
-        if (Service.OpenConsole)
-            Debug();
 
         using (var style = ImRaii.PushStyle(ImGuiStyleVar.CellPadding, new Vector2(5.Scaled(), 0))) {
             using var table = ImRaii.Table("###MainTable", 2, ImGuiTableFlags.Resizable);
@@ -102,22 +82,19 @@ public class PluginUi : Window, IDisposable {
             using (ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f)))
             using (var leftChild = ImRaii.Child($"###AhLeft", regionSize with { Y = topLeftSideHeight }, false, ImGuiWindowFlags.NoDecoration)) {
                 if (ImGui.Selectable(UIStrings.StartActions))
-                    Service.FishingSessions.StartFishing();
+                    FishingSessionManager.Get().StartFishing();
 
                 using (var c = ImRaii.Child("logo", new(0, 125.Scaled()))) {
-                    if (ITextureProvider.Get().GetFromManifestResource(Assembly.GetExecutingAssembly(), $"AutoHook.Assets.Fishy{(Service.Configuration.PluginEnabled ? "" : "_g")}.png").TryGetWrap(out var image, out var _)) {
+                    if (ITextureProvider.Get().GetFromManifestResource(Assembly.GetExecutingAssembly(), $"AutoHook.Assets.Fishy{(Configuration.C.PluginEnabled ? "" : "_g")}.png").TryGetWrap(out var image, out var _)) {
                         ImGuiEx.LineCentered("###AHLogo", () => {
                             ImGui.Image(image.Handle, new Vector2(125.Scaled(), 125.Scaled()));
 
                             if (ImGui.IsItemClicked(ImGuiMouseButton.Left)) {
-                                if (ImGui.GetIO().KeyShift && Service.Configuration.PluginEnabled)
-                                    Service.FishingSessions.RequestStopAfterNextFish();
+                                if (ImGui.GetIO().KeyShift && Configuration.C.PluginEnabled)
+                                    FishingSessionManager.Get().RequestStopAfterNextFish();
                                 else
-                                    Service.Configuration.PluginEnabled = !Service.Configuration.PluginEnabled;
+                                    Configuration.C.PluginEnabled = !Configuration.C.PluginEnabled;
                             }
-
-                            if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-                                Service.OpenConsole = !Service.OpenConsole;
 
                             ImGui.TooltipOnHover(UIStrings.ClickToToggle);
                         });
@@ -168,10 +145,10 @@ public class PluginUi : Window, IDisposable {
 
     private static void DrawStatus() {
         ImGuiEx.LineCentered("###AhStatus", () => {
-            if (!Service.Configuration.PluginEnabled) {
+            if (!Configuration.C.PluginEnabled) {
                 ImGui.TextColored(ImGuiColors.DalamudGrey, UIStrings.Plugin_Disabled);
             }
-            else if (Service.WorldState.Fishing.FishingState == FishingState.None) {
+            else if (WorldState.Get().Fishing.FishingState == FishingState.None) {
                 try {
                     var preset = _presets.SelectedPreset;
                     if (preset == null) {
@@ -179,12 +156,12 @@ public class PluginUi : Window, IDisposable {
                             UIStrings.StatusNoPreset);
                     }
                     else {
-                        var baitId = Service.WorldState.Fishing.BaitInfo.BaitId;
+                        var baitId = WorldState.Get().Fishing.BaitInfo.BaitId;
                         var baitName = baitId == 0 ? UIStrings.None : Item.GetRow(baitId).Name.ToString();
 
                         var hasBait = preset != null && preset.HasBaitOrMooch(baitId);
                         var presetName = hasBait ? _presets.SelectedPreset?.PresetName : _presets.DefaultPreset.PresetName;
-                        Service.Status = $"Equipped Bait: {baitName} - Preset \'{presetName}\' will be used.";
+                        PluginUi.Status = $"Equipped Bait: {baitName} - Preset \'{presetName}\' will be used.";
 
                         ImGui.TextColored(ImGuiColors.DalamudViolet, $"Equipped Bait:");
                         ImGui.SameLine(0, 3.Scaled());
@@ -202,7 +179,7 @@ public class PluginUi : Window, IDisposable {
                 }
             }
             else
-                ImGui.TextColored(ImGuiColors.DalamudViolet, Service.Status);
+                ImGui.TextColored(ImGuiColors.DalamudViolet, PluginUi.Status);
         });
 
         ImGui.Separator();
@@ -221,7 +198,7 @@ public class PluginUi : Window, IDisposable {
     }
 
     private bool _openChangelog = false;
-    private static readonly FishingPresets _presets = Service.Configuration.HookPresets;
+    private static readonly FishingPresets _presets = Configuration.C.HookPresets;
 
     [Localizable(false)]
     private void DrawChangelog() {

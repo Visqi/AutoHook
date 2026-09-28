@@ -15,11 +15,11 @@ public sealed class AutoOceanFish(uint zoneIndex) : TaskBase {
         new("Right", -7.25f, -7f, 6.711f, -11f, 3.5f),
     ];
 
-    private static WorldState Ws => Service.WorldState;
+    private static WorldState Ws => WorldState.Get();
 
     protected override async Task Execute() {
         using var scope = BeginScope(nameof(AutoOceanFish));
-        var walk = ZoneIndex == 0 && Service.Configuration.AOF_WalkToRailing;
+        var walk = ZoneIndex == 0 && Configuration.C.AOF_WalkToRailing;
 
         if (walk) {
             Status = "Walking to railing";
@@ -29,8 +29,8 @@ public sealed class AutoOceanFish(uint zoneIndex) : TaskBase {
         }
 
         Status = "Starting fishing";
-        await WaitUntil(() => Service.WorldState.Fishing.CanFish, "WaitForCanFish", checkFrequency: 50);
-        Service.FishingSessions.StartFishing();
+        await WaitUntil(() => WorldState.Get().Fishing.CanFish, "WaitForCanFish", checkFrequency: 50);
+        FishingSessionManager.Get().StartFishing();
     }
 
     // https://github.com/Knightmore/Henchman/blob/4aa8cf33b6164536acca81afefa0df5da6740e89/Henchman/Features/OnABoat/OnABoat.cs#L120
@@ -91,7 +91,7 @@ public sealed class AutoOceanFish(uint zoneIndex) : TaskBase {
     }
 
     private static bool ShouldCancelMovement()
-        => !Service.Configuration.PluginEnabled || Ws.Fishing.FishingState is not FishingState.None || Ws.OceanFishing.TimeLeftInZone != 0 && Ws.OceanFishing.TimeLeftInZone < Ws.OceanFishing.ZoneTimeMax - 5;
+        => !Configuration.C.PluginEnabled || Ws.Fishing.FishingState is not FishingState.None || Ws.OceanFishing.TimeLeftInZone != 0 && Ws.OceanFishing.TimeLeftInZone < Ws.OceanFishing.ZoneTimeMax - 5;
 }
 
 internal readonly record struct FishingSpotRegion(string Name, float MinX, float MaxX, float Y, float MinZ, float MaxZ) {

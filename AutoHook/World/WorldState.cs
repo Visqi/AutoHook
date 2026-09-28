@@ -1,11 +1,20 @@
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 
 namespace AutoHook.World;
 
-public sealed class WorldState(ulong qpf, string gameVersion) {
-    public ulong QPF = qpf;
-    public string GameVersion = gameVersion;
+public sealed class WorldState : IPluginService {
+    public ulong QPF;
+    public string GameVersion = "";
     public FrameState Frame;
+
+    public unsafe WorldState()
+        : this((ulong)Framework.Instance()->PerformanceCounterFrequency, IDataManager.Get().GameData.Repositories["ffxiv"].Version) { }
+
+    public WorldState(ulong qpf, string gameVersion) {
+        QPF = qpf;
+        GameVersion = gameVersion;
+    }
 
     public TimeOnly EorzeaTime { get; set; }
 
@@ -119,7 +128,7 @@ public sealed class WorldState(ulong qpf, string gameVersion) {
     public void Execute(Operation op) => op.Execute(this);
 
     public void Decide(DecisionContext context, bool success, string action, string? detail = null, string? preset = null) {
-        var presetName = preset ?? Service.Configuration.HookPresets.SelectedPreset?.PresetName ?? Service.GlobalPresetName;
+        var presetName = preset ?? Configuration.C.HookPresets.SelectedPreset?.PresetName ?? AutoHook.GlobalPresetName;
         Execute(new OpDecision(context, success, presetName, action, detail ?? ""));
     }
 

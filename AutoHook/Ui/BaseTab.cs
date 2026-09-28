@@ -18,7 +18,7 @@ public abstract class BaseTab : IDisposable {
     }
 
     public void DrawTabDescription(string tabDescription) {
-        if (!Service.Configuration.HideTabDescription) {
+        if (!Configuration.C.HideTabDescription) {
             if (ImGui.TreeNodeEx(UIStrings.Tab_Description, ImGuiTreeNodeFlags.FramePadding)) {
                 _showDescription = true;
                 ImGui.TreePop();

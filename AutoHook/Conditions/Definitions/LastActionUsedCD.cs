@@ -1,4 +1,3 @@
-using static AutoHook.Conditions.Params.ConditionParams;
 using LuminaAction = Lumina.Excel.Sheets.Action;
 
 namespace AutoHook.Conditions.Definitions;

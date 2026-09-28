@@ -1,4 +1,3 @@
-using AutoHook.Conditions;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using System.ComponentModel;

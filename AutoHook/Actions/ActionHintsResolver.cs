@@ -1,3 +1,5 @@
+using AutoHook.Extensions;
+using AutoHook.Services;
 using AutoHook.Tasks;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -72,7 +74,7 @@ public sealed class ActionHintsResolver {
 
             case ResetCounterHint:
                 GetExtraOwnerPreset().ResetCounter();
-                Service.PrintChat(@"[Extra] Trigger: Reset fish caught counter");
+                IChatGui.Get().PrintStatus(@"[Extra] Trigger: Reset fish caught counter");
                 break;
 
             case SwapPresetHint swap:
@@ -88,15 +90,15 @@ public sealed class ActionHintsResolver {
             case SwapBaitHint swapBait:
                 var baitResult = PresetSwapHelpers.TrySwapBait(ws, swapBait.Bait, skipIfAlreadySwapped: true);
                 if (baitResult is ChangeBaitReturn.Success or ChangeBaitReturn.AlreadyEquipped) {
-                    Service.PrintChat(@$"[Extra] Trigger: Swapping bait to {swapBait.Bait.Name}");
-                    Service.Save();
+                    IChatGui.Get().PrintStatus(@$"[Extra] Trigger: Swapping bait to {swapBait.Bait.Name}");
+                    Configuration.Save();
                 }
                 break;
 
             case RemoveStatusHint remove:
                 if (remove.StatusId != 0 && ws.Player.HasStatus(remove.StatusId) && EzThrottler.Throttle("ExtraRemoveStatus", 500)) {
                     if (StatusManager.ExecuteStatusOff(remove.StatusId))
-                        Service.PrintChat(@$"[Extra] Trigger: Removed {StatusSheet.GetRow(remove.StatusId).Name}");
+                        IChatGui.Get().PrintStatus(@$"[Extra] Trigger: Removed {StatusSheet.GetRow(remove.StatusId).Name}");
                 }
                 break;
 
@@ -109,12 +111,12 @@ public sealed class ActionHintsResolver {
             case StartReductionHint:
                 if (Svc.Automation.CurrentTask is not AetherialReduction) {
                     Svc.Automation.Start(new AetherialReduction());
-                    Service.PrintChat(UIStrings.AetherialReduction_Started);
+                    IChatGui.Get().PrintStatus(UIStrings.AetherialReduction_Started);
                 }
                 break;
 
             case NotifyHint notify:
-                Service.NotificationMaster.TryNotify(notify.Config, notify.FallbackText);
+                NotificationMasterService.Get().Api.TryNotify(notify.Config, notify.FallbackText);
                 break;
         }
     }
@@ -123,21 +125,21 @@ public sealed class ActionHintsResolver {
         => RodFishingModule.Presets.SelectedPreset?.ExtraCfg.Enabled == true ? RodFishingModule.Presets.SelectedPreset : RodFishingModule.Presets.DefaultPreset;
 
     public bool ExecuteImmediate(ActionRequest request)
-        => Service.ActionExecutor.ExecuteRequest(request);
+        => ActionExecutor.Get().ExecuteRequest(request);
 
     private static bool EnqueueWinner(ActionRequest request, List<ActionRequest>? chain, Action? afterExecute) {
         var hasFollowUp = chain is { Count: > 0 } || afterExecute != null;
         bool enqueued;
 
         if (chain is { Count: > 0 })
-            enqueued = Service.ActionExecutor.Enqueue(request, [.. chain]);
+            enqueued = ActionExecutor.Get().Enqueue(request, [.. chain]);
         else if (hasFollowUp)
-            enqueued = Service.ActionExecutor.Enqueue(request, forceQueue: true);
+            enqueued = ActionExecutor.Get().Enqueue(request, forceQueue: true);
         else
-            enqueued = Service.ActionExecutor.Enqueue(request);
+            enqueued = ActionExecutor.Get().Enqueue(request);
 
         if (afterExecute != null)
-            Service.ActionExecutor.EnqueueCallback(afterExecute);
+            ActionExecutor.Get().EnqueueCallback(afterExecute);
 
         return enqueued;
     }

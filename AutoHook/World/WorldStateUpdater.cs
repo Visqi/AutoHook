@@ -1,11 +1,10 @@
-using AutoHook.World.UpdateModules;
 using Dalamud.Game.Inventory.InventoryEventArgTypes;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 
 namespace AutoHook.World;
 
-public sealed class WorldStateUpdater : IDisposable {
+public sealed class WorldStateUpdater : IPluginService, IDisposable {
     private readonly DateTime _startTime = DateTime.UtcNow;
     private readonly long _startQpc;
 
@@ -35,7 +34,7 @@ public sealed class WorldStateUpdater : IDisposable {
         if (Player.ClassJob.RowId is not 18 || IObjectTable.Get().LocalPlayer is null)
             return;
 
-        var ws = Service.WorldState;
+        var ws = WorldState.Get();
         var fwk = Framework.Instance();
         if (fwk == null)
             return;
@@ -92,7 +91,7 @@ public sealed class WorldStateUpdater : IDisposable {
         if (Player.ClassJob.RowId is not 18 || IObjectTable.Get().LocalPlayer is null)
             return;
 
-        _fishing.Refresh(Service.WorldState);
+        _fishing.Refresh(WorldState.Get());
     }
 
     private void OnInventoryChanged(IReadOnlyCollection<InventoryEventArgs> _)

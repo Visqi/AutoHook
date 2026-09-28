@@ -1,22 +1,20 @@
-using AutoHook.Conditions;
-
 namespace AutoHook.Modules.Ocean;
 
 public static class OceanPresetSelector {
     public static void TryApply() {
-        if (!Service.Configuration.AutoOceanFish)
+        if (!Configuration.C.AutoOceanFish)
             return;
 
-        var ws = Service.WorldState;
+        var ws = WorldState.Get();
         var ocean = ws.OceanFishing;
         if (ocean == OceanFishingState.Empty || ocean.TimeOfDay == TimeOfDay.None)
             return;
 
         OceanGoalCatalog.PrefetchRouteAchievements(ocean.CurrentRoute);
 
-        var settingsGoal = Service.Configuration.AutoOceanFishGoal;
+        var settingsGoal = Configuration.C.AutoOceanFishGoal;
         var stop = OceanStopUtil.FormatStopLabel(ocean.CurrentSpotId, ocean.CurrentTimeId);
-        var fallthrough = Service.Configuration.AOF_Fallthrough ? "fallthrough if acquired" : "keep goal if acquired";
+        var fallthrough = Configuration.C.AOF_Fallthrough ? "fallthrough if acquired" : "keep goal if acquired";
         var about = $"{settingsGoal} · route {ocean.CurrentRoute} · zone {ocean.CurrentZone + 1} · {stop} · {fallthrough}";
         var skips = new List<string>();
 
@@ -76,7 +74,7 @@ public static class OceanPresetSelector {
         });
         var status = string.Join(", ", statusParts);
 
-        var skipIfAcquired = Service.Configuration.AOF_Fallthrough;
+        var skipIfAcquired = Configuration.C.AOF_Fallthrough;
         var eligible = OceanGoalCatalog.GetEligibleAchievementIds(ocean.CurrentRoute, skipIfAcquired);
         if (eligible.Count == 0) {
             skips.Add(skipIfAcquired ? $"Achievement — not eligible ({status})" : $"Achievement — not eligible, party size ({status})");
@@ -98,7 +96,7 @@ public static class OceanPresetSelector {
     private static bool TryMatchLevellingTier(OceanFishingState ocean, List<string> skips, out CustomPresetConfig preset) {
         preset = null!;
 
-        if (!OceanGoalCatalog.IsLevellingNeeded() && Service.Configuration.AOF_Fallthrough) {
+        if (!OceanGoalCatalog.IsLevellingNeeded() && Configuration.C.AOF_Fallthrough) {
             skips.Add("Levelling — max level");
             return false;
         }
@@ -125,7 +123,7 @@ public static class OceanPresetSelector {
         var status = string.Join(", ", forRoute.Select(f =>
             $"#{f.FishParameterId} {(OceanGoalCatalog.IsLegendaryCaught(f.FishParameterId) ? "caught" : "uncaught")}"));
 
-        var skipIfAcquired = Service.Configuration.AOF_Fallthrough;
+        var skipIfAcquired = Configuration.C.AOF_Fallthrough;
         var eligible = OceanGoalCatalog.GetEligibleLegendaryIds(ocean.CurrentRoute, skipIfAcquired);
         if (eligible.Count == 0) {
             skips.Add($"Legendary — already caught ({status})");
@@ -148,7 +146,7 @@ public static class OceanPresetSelector {
             var alreadyGlobal = presets.SelectedPreset == null;
             if (!alreadyGlobal)
                 presets.Select(null, FishingPresets.ReasonAutoOceanFish);
-            ws.Decide(DecisionContext.OceanPreset, true, alreadyGlobal ? $"Already on global ({tier})" : $"Selected global ({tier})", JoinDetail(about, skips), Service.GlobalPresetName);
+            ws.Decide(DecisionContext.OceanPreset, true, alreadyGlobal ? $"Already on global ({tier})" : $"Selected global ({tier})", JoinDetail(about, skips), AutoHook.GlobalPresetName);
             return;
         }
 
@@ -184,7 +182,7 @@ public static class OceanPresetSelector {
             return false;
         if (!extra.AutoOceanFishAllStops && !OceanStopUtil.MatchesStop(extra.AutoOceanFishSpotId, extra.AutoOceanFishTimeId, ocean))
             return false;
-        return !(extra.AutoOceanFishConditionSet is { } set) || !set.HasAnyCondition() || !set.Fails(Service.WorldState);
+        return !(extra.AutoOceanFishConditionSet is { } set) || !set.HasAnyCondition() || !set.Fails(WorldState.Get());
     }
 
     private static IEnumerable<CustomPresetConfig> EnumerateHookPresets() {

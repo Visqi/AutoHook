@@ -11,7 +11,7 @@ public class FishingPresets : BasePreset {
     public const string ReasonIpc = "IPC";
 
     // Global preset, cant rename rn 
-    public CustomPresetConfig DefaultPreset = new(Service.GlobalPresetName);
+    public CustomPresetConfig DefaultPreset = new(AutoHook.GlobalPresetName);
 
     public List<CustomPresetConfig> CustomPresets = [];
 
@@ -40,7 +40,7 @@ public class FishingPresets : BasePreset {
             CustomPresets.Add(newPreset);
             InvalidatePresetListCache();
         });
-        Service.Save();
+        Configuration.Save();
     }
 
     public override void AddNewPreset(BasePresetConfig preset) {
@@ -52,7 +52,7 @@ public class FishingPresets : BasePreset {
             CustomPresets.Add(copy);
             InvalidatePresetListCache();
         });
-        Service.Save();
+        Configuration.Save();
     }
 
     public override void RemovePreset(Guid value) {
@@ -63,7 +63,7 @@ public class FishingPresets : BasePreset {
 
             if (SelectedGuid == value.ToString()) {
                 SelectedGuid = "";
-                Service.Status = string.Empty;
+                PluginUi.Status = string.Empty;
             }
 
             foreach (var folder in Folders)
@@ -72,12 +72,12 @@ public class FishingPresets : BasePreset {
             CustomPresets.Remove(preset);
             InvalidatePresetListCache();
         });
-        Service.Save();
+        Configuration.Save();
     }
 
     public override void OnSelectedPreset(BasePresetConfig? newPreset, BasePresetConfig? oldPreset) {
         NotifyPresetSelected(newPreset, oldPreset);
-        Service.Save();
+        Configuration.Save();
     }
 
     public override void SwapIndex(int itemIndex, int targetIndex) {
@@ -90,12 +90,12 @@ public class FishingPresets : BasePreset {
             CustomPresets.Insert(targetIndex, moved);
             InvalidatePresetListCache();
         });
-        Service.Save();
+        Configuration.Save();
     }
 
     public void AddNewFolder(string folderName) {
         Configuration.MutateSerialized(() => Folders.Add(new PresetFolder(folderName)));
-        Service.Save();
+        Configuration.Save();
     }
 
     public void AddNewFolder(string folderName, Guid? parentFolderId) {
@@ -104,7 +104,7 @@ public class FishingPresets : BasePreset {
                 ParentFolderId = parentFolderId,
             });
         });
-        Service.Save();
+        Configuration.Save();
     }
 
     public void RemoveFolder(Guid folderId) {
@@ -113,7 +113,7 @@ public class FishingPresets : BasePreset {
             if (folder != null)
                 Folders.Remove(folder);
         });
-        Service.Save();
+        Configuration.Save();
     }
 
     private void RemoveFolderWithContentsRecursive(PresetFolder folder) {
@@ -126,7 +126,7 @@ public class FishingPresets : BasePreset {
             if (preset != null) {
                 if (SelectedGuid == presetId.ToString()) {
                     SelectedGuid = "";
-                    Service.Status = string.Empty;
+                    PluginUi.Status = string.Empty;
                 }
                 CustomPresets.Remove(preset);
             }
@@ -143,7 +143,7 @@ public class FishingPresets : BasePreset {
             if (folder != null)
                 RemoveFolderWithContentsRecursive(folder);
         });
-        Service.Save();
+        Configuration.Save();
     }
 
     public void RegisterPreset(CustomPresetConfig preset, bool select = true) {
@@ -154,24 +154,24 @@ public class FishingPresets : BasePreset {
             InvalidatePresetListCache();
             if (select) {
                 SelectedGuid = preset.UniqueId.ToString();
-                Service.Status = string.Empty;
+                PluginUi.Status = string.Empty;
             }
         });
 
         if (select)
             NotifyPresetSelected(preset, oldPreset);
 
-        Service.Save();
+        Configuration.Save();
     }
 
     private unsafe void NotifyPresetSelected(BasePresetConfig? newPreset, BasePresetConfig? oldPreset) {
         if (oldPreset is CustomPresetConfig old)
             old.TryResetCounter();
 
-        var from = oldPreset?.PresetName ?? Service.GlobalPresetName;
-        var to = newPreset?.PresetName ?? Service.GlobalPresetName;
+        var from = oldPreset?.PresetName ?? AutoHook.GlobalPresetName;
+        var to = newPreset?.PresetName ?? AutoHook.GlobalPresetName;
         if (from != to) {
-            Service.WorldState.Decide(DecisionContext.PresetSwitch, true, $"{from} -> {to}", $"Reason: {_selectReason ?? ReasonManual}", to);
+            WorldState.Get().Decide(DecisionContext.PresetSwitch, true, $"{from} -> {to}", $"Reason: {_selectReason ?? ReasonManual}", to);
         }
 
         if (newPreset is CustomPresetConfig { ListOfFish: var fishCaught }) {

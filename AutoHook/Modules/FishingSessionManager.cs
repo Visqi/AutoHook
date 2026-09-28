@@ -1,21 +1,19 @@
-using AutoHook.Modules.Gig;
 using AutoHook.Tasks;
-using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
 namespace AutoHook.Modules;
 
-public sealed class FishingSessionManager : IDisposable {
+public sealed class FishingSessionManager : IPluginService, IDisposable {
     private const uint FisherJobId = 18;
 
     public RodFishingModule Rod { get; }
     public GigFishingModule Gig { get; }
 
-    private static WorldState Ws => Service.WorldState;
+    private static WorldState Ws => WorldState.Get();
 
     public FishingSessionManager() {
-        Rod = new RodFishingModule(Service.WorldState);
-        Gig = new GigFishingModule(Service.WorldState);
+        Rod = new RodFishingModule(WorldState.Get());
+        Gig = new GigFishingModule(WorldState.Get());
         IFramework.Get().Update += OnFrameworkUpdate;
     }
 
@@ -30,8 +28,8 @@ public sealed class FishingSessionManager : IDisposable {
     public void RequestStopAfterNextFish() => Rod.RequestStopAfterNextFish();
 
     private void OnFrameworkUpdate(IFramework _) {
-        if (!Service.Configuration.PluginEnabled || !IClientState.Get().IsLoggedIn || IObjectTable.Get().LocalPlayer == null) {
-            if (!Service.Configuration.PluginEnabled && Svc.Automation.CurrentTask is AutoOceanFish)
+        if (!Configuration.C.PluginEnabled || !IClientState.Get().IsLoggedIn || IObjectTable.Get().LocalPlayer == null) {
+            if (!Configuration.C.PluginEnabled && Svc.Automation.CurrentTask is AutoOceanFish)
                 Svc.Automation.Stop();
 
             var sf = Ws.Spearfishing;
@@ -40,7 +38,7 @@ public sealed class FishingSessionManager : IDisposable {
             return;
         }
 
-        Service.WorldStateUpdater.Update();
+        WorldStateUpdater.Get().Update();
 
         if (Svc.Automation.CurrentTask is AutoOceanFish && Ws.Fishing.FishingState != FishingState.None) {
             Ws.Decide(DecisionContext.OceanPreset, true, "Stop task", "already fishing");

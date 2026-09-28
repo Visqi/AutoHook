@@ -118,7 +118,7 @@ public class SubTabAutoCast {
                     ImGuiInputTextFlags.EnterReturnsTrue);
                 if (startTimeGui && TimeOnly.TryParse(startTime, out var newStartTime)) {
                     acCfg.TimeWindow.Value = (true, newStartTime, end);
-                    Service.Save();
+                    Configuration.Save();
                 }
             }
 
@@ -127,13 +127,13 @@ public class SubTabAutoCast {
                     ImGuiInputTextFlags.EnterReturnsTrue);
                 if (endTimeGui && TimeOnly.TryParse(endTime, out var newEndTime)) {
                     acCfg.TimeWindow.Value = (true, start, newEndTime);
-                    Service.Save();
+                    Configuration.Save();
                 }
             }
         }, UIStrings.SpecificTimeWindowHelpText);
         if (enabledLocal != enabled) {
             acCfg.TimeWindow.Value = (enabledLocal, start, end);
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGui.TextColored(ImGuiColors.DalamudOrange, UIStrings.Auto_Cast_Sort_Notice);

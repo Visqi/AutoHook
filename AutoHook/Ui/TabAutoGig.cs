@@ -11,7 +11,7 @@ internal class TabAutoGig : BaseTab {
 
     public override OpenWindow Type => OpenWindow.AutoGig;
 
-    private readonly SpearFishingPresets _gigCfg = Service.Configuration.AutoGigConfig;
+    private readonly SpearFishingPresets _gigCfg = Configuration.C.AutoGigConfig;
 
     // null = viewing Catch Everything (Global)
     private AutoGigConfig? _displayed;
@@ -92,7 +92,7 @@ internal class TabAutoGig : BaseTab {
                 ImGui.SetNextItemWidth(90.Scaled());
                 if (ImGui.InputInt(UIStrings.GigHitbox, ref _gigCfg.GlobalHitboxSize)) {
                     _gigCfg.GlobalHitboxSize = Math.Max(0, Math.Min(_gigCfg.GlobalHitboxSize, 300));
-                    Service.Save();
+                    Configuration.Save();
                 }
 
                 ImGui.Spacing();
@@ -138,7 +138,7 @@ internal class TabAutoGig : BaseTab {
 
                     if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
                         _gigCfg.SelectedPreset = isActive ? null : preset;
-                        Service.Save();
+                        Configuration.Save();
                     }
                 }
             }
@@ -155,7 +155,7 @@ internal class TabAutoGig : BaseTab {
 
                 if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
                     _gigCfg.SelectedPreset = null;
-                    Service.Save();
+                    Configuration.Save();
                 }
             }
         }

@@ -1,4 +1,3 @@
-using AutoHook.Conditions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
@@ -62,22 +61,22 @@ public class BaseBiteConfig(HookType type) {
         if (!UseMultipleHookTypesByTimer) {
             if (ImGui.RadioButton(UIStrings.Normal_Hook, HooksetType == HookType.Normal)) {
                 HooksetType = HookType.Normal;
-                Service.Save();
+                Configuration.Save();
             }
 
             if (ImGui.RadioButton(UIStrings.PrecisionHookset, HooksetType == HookType.Precision)) {
                 HooksetType = HookType.Precision;
-                Service.Save();
+                Configuration.Save();
             }
 
             if (ImGui.RadioButton(UIStrings.PowerfulHookset, HooksetType == HookType.Powerful)) {
                 HooksetType = HookType.Powerful;
-                Service.Save();
+                Configuration.Save();
             }
 
             if (ImGui.RadioButton(UIStrings.StellarHookset, HooksetType == HookType.Stellar)) {
                 HooksetType = HookType.Stellar;
-                Service.Save();
+                Configuration.Save();
             }
 
             HookTypeConditionSet = ConditionUi.DrawConditionSet(UIStrings.Conditions, HookTypeConditionSet, ConditionScope.Hook, showAdvanced: true, showSubPrefix: true);
@@ -129,7 +128,7 @@ public class BaseBiteConfig(HookType type) {
                     break;
             }
 
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGui.SameLine();
@@ -150,7 +149,7 @@ public class BaseBiteConfig(HookType type) {
                     break;
             }
 
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGuiComponents.HelpMarker(UIStrings.HelpMarkerMaxWaitTimer);

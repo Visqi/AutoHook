@@ -53,7 +53,7 @@ internal static class LegacyPresetMapper {
 
         var newPreset = new CustomPresetConfig(old.PresetName);
 
-        Service.PrintDebug($"Converting v3 to v4: {old.PresetName}");
+        IPluginLog.Get().Debug($"Converting v3 to v4: {old.PresetName}");
         foreach (var bait in old.ListOfBaits) {
             bait.ConvertV3ToV4();
 

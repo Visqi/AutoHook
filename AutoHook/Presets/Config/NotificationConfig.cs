@@ -53,7 +53,7 @@ public record class NotificationConfig {
         ImGui.SetNextItemWidth(320.Scaled());
         if (ImGui.InputText(label, ref text, 10_000)) {
             field = text;
-            Service.Save();
+            Configuration.Save();
         }
     }
 }

@@ -81,19 +81,19 @@ public class AutoGigConfig : BasePresetConfig {
 
     public void ResetCounter() {
         SpearfishingCounterHelper.Reset(Gigs);
-        if (Service.WorldState.Spearfishing.FishCaughtCounts.Count > 0)
-            Service.WorldState.Execute(new SpearfishingState.OpResetFishCaught());
+        if (WorldState.Get().Spearfishing.FishCaughtCounts.Count > 0)
+            WorldState.Get().Execute(new SpearfishingState.OpResetFishCaught());
     }
 
     public override void AddItem(BaseOption item) {
         Gigs.Add((BaseGig)item);
-        Service.Save();
+        Configuration.Save();
     }
 
     public override void RemoveItem(Guid value) {
         SpearfishingCounterHelper.Remove(value);
         Gigs.RemoveAll(x => x.UniqueId == value);
-        Service.Save();
+        Configuration.Save();
     }
 
     public override void DrawOptions() {
@@ -127,7 +127,7 @@ public class AutoGigConfig : BasePresetConfig {
         if (ImGui.Button(UIStrings.Add)) {
             if (!Gigs.Any(gig => gig.SpearfishingNotebookId == SelectedAddPoolId && gig.Fish == null))
                 AddItem(new BaseGig(0) { SpearfishingNotebookId = SelectedAddPoolId });
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGui.SameLine();
@@ -159,7 +159,7 @@ public class AutoGigConfig : BasePresetConfig {
         ImGui.SetNextItemWidth(90.Scaled());
         if (ImGui.InputInt(UIStrings.GigHitbox, ref HitboxSize)) {
             HitboxSize = Math.Max(0, Math.Min(HitboxSize, 300));
-            Service.Save();
+            Configuration.Save();
         }
 
         DrawUtil.Checkbox("Retain counters between pools", ref RetainCountersBetweenSessions);
@@ -181,7 +181,7 @@ public class AutoGigConfig : BasePresetConfig {
                 ImGui.Spacing();
                 if (ImGui.Button(UIStrings.Add)) {
                     AddItem(new BaseGig(0) { SpearfishingNotebookId = group.Key });
-                    Service.Save();
+                    Configuration.Save();
                 }
 
                 ImGui.SameLine();
@@ -195,7 +195,7 @@ public class AutoGigConfig : BasePresetConfig {
             if (poolEnabled != wasEnabled) {
                 foreach (var gig in gigs)
                     gig.Enabled = poolEnabled;
-                Service.Save();
+                Configuration.Save();
             }
 
             ImGui.Spacing();
@@ -233,7 +233,7 @@ public class AutoGigConfig : BasePresetConfig {
         using (ImRaii.PushFont(UiBuilder.IconFont)) {
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash) && ImGui.GetIO().KeyShift) {
                 RemoveItem(gig.UniqueId);
-                Service.Save();
+                Configuration.Save();
             }
         }
 

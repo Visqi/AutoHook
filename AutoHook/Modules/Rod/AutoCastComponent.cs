@@ -1,4 +1,3 @@
-using AutoHook.Conditions;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
@@ -74,7 +73,7 @@ public sealed class AutoCastComponent(RodFishingModule module) : RodComponent(mo
         if (ProposeAction(hints, autoCast != null ? HintPriority.ForAutoCast(autoCast) : HintPriority.AutoCast, autoCast, Ws, acCfg, false, ignoreMooch, afterExecute: continueStart))
             return;
 
-        if (Service.WorldStateUpdater.HasPendingGp) {
+        if (WorldStateUpdater.Get().HasPendingGp) {
             hints.HoldForPendingGp = true;
             return;
         }
@@ -92,7 +91,7 @@ public sealed class AutoCastComponent(RodFishingModule module) : RodComponent(mo
             return;
 
         var delay = usedAction != null ? Rod.GetPostCastDelayMs() : 0;
-        Service.ActionExecutor.EnqueueCallback(() => {
+        ActionExecutor.Get().EnqueueCallback(() => {
             if (!Ws.Fishing.FishingStep.HasFlag(FishingSteps.StartedCasting) || Ws.Fishing.FishingStep.HasFlag(FishingSteps.BeganFishing))
                 return;
 
@@ -243,9 +242,9 @@ public sealed class AutoCastComponent(RodFishingModule module) : RodComponent(mo
             if (BaitComponent.ChangeSwimbait((uint)slotIndex) == ChangeBaitReturn.Success) {
                 Ws.Decide(DecisionContext.Swimbait, true, $"Slot {slotIndex}",
                     JoinSwimbaitDetail($"{fishName} · {configSource}", activeSwimbaitCfg.ConditionSet?.Describe()), presetName);
-                Service.WorldStateUpdater?.RefreshFishingStateSnapshot();
+                WorldStateUpdater.Get()?.RefreshFishingStateSnapshot();
                 Rod.BiteHook.UpdateStatusAndTimer();
-                Service.Status = $"Using swimbait: {Item.GetRow(fishId).Name}";
+                PluginUi.Status = $"Using swimbait: {Item.GetRow(fishId).Name}";
                 return true;
             }
 

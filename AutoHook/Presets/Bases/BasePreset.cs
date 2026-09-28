@@ -9,7 +9,7 @@ public abstract class BasePreset {
     public virtual BasePresetConfig? SelectedPreset {
         get => PresetList.FirstOrDefault(p => p.UniqueId.ToString() == SelectedGuid);
         set {
-            Service.Status = string.Empty;
+            PluginUi.Status = string.Empty;
             var oldPreset = SelectedPreset;
             if (value != null) {
                 OnSelectedPreset(value, oldPreset);
@@ -36,11 +36,11 @@ public abstract class BasePreset {
             return;
 
         preset.PresetName = newName;
-        Service.Save();
+        Configuration.Save();
     }
 
     public virtual void OnSelectedPreset(BasePresetConfig? newPreset, BasePresetConfig? oldPreset) {
-        Service.Save();
+        Configuration.Save();
     }
 
     public abstract void SwapIndex(int itemIndex, int targetIndex);

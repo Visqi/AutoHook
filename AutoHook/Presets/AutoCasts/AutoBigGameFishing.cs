@@ -17,7 +17,7 @@ public sealed class AutoBigGameFishing : BaseActionCast {
         var stack = AnglersStacks;
         if (DrawUtil.EditNumberField(UIStrings.TabAutoCasts_DrawExtraOptionsThaliaksFavor_, ref stack, "", 1)) {
             AnglersStacks = Math.Max(2, Math.Min(stack, 10));
-            Service.Save();
+            Configuration.Save();
         }
 
         DrawAutoCastConditions();

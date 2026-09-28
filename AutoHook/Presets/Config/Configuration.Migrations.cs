@@ -62,7 +62,7 @@ public partial class Configuration {
             if (config.Version != 3)
                 return;
 
-            Service.PrintDebug(@$"[Configuration] Updating to v4");
+            IPluginLog.Get().Debug(@$"[Configuration] Updating to v4");
             WriteJsonToDisk(CaptureSnapshot(config), Svc.Interface.ConfigFile.FullName, CancellationToken.None);
             config.Version = 4;
         }
@@ -76,14 +76,14 @@ public partial class Configuration {
             if (config.Version != 4)
                 return;
 
-            Service.PrintDebug(@$"[Configuration] Updating to v5");
+            IPluginLog.Get().Debug(@$"[Configuration] Updating to v5");
 
             foreach (var gig in config.AutoGigConfig.Presets) {
-                Service.PrintDebug($"Renaming {gig.PresetName} to {gig.Name}");
+                IPluginLog.Get().Debug($"Renaming {gig.PresetName} to {gig.Name}");
                 gig.PresetName = gig.Name;
             }
 
-            config.HookPresets.DefaultPreset.PresetName = Service.GlobalPresetName;
+            config.HookPresets.DefaultPreset.PresetName = AutoHook.GlobalPresetName;
 
             WriteJsonToDisk(CaptureSnapshot(config), Svc.Interface.ConfigFile.FullName, CancellationToken.None);
             config.Version = 5;

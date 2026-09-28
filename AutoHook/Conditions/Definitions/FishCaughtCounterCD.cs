@@ -1,5 +1,4 @@
 using Dalamud.Bindings.ImGui;
-using static AutoHook.Conditions.Params.ConditionParams;
 
 namespace AutoHook.Conditions.Definitions;
 
@@ -14,7 +13,7 @@ public sealed class FishCaughtCounterCD : IConditionDefinition {
         if (fishId <= 0)
             return args.Invert;
 
-        var presets = Service.Configuration.HookPresets.CustomPresets.Append(Service.Configuration.HookPresets.DefaultPreset);
+        var presets = Configuration.C.HookPresets.CustomPresets.Append(Configuration.C.HookPresets.DefaultPreset);
         var total = presets
             .SelectMany(p => p.ListOfFish)
             .Where(f => f.Fish.Id == fishId)

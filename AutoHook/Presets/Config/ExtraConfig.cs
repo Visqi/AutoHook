@@ -1,4 +1,3 @@
-using AutoHook.Conditions.Definitions;
 using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 using System.ComponentModel;

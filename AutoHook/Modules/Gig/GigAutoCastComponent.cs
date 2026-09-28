@@ -3,7 +3,7 @@ using AutoHook.Spearfishing;
 namespace AutoHook.Modules.Gig;
 
 public sealed class GigAutoCastComponent(GigFishingModule module) : GigFishingComponent(module) {
-    private static SpearFishingPresets GigCfg => Service.Configuration.AutoGigConfig;
+    private static SpearFishingPresets GigCfg => Configuration.C.AutoGigConfig;
 
     public override void ContributeHints(ActionHints hints) {
         var selectedPreset = GigCfg.SelectedPreset;

@@ -1,4 +1,4 @@
-using AutoHook.Conditions;
+using AutoHook.Extensions;
 
 namespace AutoHook.Modules.Rod;
 
@@ -23,7 +23,7 @@ public sealed class FishCaughtComponent(RodFishingModule module) : RodComponent(
     }
 
     public static bool HasGpBlockedFishCaughtAction(FishConfig cfg)
-        => SelectFishCaughtCast(Service.WorldState, cfg, gpBlockedOnly: true) != null;
+        => SelectFishCaughtCast(WorldState.Get(), cfg, gpBlockedOnly: true) != null;
 
     private static BaseActionCast? SelectFishCaughtCast(WorldState ws, FishConfig cfg, bool gpBlockedOnly = false) {
         BaseActionCast? cast = null;
@@ -112,8 +112,8 @@ public sealed class FishCaughtComponent(RodFishingModule module) : RodComponent(
                 FishingCounters.AddBaitSwap(guid);
                 var result = PresetSwapHelpers.TrySwapBait(Ws, lastCatchCfg.BaitToSwap);
                 if (result == ChangeBaitReturn.Success) {
-                    Service.PrintChat(@$"[Fish Caught] Swapping bait to {lastCatchCfg.BaitToSwap.Name}");
-                    Service.Save();
+                    IChatGui.Get().PrintStatus(@$"[Fish Caught] Swapping bait to {lastCatchCfg.BaitToSwap.Name}");
+                    Configuration.Save();
                 }
                 if (lastCatchCfg.SwapBaitResetCount) FishingCounters.QueueRemove(guid);
             }

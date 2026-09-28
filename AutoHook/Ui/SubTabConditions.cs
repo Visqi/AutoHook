@@ -17,7 +17,7 @@ public static class SubTabConditions {
                 Name = UIStrings.PresetConditions_NewName,
                 ConditionSet = new(),
             });
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGui.SameLine();
@@ -72,7 +72,7 @@ public static class SubTabConditions {
         using (var disabled = ImRaii.Disabled(!ImGui.GetIO().KeyShift)) {
             if (ImGui.Selectable(UIStrings.Delete, false)) {
                 preset.NamedConditions.Remove(named);
-                Service.Save();
+                Configuration.Save();
                 removed = true;
             }
         }
@@ -90,16 +90,16 @@ public static class SubTabConditions {
         var name = named.Name;
         if (ImGui.InputText(UIStrings.PresetName, ref name, 64, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue)) {
             named.Name = name;
-            Service.Save();
+            Configuration.Save();
             ImGui.CloseCurrentPopup();
         }
 
         if (ImGui.Button(UIStrings.Close)) {
-            Service.Save();
+            Configuration.Save();
             ImGui.CloseCurrentPopup();
         }
     }
 
     private static bool IsNamedConditionTrue(NamedConditionConfig named)
-        => named.ConditionSet is { Groups.Count: > 0 } && named.ConditionSet.Evaluate(Service.WorldState, Registry);
+        => named.ConditionSet is { Groups.Count: > 0 } && named.ConditionSet.Evaluate(WorldState.Get(), Registry);
 }

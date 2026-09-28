@@ -1,4 +1,3 @@
-using AutoHook.Conditions.Definitions;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Newtonsoft.Json;
 using System.ComponentModel;
@@ -140,7 +139,7 @@ public class HookConfig : BaseOption {
         => UsesIntuitionHookConfig() ? SwimbaitIntuition : SwimbaitNormal;
 
     public bool UsesIntuitionHookConfig() {
-        var fishing = Service.WorldState.Fishing;
+        var fishing = WorldState.Get().Fishing;
         var intuitionActive = fishing.CastSnapshot is { Active: true } snapshot ? snapshot.IntuitionStatus is IntuitionStatus.Active or IntuitionStatus.Gained : fishing.Intuition.IsActive;
         return intuitionActive && IntuitionHook.UseCustomStatusHook;
     }
@@ -155,7 +154,7 @@ public class HookConfig : BaseOption {
             { BiteType.Legendary, (hookset.TripleLegendary, hookset.DoubleLegendary, hookset.PatienceLegendary) }
         };
 
-        Service.Status = "";
+        PluginUi.Status = "";
 
         if (hookDictionary.TryGetValue(bite, out var hook)) {
             // Triple Hook
@@ -165,11 +164,11 @@ public class HookConfig : BaseOption {
                         return ht;
 
                 if (hookset.LetFishEscapeTripleHook && ws.Player.CurrentGp < 700) {
-                    Service.Status = "Not enough GP to use Triple Hook, Letting fish escape is enabled";
+                    PluginUi.Status = "Not enough GP to use Triple Hook, Letting fish escape is enabled";
                     return HookType.None;
                 }
 
-                Service.Status = $"(Triple Hook) {Service.Status}";
+                PluginUi.Status = $"(Triple Hook) {PluginUi.Status}";
             }
 
             // Double Hook
@@ -179,11 +178,11 @@ public class HookConfig : BaseOption {
                         return ht;
 
                 if (hookset.LetFishEscapeDoubleHook && ws.Player.CurrentGp < 400) {
-                    Service.Status = "Not enough GP to use Double Hook, Letting fish escape is enabled";
+                    PluginUi.Status = "Not enough GP to use Double Hook, Letting fish escape is enabled";
                     return HookType.None;
                 }
 
-                Service.Status = $"(Triple Hook) {Service.Status}";
+                PluginUi.Status = $"(Triple Hook) {PluginUi.Status}";
             }
 
             // Normal - Patience
@@ -198,16 +197,16 @@ public class HookConfig : BaseOption {
                         };
                         return fallback != ht && ws.ActionAvailable((uint)fallback, ActionType.Action) ? fallback : HookType.Normal;
                     }
-                    Service.Status = "(Normal/Patience Hook) No hook type for current bite timer.";
+                    PluginUi.Status = "(Normal/Patience Hook) No hook type for current bite timer.";
                 }
                 else
-                    Service.Status = $"(Normal/Patience Hook) {Service.Status}";
+                    PluginUi.Status = $"(Normal/Patience Hook) {PluginUi.Status}";
             }
-            else if (Service.Status == "")
-                Service.Status = UIStrings.Status_NoHookEnabled;
+            else if (PluginUi.Status == "")
+                PluginUi.Status = UIStrings.Status_NoHookEnabled;
         }
 
-        //Service.Status = "Skipping bite - No hook for this bite is enabled";
+        //PluginUi.Status = "Skipping bite - No hook for this bite is enabled";
         return HookType.None;
     }
 
@@ -257,12 +256,12 @@ public class HookConfig : BaseOption {
             if (ws.IsStellarHooksetAvailable())
                 return true;
 
-            Service.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
+            PluginUi.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
             return false;
         }
 
         if (!ws.ActionAvailable((uint)timedHook, ActionType.Action)) {
-            Service.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
+            PluginUi.Status = UIStrings.Status_HookNotAvailableNormalWillBeUsed;
             return false;
         }
 

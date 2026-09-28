@@ -1,5 +1,3 @@
-using AutoHook.Conditions;
-using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
@@ -65,7 +63,7 @@ public abstract class BaseActionCast {
     public virtual void SetThreshold(int newCost) {
         var actionCost = Id == IDs.Actions.ThaliaksFavor ? 0 : (int)ActionExecutor.GetActionCost(Id, ActionType);
         GpThreshold = (newCost < 0) ? 0 : Math.Max(newCost, actionCost);
-        Service.Save();
+        Configuration.Save();
     }
 
     public bool IsAvailableToCast(WorldState ws, bool ignoreCurrentMooch = false)
@@ -79,7 +77,7 @@ public abstract class BaseActionCast {
         if (DoesCancelMooch() && ws.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch)
             return "Would cancel mooch";
 
-        if (RestoresGp && Service.WorldStateUpdater.HasPendingGp)
+        if (RestoresGp && WorldStateUpdater.Get().HasPendingGp)
             return "GP pending";
 
         var condition = CastCondition(ws);
@@ -181,7 +179,7 @@ public abstract class BaseActionCast {
                     .OrderByDescending(x => x.Priority).First();
                 nextAct.Priority = Priority;
                 Priority--;
-                Service.Save();
+                Configuration.Save();
             }
         }
 
@@ -194,7 +192,7 @@ public abstract class BaseActionCast {
                     .OrderBy(x => x.Priority).First();
                 lastAct.Priority = Priority;
                 Priority++;
-                Service.Save();
+                Configuration.Save();
             }
         }
     }
@@ -219,14 +217,14 @@ public abstract class BaseActionCast {
         ImGui.Separator();
         if (ImGui.RadioButton(UIStrings.Above, GpThresholdAbove)) {
             GpThresholdAbove = true;
-            Service.Save();
+            Configuration.Save();
         }
 
         //ImGui.SameLine();
 
         if (ImGui.RadioButton(UIStrings.Below, !GpThresholdAbove)) {
             GpThresholdAbove = false;
-            Service.Save();
+            Configuration.Save();
         }
 
         //ImGui.SameLine();
@@ -235,7 +233,7 @@ public abstract class BaseActionCast {
         if (ImGui.InputInt(UIStrings.GP, ref GpThreshold, 1, 1)) {
             GpThreshold = Math.Max(GpThreshold, 0);
             SetThreshold(GpThreshold);
-            Service.Save();
+            Configuration.Save();
         }
     }
 }

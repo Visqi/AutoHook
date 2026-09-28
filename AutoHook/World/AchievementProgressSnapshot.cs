@@ -10,7 +10,7 @@ public static class AchievementProgressSnapshot {
         if (ach == null || !ach->IsLoaded())
             return results;
 
-        var ws = Service.WorldState;
+        var ws = WorldState.Get();
         var emitted = new HashSet<uint>();
 
         foreach (var (id, progress) in ws.AchievementProgress) {

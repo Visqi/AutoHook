@@ -68,7 +68,7 @@ public class ConditionSet {
         if (Groups.Count == 0)
             return "";
 
-        world ??= Service.WorldState;
+        world ??= WorldState.Get();
         registry ??= Registry;
 
         var lines = new List<string>();

@@ -34,7 +34,7 @@ public class SubTabBaitMooch {
             if (ImGui.Button(UIStrings.Add)) {
                 if (list.All(x => x.BaitFish.Id != -1)) {
                     list.Add(new HookConfig(new BaitFishClass()));
-                    Service.Save();
+                    Configuration.Save();
                 }
             }
 
@@ -96,7 +96,7 @@ public class SubTabBaitMooch {
                 ImGui.Spacing();
                 DrawUtil.DrawStopAfter(UIStrings.StopAfterHooking, hook.StopAfterCaughtLimit, ref hook.StopFishingStep, ref hook.StopAfterResetCount);
             }, UIStrings.EnabledConfigArrowhelpMarker)) {
-                Service.Save();
+                Configuration.Save();
             }
 
             DrawUtil.SpacingSeparator();
@@ -118,8 +118,8 @@ public class SubTabBaitMooch {
         ImGui.SameLine();
 
         if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowLeft)) {
-            if (Service.WorldState.Fishing.BaitInfo.BaitId > 0) // just make sure bait is bait
-                hookConfig.BaitFish = list.Single(x => x.Id == Service.WorldState.Fishing.BaitInfo.BaitId);
+            if (WorldState.Get().Fishing.BaitInfo.BaitId > 0) // just make sure bait is bait
+                hookConfig.BaitFish = list.Single(x => x.Id == WorldState.Get().Fishing.BaitInfo.BaitId);
         }
 
         ImGui.TooltipOnHover(UIStrings.UIUseCurrentBait);
@@ -132,7 +132,7 @@ public class SubTabBaitMooch {
         using (ImRaii.Disabled(!ImGui.GetIO().KeyShift)) {
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
                 _preset.RemoveItem(hookConfig.UniqueId);
-                Service.Save();
+                Configuration.Save();
             }
         }
 

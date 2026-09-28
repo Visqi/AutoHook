@@ -1,8 +1,5 @@
-using AutoHook.Conditions;
-using AutoHook.Conditions.Definitions;
 using AutoHook.FishSolver;
 using AutoHook.FishSolverIntegration;
-using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
@@ -15,7 +12,7 @@ public class PresetCreator {
     private const string AutoV1Tag = "AutoV1";
     private const string AutoV2Tag = "AutoV2";
 
-    private readonly FishingPresets Presets = Service.Configuration.HookPresets;
+    private readonly FishingPresets Presets = Configuration.C.HookPresets;
 
     private string _newPresetName = "";
     private ImportedFish? _selectedTargetFish;
@@ -111,7 +108,7 @@ public class PresetCreator {
             return;
         }
 
-        var ws = Service.WorldState;
+        var ws = WorldState.Get();
         var cordials = FishSolverBridge.ReadCordialInventory(ws.Player.GetItemCount);
         var fisherLevel = IPlayerState.Get().GetClassJobLevel(ClassJob.GetRow(18));
         var plan = GameRes.FishSolver.Solve(
@@ -191,14 +188,14 @@ public class PresetCreator {
         if (_selectedTargetFish == null || !GameRes.FishSolver.IsLoaded)
             return;
 
-        var ws = Service.WorldState;
+        var ws = WorldState.Get();
         var cordials = FishSolverBridge.ReadCordialInventory(ws.Player.GetItemCount);
         var presetName = ResolvePresetName(AutoV2Tag);
         var fisherLevel = IPlayerState.Get().GetClassJobLevel(ClassJob.GetRow(18));
 
         var preset = GameRes.FishSolver.BuildPreset(_selectedTargetFish.ItemId, fisherLevel, (int)ws.Player.MaxGp, presetName, cordials);
         if (preset == null) {
-            Service.PrintDebug("[FishSolver] Failed to build preset.");
+            IPluginLog.Get().Debug("[FishSolver] Failed to build preset.");
             return;
         }
 

@@ -1,4 +1,3 @@
-using AutoHook.Ui;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
@@ -90,7 +89,7 @@ public class CustomPresetConfig : BasePresetConfig {
         else if (item is FishConfig fishConfig)
             ListOfFish.Add(fishConfig);
 
-        Service.Save();
+        Configuration.Save();
     }
 
     public void ReplaceBaitConfig(HookConfig hookConfig) {
@@ -101,7 +100,7 @@ public class CustomPresetConfig : BasePresetConfig {
 
         ListOfBaits.Add(hookConfig);
 
-        Service.Save();
+        Configuration.Save();
     }
 
     public void ReplaceMoochConfig(HookConfig moochConfig) {
@@ -112,7 +111,7 @@ public class CustomPresetConfig : BasePresetConfig {
 
         ListOfMooch.Add(moochConfig);
 
-        Service.Save();
+        Configuration.Save();
     }
 
     public HookConfig? GetCfgById(uint id, bool isMooching) {
@@ -133,7 +132,7 @@ public class CustomPresetConfig : BasePresetConfig {
         ListOfBaits.RemoveAll(x => x.UniqueId == value);
         ListOfMooch.RemoveAll(x => x.UniqueId == value);
         ListOfFish.RemoveAll(x => x.UniqueId == value);
-        Service.Save();
+        Configuration.Save();
     }
 
     public bool HasBaitOrMooch(uint id) {
@@ -169,7 +168,7 @@ public class CustomPresetConfig : BasePresetConfig {
         return HashCode.Combine(UniqueId);
     }
 
-    [JsonIgnore] public bool IsGlobal => PresetName == Service.GlobalPresetName;
+    [JsonIgnore] public bool IsGlobal => PresetName == AutoHook.GlobalPresetName;
 
     public override void DrawOptions() {
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X / 2 -

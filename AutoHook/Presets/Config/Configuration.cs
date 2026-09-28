@@ -1,5 +1,3 @@
-using AutoHook.Conditions;
-using AutoHook.Presets.Migration.Legacy;
 using AutoHook.Spearfishing;
 using Dalamud.Configuration;
 using Newtonsoft.Json;
@@ -11,7 +9,9 @@ using System.IO.Compression;
 namespace AutoHook.Presets.Config;
 
 [Serializable]
-public partial class Configuration : IPluginConfiguration {
+public partial class Configuration : IPluginConfiguration, IPluginService {
+    [JsonIgnore] public static Configuration C => Configuration.Get();
+
     public const int LatestVersion = 11;
 
     public int Version { get; set; } = LatestVersion;

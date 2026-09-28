@@ -75,7 +75,7 @@ public partial class Configuration {
         }
     }
 
-    // queue a coalesced background write of Service.Configuration.
+    // queue a coalesced background write of Configuration.C.
     public static void Save() {
         if (Volatile.Read(ref _saveSuppressionDepth) > 0)
             return;
@@ -99,7 +99,7 @@ public partial class Configuration {
         if (Interlocked.CompareExchange(ref _savePending, 0, 0) == 0)
             return;
 
-        await WriteAsync(Service.Configuration).ConfigureAwait(false);
+        await WriteAsync(Configuration.C).ConfigureAwait(false);
         Interlocked.Exchange(ref _savePending, 0);
     }
 
@@ -107,7 +107,7 @@ public partial class Configuration {
         try {
             while (true) {
                 Interlocked.Exchange(ref _savePending, 0);
-                await WriteAsync(Service.Configuration).ConfigureAwait(false);
+                await WriteAsync(Configuration.C).ConfigureAwait(false);
                 if (Interlocked.CompareExchange(ref _savePending, 0, 0) == 0)
                     break;
             }

@@ -1,3 +1,5 @@
+using AutoHook.Extensions;
+
 namespace AutoHook.Modules;
 
 /// <summary>Shared preset/bait swap used by Extra side-effects and fish-caught swaps.</summary>
@@ -29,17 +31,17 @@ public static class PresetSwapHelpers {
         ws.Execute(new RodState.OpSetFishingStep(FishingSteps.PresetSwapped, Or: true));
 
         if (preset != null) {
-            Service.Save();
+            Configuration.Save();
             presets.Select(preset, reason);
             if (clearExtraTriggerStates)
                 preset.ExtraCfg.LastTriggerStates.Clear();
-            Service.PrintChat(successMessage);
-            Service.Save();
+            IChatGui.Get().PrintStatus(successMessage);
+            Configuration.Save();
             return true;
         }
 
         if (notFoundMessage != null)
-            Service.PrintChat(notFoundMessage);
+            IChatGui.Get().PrintStatus(notFoundMessage);
 
         return false;
     }

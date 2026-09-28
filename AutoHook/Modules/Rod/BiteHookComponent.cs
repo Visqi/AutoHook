@@ -1,4 +1,5 @@
-using AutoHook.Conditions;
+using AutoHook.Extensions;
+using AutoHook.Services;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
@@ -13,7 +14,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
             Rod.SpectralRestPending = false;
             return;
         }
-        if (op.Change is not SpectralCurrentChange.Gained || !Service.Configuration.PluginEnabled || !Service.Configuration.SpectralRest)
+        if (op.Change is not SpectralCurrentChange.Gained || !Configuration.C.PluginEnabled || !Configuration.C.SpectralRest)
             return;
         Rod.SpectralRestPending = true;
         TrySpectralRest();
@@ -24,7 +25,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
 
         var midCast = Ws.Fishing.FishingState is FishingState.LineInWater or FishingState.AmbitiousLure or FishingState.ModestLure;
         var canceling = (Ws.Fishing.FishingStep & (FishingSteps.Reeling | FishingSteps.TimeOut)) != 0;
-        if (!Service.Configuration.PluginEnabled || !Service.Configuration.SpectralRest || !midCast) {
+        if (!Configuration.C.PluginEnabled || !Configuration.C.SpectralRest || !midCast) {
             Rod.SpectralRestPending = false;
             return;
         }
@@ -35,18 +36,18 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         if (!Rod.Resolver.Resolve(Ws, hints))
             return;
 
-        Service.Status = UIStrings.SpectralRestOnGain;
+        PluginUi.Status = UIStrings.SpectralRestOnGain;
         Ws.Execute(new RodState.OpSetFishingStep(FishingSteps.Reeling));
     }
 
     public unsafe void UpdateStatusAndTimer(bool forceMooching = false) {
-        if (Service.Configuration.ResetAfkTimer)
+        if (Configuration.C.ResetAfkTimer)
             InputTimerModule.Instance()->ResetAfkTimer();
 
         var selected = Rod.GetHookCfg(forceMooching);
         var hookset = selected.GetHookset();
 
-        if (Service.Configuration.ShowStatus) {
+        if (Configuration.C.ShowStatus) {
             var buffStatus = "";
 
             if (hookset.RequiredStatus != 0) {
@@ -58,7 +59,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
 
             var message = !selected.Enabled ? @$"No hooking option found. Make sure to add/enable your bait/mooch settings" : @$"Hooking with: {hookCfgName} {buffStatus}";
 
-            Service.Status = message;
+            PluginUi.Status = message;
         }
     }
 
@@ -96,7 +97,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
             Ws.Fishing.FishingStep.HasFlag(FishingSteps.Reeling))
             return;
 
-        Service.Status = @$"Timeout reached - using Rest";
+        PluginUi.Status = @$"Timeout reached - using Rest";
         var hints = new ActionHints();
         hints.AddCast(HintPriority.TimeoutRest, new ActionRequest(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook), HintSource.Timeout, detail: "Timeout", context: DecisionContext.Hook);
         if (Rod.Resolver.Resolve(Ws, hints))
@@ -124,9 +125,9 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         if (!currentHook.Enabled)
             return;
 
-        var delay = Rod.Rng.Next(Service.Configuration.DelayBetweenHookMin, Service.Configuration.DelayBetweenHookMax);
+        var delay = Rod.Rng.Next(Configuration.C.DelayBetweenHookMin, Configuration.C.DelayBetweenHookMax);
         var timePassed = Rod.FishTimerSecs;
-        var ws = Service.WorldState;
+        var ws = WorldState.Get();
         ws.Execute(new RodState.OpBiteContext(timePassed, ws.Player.HasStatus(IDs.Status.Chum)));
         ws.Execute(new RodState.OpIntuition(new IntuitionInfo(ws.Fishing.Intuition.Status, ws.Player.GetStatusTime(IDs.Status.FishersIntuition))));
         ws.Execute(new OceanState.OpOceanFishing(ws.Ocean.OceanFishing));
@@ -135,7 +136,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         var hints = new ActionHints();
 
         if (hook is null or HookType.None) {
-            delay = Rod.Rng.Next(Service.Configuration.DelayBeforeCancelMin, Service.Configuration.DelayBeforeCancelMax);
+            delay = Rod.Rng.Next(Configuration.C.DelayBeforeCancelMin, Configuration.C.DelayBeforeCancelMax);
             hints.PreferRest = true;
             hints.PreferRestContext = DecisionContext.Hook;
             hints.PreferRestDetail = $"{bite} bite";
@@ -149,7 +150,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
             : new ActionRequest((uint)hook, ActionType.Action, $"{hook}", DelayBeforeMs: delay, DecisionContext: DecisionContext.Hook);
         hints.AddCast(HintPriority.Hook, request, HintSource.BiteHook, detail: $"{bite} bite", context: DecisionContext.Hook);
         if (Rod.Resolver.Resolve(Ws, hints))
-            Service.Status = @$"Using {hook} hook. (Bite: {bite})";
+            PluginUi.Status = @$"Using {hook} hook. (Bite: {bite})";
     }
 
     public void OnCatch() {
@@ -163,17 +164,15 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         var lastFishCatchCfg = Rod.FishCaught.GetLastCatchConfig();
         var currentHook = Rod.GetHookCfg();
 
-        Service.LastCatch = lastCatchFish;
-
         if (lastFishCatchCfg != null) {
             for (var i = 0; i < amount; i++)
                 FishingCounters.AddFishCount(lastFishCatchCfg.UniqueId);
-            Service.NotificationMaster.TryNotify(lastFishCatchCfg.NotifyOnSuccess, $"Caught {lastCatchFish.Name} x{amount}");
+            NotificationMasterService.Get().Api.TryNotify(lastFishCatchCfg.NotifyOnSuccess, $"Caught {lastCatchFish.Name} x{amount}");
         }
 
         if (currentHook.Enabled) {
             FishingCounters.AddFishCount(currentHook.UniqueId);
-            Service.NotificationMaster.TryNotify(currentHook.NotifyOnSuccess, $"Hook success with {currentHook.BaitFish.Name}: {lastCatchFish.Name} x{amount}");
+            NotificationMasterService.Get().Api.TryNotify(currentHook.NotifyOnSuccess, $"Hook success with {currentHook.BaitFish.Name}: {lastCatchFish.Name} x{amount}");
         }
     }
 
@@ -195,7 +194,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         if (!stopEnabled || !limit.BackingSet.Passes(Ws))
             return;
 
-        Service.PrintChat(string.Format(chatMessageFormat, @$"{name}: {limitCount}"));
+        IChatGui.Get().PrintStatus(string.Format(chatMessageFormat, @$"{name}: {limitCount}"));
         Ws.Execute(new RodState.OpSetFishingStep(stopStep, Or: true));
         if (resetCount)
             FishingCounters.QueueRemove(uniqueId);
@@ -218,7 +217,7 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         if (Rod.FishingTimer.IsRunning)
             Rod.FishingTimer.Reset();
 
-        Service.Status = "";
+        PluginUi.Status = "";
 
         Rod.ExecuteImmediate(new ActionRequest(IDs.Actions.Quit, ActionType.Action, "Quit", UseRaw: true));
         Rod.BeginPostCastDelay();

@@ -1,5 +1,4 @@
 using Dalamud.Bindings.ImGui;
-using static AutoHook.Conditions.Params.ConditionParams;
 
 namespace AutoHook.Conditions.Definitions;
 

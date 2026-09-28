@@ -19,7 +19,7 @@ public sealed class LureChatComponent(RodFishingModule module) : RodComponent(mo
             Ws.Execute(new RodState.OpSetLureSuccess(true));
 
         if (message.LogMessageId is LogMessageIds.CantFish)
-            Service.Status = UIStrings.CantFishHere;
+            PluginUi.Status = UIStrings.CantFishHere;
     }
 
     public void CheckForSpecialLure(IHandleableChatMessage message) {

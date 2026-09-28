@@ -6,7 +6,6 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.Network;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -61,8 +60,8 @@ public sealed class HooksUpdateModule : IDisposable {
 
     private unsafe bool UseActionDetour(ActionManager* thisPtr, ActionType actionType, uint actionId, ulong targetId, uint extraParam, ActionManager.UseActionMode mode, uint comboRouteId, bool* outOptAreaTargeted) {
         try {
-            if (actionType == ActionType.Action && Service.Configuration.PluginEnabled && Service.WorldState.ActionAvailable(actionId, actionType))
-                Service.WorldState.Execute(new RodState.OpPlayerUsedAction(new UsedAction(actionId, actionType)));
+            if (actionType == ActionType.Action && Configuration.C.PluginEnabled && WorldState.Get().ActionAvailable(actionId, actionType))
+                WorldState.Get().Execute(new RodState.OpPlayerUsedAction(new UsedAction(actionId, actionType)));
         }
         catch (Exception e) {
             IPluginLog.Get().Warning(e, "[WorldStateUpdater] UseAction");
@@ -73,24 +72,24 @@ public sealed class HooksUpdateModule : IDisposable {
     private unsafe void UpdateCatchDetour(AgentCatch* thisPtr, uint itemId, bool isLarge, ushort size, byte amount, byte level, byte stars, byte oceanStars, bool isMoochable, bool isFirstTimeCatch, byte a11, byte a12) {
         _updateCatchHook!.Original(thisPtr, itemId, isLarge, size, amount, level, stars, oceanStars, isMoochable, isFirstTimeCatch, a11, a12);
         if (ItemUtil.GetBaseId(itemId) is { ItemId: > 0 and var id }) {
-            Service.WorldState.Execute(new RodState.OpSetLastCatch(new CatchInfo(id, amount, isLarge, size, level, stars, oceanStars, isMoochable, isFirstTimeCatch)));
+            WorldState.Get().Execute(new RodState.OpSetLastCatch(new CatchInfo(id, amount, isLarge, size, level, stars, oceanStars, isMoochable, isFirstTimeCatch)));
         }
-        Service.WorldState.Execute(new RodState.OpSetFishingStep(FishingSteps.FishCaught));
+        WorldState.Get().Execute(new RodState.OpSetFishingStep(FishingSteps.FishCaught));
     }
 
     private unsafe void ReceiveAchievementProgressDetour(AchievementStruct* thisPtr, uint id, uint current, uint max) {
         _receiveAchievementProgressHook!.Original(thisPtr, id, current, max);
-        Service.WorldState.Execute(new WorldState.OpAchievementProgress(id, current, max));
+        WorldState.Get().Execute(new WorldState.OpAchievementProgress(id, current, max));
     }
 
     private unsafe bool PlayAnimationDetour(FishingEventHandler* thisPtr, Character* chara, ushort actionTimelineId, ulong a4) {
         var tugType = (FishingHookStrength)actionTimelineId;
         if (tugType is FishingHookStrength.Weak or FishingHookStrength.Strong or FishingHookStrength.Legendary) {
-            Service.WorldState.Execute(new RodState.OpSetFishingStep(FishingSteps.FishBit));
-            Service.WorldState.Execute(new RodState.OpTugType(tugType));
+            WorldState.Get().Execute(new RodState.OpSetFishingStep(FishingSteps.FishBit));
+            WorldState.Get().Execute(new RodState.OpTugType(tugType));
         }
         else {
-            Service.WorldState.Execute(new RodState.OpTugType(0));
+            WorldState.Get().Execute(new RodState.OpTugType(0));
         }
 
         return _playAnimationHook!.Original(thisPtr, chara, actionTimelineId, a4);

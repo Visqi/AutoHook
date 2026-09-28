@@ -1,3 +1,5 @@
+using AutoHook.Extensions;
+
 namespace AutoHook.Modules.Rod;
 
 public sealed class ExtraComponent(RodFishingModule module) : RodComponent(module) {
@@ -27,7 +29,7 @@ public sealed class ExtraComponent(RodFishingModule module) : RodComponent(modul
             if (!trig.ConditionSet.Evaluate(Ws, Registry))
                 continue;
 
-            Service.AutoCollectables.RequestResolve(trig.ResolveCollectablesForceNo);
+            AutoCollectables.Get().RequestResolve(trig.ResolveCollectablesForceNo);
             return;
         }
     }
@@ -84,11 +86,11 @@ public sealed class ExtraComponent(RodFishingModule module) : RodComponent(modul
     private void SwapLoopBailout(HashSet<Guid> involvedPresetIds) {
         var involvedNames = EnumerateHookPresets().Where(p => involvedPresetIds.Contains(p.UniqueId)).Select(p => p.PresetName).ToList();
 
-        Service.Configuration.PluginEnabled = false;
-        Service.Save();
+        Configuration.C.PluginEnabled = false;
+        Configuration.Save();
 
         var presetList = involvedNames.Count > 0 ? string.Join(", ", involvedNames) : UIStrings.UnknownPresets;
-        Service.PrintChat(string.Format(UIStrings.Extra_PresetSwapLoop_Bailout, presetList));
+        IChatGui.Get().PrintStatus(string.Format(UIStrings.Extra_PresetSwapLoop_Bailout, presetList));
     }
 
     private static IEnumerable<CustomPresetConfig> EnumerateHookPresets() {

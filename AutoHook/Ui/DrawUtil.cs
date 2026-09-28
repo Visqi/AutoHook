@@ -1,4 +1,3 @@
-using AutoHook.Conditions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -87,7 +86,7 @@ public static class DrawUtil {
 
         if (ImGui.Checkbox($"{label}", ref refValue)) {
             clicked = true;
-            Service.Save();
+            Configuration.Save();
         }
 
         if (helpText != string.Empty) {
@@ -125,7 +124,7 @@ public static class DrawUtil {
                         ImGui.CloseCurrentPopup();
                         onSelect(item);
                         _filterText = "";
-                        Service.Save();
+                        Configuration.Save();
                     }
                 }
             }
@@ -147,7 +146,7 @@ public static class DrawUtil {
 
                 using var child = ImRaii.Child("###ComboPreset", new Vector2(0, 100.Scaled()), false);
                 if (ImGui.Selectable(UIStrings.Disabled, presetList.SelectedPreset == null)) {
-                    Service.Save();
+                    Configuration.Save();
                     presetList.SelectedPreset = null;
                     ImGui.CloseCurrentPopup();
                 }
@@ -167,7 +166,7 @@ public static class DrawUtil {
                     if (ImGui.Selectable(itemName, false)) {
                         presetList.SelectedGuid = item.UniqueId.ToString();
                         _filterText = "";
-                        Service.Save();
+                        Configuration.Save();
                         ImGui.CloseCurrentPopup();
                     }
                 }
@@ -192,12 +191,12 @@ public static class DrawUtil {
         var name = selectedPreset.PresetName ?? "Rename";
         if (ImGui.InputText(UIStrings.PresetName, ref name, 64, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue)) {
             selectedPreset.RenamePreset(name);
-            Service.Save();
+            Configuration.Save();
             ImGui.CloseCurrentPopup();
         }
 
         if (ImGui.Button(UIStrings.Close)) {
-            Service.Save();
+            Configuration.Save();
             ImGui.CloseCurrentPopup();
         }
     }
@@ -207,9 +206,9 @@ public static class DrawUtil {
             var buttonSize = ImGui.CalcTextSize(FontAwesomeIcon.Plus.ToIconString()) + ImGui.GetStyle().FramePadding * 2;
             if (ImGui.Button(FontAwesomeIcon.Plus.ToIconString(), buttonSize)) {
                 try {
-                    Service.Save();
+                    Configuration.Save();
                     presetConfig.AddNewPreset(@$"{UIStrings.NewPreset} {DateTime.Now}");
-                    Service.Save();
+                    Configuration.Save();
                 }
                 catch (Exception e) {
                     IPluginLog.Get().Error(e.ToString());
@@ -236,7 +235,7 @@ public static class DrawUtil {
         var size = buttonSize ?? default;
         if (ImGui.Button(UIStrings.Import, size)) {
             onConfirm(import);
-            Service.Save();
+            Configuration.Save();
             ImGui.CloseCurrentPopup();
             return true;
         }
@@ -290,7 +289,7 @@ public static class DrawUtil {
         using (ImRaii.Disabled(!ImGui.GetIO().KeyShift || selectedPreset == null)) {
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
                 itemList.RemovePreset(selectedPreset?.UniqueId ?? Guid.Empty);
-                Service.Save();
+                Configuration.Save();
             }
         }
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
@@ -302,7 +301,7 @@ public static class DrawUtil {
         using var id = ImRaii.PushId(treeName);
         if (ImGui.Checkbox("###checkbox", ref enable)) {
             if (enable) ImGui.SetNextItemOpen(true);
-            Service.Save();
+            Configuration.Save();
         }
 
         if (helpText != string.Empty)
@@ -404,7 +403,7 @@ public static class DrawUtil {
             ImGui.SetNextItemWidth(90.Scaled());
             if (ImGui.InputInt(UIStrings.TimeS, ref limitLocal)) {
                 limitLocal = Math.Max(1, limitLocal);
-                Service.Save();
+                Configuration.Save();
             }
 
             drawBody();
@@ -424,7 +423,7 @@ public static class DrawUtil {
         DrawCheckboxTree(label, ref enabledLocal, () => drawBody(ref limitLocal));
         if (enabledLocal != enabled || limitLocal != limit) {
             condition.Value = (enabledLocal, limitLocal);
-            Service.Save();
+            Configuration.Save();
         }
     }
 
@@ -432,7 +431,7 @@ public static class DrawUtil {
         => DrawComboSelector(GameRes.Baits, b => $"[#{b.Id}] {b.Name}", bait.Name, onSelect);
 
     public static void DrawPresetSwapSelector(string presetName, Action<string> onSelect)
-        => DrawComboSelector(Service.Configuration.HookPresets.CustomPresets, preset => preset.PresetName, presetName, preset => onSelect(preset.PresetName));
+        => DrawComboSelector(Configuration.C.HookPresets.CustomPresets, preset => preset.PresetName, presetName, preset => onSelect(preset.PresetName));
 
     public static void DrawSurfaceSlapAndIdenticalCast(AutoSurfaceSlap surfaceSlap, AutoIdenticalCast identicalCast) {
         DrawCheckboxTree(UIStrings.UseSurfaceSlap, ref surfaceSlap.Enabled,
@@ -449,7 +448,7 @@ public static class DrawUtil {
         DrawCaughtCountLimitTree(label, condition, () => {
             if (ImGui.RadioButton(UIStrings.Stop_Casting, step == FishingSteps.None)) {
                 step = FishingSteps.None;
-                Service.Save();
+                Configuration.Save();
             }
 
             ImGui.SameLine();
@@ -457,7 +456,7 @@ public static class DrawUtil {
 
             if (ImGui.RadioButton(UIStrings.Quit_Fishing, step == FishingSteps.Quitting)) {
                 step = FishingSteps.Quitting;
-                Service.Save();
+                Configuration.Save();
             }
 
             ImGui.SameLine();

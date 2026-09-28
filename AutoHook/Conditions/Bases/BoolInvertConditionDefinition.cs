@@ -1,5 +1,3 @@
-using static AutoHook.Conditions.Params.ConditionParams;
-
 namespace AutoHook.Conditions.Bases;
 
 public abstract class BoolInvertConditionDefinition : IConditionDefinition {

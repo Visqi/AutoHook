@@ -1,6 +1,5 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
-using static AutoHook.Conditions.Params.ConditionParams;
 
 namespace AutoHook.Conditions;
 
@@ -24,7 +23,7 @@ public static class PresetConditionHelper {
     public static bool IsPresetType(string typeId) => TryParseTypeId(typeId, out _);
 
     public static CustomPresetConfig? GetEvaluationPreset()
-        => ConditionUi.EvaluationPreset ?? Service.Configuration.HookPresets.CurrentPreset;
+        => ConditionUi.EvaluationPreset ?? Configuration.C.HookPresets.CurrentPreset;
 
     public static NamedConditionConfig? FindNamed(CustomPresetConfig preset, Guid id)
         => preset.NamedConditions.FirstOrDefault(n => n.UniqueId == id);

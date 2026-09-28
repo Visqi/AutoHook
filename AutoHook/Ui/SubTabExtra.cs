@@ -1,4 +1,3 @@
-using AutoHook.Conditions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -24,24 +23,24 @@ public class SubTabExtra {
         ImGui.Spacing();
         if (DrawUtil.Checkbox(UIStrings.Enable_Extra_Configs, ref config.Enabled)) {
             if (config.Enabled) {
-                if (_preset.IsGlobal && (Service.Configuration.HookPresets.SelectedPreset?.ExtraCfg.Enabled ?? false)) {
-                    Service.Configuration.HookPresets.SelectedPreset.ExtraCfg.Enabled = false;
+                if (_preset.IsGlobal && (Configuration.C.HookPresets.SelectedPreset?.ExtraCfg.Enabled ?? false)) {
+                    Configuration.C.HookPresets.SelectedPreset.ExtraCfg.Enabled = false;
                 }
                 else if (!_preset.IsGlobal) {
-                    Service.Configuration.HookPresets.DefaultPreset.ExtraCfg.Enabled = false;
+                    Configuration.C.HookPresets.DefaultPreset.ExtraCfg.Enabled = false;
                 }
             }
         }
 
         if (!_preset.IsGlobal) {
-            if (Service.Configuration.HookPresets.DefaultPreset.ExtraCfg.Enabled && !config.Enabled)
+            if (Configuration.C.HookPresets.DefaultPreset.ExtraCfg.Enabled && !config.Enabled)
                 ImGui.TextColored(ImGuiColors.DalamudViolet, UIStrings.Global_Extra_Being_Used);
             else if (!config.Enabled)
                 ImGui.TextColored(ImGuiColors.ParsedBlue, UIStrings.SubExtra_Disabled);
         }
         else {
-            if (Service.Configuration.HookPresets.SelectedPreset?.ExtraCfg.Enabled ?? false)
-                ImGui.TextColored(ImGuiColors.DalamudViolet, string.Format(UIStrings.Custom_Extra_Being_Used, Service.Configuration.HookPresets.SelectedPreset.PresetName));
+            if (Configuration.C.HookPresets.SelectedPreset?.ExtraCfg.Enabled ?? false)
+                ImGui.TextColored(ImGuiColors.DalamudViolet, string.Format(UIStrings.Custom_Extra_Being_Used, Configuration.C.HookPresets.SelectedPreset.PresetName));
             else if (!config.Enabled)
                 ImGui.TextColored(ImGuiColors.ParsedBlue, UIStrings.SubExtra_Disabled);
         }
@@ -81,7 +80,7 @@ public class SubTabExtra {
     }
 
     private static void DrawAutoOceanFish(ExtraConfig config) {
-        if (!Service.Configuration.AutoOceanFish) {
+        if (!Configuration.C.AutoOceanFish) {
             ImGui.TextColored(ImGuiColors.ParsedGrey, "Enable Auto ocean fishing in Settings to use this.");
             return;
         }
@@ -90,7 +89,7 @@ public class SubTabExtra {
         using (ImRaii.PushId("AutoOceanFish")) {
             if (DrawUtil.DrawCheckboxHeader(UIStrings.UseWithOceanFishing, ref enabled, ImGuiTreeNodeFlags.None, () => {
                 if (DrawUtil.Checkbox(UIStrings.UseForAllZoneTimes, ref config.AutoOceanFishAllStops)) {
-                    Service.Save();
+                    Configuration.Save();
                 }
 
                 if (!config.AutoOceanFishAllStops) {
@@ -106,7 +105,7 @@ public class SubTabExtra {
                             if (ImGui.Selectable(OceanStopUtil.FormatStopLabel(stop.SpotId, stop.TimeId), stop.SpotId == selected.SpotId && stop.TimeId == selected.TimeId)) {
                                 config.AutoOceanFishSpotId = stop.SpotId;
                                 config.AutoOceanFishTimeId = stop.TimeId;
-                                Service.Save();
+                                Configuration.Save();
                             }
                         }
                     }
@@ -119,7 +118,7 @@ public class SubTabExtra {
                 config.AutoOceanFishConditionSet = ConditionUi.DrawConditionSet(UIStrings.When, config.AutoOceanFishConditionSet, ConditionScope.Hook, showAdvanced: true);
             })) {
                 config.AutoOceanFishEnabled = enabled;
-                Service.Save();
+                Configuration.Save();
             }
         }
     }
@@ -134,19 +133,19 @@ public class SubTabExtra {
         if (ImGui.Selectable(UIStrings.OceanFishGoal_Points, config.AutoOceanFishGoal == OceanFishGoalKind.Points)) {
             config.AutoOceanFishGoal = OceanFishGoalKind.Points;
             config.AutoOceanFishGoalId = 0;
-            Service.Save();
+            Configuration.Save();
         }
 
         if (ImGui.Selectable(UIStrings.OceanFishGoal_Legendary, config.AutoOceanFishGoal == OceanFishGoalKind.Legendary)) {
             config.AutoOceanFishGoal = OceanFishGoalKind.Legendary;
             config.AutoOceanFishGoalId = 0;
-            Service.Save();
+            Configuration.Save();
         }
 
         if (ImGui.Selectable(UIStrings.OceanFishGoal_Levelling, config.AutoOceanFishGoal == OceanFishGoalKind.Levelling)) {
             config.AutoOceanFishGoal = OceanFishGoalKind.Levelling;
             config.AutoOceanFishGoalId = 0;
-            Service.Save();
+            Configuration.Save();
         }
 
         ImGui.Separator();
@@ -157,7 +156,7 @@ public class SubTabExtra {
             if (ImGui.Selectable(name, selected)) {
                 config.AutoOceanFishGoal = OceanFishGoalKind.Achievement;
                 config.AutoOceanFishGoalId = def.AchievementId;
-                Service.Save();
+                Configuration.Save();
             }
         }
     }
@@ -182,7 +181,7 @@ public class SubTabExtra {
                 SwapBait = false,
                 StopAction = ExtraStopAction.None,
             });
-            Service.Save();
+            Configuration.Save();
         }
         ImGui.TooltipOnHover(UIStrings.Add);
 
@@ -201,7 +200,7 @@ public class SubTabExtra {
                     ImGui.SameLine(0, 3.Scaled());
                     if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash)) {
                         config.Triggers.RemoveAt(i);
-                        Service.Save();
+                        Configuration.Save();
                         removed = true;
                     }
                     ImGui.TooltipOnHover(UIStrings.Delete);
@@ -226,7 +225,7 @@ public class SubTabExtra {
                     () => {
                         if (ImGui.RadioButton(UIStrings.Stop_Casting, trig.StopAction == ExtraStopAction.StopOnly)) {
                             trig.StopAction = ExtraStopAction.StopOnly;
-                            Service.Save();
+                            Configuration.Save();
                         }
 
                         ImGui.SameLine();
@@ -234,17 +233,17 @@ public class SubTabExtra {
 
                         if (ImGui.RadioButton(UIStrings.Quit_Fishing, trig.StopAction == ExtraStopAction.QuitFishing)) {
                             trig.StopAction = ExtraStopAction.QuitFishing;
-                            Service.Save();
+                            Configuration.Save();
                         }
                     });
 
                 if (!stopEnabled && trig.StopAction != ExtraStopAction.None) {
                     trig.StopAction = ExtraStopAction.None;
-                    Service.Save();
+                    Configuration.Save();
                 }
                 else if (stopEnabled && trig.StopAction == ExtraStopAction.None) {
                     trig.StopAction = ExtraStopAction.StopOnly;
-                    Service.Save();
+                    Configuration.Save();
                 }
 
                 var swapPreset = trig.SwapPreset;
@@ -291,7 +290,7 @@ public class SubTabExtra {
                 ImGui.Unindent(20.Scaled());
             }, helpText: string.Empty, forceOpen: forceOpen)) {
                 trig.Enabled = enabled;
-                Service.Save();
+                Configuration.Save();
             }
 
             if (removed) {

@@ -1,4 +1,3 @@
-using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 
@@ -11,16 +10,15 @@ public enum ActionDelayMode {
 
 public readonly record struct ActionRequest(uint Id, ActionType Type = ActionType.Action, string Name = "", ActionDelayMode DelayMode = ActionDelayMode.Delayed, int DelayBeforeMs = 0, bool UseRaw = false, bool StellarHookset = false, DecisionContext? DecisionContext = null);
 
-public sealed class ActionExecutor : IDisposable {
+public sealed class ActionExecutor : IPluginService, IDisposable {
     private readonly record struct QueueItem(ActionRequest? Request, Action? Callback, long ReadyAtMs);
 
-    private readonly WorldState _ws;
+    private readonly WorldState _ws = WorldState.Get();
     private readonly Random _rng = new();
     private readonly Queue<QueueItem> _queue = new();
     private long _unblockAtTickMs;
 
-    public ActionExecutor(WorldState worldState) {
-        _ws = worldState;
+    public ActionExecutor() {
         IFramework.Get().Update += OnFrameworkUpdate;
     }
 
@@ -190,8 +188,8 @@ public sealed class ActionExecutor : IDisposable {
 
     public int GetPostCastDelayMs() {
         try {
-            var min = Service.Configuration.DelayBetweenCastsMin;
-            var max = Service.Configuration.DelayBetweenCastsMax;
+            var min = Configuration.C.DelayBetweenCastsMin;
+            var max = Configuration.C.DelayBetweenCastsMax;
             if (max < min)
                 (min, max) = (max, min);
             return _rng.Next(min, max + 1);

@@ -1,5 +1,4 @@
 using ECommons.Throttlers;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Lumina.Excel.Sheets;
 using System.Collections.Immutable;
 
@@ -91,7 +90,7 @@ public static class OceanGoalCatalog {
         => IPlayerState.Get().GetClassJobLevel(ClassJob.GetRow(18)) < GamePlayerState.Instance()->MaxLevel;
 
     public static List<uint> GetEligibleAchievementIds(uint routeId, bool skipIfAcquired = true) {
-        var partySize = Math.Max(1, Service.WorldState.Party.QueuedWithContentIds.Count);
+        var partySize = Math.Max(1, WorldState.Get().Party.QueuedWithContentIds.Count);
         // treat unk as incomplete so z1 doesn't skip past Achievements before the server response
         return [.. GetAchievementsForRoute(routeId)
             .Where(def => partySize >= def.MinPartySize
@@ -100,7 +99,7 @@ public static class OceanGoalCatalog {
     }
 
     public static unsafe bool? IsAchievementIncomplete(uint achievementId) {
-        if (Service.WorldState.AchievementProgress.TryGetValue(achievementId, out var progress) && progress.Max > 0)
+        if (WorldState.Get().AchievementProgress.TryGetValue(achievementId, out var progress) && progress.Max > 0)
             return progress.Current < progress.Max;
 
         var ach = FFXIVClientStructs.FFXIV.Client.Game.UI.Achievement.Instance();

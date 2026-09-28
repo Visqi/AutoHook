@@ -1,6 +1,7 @@
 global using AutoHook.Actions;
 global using AutoHook.Data;
 global using AutoHook.Enums;
+global using AutoHook.Extensions;
 global using AutoHook.Modules;
 global using AutoHook.Modules.Gig;
 global using AutoHook.Modules.Ocean;
@@ -20,6 +21,7 @@ global using Condition = AutoHook.Conditions.Model.Condition;
 global using static AutoHook.Conditions.Params.ConditionParams;
 global using static AutoHook.Conditions.ConditionRegistry;
 global using AutoHook.Resources.Localization;
+global using AutoHook.Services;
 global using AutoHook.Ui;
 global using AutoHook.Utils;
 global using AutoHook.World;

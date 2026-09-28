@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace AutoHook.Modules;
 
-public class AutoCollectables : IDisposable {
+public class AutoCollectables : IPluginService, IDisposable {
     private bool _pendingResolve;
     private bool _pendingForceNo;
 
@@ -39,15 +39,15 @@ public class AutoCollectables : IDisposable {
 
     private unsafe void HandleAddon(AddonEvent type, AddonArgs args) {
         switch (type) {
-            case AddonEvent.PreFinalize when Service.WorldState.Fishing.CollectableWindowOpen:
-                Service.WorldState.Execute(new RodState.OpSetCollectableWindowOpen(false));
+            case AddonEvent.PreFinalize when WorldState.Get().Fishing.CollectableWindowOpen:
+                WorldState.Get().Execute(new RodState.OpSetCollectableWindowOpen(false));
                 break;
             case AddonEvent.PostSetup:
-                if (IsCollectableWindow(args.GetAddon<AddonSelectYesno>()) is bool open && open != Service.WorldState.Fishing.CollectableWindowOpen)
-                    Service.WorldState.Execute(new RodState.OpSetCollectableWindowOpen(open));
+                if (IsCollectableWindow(args.GetAddon<AddonSelectYesno>()) is bool open && open != WorldState.Get().Fishing.CollectableWindowOpen)
+                    WorldState.Get().Execute(new RodState.OpSetCollectableWindowOpen(open));
                 break;
             case AddonEvent.PostUpdate:
-                if (!Service.Configuration.PluginEnabled)
+                if (!Configuration.C.PluginEnabled)
                     return;
 
                 var addon = args.GetAddon<AddonSelectYesno>();
@@ -71,7 +71,7 @@ public class AutoCollectables : IDisposable {
                     return;
                 }
 
-                if (!Service.Configuration.AutoCollectablesEnabled)
+                if (!Configuration.C.AutoCollectablesEnabled)
                     return;
 
                 TrySelectYesNo(addon, forceNo: false);
@@ -80,16 +80,16 @@ public class AutoCollectables : IDisposable {
     }
 
     private IEnumerable<ExtraTrigger> GetTriggers()
-        => Service.Configuration.HookPresets.CurrentPreset.ExtraCfg.Triggers.Where(t => t is { Enabled: true, ResolveCollectablesWindow: true, ConditionSet: not null });
+        => Configuration.C.HookPresets.CurrentPreset.ExtraCfg.Triggers.Where(t => t is { Enabled: true, ResolveCollectablesWindow: true, ConditionSet: not null });
 
     private bool IsWaitingOnConditions() {
         var sets = GetTriggers().Select(t => t.ConditionSet!).Where(set => set.HasAnyCondition());
-        return sets.Any() && sets.All(set => !set.Evaluate(Service.WorldState, Registry));
+        return sets.Any() && sets.All(set => !set.Evaluate(WorldState.Get(), Registry));
     }
 
     private bool TryGetPresetResolve(out bool forceNo) {
         forceNo = false;
-        if (GetTriggers().FirstOrDefault(t => t.ConditionSet!.Evaluate(Service.WorldState, Registry)) is not { } match)
+        if (GetTriggers().FirstOrDefault(t => t.ConditionSet!.Evaluate(WorldState.Get(), Registry)) is not { } match)
             return false;
         forceNo = match.ResolveCollectablesForceNo;
         return true;

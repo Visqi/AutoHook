@@ -11,7 +11,7 @@ public sealed class GigFishingModule : FishingModule {
 
     public Guid LastGigEntryId { get; set; }
 
-    private static SpearFishingPresets GigCfg => Service.Configuration.AutoGigConfig;
+    private static SpearFishingPresets GigCfg => Configuration.C.AutoGigConfig;
     private WorldState Ws => WorldState;
 
     public GigFishingModule(WorldState worldState) : base(worldState) {
@@ -25,10 +25,10 @@ public sealed class GigFishingModule : FishingModule {
     }
 
     public bool Enqueue(ActionRequest request, bool forceQueue = false)
-        => Service.ActionExecutor.Enqueue(request, forceQueue);
+        => ActionExecutor.Get().Enqueue(request, forceQueue);
 
     public override void Update() {
-        if (!Service.Configuration.PluginEnabled)
+        if (!Configuration.C.PluginEnabled)
             return;
 
         if (!Ws.Spearfishing.WindowOpen && !Ws.Spearfishing.SessionActive)

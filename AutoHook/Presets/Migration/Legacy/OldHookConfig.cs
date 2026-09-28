@@ -1,6 +1,3 @@
-using AutoHook.Conditions;
-using AutoHook.Conditions.Definitions;
-
 namespace AutoHook.Presets.Migration.Legacy;
 
 public class OldHookConfig {
