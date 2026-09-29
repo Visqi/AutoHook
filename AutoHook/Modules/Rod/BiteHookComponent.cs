@@ -159,7 +159,8 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
 
         var fishId = lastCatch.FishId;
         var amount = lastCatch.Amount;
-        var lastCatchFish = GameRes.Fishes.FirstOrDefault(fish => fish.Id == fishId) ?? new BaitFishClass(@"-", -1);
+        var lastCatchFish = FishBaitCatalog.Get()[(int)fishId];
+        var lastCatchName = lastCatchFish?.Name ?? "-";
         Ws.Execute(new RodState.OpAddFishCaught(fishId, amount));
         var lastFishCatchCfg = Rod.FishCaught.GetLastCatchConfig();
         var currentHook = Rod.GetHookCfg();
@@ -167,12 +168,12 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         if (lastFishCatchCfg != null) {
             for (var i = 0; i < amount; i++)
                 FishingCounters.AddFishCount(lastFishCatchCfg.UniqueId);
-            NotificationMasterService.Get().Api.TryNotify(lastFishCatchCfg.NotifyOnSuccess, $"Caught {lastCatchFish.Name} x{amount}");
+            NotificationMasterService.Get().Api.TryNotify(lastFishCatchCfg.NotifyOnSuccess, $"Caught {lastCatchName} x{amount}");
         }
 
         if (currentHook.Enabled) {
             FishingCounters.AddFishCount(currentHook.UniqueId);
-            NotificationMasterService.Get().Api.TryNotify(currentHook.NotifyOnSuccess, $"Hook success with {currentHook.BaitFish.Name}: {lastCatchFish.Name} x{amount}");
+            NotificationMasterService.Get().Api.TryNotify(currentHook.NotifyOnSuccess, $"Hook success with {currentHook.BaitFish.Name}: {lastCatchName} x{amount}");
         }
     }
 

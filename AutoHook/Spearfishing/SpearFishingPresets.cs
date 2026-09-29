@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace AutoHook.Spearfishing;
 
 public class SpearFishingPresets : BasePreset {
-    public bool AutoGigEnabled = false; // deprecated
+    public bool AutoGigEnabled = false;
     public bool AutoGigHideOverlay = false;
     public bool AutoGigDrawFishHitbox = true;
     public bool AutoGigDrawGigHitbox = true;
@@ -17,7 +17,7 @@ public class SpearFishingPresets : BasePreset {
     public AutoElectricCurrent ElectricCurrent = new(true);
     public AutoVitalSight VitalSight = new(true);
 
-    public bool CatchAll = false; // deprecated
+    public bool CatchAll = false; // deprecated — migrated via OnDeserialized
     public ConditionSet? CatchAllConditionSet { get; set; }
     public AutoNaturesBounty CatchAllNaturesBountyAction = new(true);
     public AutoVeteranTrade CatchAllVeteranTradeAction = new(true);
@@ -29,16 +29,33 @@ public class SpearFishingPresets : BasePreset {
     public List<AutoGigConfig> Presets = [];
 
     [JsonIgnore]
-    public bool IsCatchAllActive => SelectedPreset == null;
+    public bool IsCatchAllActive => AutoGigEnabled && SelectedPreset == null;
 
     [JsonIgnore]
     public int ActiveHitboxSize => SelectedPreset?.HitboxSize ?? GlobalHitboxSize;
 
     [OnDeserialized]
     private void OnDeserialized(StreamingContext _) {
-        if (CatchAll)
+        if (CatchAll) {
             SelectedGuid = "";
+            AutoGigEnabled = true;
+        }
         PrepareActions();
+    }
+
+    public void SetDisabled() {
+        AutoGigEnabled = false;
+        Configuration.Save();
+    }
+
+    public void SetCatchAll() {
+        AutoGigEnabled = true;
+        SelectedPreset = null;
+    }
+
+    public void SetActivePreset(AutoGigConfig preset) {
+        AutoGigEnabled = true;
+        SelectedPreset = preset;
     }
 
     public void PrepareActions() {
@@ -87,6 +104,7 @@ public class SpearFishingPresets : BasePreset {
         var newPreset = new AutoGigConfig(presetName);
         Presets.Add(newPreset);
         InvalidatePresetListCache();
+        AutoGigEnabled = true;
         SelectedGuid = newPreset.UniqueId.ToString();
         Configuration.Save();
     }
@@ -98,6 +116,7 @@ public class SpearFishingPresets : BasePreset {
         copy.RegenerateNestedUniqueIds();
         Presets.Add(copy);
         InvalidatePresetListCache();
+        AutoGigEnabled = true;
         SelectedGuid = copy.UniqueId.ToString();
         Configuration.Save();
     }

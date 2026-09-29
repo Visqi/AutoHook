@@ -20,12 +20,9 @@ public static class AchievementProgressSnapshot {
             results.Add(new WorldState.OpAchievementProgress(id, progress.Current, progress.Max));
         }
 
-        foreach (var row in IDataManager.Get().GetExcelSheet<AchievementSheet>()) {
-            var id = row.RowId;
-            if (id == 0 || emitted.Contains(id))
-                continue;
-            if (ach->IsComplete((int)id))
-                results.Add(new WorldState.OpAchievementProgress(id, 1, 1));
+        foreach (var row in AchievementSheet.Where(r => r.RowId != 0 && !emitted.Contains(r.RowId))) {
+            if (ach->IsComplete((int)row.RowId))
+                results.Add(new WorldState.OpAchievementProgress(row.RowId, 1, 1));
         }
 
         return results;

@@ -30,9 +30,9 @@ public sealed class LastSlappedCD : IConditionDefinition {
 
     public void DrawParams(Condition condition) {
         var args = GetParams(condition.Params);
-        var currentFish = GameRes.Fishes.FirstOrDefault(f => f.Id == args.Id);
+        var currentFish = FishBaitCatalog.Get().Fishes.FirstOrDefault(f => f.Id == args.Id);
         var selectedName = currentFish is { Id: > 0 } ? $"[#{currentFish.Id}] {currentFish.Name}" : "Any fish slapped";
-        DrawUtil.DrawComboSelector(GameRes.Fishes, fish => $"[#{fish.Id}] {fish.Name}", selectedName, fish => condition.Params = (args with { Id = (uint)fish.Id }).ToParams());
+        DrawUtil.DrawComboSelector(FishBaitCatalog.Get().Fishes, fish => $"[#{fish.Id}] {fish.Name}", selectedName, fish => condition.Params = (args with { Id = (uint)fish.Id }).ToParams());
     }
 
     public string DescribeParameters(IReadOnlyDictionary<string, object> parameters) {

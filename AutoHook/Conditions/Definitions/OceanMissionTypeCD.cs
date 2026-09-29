@@ -19,34 +19,16 @@ public sealed class OceanMissionTypeCD : IConditionDefinition {
         var ids = GetIds(condition.Params);
         var currentId = ids.Count > 0 ? ids[0] : 0;
 
-        var sheet = IDataManager.Get().GetExcelSheet<IKDPlayerMissionCondition>();
-        if (sheet == null) {
-            DrawIdsParams(condition, "Mission type IDs");
-            return;
-        }
-
-        string LabelForRow(uint rowId) {
+        static string LabelForRow(uint rowId) {
             if (rowId == 0) return "Select mission";
-            if (!sheet.TryGetRow(rowId, out var row)) return $"{rowId}";
+            if (!IKDPlayerMissionCondition.TryGetRow(rowId, out var row)) return $"{rowId}";
             var name = row.Unknown0.ToString();
             return string.IsNullOrEmpty(name) ? $"{rowId}" : $"{rowId}: {name}";
         }
 
-        var missions = sheet
-            .Where(row => !string.IsNullOrEmpty(row.Unknown0.ToString()))
-            .Select(row => (Id: row.RowId, Name: row.Unknown0.ToString()))
-            .OrderBy(x => x.Name)
-            .ToList();
-
+        var missions = IKDPlayerMissionCondition.Where(row => !row.Unknown0.ToString().IsEmpty).Select(row => (Id: row.RowId, Name: row.Unknown0.ToString())).OrderBy(x => x.Name).ToList();
         var label = LabelForRow(currentId);
-
-        DrawUtil.DrawComboSelector(
-            missions,
-            m => $"{m.Id}: {m.Name}",
-            label,
-            m => {
-                condition.Params["ids"] = new List<object> { (long)m.Id };
-            });
+        DrawUtil.DrawComboSelector(missions, m => $"{m.Id}: {m.Name}", label, m => { condition.Params["ids"] = new List<object> { (long)m.Id }; });
     }
 
     public string DescribeParameters(IReadOnlyDictionary<string, object> parameters) {
@@ -54,8 +36,7 @@ public sealed class OceanMissionTypeCD : IConditionDefinition {
         if (ids.Count == 0)
             return "any mission";
         var id = ids[0];
-        var sheet = IDataManager.Get().GetExcelSheet<IKDPlayerMissionCondition>();
-        if (sheet != null && sheet.TryGetRow(id, out var row)) {
+        if (IKDPlayerMissionCondition.TryGetRow(id, out var row)) {
             var name = row.Unknown0.ToString();
             return string.IsNullOrEmpty(name) ? $"mission type {id}" : $"{id}: {name}";
         }

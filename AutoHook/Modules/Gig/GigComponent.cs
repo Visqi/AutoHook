@@ -9,7 +9,7 @@ public sealed class GigComponent(GigFishingModule module) : GigFishingComponent(
     private static SpearFishingPresets GigCfg => Configuration.C.AutoGigConfig;
 
     public override void Update() {
-        if (!Configuration.C.PluginEnabled)
+        if (!Configuration.C.PluginEnabled || !GigCfg.AutoGigEnabled)
             return;
         if (ActionExecutor.Get().IsBusy)
             return;

@@ -101,7 +101,7 @@ public static class DrawUtil {
 
     private static string _filterText = "";
 
-    public static void DrawComboSelector<T>(List<T> itemList, Func<T, string> getItemName, string selectedItem, Action<T> onSelect) {
+    public static void DrawComboSelector<T>(IReadOnlyList<T> itemList, Func<T, string> getItemName, string selectedItem, Action<T> onSelect) {
         var padding = ImGui.GetStyle().FramePadding.X * 2 + ImGui.GetFrameHeight();
         var width = Math.Max(220.Scaled(), itemList.Select(i => getItemName(i) ?? "").Append(selectedItem).Max(n => ImGui.CalcTextSize(n).X + padding));
 
@@ -447,7 +447,7 @@ public static class DrawUtil {
     }
 
     public static void DrawBaitSwapSelector(BaitFishClass bait, Action<BaitFishClass> onSelect)
-        => DrawComboSelector(GameRes.Baits, b => $"[#{b.Id}] {b.Name}", bait.Name, onSelect);
+        => DrawComboSelector(FishBaitCatalog.Get().Baits, b => $"[#{b.Id}] {b.Name}", bait.Name, b => onSelect(new BaitFishClass(b)));
 
     public static void DrawPresetSwapSelector(string presetName, Action<string> onSelect)
         => DrawComboSelector(Configuration.C.HookPresets.CustomPresets, preset => preset.PresetName, presetName, preset => onSelect(preset.PresetName));

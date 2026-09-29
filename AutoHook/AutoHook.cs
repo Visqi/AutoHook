@@ -68,7 +68,8 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
             });
         }
 
-        GameRes.Initialize();
+        await FishBaitCatalog.Get().InitializeAsync(cancellationToken);
+        await FishSpotCatalog.Get().InitializeAsync(cancellationToken);
 
         Svc.Interface.UiBuilder.Draw += DrawUi;
         Svc.Interface.UiBuilder.OpenConfigUi += _pluginUi.Toggle;
@@ -140,7 +141,7 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
     }
 
     private static void SwapBait(string args) {
-        var bait = GameRes.Baits.FirstOrDefault(f => f.Name.Equals(args, StringComparison.CurrentCultureIgnoreCase) || f.Id.ToString() == args);
+        var bait = FishBaitCatalog.Get().Baits.FirstOrDefault(f => f.Name.Equals(args, StringComparison.CurrentCultureIgnoreCase) || f.Id.ToString() == args);
         BaitComponent.ChangeBait((uint)bait?.Id!);
     }
 
@@ -164,7 +165,7 @@ public class AutoHook(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPl
                 return;
             }
 
-            Configuration.C.AutoGigConfig.SelectedPreset = preset;
+            Configuration.C.AutoGigConfig.SetActivePreset(preset);
             IChatGui.Get().Print(@$"{UIStrings.Gig_preset_set_to_} {preset.PresetName}");
             Configuration.FlushAsync().GetAwaiter().GetResult();
         }

@@ -19,12 +19,12 @@ public sealed class SessionCaughtCountCD : IConditionDefinition, ISimpleConditio
 
     public void DrawParams(Condition condition) {
         var fishId = GetInt(condition.Params, "id", 0);
-        var currentFish = GameRes.Fishes.FirstOrDefault(f => f.Id == fishId);
+        var currentFish = FishBaitCatalog.Get().Fishes.FirstOrDefault(f => f.Id == fishId);
         var selectedName = currentFish is { Id: > 0 }
             ? $"[#{currentFish.Id}] {currentFish.Name}"
             : "-";
 
-        DrawUtil.DrawComboSelector(GameRes.Fishes, fish => $"[#{fish.Id}] {fish.Name}", selectedName, fish => condition.Params["id"] = (long)fish.Id);
+        DrawUtil.DrawComboSelector(FishBaitCatalog.Get().Fishes, fish => $"[#{fish.Id}] {fish.Name}", selectedName, fish => condition.Params["id"] = (long)fish.Id);
 
         ImGui.SameLine();
         DrawIntCompareParams(condition, "##session_caught_op", "Count", defaultValue: 1, clamp: v => Math.Max(1, v), valueWidth: 60);

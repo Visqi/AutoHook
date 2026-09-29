@@ -1,8 +1,8 @@
 using AutoHook.Spearfishing.Enums;
-using Lumina.Excel.Sheets;
 
 namespace AutoHook.Presets.Bases;
 
+/// <summary>JSON DTO for fish_list.json. Runtime catalog entries are <see cref="Data.Fish"/>.</summary>
 public class ImportedFish {
     public int ItemId { get; set; }
     public HookType HookType { get; set; }
@@ -10,14 +10,10 @@ public class ImportedFish {
     public int InitialBait { get; set; }
     public List<int> Mooches { get; set; } = [];
     public List<FishPredator> Predators { get; set; } = [];
-    public List<int> Nodes { get; set; } = [];
-    public bool IsSpearFish { get; set; } = new();
-    public SpearfishSize Size { get; set; } = new();
-    public SpearfishSpeed Speed { get; set; } = new();
-
-    public int SurfaceSlap { get; set; } = new();
-    public bool OceanFish { get; set; } = new();
-    public FishInterval Interval { get; set; } = new();
+    public bool IsSpearFish { get; set; }
+    public SpearfishSize Size { get; set; }
+    public SpearfishSpeed Speed { get; set; }
+    public bool OceanFish { get; set; }
     public List<int> SpotIds { get; set; } = [];
     public List<int> Weathers { get; set; } = [];
     public List<int> WeathersFrom { get; set; } = [];
@@ -33,18 +29,8 @@ public class ImportedFish {
     public double BiteTimeMin { get; set; }
     public double BiteTimeMax { get; set; }
 
-    public string Name => Item.GetRow((uint)ItemId).Name.ToString();
-
-    public bool IsLureFish => GameRes.LureFishes.Any(f => f.Id == ItemId);
-
     public class FishPredator {
         public int ItemId { get; set; }
         public int Quantity { get; set; }
-    }
-
-    public class FishInterval {
-        public int OnTime { get; set; }
-        public int OffTime { get; set; }
-        public int ShiftTime { get; set; }
     }
 }

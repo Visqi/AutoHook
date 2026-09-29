@@ -57,9 +57,9 @@ public static class SolverPresetBuilder {
            || plan.Archetype is StrategyArchetype.PreMoochOpener or StrategyArchetype.MoochChain
                or StrategyArchetype.MoochLoop or StrategyArchetype.SwimbaitBank;
 
-    private static void SetupFishCaughtActions(CustomPresetConfig preset, ImportedFish target, SolverOutput plan, ImportedFish? slapFish) {
+    private static void SetupFishCaughtActions(CustomPresetConfig preset, Fish target, SolverOutput plan, Fish? slapFish) {
         if (slapFish != null) {
-            var slapCfg = AddFishConfig(preset, slapFish.ItemId);
+            var slapCfg = AddFishConfig(preset, slapFish.Id);
             slapCfg.SurfaceSlap.Enabled = true;
         }
 
@@ -82,17 +82,17 @@ public static class SolverPresetBuilder {
             return;
         }
 
-        AddFishConfig(preset, target.ItemId);
+        AddFishConfig(preset, target.Id);
     }
 
-    private static void SetupSwimbaitBank(CustomPresetConfig preset, ImportedFish target, SolverOutput plan) {
+    private static void SetupSwimbaitBank(CustomPresetConfig preset, Fish target, SolverOutput plan) {
         var bankCount = plan.PrepPhase.Steps
             .FirstOrDefault(s => s.Action == PrepActionKind.SwimbaitSelect)?.Count ?? 3;
 
-        var fishConfig = AddFishConfig(preset, target.ItemId);
+        var fishConfig = AddFishConfig(preset, target.Id);
         fishConfig.SparefulHand.Enabled = true;
-        fishConfig.SparefulHand.FishIdToCheck = (uint)target.ItemId;
-        fishConfig.SparefulHand.ConditionSet = Configuration.ConditionSetBuilder.SwimbaitCount(bankCount, "<", target.ItemId) is { } cond
+        fishConfig.SparefulHand.FishIdToCheck = (uint)target.Id;
+        fishConfig.SparefulHand.ConditionSet = Configuration.ConditionSetBuilder.SwimbaitCount(bankCount, "<", target.Id) is { } cond
             ? new ConditionSet {
                 CombineMode = ConditionCombineMode.All,
                 Groups = [new ConditionGroup { CombineMode = ConditionCombineMode.All, Conditions = [cond] }],
@@ -100,7 +100,7 @@ public static class SolverPresetBuilder {
         fishConfig.StopAfterCaughtLimit.Value = (true, bankCount + 1);
     }
 
-    private static void SetupIntuitionPrep(CustomPresetConfig preset, ImportedFish target, SolverOutput plan) {
+    private static void SetupIntuitionPrep(CustomPresetConfig preset, Fish target, SolverOutput plan) {
         var useSharedPrepBait = target.Predators.Count > 1
             && (plan.HoldMode == PrepHoldMode.IdenticalCastZeroTime
                 || plan.Archetype == StrategyArchetype.IntuitionRebuild);
@@ -121,26 +121,26 @@ public static class SolverPresetBuilder {
             var fish = FindFish(predator.ItemId);
             if (fish == null)
                 continue;
-            AddFishConfig(preset, fish.ItemId);
+            AddFishConfig(preset, fish.Id);
         }
     }
-    private static void ConfigureIntuitionPrepBaits(CustomPresetConfig preset, ImportedFish target) {
+    private static void ConfigureIntuitionPrepBaits(CustomPresetConfig preset, Fish target) {
         var spotId = target.SpotIds.FirstOrDefault();
         var predators = target.Predators
             .Select(p => FindFish(p.ItemId))
             .Where(f => f != null)
-            .Cast<ImportedFish>()
+            .Cast<Fish>()
             .ToList();
         if (predators.Count == 0)
             return;
-        var baitToFish = new Dictionary<int, List<ImportedFish>>();
+        var baitToFish = new Dictionary<int, List<Fish>>();
         foreach (var fish in predators) {
             foreach (var baitId in ResolveBaitsForFishAtSpot(fish, spotId)) {
                 if (!baitToFish.TryGetValue(baitId, out var list)) {
                     list = [];
                     baitToFish[baitId] = list;
                 }
-                if (list.All(f => f.ItemId != fish.ItemId))
+                if (list.All(f => f.Id != fish.Id))
                     list.Add(fish);
             }
         }
@@ -149,7 +149,7 @@ public static class SolverPresetBuilder {
         var catchBait = ResolveIntuitionCatchBait(target);
         EnsureBaitHasFish(baitToFish, startBait, predators);
         if (catchBait > 0 && catchBait != startBait)
-            EnsureBaitHasFish(baitToFish, catchBait, [.. predators.Where(f => IsMoochPredator(target, f.ItemId))]);
+            EnsureBaitHasFish(baitToFish, catchBait, [.. predators.Where(f => IsMoochPredator(target, f.Id))]);
         foreach (var (baitId, fishOnBait) in baitToFish) {
             if (baitId <= 0 || fishOnBait.Count == 0)
                 continue;
@@ -157,7 +157,7 @@ public static class SolverPresetBuilder {
             EnableIntuitionSwimbaitUse(preset, baitId);
         }
     }
-    private static void EnsureBaitHasFish(Dictionary<int, List<ImportedFish>> baitToFish, int baitId, List<ImportedFish> candidates) {
+    private static void EnsureBaitHasFish(Dictionary<int, List<Fish>> baitToFish, int baitId, List<Fish> candidates) {
         if (baitId <= 0 || candidates.Count == 0)
             return;
         if (!baitToFish.TryGetValue(baitId, out var list)) {
@@ -165,11 +165,11 @@ public static class SolverPresetBuilder {
             baitToFish[baitId] = list;
         }
         foreach (var fish in candidates) {
-            if (list.All(f => f.ItemId != fish.ItemId))
+            if (list.All(f => f.Id != fish.Id))
                 list.Add(fish);
         }
     }
-    private static bool IsMoochPredator(ImportedFish target, int fishId)
+    private static bool IsMoochPredator(Fish target, int fishId)
         => target.Mooches.Contains(fishId) || target.Predators.Any(p => p.ItemId == fishId && target.Mooches.Contains(p.ItemId));
     private static void EnableIntuitionSwimbaitUse(CustomPresetConfig preset, int baitId) {
         var baitCfg = preset.ListOfBaits.FirstOrDefault(f => f.BaitFish.Id == baitId);
@@ -177,7 +177,7 @@ public static class SolverPresetBuilder {
             return;
         baitCfg.SwimbaitIntuition.UseSwimbait = true;
     }
-    private static void SetupIntuitionMoochTarget(CustomPresetConfig preset, ImportedFish target, List<ImportedFish> moochList, SolverOutput plan) {
+    private static void SetupIntuitionMoochTarget(CustomPresetConfig preset, Fish target, List<Fish> moochList, SolverOutput plan) {
         var catchBait = ResolveIntuitionCatchBait(target);
         if (catchBait <= 0)
             catchBait = ResolveTackleBait(target, moochList);
@@ -194,7 +194,7 @@ public static class SolverPresetBuilder {
         NarrowPrepBaitsToMoochBiteUnderIntuition(preset, target, moochFish);
         SetupBaitAndMooch(preset, catchBait, target, moochList, isIntuition: true, slapFish: null, plan);
     }
-    private static void NarrowPrepBaitsToMoochBiteUnderIntuition(CustomPresetConfig preset, ImportedFish target, ImportedFish moochFish) {
+    private static void NarrowPrepBaitsToMoochBiteUnderIntuition(CustomPresetConfig preset, Fish target, Fish moochFish) {
         var catchBait = ResolveIntuitionCatchBait(target);
         foreach (var baitCfg in preset.ListOfBaits) {
             if (baitCfg.BaitFish.Id == catchBait)
@@ -206,7 +206,7 @@ public static class SolverPresetBuilder {
         }
     }
 
-    private static void ConfigureTargetIntuitionBait(CustomPresetConfig preset, ImportedFish target, List<ImportedFish> moochList, SolverOutput plan) {
+    private static void ConfigureTargetIntuitionBait(CustomPresetConfig preset, Fish target, List<Fish> moochList, SolverOutput plan) {
         var targetBait = ResolveTackleBait(target, moochList);
         var baitCfg = preset.ListOfBaits.FirstOrDefault(f => f.BaitFish.Id == targetBait) ?? new HookConfig(targetBait);
         baitCfg.ResetAllHooksets();
@@ -219,7 +219,7 @@ public static class SolverPresetBuilder {
         preset.ReplaceBaitConfig(baitCfg);
     }
 
-    private static void ConfigurePrepBait(CustomPresetConfig preset, int baitId, IReadOnlyList<ImportedFish> triggerFish) {
+    private static void ConfigurePrepBait(CustomPresetConfig preset, int baitId, IReadOnlyList<Fish> triggerFish) {
         if (triggerFish.Count == 0)
             return;
         var baitCfg = preset.ListOfBaits.FirstOrDefault(f => f.BaitFish.Id == baitId) ?? new HookConfig(baitId);
@@ -231,7 +231,7 @@ public static class SolverPresetBuilder {
         preset.ReplaceBaitConfig(baitCfg);
     }
 
-    private static void SetupIntuitionBaitSwapRules(CustomPresetConfig preset, ImportedFish target, List<ImportedFish> targetMoochList, SolverOutput plan) {
+    private static void SetupIntuitionBaitSwapRules(CustomPresetConfig preset, Fish target, List<Fish> targetMoochList, SolverOutput plan) {
         if (target.Predators.Count == 0)
             return;
 
@@ -255,7 +255,7 @@ public static class SolverPresetBuilder {
             SetupSinglePredatorPrepSwap(preset, target);
     }
 
-    private static void SetupSinglePredatorPrepSwap(CustomPresetConfig preset, ImportedFish target) {
+    private static void SetupSinglePredatorPrepSwap(CustomPresetConfig preset, Fish target) {
         var prepFish = FindFish(target.Predators[0].ItemId);
         if (prepFish == null)
             return;
@@ -271,7 +271,7 @@ public static class SolverPresetBuilder {
         });
     }
 
-    private static void SetupMultiPredatorPrepSwaps(CustomPresetConfig preset, ImportedFish target) {
+    private static void SetupMultiPredatorPrepSwaps(CustomPresetConfig preset, Fish target) {
         var resolved = target.Predators
             .Select(p => FindFish(p.ItemId) is { } fish ? (Predator: p, Fish: fish) : default)
             .Where(x => x.Fish != null)
@@ -284,14 +284,14 @@ public static class SolverPresetBuilder {
             return;
         // When non-mooch predators are done, swap to the force-only mooch bait (e.g. Metal Spinner)
         if (catchBait > 0 && catchBait != startBait) {
-            var nonMooch = resolved.Where(r => !target.Mooches.Contains(r.Fish.ItemId)).ToList();
+            var nonMooch = resolved.Where(r => !target.Mooches.Contains(r.Fish.Id)).ToList();
             if (nonMooch.Count > 0) {
                 var conditions = new List<Condition> {
                     Configuration.ConditionSetBuilder.IntuitionActive(inverse: true),
                     Configuration.ConditionSetBuilder.CurrentBait(catchBait, inverse: true),
                 };
                 foreach (var r in nonMooch)
-                    conditions.Add(Configuration.ConditionSetBuilder.FishCount(r.Fish.ItemId, r.Predator.Quantity));
+                    conditions.Add(Configuration.ConditionSetBuilder.FishCount(r.Fish.Id, r.Predator.Quantity));
                 preset.ExtraCfg.Triggers.Add(new ExtraTrigger {
                     Enabled = true,
                     ConditionSet = Configuration.ConditionSetBuilder.All([.. conditions]),
@@ -300,7 +300,7 @@ public static class SolverPresetBuilder {
                 });
             }
         }
-        var allComplete = resolved.Select(r => Configuration.ConditionSetBuilder.FishCount(r.Fish.ItemId, r.Predator.Quantity)).ToList();
+        var allComplete = resolved.Select(r => Configuration.ConditionSetBuilder.FishCount(r.Fish.Id, r.Predator.Quantity)).ToList();
         var completeConditions = new List<Condition> {
             Configuration.ConditionSetBuilder.IntuitionActive(inverse: true),
             Configuration.ConditionSetBuilder.CurrentBait(startBait, inverse: true),
@@ -315,7 +315,7 @@ public static class SolverPresetBuilder {
         });
     }
 
-    private static void AddPostWindowStopTrigger(CustomPresetConfig preset, ImportedFish target) {
+    private static void AddPostWindowStopTrigger(CustomPresetConfig preset, Fish target) {
         if (!TryParseFishingWindowEnd(target.Time, out var windowEnd))
             return;
 
@@ -327,12 +327,12 @@ public static class SolverPresetBuilder {
         });
     }
 
-    private static void SetupAutoCasts(CustomPresetConfig preset, ImportedFish target, List<ImportedFish> moochList, SolverOutput plan) {
+    private static void SetupAutoCasts(CustomPresetConfig preset, Fish target, List<Fish> moochList, SolverOutput plan) {
         ref var ac = ref preset.AutoCastsCfg;
         ac.EnableAll = true;
         ac.CastLine.Enabled = true;
         ac.CastCordial.Enabled = plan.ResourcePolicy.UseCordials;
-        ac.CastCollect.Enabled = Item.GetRow((uint)target.ItemId).IsCollectable;
+        ac.CastCollect.Enabled = Item.GetRow((uint)target.Id).IsCollectable;
         ac.CastSnagging.Enabled = target.Snagging;
 
         var intuitionPrep = target.Predators.Count > 0;
@@ -353,7 +353,7 @@ public static class SolverPresetBuilder {
         }
         else {
             ac.CastChum.Enabled = plan.ResourcePolicy.UseChum;
-            var isCollectable = Item.GetRow((uint)target.ItemId).IsCollectable;
+            var isCollectable = Item.GetRow((uint)target.Id).IsCollectable;
             var needsMooch = moochList.Count > 0 || plan.HoldMode is PrepHoldMode.MoochHold or PrepHoldMode.SwimbaitBank;
             var multiMooch = moochList.Count > 1 || plan.Archetype == StrategyArchetype.MoochChain;
             // single mooch, no collectability / Spareful Hand: try mooch2 first (more gp efficient). Patience only when M2 is on CD.
@@ -436,7 +436,7 @@ public static class SolverPresetBuilder {
             Configuration.ConditionSetBuilder.Gp(gpFloor));
     }
 
-    private static void ConfigurePreWindowResourceCasts(ref AutoCastsConfig ac, ImportedFish target, SolverOutput plan, List<ImportedFish> moochList) {
+    private static void ConfigurePreWindowResourceCasts(ref AutoCastsConfig ac, Fish target, SolverOutput plan, List<Fish> moochList) {
         if (!TryParseFishingWindow(target.Time, out var windowStart, out var windowEnd))
             return;
         var gpMax = plan.PlayerProfileUsed.GpMax;
@@ -508,7 +508,7 @@ public static class SolverPresetBuilder {
         Configuration.ConditionSetBuilder.ItemCooldownReady(IDs.Item.HQCordial),
     ];
 
-    private static void ApplyCastPolicy(CustomPresetConfig preset, int baitId, ImportedFish target, SolverOutput plan) {
+    private static void ApplyCastPolicy(CustomPresetConfig preset, int baitId, Fish target, SolverOutput plan) {
         var baitCfg = preset.ListOfBaits.FirstOrDefault(b => b.BaitFish.Id == baitId) ?? preset.ListOfMooch.FirstOrDefault(b => b.BaitFish.Id == baitId);
         if (baitCfg == null)
             return;
@@ -537,7 +537,7 @@ public static class SolverPresetBuilder {
         hookset.CastLures.ConfigureSpecialLure(actionId);
     }
 
-    private static void SetupBaitAndMooch(CustomPresetConfig preset, int bait, ImportedFish fishTarget, List<ImportedFish>? moochList, bool isIntuition, ImportedFish? slapFish, SolverOutput? plan) {
+    private static void SetupBaitAndMooch(CustomPresetConfig preset, int bait, Fish fishTarget, List<Fish>? moochList, bool isIntuition, Fish? slapFish, SolverOutput? plan) {
         var initBaitCfg = preset.ListOfBaits.FirstOrDefault(f => f.BaitFish.Id == bait);
         if (initBaitCfg == null) {
             initBaitCfg = new HookConfig(bait);
@@ -554,13 +554,13 @@ public static class SolverPresetBuilder {
         }
 
         foreach (var mooch in moochList) {
-            var newMooch = preset.ListOfMooch.FirstOrDefault(f => f.BaitFish.Id == mooch.ItemId) ?? new HookConfig(mooch.ItemId);
+            var newMooch = preset.ListOfMooch.FirstOrDefault(f => f.BaitFish.Id == mooch.Id) ?? new HookConfig(mooch.Id);
             newMooch.ResetAllHooksets();
 
             if (isIntuition)
                 newMooch.IntuitionHook.UseCustomStatusHook = true;
 
-            var fishConfig = AddFishConfig(preset, mooch.ItemId);
+            var fishConfig = AddFishConfig(preset, mooch.Id);
             fishConfig.Mooch.Enabled = true;
             fishConfig.Mooch.Mooch2.Enabled = true;
             if (isIntuition) {
@@ -583,7 +583,7 @@ public static class SolverPresetBuilder {
         }
     }
 
-    private static void ConfigureStraightCatchBait(HookConfig initBaitCfg, ImportedFish fishTarget, ImportedFish? slapFish, bool isIntuition) {
+    private static void ConfigureStraightCatchBait(HookConfig initBaitCfg, Fish fishTarget, Fish? slapFish, bool isIntuition) {
         initBaitCfg.SetBiteAndHookType(fishTarget.BiteType, fishTarget.HookType, isIntuition);
 
         if (slapFish != null && slapFish.BiteType != fishTarget.BiteType)
@@ -627,7 +627,7 @@ public static class SolverPresetBuilder {
         return TryParseFishingWindow(time, out _, out end);
     }
 
-    private static int ResolveStartingPrepBait(ImportedFish target) {
+    private static int ResolveStartingPrepBait(Fish target) {
         if (target.Predators.Count == 0)
             return 0;
         // Prefer the bait that covers the most prep fish
@@ -638,7 +638,7 @@ public static class SolverPresetBuilder {
     }
 
     // bait used once int is up to catch the mooch fish
-    private static int ResolveIntuitionCatchBait(ImportedFish target) {
+    private static int ResolveIntuitionCatchBait(Fish target) {
         if (target.Mooches.Count == 0)
             return 0;
         var moochId = target.Mooches[0];
@@ -650,14 +650,14 @@ public static class SolverPresetBuilder {
             var fallback = BuildPoolsAtSpot(spotId);
             return PrepBaitSelector.SelectBestSharedPrepBait(fallback, [moochId]);
         }
-        var kb = GameRes.FishSolver.KnowledgeBase;
+        var kb = FishBaitCatalog.Get().FishSolver.KnowledgeBase;
         var selected = PrepBaitSelector.SelectBestSharedPrepBait(pools, [moochId], spotId, kb?.FishById);
         if (selected > 0)
             return selected;
         return FindFish(moochId)?.InitialBait ?? 0;
     }
 
-    private static int ResolvePreferredPrepBaitForFish(ImportedFish target, int fishId) {
+    private static int ResolvePreferredPrepBaitForFish(Fish target, int fishId) {
         var spotId = target.SpotIds.FirstOrDefault();
         var baits = ResolveBaitsForFishAtSpot(FindFish(fishId), spotId).ToList();
         if (baits.Count == 0)
@@ -672,19 +672,19 @@ public static class SolverPresetBuilder {
         return baits[0];
     }
 
-    private static IEnumerable<int> ResolveBaitsForFishAtSpot(ImportedFish? fish, int spotId) {
+    private static IEnumerable<int> ResolveBaitsForFishAtSpot(Fish? fish, int spotId) {
         if (fish == null)
             yield break;
         var seen = new HashSet<int>();
         if (spotId > 0) {
             var pools = BuildPoolsAtSpot(spotId);
             foreach (var (baitId, members) in pools) {
-                if (members.Contains(fish.ItemId) && seen.Add(baitId))
+                if (members.Contains(fish.Id) && seen.Add(baitId))
                     yield return baitId;
             }
             var memberPools = BuildPoolMembersAtSpot(spotId);
             foreach (var (baitId, members) in memberPools) {
-                if (members.Any(m => m.FishId == fish.ItemId) && seen.Add(baitId))
+                if (members.Any(m => m.FishId == fish.Id) && seen.Add(baitId))
                     yield return baitId;
             }
         }
@@ -692,7 +692,7 @@ public static class SolverPresetBuilder {
             yield return fish.InitialBait;
     }
 
-    private static int ResolveSharedPrepBait(ImportedFish target) {
+    private static int ResolveSharedPrepBait(Fish target) {
         if (target.Predators.Count == 0)
             return 0;
 
@@ -706,7 +706,7 @@ public static class SolverPresetBuilder {
             var fallbackPools = BuildPoolsAtSpot(spotId);
             return PrepBaitSelector.SelectBestSharedPrepBait(fallbackPools, prepIds);
         }
-        var kb = GameRes.FishSolver.KnowledgeBase;
+        var kb = FishBaitCatalog.Get().FishSolver.KnowledgeBase;
         var selected = PrepBaitSelector.SelectBestSharedPrepBait(
             poolsByBait,
             prepIds,
@@ -715,13 +715,13 @@ public static class SolverPresetBuilder {
         return selected > 0 ? selected : ResolveFallbackPrepBait(target);
     }
 
-    private static int ResolveFallbackPrepBait(ImportedFish target) {
+    private static int ResolveFallbackPrepBait(Fish target) {
         var first = FindFish(target.Predators[0].ItemId);
         return first == null ? 0 : ResolveTackleBait(first, ResolveMoochFish(first.Mooches));
     }
 
     private static Dictionary<int, IReadOnlyList<PoolMember>> BuildPoolMembersAtSpot(int spotId) {
-        var kb = GameRes.FishSolver.KnowledgeBase;
+        var kb = FishBaitCatalog.Get().FishSolver.KnowledgeBase;
         if (kb == null)
             return [];
         return kb.PoolsByKey.Values
@@ -730,7 +730,7 @@ public static class SolverPresetBuilder {
     }
 
     private static Dictionary<int, IReadOnlyCollection<int>> BuildPoolsAtSpot(int spotId) {
-        var kb = GameRes.FishSolver.KnowledgeBase;
+        var kb = FishBaitCatalog.Get().FishSolver.KnowledgeBase;
         if (kb != null) {
             return kb.PoolsByKey.Values
                 .Where(p => p.SpotId == spotId)
@@ -738,19 +738,19 @@ public static class SolverPresetBuilder {
         }
 
         var pools = new Dictionary<int, HashSet<int>>();
-        foreach (var fish in GameRes.ImportedFishes) {
+        foreach (var fish in FishBaitCatalog.Get().ImportedFishes) {
             if (!fish.SpotIds.Contains(spotId) || fish.InitialBait <= 0)
                 continue;
             if (!pools.TryGetValue(fish.InitialBait, out var set)) {
                 set = [];
                 pools[fish.InitialBait] = set;
             }
-            set.Add(fish.ItemId);
+            set.Add(fish.Id);
         }
         return pools.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyCollection<int>)kvp.Value);
     }
 
-    private static void ConfigureDualPredatorIcSlap(CustomPresetConfig preset, ImportedFish target) {
+    private static void ConfigureDualPredatorIcSlap(CustomPresetConfig preset, Fish target) {
         var a = target.Predators[0];
         var b = target.Predators[1];
         var baitA = ResolvePreferredPrepBaitForFish(target, a.ItemId);
@@ -762,7 +762,7 @@ public static class SolverPresetBuilder {
         ConfigurePredatorIcSlap(preset, a.ItemId, a.Quantity, b.ItemId, b.Quantity, baitA);
         ConfigurePredatorIcSlap(preset, b.ItemId, b.Quantity, a.ItemId, a.Quantity, baitB);
     }
-    private static void ConfigureIntuitionMoochFish(CustomPresetConfig preset, ImportedFish target, SolverOutput plan) {
+    private static void ConfigureIntuitionMoochFish(CustomPresetConfig preset, Fish target, SolverOutput plan) {
         if (target.Mooches.Count == 0 || target.Predators.Count == 0)
             return;
         var moochId = target.Mooches[0];
@@ -816,13 +816,13 @@ public static class SolverPresetBuilder {
         cfg.SurfaceSlap.DontCancelMooch = true;
     }
 
-    private static ImportedFish? FindFish(int fishId)
-        => GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == fishId);
+    private static Fish? FindFish(int fishId)
+        => FishBaitCatalog.Get()[fishId];
 
-    private static List<ImportedFish> ResolveMoochFish(IEnumerable<int> moochIds)
-        => [.. moochIds.Select(FindFish).OfType<ImportedFish>()];
+    private static List<Fish> ResolveMoochFish(IEnumerable<int> moochIds)
+        => [.. moochIds.Select(FindFish).OfType<Fish>()];
 
-    private static int ResolveTackleBait(ImportedFish target, List<ImportedFish> moochList)
+    private static int ResolveTackleBait(Fish target, List<Fish> moochList)
         => moochList.Count > 0 ? moochList[^1].InitialBait : target.InitialBait;
 }
 

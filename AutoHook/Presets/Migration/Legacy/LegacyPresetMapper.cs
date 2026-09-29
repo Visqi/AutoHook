@@ -25,8 +25,8 @@ internal static class LegacyPresetMapper {
         var filteredBaits = new List<HookConfig>();
         var filteredMooch = new List<HookConfig>();
         foreach (var old in preset.ListOfBaits) {
-            var matchingBait = GameRes.Baits.FirstOrDefault(b => b.Name == old.BaitName);
-            var matchingFish = GameRes.Fishes.FirstOrDefault(f => f.Name == old.BaitName);
+            var matchingBait = FishBaitCatalog.Get().Baits.FirstOrDefault(b => b.Name == old.BaitName);
+            var matchingFish = FishBaitCatalog.Get().Fishes.FirstOrDefault(f => f.Name == old.BaitName);
 
             if (matchingBait != null) {
                 var newOne = new HookConfig(matchingBait);

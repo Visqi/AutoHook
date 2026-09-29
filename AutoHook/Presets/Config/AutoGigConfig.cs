@@ -70,7 +70,7 @@ public class AutoGigConfig : BasePresetConfig {
     }
 
     public List<BaseGig> GetGigCurrentNode(int node) {
-        var notebookId = node > 0 && GameRes.SpearfishingSpotsByPointId.TryGetValue((uint)node, out var spot) ? spot.NotebookId : 0;
+        var notebookId = node > 0 && FishSpotCatalog.Get().TryGetSpot((uint)node, out var spot) ? spot.NotebookId : 0;
         return GetGigsForPool(notebookId);
     }
 
@@ -122,7 +122,7 @@ public class AutoGigConfig : BasePresetConfig {
 
     private void DrawFishTab() {
         var poolIds = new List<uint> { 0 };
-        poolIds.AddRange(GameRes.SpearfishingPoolsByNotebookId.Keys.Where(id => id != 0).OrderBy(GetPoolName));
+        poolIds.AddRange(FishSpotCatalog.Get().PoolNotebookIds.OrderBy(GetPoolName));
 
         if (ImGui.Button(UIStrings.Add)) {
             if (!Gigs.Any(gig => gig.SpearfishingNotebookId == SelectedAddPoolId && gig.Fish == null))
@@ -221,9 +221,7 @@ public class AutoGigConfig : BasePresetConfig {
 
     private void DrawFishSearchBar(BaseGig gig) {
         using var _ = ImRaii.PushId("DrawFishSearchBar");
-        var choices = gig.SpearfishingNotebookId == 0 || !GameRes.SpearfishingPoolsByNotebookId.TryGetValue(gig.SpearfishingNotebookId, out var pool)
-            ? GameRes.SpearfishFishes
-            : [.. pool.ItemIds.Select(id => GameRes.SpearfishFishesByItemId.GetValueOrDefault(id)).Where(fish => fish != null).Select(fish => fish!)];
+        var choices = FishSpotCatalog.Get().GetSpearFishesInPool(gig.SpearfishingNotebookId);
 
         DrawUtil.DrawComboSelector(choices, fish => fish.Name, gig.Fish?.Name ?? UIStrings.None, fish => gig.Fish = fish);
     }
@@ -241,5 +239,5 @@ public class AutoGigConfig : BasePresetConfig {
     }
 
     public static string GetPoolName(uint notebookId)
-        => notebookId == 0 ? "Any Pool" : GameRes.SpearfishingPoolsByNotebookId.TryGetValue(notebookId, out var pool) ? pool.Name : $"Unknown Pool #{notebookId}";
+        => FishSpotCatalog.Get().GetPoolName(notebookId);
 }

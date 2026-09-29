@@ -1,5 +1,6 @@
 using AutoHook.Spearfishing.Enums;
 using Dalamud.Bindings.ImGui;
+using Newtonsoft.Json;
 using System.ComponentModel;
 
 namespace AutoHook.Presets.Bases;
@@ -8,19 +9,23 @@ public class BaseGig(int itemId) : BaseOption {
     [DefaultValue(true)]
     public bool Enabled = true;
 
+    [JsonProperty("ItemId")]
     private int _itemId = itemId;
-    public ImportedFish? Fish {
-        get {
-            if (field == null && _itemId != 0 &&
-                GameRes.SpearfishFishesByItemId.TryGetValue((uint)_itemId, out var fish))
-                field = fish;
-            return field;
-        }
+
+    // legacy presets stored a nested ImportedFish under "Fish"
+    [JsonProperty("Fish")]
+    private ImportedFish? FishLegacy {
         set {
-            field = value;
-            _itemId = value?.ItemId ?? 0;
+            if (value != null)
+                _itemId = value.ItemId;
         }
-    } = GameRes.SpearfishFishesByItemId.GetValueOrDefault((uint)itemId);
+    }
+
+    [JsonIgnore]
+    public Fish? Fish {
+        get => _itemId != 0 ? FishBaitCatalog.Get()[_itemId] : null;
+        set => _itemId = value?.Id ?? 0;
+    }
 
     [DefaultValue(0u)]
     public uint SpearfishingNotebookId { get; set; }
@@ -70,10 +75,10 @@ public class BaseGig(int itemId) : BaseOption {
     }
 
     public override bool Equals(object? obj) {
-        return obj is BaseGig settings && Fish?.ItemId == settings.Fish?.ItemId && SpearfishingNotebookId == settings.SpearfishingNotebookId;
+        return obj is BaseGig settings && Fish?.Id == settings.Fish?.Id && SpearfishingNotebookId == settings.SpearfishingNotebookId;
     }
 
     public override int GetHashCode() {
-        return HashCode.Combine(Fish?.ItemId, SpearfishingNotebookId);
+        return HashCode.Combine(Fish?.Id, SpearfishingNotebookId);
     }
 }

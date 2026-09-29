@@ -212,7 +212,7 @@ public sealed class AutoCastComponent(RodFishingModule module) : RodComponent(mo
             }
 
             if (activeSwimbaitCfg == null || !activeSwimbaitCfg.UseSwimbait) {
-                var globalAllMooches = presets.DefaultPreset.ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == GameRes.AllMoochesId);
+                var globalAllMooches = presets.DefaultPreset.ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == FishBaitCatalog.AllMoochesId);
                 if (globalAllMooches != null && globalAllMooches.Enabled) {
                     var globalCfg = globalAllMooches.GetSwimbaitConfig();
                     if (globalCfg.UseSwimbait) {

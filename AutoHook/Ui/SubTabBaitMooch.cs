@@ -72,7 +72,7 @@ public class SubTabBaitMooch {
                         if (tabDefault) {
                             hook.NormalHook.DrawOptions();
 
-                            if (isMooch && (_preset.IsGlobal || hook.BaitFish.Id == GameRes.AllMoochesId || GameRes.MoochableFish.Any(f => f.Id == hook.BaitFish.Id))) {
+                            if (isMooch && (_preset.IsGlobal || hook.BaitFish.Id == FishBaitCatalog.AllMoochesId || FishBaitCatalog.Get().MoochableFish.Any(f => f.Id == hook.BaitFish.Id))) {
                                 ImGui.Spacing();
                                 DrawSwimbaitUsage(hook.SwimbaitNormal, _preset.IsGlobal, false);
                             }
@@ -83,7 +83,7 @@ public class SubTabBaitMooch {
                     if (tabIntuition) {
                         hook.IntuitionHook.DrawOptions();
 
-                        if (isMooch && (_preset.IsGlobal || hook.BaitFish.Id == GameRes.AllMoochesId || GameRes.MoochableFish.Any(f => f.Id == hook.BaitFish.Id))) {
+                        if (isMooch && (_preset.IsGlobal || hook.BaitFish.Id == FishBaitCatalog.AllMoochesId || FishBaitCatalog.Get().MoochableFish.Any(f => f.Id == hook.BaitFish.Id))) {
                             ImGui.Spacing();
                             DrawSwimbaitUsage(hook.SwimbaitIntuition, _preset.IsGlobal, true);
                         }
@@ -104,11 +104,13 @@ public class SubTabBaitMooch {
     }
 
     private static void DrawInputSearchBar(HookConfig hookConfig, bool isMooch) {
-        var list = (isMooch ? GameRes.Fishes : GameRes.Baits).ToList();
+        var list = (isMooch ? FishBaitCatalog.Get().Fishes : FishBaitCatalog.Get().Baits)
+            .Select(f => new BaitFishClass(f))
+            .ToList();
         if (isMooch)
-            list.Insert(0, new BaitFishClass(UIStrings.All_Mooches, GameRes.AllMoochesId));
+            list.Insert(0, new BaitFishClass(UIStrings.All_Mooches, FishBaitCatalog.AllMoochesId));
         else
-            list.Insert(0, new BaitFishClass(UIStrings.All_Baits, GameRes.AllBaitsId));
+            list.Insert(0, new BaitFishClass(UIStrings.All_Baits, FishBaitCatalog.AllBaitsId));
 
         DrawUtil.DrawComboSelector(list, item => $"[{item.Id}] {item.Name}", hookConfig.BaitFish.Name, item => hookConfig.BaitFish = item);
 

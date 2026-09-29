@@ -18,9 +18,7 @@ public static class OceanStopUtil {
 
     public static IEnumerable<OceanStopKey> GetUniqueStops() {
         var seen = new HashSet<(uint SpotId, uint TimeId)>();
-        foreach (var route in IDataManager.Get().GetExcelSheet<IKDRoute>()) {
-            if (route.RowId == 0)
-                continue;
+        foreach (var route in IKDRoute.Where(r => r.RowId != 0)) {
             for (var z = 0; z < 3; z++) {
                 var spotId = route.Spot[z].RowId;
                 var timeId = route.Time[z].RowId;
@@ -37,11 +35,8 @@ public static class OceanStopUtil {
     }
 
     public static string FormatStateLog(OceanFishingState ocean) {
-        var stop = ocean.CurrentSpotId != 0 && ocean.CurrentTimeId != 0
-            ? FormatStopLabel(ocean.CurrentSpotId, ocean.CurrentTimeId)
-            : "-";
-        return $"zone={ocean.CurrentZone + 1}, stop={stop}, route={ocean.CurrentRoute}, status={ocean.Status}, " +
-               $"timer={ocean.TimeLeftInZone:F1}/{ocean.ZoneTimeMax:F1}s, spectral={ocean.SpectralCurrentActive}";
+        var stop = ocean.CurrentSpotId != 0 && ocean.CurrentTimeId != 0 ? FormatStopLabel(ocean.CurrentSpotId, ocean.CurrentTimeId) : "-";
+        return $"zone={ocean.CurrentZone + 1}, stop={stop}, route={ocean.CurrentRoute}, status={ocean.Status}, timer={ocean.TimeLeftInZone:F1}/{ocean.ZoneTimeMax:F1}s, spectral={ocean.SpectralCurrentActive}";
     }
 
     private static string GetSpotName(uint spotId) {

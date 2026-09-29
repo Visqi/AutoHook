@@ -28,7 +28,7 @@ public sealed class GigFishingModule : FishingModule {
         => ActionExecutor.Get().Enqueue(request, forceQueue);
 
     public override void Update() {
-        if (!Configuration.C.PluginEnabled)
+        if (!Configuration.C.PluginEnabled || !GigCfg.AutoGigEnabled)
             return;
 
         if (!Ws.Spearfishing.WindowOpen && !Ws.Spearfishing.SessionActive)

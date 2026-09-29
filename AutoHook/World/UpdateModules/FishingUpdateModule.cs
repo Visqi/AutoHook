@@ -138,7 +138,7 @@ public sealed class FishingUpdateModule : IWorldUpdateModule {
         if (swimbaitId.HasValue && swimbaitId.Value != 0)
             return swimbaitId.Value;
         if (FishIdSet.Count == 0) {
-            foreach (var fish in GameRes.Fishes)
+            foreach (var fish in FishBaitCatalog.Get().Fishes)
                 FishIdSet.Add((uint)fish.Id);
         }
         if (FishIdSet.Contains(currentId))

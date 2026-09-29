@@ -38,6 +38,11 @@ public class FishConfig : BaseOption {
         Mooch.UseAlwaysMoochLabel = true;
     }
 
+    public FishConfig(Fish fish) {
+        Fish = new BaitFishClass(fish);
+        Mooch.UseAlwaysMoochLabel = true;
+    }
+
     public FishConfig(int fishId) {
         Fish = new BaitFishClass(fishId);
     }

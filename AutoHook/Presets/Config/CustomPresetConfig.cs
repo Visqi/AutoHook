@@ -117,11 +117,11 @@ public class CustomPresetConfig : BasePresetConfig {
     public HookConfig? GetCfgById(uint id, bool isMooching) {
         if (isMooching) {
             var mooch = ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == id);
-            return mooch ?? ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == GameRes.AllMoochesId);
+            return mooch ?? ListOfMooch.FirstOrDefault(hook => hook.BaitFish.Id == FishBaitCatalog.AllMoochesId);
         }
 
         var bait = ListOfBaits.FirstOrDefault(hook => hook.BaitFish.Id == id);
-        return bait ?? ListOfBaits.FirstOrDefault(hook => hook.BaitFish.Id == GameRes.AllBaitsId);
+        return bait ?? ListOfBaits.FirstOrDefault(hook => hook.BaitFish.Id == FishBaitCatalog.AllBaitsId);
     }
 
     public FishConfig? GetFishById(uint id) {
@@ -136,8 +136,8 @@ public class CustomPresetConfig : BasePresetConfig {
     }
 
     public bool HasBaitOrMooch(uint id) {
-        return ListOfBaits.Any(hook => hook.BaitFish.Id == id || hook.BaitFish.Id == GameRes.AllBaitsId) ||
-               ListOfMooch.Any(hook => hook.BaitFish.Id == id || hook.BaitFish.Id == GameRes.AllMoochesId);
+        return ListOfBaits.Any(hook => hook.BaitFish.Id == id || hook.BaitFish.Id == FishBaitCatalog.AllBaitsId) ||
+               ListOfMooch.Any(hook => hook.BaitFish.Id == id || hook.BaitFish.Id == FishBaitCatalog.AllMoochesId);
     }
 
     public void ResetCounter() {

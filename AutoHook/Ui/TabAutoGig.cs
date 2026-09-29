@@ -129,7 +129,7 @@ internal class TabAutoGig : BaseTab {
 
         foreach (var preset in _gigCfg.Presets) {
             using var id = ImRaii.PushId(preset.UniqueId.ToString());
-            var isActive = _gigCfg.SelectedGuid == preset.UniqueId.ToString();
+            var isActive = _gigCfg.AutoGigEnabled && _gigCfg.SelectedGuid == preset.UniqueId.ToString();
             var color = isActive ? ImGuiColors.DalamudOrange : ImGuiColors.DalamudWhite;
             using (ImRaii.PushColor(ImGuiCol.Text, color)) {
                 if (ImGui.Selectable((isActive ? "> " : "") + preset.PresetName, !_viewingGlobal && _displayed?.UniqueId == preset.UniqueId, ImGuiSelectableFlags.AllowDoubleClick)) {
@@ -137,8 +137,10 @@ internal class TabAutoGig : BaseTab {
                     _viewingGlobal = false;
 
                     if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
-                        _gigCfg.SelectedPreset = isActive ? null : preset;
-                        Configuration.Save();
+                        if (isActive)
+                            _gigCfg.SetCatchAll();
+                        else
+                            _gigCfg.SetActivePreset(preset);
                     }
                 }
             }
@@ -154,8 +156,10 @@ internal class TabAutoGig : BaseTab {
                 _displayed = null;
 
                 if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left)) {
-                    _gigCfg.SelectedPreset = null;
-                    Configuration.Save();
+                    if (globalActive)
+                        _gigCfg.SetDisabled();
+                    else
+                        _gigCfg.SetCatchAll();
                 }
             }
         }

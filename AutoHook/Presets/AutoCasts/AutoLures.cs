@@ -116,7 +116,7 @@ public sealed class AutoLures : BaseActionCast {
         using var id = ImRaii.PushId(label);
         DrawUtil.DrawCheckboxTree(label, ref type.Enabled, () => {
             DrawTarget(UIStrings.AnyTarget, type.Any);
-            DrawTarget(UIStrings.OnlySpecial, type.Special, $"{UIStrings.SpecialFishExemple} {GameRes.LureFishes.FirstOrDefault()?.Name}");
+            DrawTarget(UIStrings.OnlySpecial, type.Special, $"{UIStrings.SpecialFishExemple} {FishBaitCatalog.Get().LureFishes.FirstOrDefault()?.Name}");
             DrawTarget(UIStrings.NotSpecial, type.NotSpecial);
         });
     }

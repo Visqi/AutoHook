@@ -7,7 +7,7 @@ public sealed class BaitComponent(RodFishingModule module) : RodComponent(module
     public static ChangeBaitReturn ChangeBait(uint baitId) {
         var ws = WorldState.Get();
         if (baitId == ws.Fishing.BaitInfo.BaitId) return ChangeBaitReturn.AlreadyEquipped;
-        if (baitId == 0 || GameRes.Baits.All(b => b.Id != baitId)) return ChangeBaitReturn.InvalidBait;
+        if (baitId == 0 || FishBaitCatalog.Get().Baits.All(b => b.Id != baitId)) return ChangeBaitReturn.InvalidBait;
         if (ws.Player.GetItemCount(baitId) <= 0) return ChangeBaitReturn.NotInInventory;
         return GameMain.ExecuteCommand(701, 4, (int)baitId, 0, 0) ? ChangeBaitReturn.Success : ChangeBaitReturn.UnknownError;
     }
@@ -23,7 +23,7 @@ public sealed class BaitComponent(RodFishingModule module) : RodComponent(module
             IChatGui.Get().PrintStatus($"Bait \"{bait.Name}\" is already equipped.");
             return ChangeBaitReturn.AlreadyEquipped;
         }
-        if (bait.Id == 0 || GameRes.Baits.All(b => b.Id != bait.Id)) {
+        if (bait.Id == 0 || FishBaitCatalog.Get().Baits.All(b => b.Id != bait.Id)) {
             IChatGui.Get().PrintStatus($"Bait \"{bait.Name}\" is not a valid bait.");
             return ChangeBaitReturn.InvalidBait;
         }

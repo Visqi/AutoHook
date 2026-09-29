@@ -40,6 +40,10 @@ public class HookConfig : BaseOption {
         BaitFish = baitFish;
     }
 
+    public HookConfig(Fish fish) {
+        BaitFish = new BaitFishClass(fish);
+    }
+
     public HookConfig(int baitFishId) {
         BaitFish = new BaitFishClass(baitFishId);
     }

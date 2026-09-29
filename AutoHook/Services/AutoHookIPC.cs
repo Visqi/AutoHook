@@ -33,11 +33,7 @@ public class AutoHookIPC : IPluginService {
 
     [EzIPC]
     public void SetAutoGigState(bool state) {
-        WriteConfig(() => {
-            if (!state)
-                _cfg.AutoGigConfig.SelectedPreset = null;
-            _cfg.AutoGigConfig.AutoGigEnabled = state;
-        });
+        WriteConfig(() => _cfg.AutoGigConfig.AutoGigEnabled = state);
         Configuration.Save();
     }
 
@@ -48,7 +44,11 @@ public class AutoHookIPC : IPluginService {
     }
 
     public void SetPresetAutogig(string preset) {
-        WriteConfig(() => _cfg.AutoGigConfig.SelectedPreset = _cfg.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == preset));
+        WriteConfig(() => {
+            var match = _cfg.AutoGigConfig.Presets.FirstOrDefault(x => x.PresetName == preset);
+            if (match != null)
+                _cfg.AutoGigConfig.SetActivePreset(match);
+        });
         Configuration.Save();
     }
 
@@ -170,7 +170,7 @@ public class AutoHookIPC : IPluginService {
         if (uint.TryParse(baitNameOrId, out var parsedId))
             return SwapBaitById(parsedId);
 
-        var bait = GameRes.Baits.FirstOrDefault(b => string.Equals(b.Name, baitNameOrId, StringComparison.OrdinalIgnoreCase));
+        var bait = FishBaitCatalog.Get().Baits.FirstOrDefault(b => string.Equals(b.Name, baitNameOrId, StringComparison.OrdinalIgnoreCase));
 
         if (bait == null || bait.Id <= 0)
             return false;

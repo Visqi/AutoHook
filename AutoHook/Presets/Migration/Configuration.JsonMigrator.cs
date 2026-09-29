@@ -774,7 +774,7 @@ public static class ConfigurationJsonMigrator {
     }
 
     private static void MergeSwimbaitCountCondition(JObject swimbait, int hookFishId, int threshold) {
-        var fishId = hookFishId != GameRes.AllMoochesId ? hookFishId : 0;
+        var fishId = hookFishId != FishBaitCatalog.AllMoochesId ? hookFishId : 0;
         var countCond = Configuration.ConditionSetBuilder.SwimbaitCount(threshold, ">=", fishId);
         var setObj = swimbait["ConditionSet"] as JObject;
         if (setObj?["g"] is JArray { Count: > 0 } groups && groups[0] is JObject firstGroup) {

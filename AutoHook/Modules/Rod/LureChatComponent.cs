@@ -31,7 +31,7 @@ public sealed class LureChatComponent(RodFishingModule module) : RodComponent(mo
 
     public void CheckForSpecialLure(IHandleableChatMessage message) {
         if (message.LogKind is not XivChatType.Gathering) return;
-        var isSpecialLure = GameRes.LureFishes.FirstOrDefault(f => f.LureMessage == message.Message.TextValue) != null;
+        var isSpecialLure = FishBaitCatalog.Get().LureFishes.FirstOrDefault(f => f.LureMessage == message.Message.TextValue) != null;
         var active = Rod.GetHookCfg().GetHookset().CastLures.GetActiveOption(Ws);
         if (active != null && AutoLures.MatchesLureSuccess(active.Value.Target, isGenericLure: false, isSpecialLure))
             Ws.Execute(new RodState.OpSetLureSuccess(true));

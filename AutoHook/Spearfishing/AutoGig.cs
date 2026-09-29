@@ -53,19 +53,23 @@ internal class AutoGig : Window, IDisposable {
 
     public void DrawSettings() {
         var selectedPreset = _gigCfg.SelectedPreset;
-        ImGui.TextColored(ImGuiColors.DalamudOrange,
-            selectedPreset?.PresetName ?? UIStrings.CatchEverything);
+        var activeLabel = !_gigCfg.AutoGigEnabled
+            ? UIStrings.Disabled
+            : selectedPreset?.PresetName ?? UIStrings.CatchEverything;
+        ImGui.TextColored(ImGuiColors.DalamudOrange, activeLabel);
         PluginUi.ShowKofi();
 
         ImGui.SetNextItemWidth(220.Scaled());
-        var preview = selectedPreset?.PresetName ?? UIStrings.CatchEverything;
-        using (var combo = ImRaii.Combo("###gigOverlayPreset", preview)) {
+        using (var combo = ImRaii.Combo("###gigOverlayPreset", activeLabel)) {
             if (combo) {
-                if (ImGui.Selectable(UIStrings.CatchEverything, selectedPreset == null))
-                    _gigCfg.SelectedPreset = null;
+                if (ImGui.Selectable(UIStrings.Disabled, !_gigCfg.AutoGigEnabled))
+                    _gigCfg.SetDisabled();
+                if (ImGui.Selectable(UIStrings.CatchEverything, _gigCfg.IsCatchAllActive))
+                    _gigCfg.SetCatchAll();
                 foreach (var preset in _gigCfg.Presets) {
-                    if (ImGui.Selectable(preset.PresetName, selectedPreset?.UniqueId == preset.UniqueId))
-                        _gigCfg.SelectedPreset = preset;
+                    var isActive = _gigCfg.AutoGigEnabled && selectedPreset?.UniqueId == preset.UniqueId;
+                    if (ImGui.Selectable(preset.PresetName, isActive))
+                        _gigCfg.SetActivePreset(preset);
                 }
             }
         }
@@ -101,7 +105,7 @@ internal class AutoGig : Window, IDisposable {
             }
         }
 
-        if (!Configuration.C.PluginEnabled)
+        if (!Configuration.C.PluginEnabled || !_gigCfg.AutoGigEnabled)
             return;
 
         DrawFishHitboxes(addon, addon->Fish[0], addon->GetNodeById(Fish1NodeId));

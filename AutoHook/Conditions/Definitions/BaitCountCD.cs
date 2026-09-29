@@ -20,12 +20,12 @@ public sealed class BaitCountCD : IConditionDefinition {
 
     public void DrawParams(Condition condition) {
         var baitId = GetInt(condition.Params, "id", 0);
-        var currentBait = GameRes.Baits.FirstOrDefault(b => b.Id == baitId);
+        var currentBait = FishBaitCatalog.Get().Baits.FirstOrDefault(b => b.Id == baitId);
         var selectedName = currentBait is { Id: > 0 }
             ? $"[#{currentBait.Id}] {currentBait.Name}"
             : "-";
 
-        DrawUtil.DrawComboSelector(GameRes.Baits, bait => $"[#{bait.Id}] {bait.Name}", selectedName, bait => condition.Params["id"] = (long)bait.Id);
+        DrawUtil.DrawComboSelector(FishBaitCatalog.Get().Baits, bait => $"[#{bait.Id}] {bait.Name}", selectedName, bait => condition.Params["id"] = (long)bait.Id);
 
         ImGui.SameLine();
         DrawIntCompareParams(condition, "##baitcount_op", "Count", clamp: v => Math.Max(0, v));

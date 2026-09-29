@@ -19,10 +19,10 @@ public sealed class SpearfishingCaughtCountCD : IConditionDefinition {
 
     public void DrawParams(Condition condition) {
         var fishId = GetInt(condition.Params, "id", 0);
-        var currentFish = GameRes.SpearfishFishes.FirstOrDefault(fish => fish.ItemId == fishId);
-        var selectedName = currentFish is not null ? $"[#{currentFish.ItemId}] {currentFish.Name}" : "-";
+        var currentFish = FishBaitCatalog.Get().SpearFishes.FirstOrDefault(fish => fish.Id == fishId);
+        var selectedName = currentFish?.Label ?? "-";
 
-        DrawUtil.DrawComboSelector(GameRes.SpearfishFishes, fish => $"[#{fish.ItemId}] {fish.Name}", selectedName, fish => condition.Params["id"] = (long)fish.ItemId);
+        DrawUtil.DrawComboSelector(FishBaitCatalog.Get().SpearFishes, fish => fish.Label, selectedName, fish => condition.Params["id"] = (long)fish.Id);
         ImGui.SameLine();
         DrawIntCompareParams(condition, "##spearfishing_caught_op", "Count", defaultValue: 1, clamp: value => Math.Max(1, value), valueWidth: 60);
     }

@@ -24,12 +24,12 @@ public sealed class SwimbaitCountCD : IConditionDefinition {
         var fishId = GetInt(condition.Params, "id", 0);
         var selectedName = fishId switch {
             0 => "Current slot fish",
-            > 0 when GameRes.Fishes.FirstOrDefault(f => f.Id == fishId) is { } fish => $"[#{fish.Id}] {fish.Name}",
+            > 0 when FishBaitCatalog.Get().Fishes.FirstOrDefault(f => f.Id == fishId) is { } fish => $"[#{fish.Id}] {fish.Name}",
             _ => "-",
         };
 
         var fishOptions = new List<BaitFishClass> { new("Current slot fish", 0) };
-        fishOptions.AddRange(GameRes.Fishes);
+        fishOptions.AddRange(FishBaitCatalog.Get().Fishes.Select(f => new BaitFishClass(f)));
         DrawUtil.DrawComboSelector(fishOptions, fish => fish.Id == 0 ? fish.Name : $"[#{fish.Id}] {fish.Name}", selectedName, fish => condition.Params["id"] = (long)fish.Id);
 
         ImGui.SameLine();

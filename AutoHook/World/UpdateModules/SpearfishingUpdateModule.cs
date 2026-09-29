@@ -66,11 +66,11 @@ public sealed class SpearfishingUpdateModule : IWorldUpdateModule {
     }
 
     public void ProcessCatches(WorldState ws) {
-        if (GameRes.SpearfishItemIds.Count == 0)
+        if (FishBaitCatalog.Get().SpearfishItemIds.Count == 0)
             return;
 
         _spearItemCountScratch.Clear();
-        foreach (var itemId in GameRes.SpearfishItemIds) {
+        foreach (var itemId in FishBaitCatalog.Get().SpearfishItemIds) {
             var count = ws.Player.GetItemCount(itemId);
             if (count > 0)
                 _spearItemCountScratch[itemId] = count;
@@ -136,7 +136,7 @@ public sealed class SpearfishingUpdateModule : IWorldUpdateModule {
         if (ITargetManager.Get().Target is not { ObjectKind: Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint, BaseId: var pointId })
             return SpearfishingSpotState.Empty;
 
-        if (!GameRes.SpearfishingSpotsByPointId.TryGetValue(pointId, out var spot))
+        if (!FishSpotCatalog.Get().TryGetSpot(pointId, out var spot))
             return new SpearfishingSpotState(pointId, 0, 0, false);
 
         return new SpearfishingSpotState(spot.GatheringPointId, spot.GatheringPointBaseId, spot.NotebookId, spot.IsShadowNode);

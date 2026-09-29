@@ -75,7 +75,8 @@ public class SubTabFish {
         ImGui.SameLine();
 
         var lastCatchFish = WorldState.Get().Fishing.LastCatch is { FishId: > 0 } lc
-            ? GameRes.Fishes.FirstOrDefault(fish => fish.Id == lc.FishId) ?? new BaitFishClass(@"-", (int)lc.FishId) : null;
+            ? FishBaitCatalog.Get()[(int)lc.FishId] ?? new Fish { Id = (int)lc.FishId, Name = "-" }
+            : null;
 
         if (ImGui.Button($"{UIStrings.AddLastCatch} {lastCatchFish?.Name ?? "-"}")) {
             if (lastCatchFish is null || lastCatchFish.Id is 0 or -1)
@@ -103,11 +104,11 @@ public class SubTabFish {
     private static void DrawFishSearchBar(FishConfig fishConfig) {
         using var _ = ImRaii.PushId("DrawFishSearchBar");
         DrawUtil.DrawComboSelector(
-            GameRes.Fishes,
+            FishBaitCatalog.Get().Fishes,
             fish => $"[#{fish.Id}] {fish.Name}",
             fishConfig.Fish.Name,
             fish => {
-                fishConfig.Fish = fish;
+                fishConfig.Fish = new BaitFishClass(fish);
                 var stopLimit = fishConfig.StopAfterCaughtLimit.Value;
                 fishConfig.StopAfterCaughtLimit.Value = stopLimit;
                 var baitLimit = fishConfig.SwapBaitLimit.Value;

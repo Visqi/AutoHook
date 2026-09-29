@@ -25,12 +25,12 @@ public sealed class FishCaughtCounterCD : IConditionDefinition {
 
     public void DrawParams(Condition condition) {
         var fishId = GetInt(condition.Params, "id", 0);
-        var currentFish = GameRes.Fishes.FirstOrDefault(f => f.Id == fishId);
+        var currentFish = FishBaitCatalog.Get().Fishes.FirstOrDefault(f => f.Id == fishId);
         var selectedName = currentFish is { Id: > 0 }
             ? $"[#{currentFish.Id}] {currentFish.Name}"
             : "-";
 
-        DrawUtil.DrawComboSelector(GameRes.Fishes, fish => $"[#{fish.Id}] {fish.Name}", selectedName, fish => condition.Params["id"] = (long)fish.Id);
+        DrawUtil.DrawComboSelector(FishBaitCatalog.Get().Fishes, fish => $"[#{fish.Id}] {fish.Name}", selectedName, fish => condition.Params["id"] = (long)fish.Id);
 
         ImGui.SameLine();
         DrawIntCompareParams(condition, "##fishcount_op", "Count", clamp: v => Math.Max(0, v));

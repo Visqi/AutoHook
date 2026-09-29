@@ -18,13 +18,13 @@ public sealed class CurrentBaitCD : IConditionDefinition {
         var ids = GetIds(condition.Params);
         var currentId = ids.Count > 0 ? ids[0] : 0;
 
-        var currentBait = GameRes.Baits.FirstOrDefault(b => b.Id == currentId);
+        var currentBait = FishBaitCatalog.Get().Baits.FirstOrDefault(b => b.Id == currentId);
         var label = currentBait is { Id: > 0 }
             ? $"[#{currentBait.Id}] {currentBait.Name}"
             : "Select bait";
 
         DrawUtil.DrawComboSelector(
-            GameRes.Baits,
+            FishBaitCatalog.Get().Baits,
             bait => $"[#{bait.Id}] {bait.Name}",
             label,
             bait => condition.Params["ids"] = new List<object> { (long)bait.Id });

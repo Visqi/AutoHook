@@ -51,7 +51,6 @@ public static class ReplayPresetImport {
         preset.RegenerateNestedUniqueIds();
         preset.RenamePreset(UniqueSpearfishingPresetName(preset.PresetName));
         Configuration.C.AutoGigConfig.AddNewPreset(preset);
-        Configuration.C.AutoGigConfig.SelectedPreset = preset;
         Configuration.Save();
         error = null;
         return true;

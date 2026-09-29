@@ -1,45 +1,59 @@
 using ECommons.MathHelpers;
 using Newtonsoft.Json;
-using FishRow = Lumina.Excel.Sheets.FishParameter;
 using ItemRow = Lumina.Excel.Sheets.Item;
 
 namespace AutoHook.Presets.Bases;
 
+/// <summary>Config/UI identity for a bait or fish. Resolves display data via <see cref="FishBaitCatalog"/>.</summary>
 public class BaitFishClass : IComparable<BaitFishClass> {
     [JsonIgnore]
-    public string Name => Id switch {
-        GameRes.AllMoochesId => UIStrings.All_Mooches,
-        GameRes.AllBaitsId => UIStrings.All_Baits,
-        <= 0 => UIStrings.None,
-        _ => ItemRow.GetRow((uint)Id).Name.ToString()
-    };
+    public string Name {
+        get {
+            if (!string.IsNullOrEmpty(_nameOverride))
+                return _nameOverride;
+            return Id switch {
+                FishBaitCatalog.AllMoochesId => UIStrings.All_Mooches,
+                FishBaitCatalog.AllBaitsId => UIStrings.All_Baits,
+                <= 0 => UIStrings.None,
+                _ => FishBaitCatalog.Get()[Id]?.Name ?? ItemRow.GetRow((uint)Id).Name.ToString(),
+            };
+        }
+    }
 
     [JsonIgnore]
-    public bool IsLocked => FishRow.FirstOrNull(r => r.Item.RowId == Id) is { GatheringSubCategory.ValueNullable.Item.RowId: not 0, GatheringSubCategory.ValueNullable.Item.Value: var book } && !IUnlockState.Get().IsItemUnlocked(book);
+    public string Label => FishBaitCatalog.Get()[Id]?.Label ?? (Id > 0 ? $"[#{Id}] {Name}" : Name);
 
     [JsonIgnore]
-    public int MinGathering => GameRes.ImportedFishes.FirstOrDefault(f => f.ItemId == Id)?.MinGathering ?? 0;
+    public bool IsLocked => FishBaitCatalog.Get()[Id]?.IsLocked ?? false;
+
+    [JsonIgnore]
+    public int MinGathering => FishBaitCatalog.Get()[Id]?.MinGathering ?? 0;
 
     public int Id;
 
-    [JsonIgnore] public string LureMessage = "";
+    [JsonIgnore] private readonly string _nameOverride = "";
 
-    // check the bait type
     [JsonIgnore]
-    public BaitType BaitType => GameRes.Baits.Any(b => b.Id == Id) ? BaitType.Bait : GameRes.Fishes.Any(f => f.Id == Id) ? BaitType.Mooch : BaitType.Unknown;
+    public string LureMessage => FishBaitCatalog.Get()[Id]?.LureMessage ?? "";
+
+    [JsonIgnore]
+    public BaitType BaitType => FishBaitCatalog.Get()[Id]?.BaitType ?? BaitType.Unknown;
+
+    [JsonIgnore]
+    public Fish? CatalogFish => FishBaitCatalog.Get()[Id];
 
     public BaitFishClass(ItemRow data) {
         Id = (int)data.RowId;
     }
 
-    public BaitFishClass(FishRow fishRow) {
+    public BaitFishClass(Lumina.Excel.Sheets.FishParameter fishRow) {
         var itemData = fishRow.Item.GetValueOrDefault<ItemRow>() ?? new ItemRow();
-        LureMessage = fishRow.Unknown_70_1.ToString();
         Id = (int)itemData.RowId;
     }
 
     public BaitFishClass(string name, int id) {
         Id = id;
+        _nameOverride = name;
     }
 
     public BaitFishClass() {
@@ -48,6 +62,10 @@ public class BaitFishClass : IComparable<BaitFishClass> {
 
     public BaitFishClass(Number id) {
         Id = id;
+    }
+
+    public BaitFishClass(Fish fish) {
+        Id = fish.Id;
     }
 
     public int CompareTo(BaitFishClass? other)

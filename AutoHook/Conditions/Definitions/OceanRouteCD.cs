@@ -20,18 +20,13 @@ public sealed class OceanRouteCD : IConditionDefinition {
         var currentId = ids.Count > 0 ? ids[0] : 0;
 
         var unique = new Dictionary<string, uint>();
-        foreach (var row in IDataManager.Get().GetExcelSheet<IKDRoute>()) {
-            if (row.RowId == 0) continue;
-            var name = row.Name.ToString();
-            if (string.IsNullOrEmpty(name)) continue;
-            if (!unique.ContainsKey(name))
-                unique[name] = row.RowId;
+        foreach (var row in IKDRoute.Where(r => r.RowId != 0 && !r.Name.IsEmpty)) {
+            if (!unique.ContainsKey(row.Name.ToString()))
+                unique[row.Name.ToString()] = row.RowId;
         }
 
         var routes = unique.OrderBy(k => k.Key).Select(k => (Id: k.Value, Name: k.Key)).ToList();
-        var label = currentId != 0 && IDataManager.Get().GetExcelSheet<IKDRoute>().TryGetRow(currentId, out var currentRow)
-            ? $"{currentRow.RowId}: {currentRow.Name}"
-            : "Select route";
+        var label = currentId != 0 && IKDRoute.TryGetRow(currentId, out var currentRow) ? $"{currentRow.RowId}: {currentRow.Name}" : "Select route";
 
         DrawUtil.DrawComboSelector(routes, r => $"{r.Id}: {r.Name}", label, r => { condition.Params["ids"] = new List<object> { (long)r.Id }; });
     }
@@ -41,8 +36,6 @@ public sealed class OceanRouteCD : IConditionDefinition {
         if (ids.Count == 0)
             return "any route";
         var id = ids[0];
-        return IDataManager.Get().GetExcelSheet<IKDRoute>().TryGetRow(id, out var row)
-            ? $"{row.RowId}: {row.Name}"
-            : $"route {id}";
+        return IKDRoute.TryGetRow(id, out var row) ? $"{row.RowId}: {row.Name}" : $"route {id}";
     }
 }

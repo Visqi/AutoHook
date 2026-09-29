@@ -58,7 +58,7 @@ public class SubTabExtra {
             DrawUtil.DrawCheckboxTree(UIStrings.ForceBaitSwap, ref config.ForceBaitSwap,
                 () => {
                     DrawUtil.TextV(UIStrings.SelectBaitStartFishing);
-                    DrawUtil.DrawComboSelector(GameRes.Baits, bait => $"[#{bait.Id}] {bait.Name}",
+                    DrawUtil.DrawComboSelector(FishBaitCatalog.Get().Baits, bait => $"[#{bait.Id}] {bait.Name}",
                         config.ForcedBaitId <= 0 ? UIStrings.None : Item.GetRow((uint)config.ForcedBaitId).Name.ToString(),
                         bait => config.ForcedBaitId = bait.Id);
                 }
@@ -271,17 +271,17 @@ public class SubTabExtra {
                 var removeStatus = trig.RemoveStatus;
                 var statusToRemove = trig.StatusToRemove;
                 DrawEnabledSelector("Remove Status", ref removeStatus, () => {
-                    if (GameRes.FishingStatuses.Count == 0)
+                    if (FishBaitCatalog.Get().FishingStatuses.Count == 0)
                         return;
 
-                    if (statusToRemove == 0 || GameRes.FishingStatuses.All(s => s != statusToRemove))
-                        statusToRemove = GameRes.FishingStatuses[0];
+                    if (statusToRemove == 0 || FishBaitCatalog.Get().FishingStatuses.All(s => s != statusToRemove))
+                        statusToRemove = FishBaitCatalog.Get().FishingStatuses[0];
 
                     var selectedLabel = $"{statusToRemove}: {Status.GetRow(statusToRemove).Name}";
-                    DrawUtil.DrawComboSelector(GameRes.FishingStatuses, s => $"{s}: {Status.GetRow(s).Name}", selectedLabel, s => statusToRemove = s);
+                    DrawUtil.DrawComboSelector(FishBaitCatalog.Get().FishingStatuses, s => $"{s}: {Status.GetRow(s).Name}", selectedLabel, s => statusToRemove = s);
                 });
-                if (removeStatus && statusToRemove == 0 && GameRes.FishingStatuses.Count > 0)
-                    statusToRemove = GameRes.FishingStatuses[0];
+                if (removeStatus && statusToRemove == 0 && FishBaitCatalog.Get().FishingStatuses.Count > 0)
+                    statusToRemove = FishBaitCatalog.Get().FishingStatuses[0];
                 trig.RemoveStatus = removeStatus;
                 trig.StatusToRemove = statusToRemove;
 

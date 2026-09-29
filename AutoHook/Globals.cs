@@ -1,5 +1,5 @@
-global using AutoHook.Actions;
 global using AutoHook.Data;
+global using AutoHook.Actions;
 global using AutoHook.Enums;
 global using AutoHook.Extensions;
 global using AutoHook.Modules;
