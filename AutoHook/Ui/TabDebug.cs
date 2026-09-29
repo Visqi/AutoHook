@@ -84,6 +84,7 @@ public class TabDebug : BaseTab {
                         ("Bite time", $"{f.BiteInfo.BiteTimeSeconds:F2}s"),
                         ("Tug", f.BiteInfo.TugType.ToString()),
                         ("Chum", ws.Fishing.ChumActive.ToString()),
+                        ("Surface slap", f.SlappedFishId == 0 ? "-" : $"{Item.GetRow(f.SlappedFishId).Name} ({f.SlappedFishId})"),
                         ("Lure success", ws.Fishing.LureSuccess.ToString()),
                         ("Collectable window", ws.Fishing.CollectableWindowOpen.ToString()),
                     ]);

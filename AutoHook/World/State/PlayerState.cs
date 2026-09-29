@@ -111,9 +111,12 @@ public sealed class PlayerState {
 
     public sealed record OpStatuses(IReadOnlyDictionary<uint, (float Time, int Stacks)> Statuses) : WorldState.Operation {
         protected override void Exec(WorldState ws) {
+            var hadSurfaceSlap = ws.Player.HasStatus(IDs.Status.SurfaceSlap);
             ws.Player.Statuses.Clear();
             foreach (var kv in Statuses)
                 ws.Player.Statuses[kv.Key] = kv.Value;
+            if (hadSurfaceSlap && !ws.Player.HasStatus(IDs.Status.SurfaceSlap))
+                ws.Fishing.SlappedFishId = 0;
         }
 
         public override void Write(Replay.ReplayOutput output) {

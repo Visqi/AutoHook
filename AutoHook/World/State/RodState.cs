@@ -54,6 +54,8 @@ public sealed class RodState {
     public double? LastLureCastBiteTime;
     public PreviousCatchInfo PreviousCatch;
 
+    public uint SlappedFishId;
+
     public bool CanFish;
     public bool ChangingPosition;
     public FishingBaitFlags CurrentCastBaitFlags;
@@ -95,6 +97,8 @@ public sealed class RodState {
             yield return new OpSetCollectableWindowOpen(true);
         if (LastLureCastBiteTime is { } lureCastBiteTime)
             yield return new OpSetLastLureCastBiteTime(lureCastBiteTime);
+        if (SlappedFishId != 0)
+            yield return new OpSetSlappedFish(SlappedFishId);
         if (PreviousCatch.CanMoochPreviousCatch || PreviousCatch.CanMooch2PreviousCatch ||
             PreviousCatch.CanReleasePreviousCatch || PreviousCatch.CanIdenticalCastPreviousCatch || PreviousCatch.CanSurfaceSlapPreviousCatch ||
             CanFish || ChangingPosition || CurrentCastBaitFlags != 0 || CurrentSelectedSwimbait != 0 ||
@@ -184,6 +188,13 @@ public sealed class RodState {
 
         public override void Write(Replay.ReplayOutput output)
             => output.EmitFourCC("LURE").Emit(Value);
+    }
+
+    public sealed record OpSetSlappedFish(uint FishId) : WorldState.Operation {
+        protected override void Exec(WorldState ws) => ws.Fishing.SlappedFishId = FishId;
+
+        public override void Write(Replay.ReplayOutput output)
+            => output.EmitFourCC("SLAP").Emit(FishId);
     }
 
     public sealed record OpSetCollectableWindowOpen(bool Open) : WorldState.Operation {

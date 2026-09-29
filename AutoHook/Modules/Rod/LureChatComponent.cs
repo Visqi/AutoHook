@@ -1,5 +1,6 @@
 using Dalamud.Game.Chat;
 using Dalamud.Game.Text;
+using Dalamud.Utility;
 
 namespace AutoHook.Modules.Rod;
 
@@ -20,6 +21,12 @@ public sealed class LureChatComponent(RodFishingModule module) : RodComponent(mo
 
         if (message.LogMessageId is LogMessageIds.CantFish)
             PluginUi.Status = UIStrings.CantFishHere;
+
+        if (message.LogMessageId is LogMessageIds.SurfaceSlap or LogMessageIds.SurfaceSlapAlt) {
+            if (!message.TryGetIntParameter(0, out var itemId) || itemId <= 0)
+                return;
+            Ws.Execute(new RodState.OpSetSlappedFish(ItemUtil.GetBaseId((uint)itemId).ItemId));
+        }
     }
 
     public void CheckForSpecialLure(IHandleableChatMessage message) {
