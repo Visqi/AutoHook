@@ -80,6 +80,7 @@ public class TabDebug : BaseTab {
                         ("Swimbait", f.BaitInfo.SelectedSwimbaitId is { } sb ? Item.GetRow(sb).Name.ToString() : "-"),
                         ("Mooch", f.BaitInfo.MoochId != 0 ? Item.GetRow(f.BaitInfo.MoochId).Name.ToString() : "-"),
                         ("Mooching", f.BaitInfo.IsMooching.ToString()),
+                        ("Session time", ws.FishingSessionStartedAt is { } started ? FormatSessionElapsed(ws.CurrentTime - started) : "-"),
                         ("Bite time", $"{f.BiteInfo.BiteTimeSeconds:F2}s"),
                         ("Tug", f.BiteInfo.TugType.ToString()),
                         ("Chum", ws.Fishing.ChumActive.ToString()),
@@ -266,6 +267,14 @@ public class TabDebug : BaseTab {
         => !fish.Available
             ? "—"
             : $"Size={fish.Size}, Speed={fish.Speed}, Dir={(fish.InverseDirection ? "L←R" : "L→R")}{(fish.GuaranteedLarge ? ", Large*" : "")}";
+
+    private static string FormatSessionElapsed(TimeSpan elapsed) {
+        var totalSeconds = Math.Max(0, (int)elapsed.TotalSeconds);
+        var hours = totalSeconds / 3600;
+        var minutes = totalSeconds % 3600 / 60;
+        var seconds = totalSeconds % 60;
+        return hours > 0 ? $"{hours}h {minutes}m {seconds}s" : $"{minutes}m {seconds}s";
+    }
 
     private static void DrawFishCaughtData(RodState f) {
         if (f.FishCaughtCounts.Count > 0) {

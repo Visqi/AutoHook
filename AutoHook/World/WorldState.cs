@@ -3,18 +3,12 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 
 namespace AutoHook.World;
 
-public sealed class WorldState : IPluginService {
-    public ulong QPF;
-    public string GameVersion = "";
+public sealed class WorldState(ulong qpf, string gameVersion) : IPluginService {
+    public ulong QPF = qpf;
+    public string GameVersion = gameVersion;
     public FrameState Frame;
 
-    public unsafe WorldState()
-        : this((ulong)Framework.Instance()->PerformanceCounterFrequency, IDataManager.Get().GameData.Repositories["ffxiv"].Version) { }
-
-    public WorldState(ulong qpf, string gameVersion) {
-        QPF = qpf;
-        GameVersion = gameVersion;
-    }
+    public unsafe WorldState() : this((ulong)Framework.Instance()->PerformanceCounterFrequency, IDataManager.Get().GameData.Repositories["ffxiv"].Version) { }
 
     public TimeOnly EorzeaTime { get; set; }
 
@@ -34,12 +28,12 @@ public sealed class WorldState : IPluginService {
     public DateTime CurrentTime => Frame.Timestamp;
     public DateTime FutureTime(float deltaSeconds) => Frame.Timestamp.AddSeconds(deltaSeconds);
 
+    public DateTime? FishingSessionStartedAt;
+
     public bool HasAnglersArtStacks(int amount) => Player.GetStatusStacks(IDs.Status.AnglersArt) >= amount;
 
     public bool BlocksFortune()
-        => Player.HasStatus(IDs.Status.MakeshiftBait)
-           || Player.HasStatus(IDs.Status.PrizeCatch)
-           || Player.HasStatus(IDs.Status.AnglersFortune);
+        => Player.HasStatus(IDs.Status.MakeshiftBait) || Player.HasStatus(IDs.Status.PrizeCatch) || Player.HasStatus(IDs.Status.AnglersFortune);
 
     public bool ActionAvailable(uint actionId, ActionType actionType = ActionType.Action)
         => Player.GetActionStatus(actionType, actionId) == 0 && !ActionOnCooldown(actionId, actionType);
@@ -71,8 +65,7 @@ public sealed class WorldState : IPluginService {
     public bool IsSlottedDutyActionReady(uint actionId, ActionType actionType = ActionType.Action)
         => Player.DutyActionManagerActive && HasDutyActionCharges(actionId) && ActionAvailable(actionId, actionType);
 
-    // fish id while evaluating swimbait slot conditions (0 = unset).
-    public uint SwimbaitEvaluationFishId { get; set; }
+    public uint SwimbaitEvaluationFishId { get; set; } // fish id while evaluating swimbait slot conditions (0 = unset).
 
     public int GetSwimbaitCount() => Fishing.SwimbaitIds.Count(id => id != 0);
     public int GetSwimbaitCountForFish(uint fishId) => Fishing.SwimbaitIds.Count(id => id == fishId);
@@ -233,6 +226,7 @@ public sealed class WorldState : IPluginService {
     public Event<OpBeganSession> BeganSession = new();
     public sealed record OpBeganSession() : Operation {
         protected override void Exec(WorldState ws) {
+            ws.FishingSessionStartedAt = ws.CurrentTime;
             ws.BeganSession.Fire(this);
             foreach (var op in AchievementProgressSnapshot.Collect())
                 ws.Execute(op);
@@ -243,7 +237,10 @@ public sealed class WorldState : IPluginService {
 
     public Event<OpEndedSession> EndedSession = new();
     public sealed record OpEndedSession() : Operation {
-        protected override void Exec(WorldState ws) => ws.EndedSession.Fire(this);
+        protected override void Exec(WorldState ws) {
+            ws.FishingSessionStartedAt = null;
+            ws.EndedSession.Fire(this);
+        }
 
         public override void Write(Replay.ReplayOutput output) => output.EmitFourCC("FEND");
     }

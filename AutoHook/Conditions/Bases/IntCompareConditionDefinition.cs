@@ -16,7 +16,7 @@ public abstract class IntCompareConditionDefinition : IConditionDefinition {
 
     protected virtual bool? InactiveResult(WorldState world, IReadOnlyDictionary<string, object> parameters) => null;
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
+    public virtual bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
         if (InactiveResult(world, parameters) is bool inactive)
             return inactive;
 
