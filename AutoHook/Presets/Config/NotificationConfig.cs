@@ -48,12 +48,12 @@ public record class NotificationConfig {
     private static void DrawMessageInput(string label, ref string field, string fallbackText) {
         using var indent = ImRaii.PushIndent();
 
-        var text = string.IsNullOrWhiteSpace(field) ? fallbackText : field;
-
+        var text = field;
         ImGui.SetNextItemWidth(320.Scaled());
-        if (ImGui.InputText(label, ref text, 10_000)) {
+        ImGui.InputTextWithHint(label, fallbackText, ref text, 10_000);
+        if (ImGui.IsItemEdited())
             field = text;
+        if (ImGui.IsItemDeactivatedAfterEdit())
             Configuration.Save();
-        }
     }
 }
