@@ -52,7 +52,7 @@ public sealed class Fish {
         public int Quantity { get; init; }
     }
 
-    internal static bool ComputeIsLocked(uint itemId) {
+    internal static bool CheckFolkloreObtained(uint itemId) {
         var row = FishParameter.FirstOrNull(r => r.Item.RowId == itemId);
         if (row is not { GatheringSubCategory.ValueNullable.Item.RowId: not 0, GatheringSubCategory.ValueNullable.Item.Value: var book })
             return false;

@@ -104,7 +104,7 @@ public sealed class FishBaitCatalog : IPluginService {
                 BaitType = BaitType.Mooch,
                 LureMessage = lure,
                 IsLureFish = !string.IsNullOrEmpty(lure),
-                IsLocked = Fish.ComputeIsLocked((uint)id),
+                IsLocked = Fish.CheckFolkloreObtained((uint)id),
             });
         }
 
