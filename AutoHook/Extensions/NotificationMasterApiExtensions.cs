@@ -41,18 +41,20 @@ public static class NotificationMasterApiExtensions {
             }
 
             if (cfg.BeepOnSuccess) {
-                const int frequency = 900;
-                const int durationMs = 200;
-                const int count = 3;
+                _ = Task.Run(() => {
+                    const int frequency = 900;
+                    const int durationMs = 200;
+                    const int count = 3;
 
-                for (var i = 0; i < count; i++) {
-                    try {
-                        Console.Beep(frequency, durationMs);
+                    for (var i = 0; i < count; i++) {
+                        try {
+                            Console.Beep(frequency, durationMs);
+                        }
+                        catch {
+                            break;
+                        }
                     }
-                    catch {
-                        break;
-                    }
-                }
+                });
 
                 success = true;
             }
