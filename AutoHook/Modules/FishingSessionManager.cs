@@ -1,4 +1,5 @@
 using AutoHook.Tasks;
+using ECommons;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
 namespace AutoHook.Modules;
@@ -28,6 +29,9 @@ public sealed class FishingSessionManager : IPluginService, IDisposable {
     public void RequestStopAfterNextFish() => Rod.RequestStopAfterNextFish();
 
     private void OnFrameworkUpdate(IFramework _) {
+        if (ECommonsMain.Disposed) // check for this cause EC disposes before this and thus EzThrottler disappears
+            return;
+
         if (!Configuration.C.PluginEnabled || !IClientState.Get().IsLoggedIn || IObjectTable.Get().LocalPlayer == null) {
             if (!Configuration.C.PluginEnabled && Svc.Automation.CurrentTask is AutoOceanFish)
                 Svc.Automation.Stop();
