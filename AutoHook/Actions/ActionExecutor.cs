@@ -62,14 +62,11 @@ public sealed class ActionExecutor : IPluginService, IDisposable {
             }
 
             var request = head.Request!.Value;
-            // Match old TaskManager: try ExecuteRequest when ready; non-raw casts still
-            // gate on BlockCasting inside TryCastDelayed/TryCastNoDelay (retry next frame).
-            if (!request.UseRaw && _ws.Player.BlockCasting)
+            if (!request.UseRaw && request.DelayMode == ActionDelayMode.Delayed && _ws.Player.BlockCasting)
                 return;
 
             if (!ExecuteRequest(request)) {
-                // BlockCasting or unavailable — keep head and retry next frame.
-                if (!request.UseRaw && _ws.Player.BlockCasting)
+                if (!request.UseRaw && request.DelayMode == ActionDelayMode.Delayed && _ws.Player.BlockCasting)
                     return;
                 _queue.Dequeue();
                 continue;
@@ -152,9 +149,6 @@ public sealed class ActionExecutor : IPluginService, IDisposable {
     }
 
     public bool TryCastNoDelay(uint actionId, ActionType actionType = ActionType.Action, string actionName = "") {
-        if (_ws.Player.BlockCasting)
-            return false;
-
         if (!_ws.ActionAvailable(actionId, actionType))
             return false;
 
