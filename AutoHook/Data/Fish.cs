@@ -20,7 +20,13 @@ public sealed class Fish {
 
     public BaitType BaitType { get; init; } = BaitType.Unknown;
     public string LureMessage { get; init; } = "";
-    public bool IsLocked { get; init; } // folklore
+    public bool IsLocked {
+        get {
+            if (Id <= 0 || IsSentinel) return false;
+            var row = FishParameter.FirstOrNull(r => r.Item.RowId == Id);
+            return row is { GatheringSubCategory.ValueNullable.Item.RowId: not 0, GatheringSubCategory.ValueNullable.Item.Value: var book } && !IUnlockState.Get().IsItemUnlocked(book);
+        }
+    }
 
     public HookType HookType { get; init; }
     public BiteType BiteType { get; init; }
@@ -50,12 +56,5 @@ public sealed class Fish {
     public sealed class FishPredator {
         public int ItemId { get; init; }
         public int Quantity { get; init; }
-    }
-
-    internal static bool CheckFolkloreObtained(uint itemId) {
-        var row = FishParameter.FirstOrNull(r => r.Item.RowId == itemId);
-        if (row is not { GatheringSubCategory.ValueNullable.Item.RowId: not 0, GatheringSubCategory.ValueNullable.Item.Value: var book })
-            return false;
-        return !IUnlockState.Get().IsItemUnlocked(book);
     }
 }

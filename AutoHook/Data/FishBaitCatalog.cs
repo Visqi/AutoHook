@@ -104,7 +104,6 @@ public sealed class FishBaitCatalog : IPluginService {
                 BaitType = BaitType.Mooch,
                 LureMessage = lure,
                 IsLureFish = !string.IsNullOrEmpty(lure),
-                IsLocked = Fish.CheckFolkloreObtained((uint)id),
             });
         }
 
@@ -211,7 +210,6 @@ public sealed class FishBaitCatalog : IPluginService {
             IsMoochable = existing?.IsMoochable ?? false,
             BaitType = existing?.BaitType is BaitType.Bait ? BaitType.Bait : BaitType.Mooch,
             LureMessage = existing?.LureMessage ?? "",
-            IsLocked = existing?.IsLocked ?? false,
             HookType = dto.HookType,
             BiteType = dto.BiteType,
             InitialBait = dto.InitialBait,
@@ -248,7 +246,6 @@ public sealed class FishBaitCatalog : IPluginService {
         IsOceanFish = a.IsOceanFish || b.IsOceanFish,
         BaitType = b.BaitType != BaitType.Unknown ? b.BaitType : a.BaitType,
         LureMessage = !string.IsNullOrEmpty(b.LureMessage) ? b.LureMessage : a.LureMessage,
-        IsLocked = a.IsLocked || b.IsLocked,
         HookType = b.HasImportedData ? b.HookType : a.HookType,
         BiteType = b.HasImportedData ? b.BiteType : a.BiteType,
         InitialBait = b.HasImportedData ? b.InitialBait : a.InitialBait,

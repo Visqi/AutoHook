@@ -9,8 +9,8 @@ public class BaitFishClass : IComparable<BaitFishClass> {
     [JsonIgnore]
     public string Name {
         get {
-            if (!string.IsNullOrEmpty(_nameOverride))
-                return _nameOverride;
+            if (!string.IsNullOrEmpty(field))
+                return field;
             return Id switch {
                 FishBaitCatalog.AllMoochesId => UIStrings.All_Mooches,
                 FishBaitCatalog.AllBaitsId => UIStrings.All_Baits,
@@ -18,7 +18,7 @@ public class BaitFishClass : IComparable<BaitFishClass> {
                 _ => FishBaitCatalog.Get()[Id]?.Name ?? ItemRow.GetRow((uint)Id).Name.ToString(),
             };
         }
-    }
+    } = "";
 
     [JsonIgnore]
     public string Label => FishBaitCatalog.Get()[Id]?.Label ?? (Id > 0 ? $"[#{Id}] {Name}" : Name);
@@ -30,8 +30,6 @@ public class BaitFishClass : IComparable<BaitFishClass> {
     public int MinGathering => FishBaitCatalog.Get()[Id]?.MinGathering ?? 0;
 
     public int Id;
-
-    [JsonIgnore] private readonly string _nameOverride = "";
 
     [JsonIgnore]
     public string LureMessage => FishBaitCatalog.Get()[Id]?.LureMessage ?? "";
@@ -53,7 +51,7 @@ public class BaitFishClass : IComparable<BaitFishClass> {
 
     public BaitFishClass(string name, int id) {
         Id = id;
-        _nameOverride = name;
+        Name = name;
     }
 
     public BaitFishClass() {
