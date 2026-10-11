@@ -71,14 +71,7 @@ public sealed class ActionHints {
         PreferRestDelayMs = 0;
     }
 
-    public void AddCast(
-        int priority,
-        ActionRequest request,
-        HintSource source,
-        string? detail = null,
-        DecisionContext context = DecisionContext.AutoCast,
-        IReadOnlyList<ActionRequest>? chain = null,
-        Action? afterExecute = null) {
+    public void AddCast(int priority, ActionRequest request, HintSource source, string? detail = null, DecisionContext context = DecisionContext.AutoCast, IReadOnlyList<ActionRequest>? chain = null, Action? afterExecute = null) {
         Casts.Add(new CastHint {
             Priority = priority,
             Request = request,

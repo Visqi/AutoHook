@@ -16,8 +16,6 @@ public sealed class WorldStateUpdater : IPluginService, IAsyncDisposable {
     private readonly SpearfishingUpdateModule _spear = new();
     private readonly HooksUpdateModule _hooks;
 
-    public bool HasPendingGp => _hooks.HasPendingGp;
-
     public unsafe WorldStateUpdater() {
         _startQpc = Framework.Instance()->PerformanceCounterValue;
         _hooks = new HooksUpdateModule(_player.MarkInventoryDirty);

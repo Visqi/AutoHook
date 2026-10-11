@@ -14,8 +14,10 @@ public sealed class ActionHintsResolver {
         if (hints.ForbidCast)
             return false;
 
-        if (hints.HoldForPendingGp)
+        if (hints.HoldForPendingGp) {
+            ws.Decide(DecisionContext.AutoCast, false, "GP pending", $"Holding cast{(ws.Player.PendingGp.Count is 0 ? string.Empty : $" ({ws.Player.PendingGp.JoinValues()})")}");
             return false;
+        }
 
         if (hints.PreferRest) {
             var rest = new ActionRequest(IDs.Actions.Rest, ActionType.Action, UIStrings.Hook, ActionDelayMode.Delayed, DelayBeforeMs: hints.PreferRestDelayMs, UseRaw: hints.PreferRestDelayMs > 0);

@@ -82,7 +82,7 @@ public sealed class AutoCastComponent(RodFishingModule module) : RodComponent(mo
         if (ProposeAction(hints, autoCast != null ? HintPriority.ForAutoCast(autoCast) : HintPriority.AutoCast, autoCast, Ws, acCfg, false, ignoreMooch, afterExecute: continueStart))
             return;
 
-        if (WorldStateUpdater.Get().HasPendingGp) {
+        if (Ws.Player.HasPendingGp) {
             hints.HoldForPendingGp = true;
             return;
         }

@@ -112,14 +112,12 @@ public sealed class RodFishingModule : FishingModule {
         }
 
         if (Svc.Automation.CurrentTask is AutoOceanFish existing) {
-            Ws.Decide(DecisionContext.OceanPreset, false, "Task not started",
-                $"already running (zone {existing.ZoneIndex + 1})");
+            Ws.Decide(DecisionContext.OceanPreset, false, "Task not started", $"already running (zone {existing.ZoneIndex + 1})");
             return;
         }
 
         Svc.Automation.Start(new AutoOceanFish(op.ZoneIndex));
-        Ws.Decide(DecisionContext.OceanPreset, true, "Task started",
-            OceanStopUtil.FormatStateLog(ocean));
+        Ws.Decide(DecisionContext.OceanPreset, true, "Task started", OceanStopUtil.FormatStateLog(ocean));
     }
 
     private void OnWorldStateModified(WorldState.Operation op) {
@@ -318,7 +316,7 @@ public sealed class RodFishingModule : FishingModule {
 
             if (!Hints.HasCastProposal && lastCatchCfg is { Enabled: true } && FishCaughtComponent.HasGpBlockedFishCaughtAction(lastCatchCfg)) {
                 var ignoreMooch = lastCatchCfg.NeverMooch;
-                if (!AutoCast.ContributeGpRestoreHints(Hints, ignoreMooch) && WorldStateUpdater.Get().HasPendingGp)
+                if (!AutoCast.ContributeGpRestoreHints(Hints, ignoreMooch) && Ws.Player.HasPendingGp)
                     Hints.HoldForPendingGp = true;
             }
 

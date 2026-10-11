@@ -28,13 +28,14 @@ public sealed class HooksUpdateModule : IAsyncDisposable {
     private readonly Hook<AchievementStruct.Delegates.ReceiveAchievementProgress>? _receiveAchievementProgressHook;
     private readonly Hook<ActionEffectHandler.Delegates.Receive>? _receiveActionEffectHook;
     private readonly Hook<EffectResultDetourDelegate>? _effectResultHook;
-    private readonly Dictionary<(uint Seq, byte TargetIndex), int> _pendingGp = [];
+    private readonly EventSubscription _gpChanged;
     private bool _wksMissionEnding;
 
-    public bool HasPendingGp => _pendingGp.Count > 0;
+    private static Dictionary<(uint Seq, byte TargetIndex), int> PendingGp => WorldState.Get().Player.PendingGp;
 
     public unsafe HooksUpdateModule(Action markInventoryDirty) {
         _markInventoryDirty = markInventoryDirty;
+        _gpChanged = WorldState.Get().Player.GpChanged.Subscribe(OnGpChanged);
         _updateCatchHook = IGameInteropProvider.Get().HookFromAddress<AgentCatch.Delegates.UpdateCatch>((nint)AgentCatch.MemberFunctionPointers.UpdateCatch, UpdateCatchDetour);
         _useActionHook = IGameInteropProvider.Get().HookFromAddress<ActionManager.Delegates.UseAction>((nint)ActionManager.MemberFunctionPointers.UseAction, UseActionDetour);
         _playAnimationHook = IGameInteropProvider.Get().HookFromAddress<FishingEventHandler.Delegates.PlayAnimation>((nint)FishingEventHandler.StaticVirtualTablePointer->PlayAnimation, PlayAnimationDetour);
@@ -54,6 +55,7 @@ public sealed class HooksUpdateModule : IAsyncDisposable {
     }
 
     public async ValueTask DisposeAsync() {
+        _gpChanged.Dispose();
         await _useActionHook.DisposeAsync();
         await _updateCatchHook.DisposeAsync();
         await _playAnimationHook.DisposeAsync();
@@ -122,8 +124,8 @@ public sealed class HooksUpdateModule : IAsyncDisposable {
                 break;
             case SetBaseStat when _wksMissionEnding && arg1 is 7 && entityId == UIState.Instance()->PlayerState.EntityId:
                 _wksMissionEnding = false;
-                if (_pendingGp.Count > 0)
-                    _pendingGp.Clear();
+                if (PendingGp.Count > 0)
+                    PendingGp.Clear();
                 break;
         }
     }
@@ -141,20 +143,55 @@ public sealed class HooksUpdateModule : IAsyncDisposable {
                 var affectsSelf = atSource ? casterEntityId == me : targetId == me;
                 if (!affectsSelf || IObjectTable.Get().LocalPlayer is { CurrentGp: var cur, MaxGp: var max } && cur >= max) // don't add a pending gp at max
                     continue;
-                _pendingGp[(header->GlobalSequence, (byte)i)] = e.Value;
+                PendingGp[(header->GlobalSequence, (byte)i)] = e.Value;
+                WorldState.Get().Decide(DecisionContext.AutoCast, false, "GP pending", $"+{e.Value}");
             }
         }
         _receiveActionEffectHook!.Original(casterEntityId, casterPtr, targetPos, header, effects, targetEntityIds);
     }
 
+    private void OnGpChanged(uint previous, uint current) {
+        var delta = (int)current - (int)previous;
+        if (delta <= 0)
+            return;
+
+        var pendingGp = PendingGp;
+        var hadPending = pendingGp.Count > 0;
+        if (!hadPending && previous == 0)
+            return;
+
+        (uint Seq, byte TargetIndex)? exact = null;
+        if (hadPending) {
+            foreach (var (key, amount) in pendingGp) {
+                if (amount != delta)
+                    continue;
+                exact = key;
+                break;
+            }
+        }
+
+        if (exact is { } exactKey)
+            pendingGp.Remove(exactKey);
+
+        string detail;
+        if (exact != null)
+            detail = PendingGp.Count == 0 ? $"+{delta} ({previous} -> {current}), cleared pending" : $"+{delta} ({previous} -> {current}), cleared pending, still pending {PendingGp.JoinValues()}";
+        else if (hadPending)
+            detail = $"+{delta} ({previous} -> {current}), no exact match (pending {PendingGp.JoinValues()})";
+        else
+            detail = $"+{delta} ({previous} -> {current})";
+
+        WorldState.Get().Decide(DecisionContext.AutoCast, exact != null, "GP gain", detail);
+    }
+
     private unsafe void EffectResultDetour(uint targetId, byte* packet, byte replaying) {
+        _effectResultHook!.Original(targetId, packet, replaying);
         if (targetId == UIState.Instance()->PlayerState.EntityId) {
             var count = packet[0];
             var p = (EffectResultEntry*)(packet + 4);
             for (var i = 0; i < count; i++, p++)
-                _pendingGp.Remove((p->RelatedActionSequence, p->RelatedTargetIndex));
+                PendingGp.Remove((p->RelatedActionSequence, p->RelatedTargetIndex));
         }
-        _effectResultHook!.Original(targetId, packet, replaying);
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

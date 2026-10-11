@@ -77,7 +77,7 @@ public abstract class BaseActionCast {
         if (DoesCancelMooch() && ws.IsMoochAvailable() && DontCancelMooch && !ignoreCurrentMooch)
             return "Would cancel mooch";
 
-        if (RestoresGp && WorldStateUpdater.Get().HasPendingGp)
+        if (RestoresGp && ws.Player.HasPendingGp)
             return "GP pending";
 
         var condition = CastCondition(ws);

@@ -9,6 +9,9 @@ public sealed class PlayerState {
     public uint CurrentGp;
     public uint MaxGp;
     public byte Level;
+    public readonly Dictionary<(uint Seq, byte TargetIndex), int> PendingGp = [];
+
+    public bool HasPendingGp => PendingGp.Count > 0;
 
     public readonly Dictionary<uint, (float Time, int Stacks)> Statuses = [];
     public readonly Dictionary<uint, int> ItemCounts = [];
@@ -92,10 +95,14 @@ public sealed class PlayerState {
             yield return new OpDutyActions(DutyActionManagerActive, DutyActionCharges);
     }
 
+    public Event<uint, uint> GpChanged = new();
     public sealed record OpGp(uint Current, uint Max) : WorldState.Operation {
         protected override void Exec(WorldState ws) {
+            var previous = ws.Player.CurrentGp;
             ws.Player.CurrentGp = Current;
             ws.Player.MaxGp = Max;
+            if (previous != Current)
+                ws.Player.GpChanged.Fire(previous, Current);
         }
 
         public override void Write(Replay.ReplayOutput output)
