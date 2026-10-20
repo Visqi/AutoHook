@@ -21,6 +21,10 @@ public class AutoHookIPC : IPluginService {
     }
 
     [EzIPC]
+    public void StartFishing()
+        => FishingSessionManager.Get().StartFishing();
+
+    [EzIPC]
     public bool GetAutoStartFishing() {
         return _cfg.AutoStartFishing;
     }
