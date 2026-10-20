@@ -23,7 +23,13 @@ public sealed class FishingSessionManager : IPluginService, IDisposable {
         Gig.Dispose();
     }
 
-    public void StartFishing() => Rod.StartFishing();
+    public void StartFishing() {
+        if (!Configuration.C.PluginEnabled) {
+            Configuration.C.PluginEnabled = true;
+            WorldStateUpdater.Get().Update(); // need to ensure stuff like bait is tracked before we call startfishing
+        }
+        Rod.StartFishing();
+    }
 
     public void RequestStopAfterNextFish() => Rod.RequestStopAfterNextFish();
 
