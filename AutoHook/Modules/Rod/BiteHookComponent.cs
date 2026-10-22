@@ -205,12 +205,11 @@ public sealed class BiteHookComponent(RodFishingModule module) : RodComponent(mo
         Rod.SpectralRestPending = false;
 
         Ws.Execute(new RodState.OpSetFishingStep(FishingSteps.None));
+        Ws.Execute(new RodState.OpResetFishCaught());
 
         var retainCounters = Rod.GetExtraCfg() is { Enabled: true, RetainCountersBetweenSessions: true };
-        if (!retainCounters) {
-            Ws.Execute(new RodState.OpResetFishCaught());
+        if (!retainCounters)
             FishingCounters.Reset();
-        }
 
         Ws.Execute(new RodState.OpClearSessionCatches());
 
