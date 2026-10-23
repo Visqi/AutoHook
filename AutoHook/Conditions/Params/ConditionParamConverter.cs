@@ -4,6 +4,18 @@ using Newtonsoft.Json.Linq;
 namespace AutoHook.Conditions.Params;
 
 public class ConditionParamConverter : JsonConverter<Dictionary<string, object>> {
+    [ThreadStatic] private static Stack<IConditionDefinition?>? _definitions;
+
+    internal static void PushDefinition(IConditionDefinition? definition) {
+        _definitions ??= new Stack<IConditionDefinition?>();
+        _definitions.Push(definition);
+    }
+
+    internal static void PopDefinition() {
+        if (_definitions is { Count: > 0 })
+            _definitions.Pop();
+    }
+
     public override void WriteJson(JsonWriter writer, Dictionary<string, object>? value, JsonSerializer serializer) {
         if (value == null || value.Count == 0) {
             writer.WriteStartObject();
@@ -11,24 +23,11 @@ public class ConditionParamConverter : JsonConverter<Dictionary<string, object>>
             return;
         }
 
-        // Filter out default / empty values
+        var definition = _definitions is { Count: > 0 } ? _definitions.Peek() : null;
         var filtered = new Dictionary<string, object>();
         foreach (var (key, rawVal) in value) {
-            if (rawVal == null)
+            if (ShouldOmit(key, rawVal, definition))
                 continue;
-
-            switch (rawVal) {
-                case int i when i == 0:
-                    continue;
-                case long l when l == 0:
-                    continue;
-                case double d when Math.Abs(d) < double.Epsilon:
-                    continue;
-                case float f when Math.Abs(f) < float.Epsilon:
-                    continue;
-                case IList<object> list when list.Count == 0:
-                    continue;
-            }
 
             filtered[key] = rawVal;
         }
@@ -42,6 +41,28 @@ public class ConditionParamConverter : JsonConverter<Dictionary<string, object>>
 
         serializer.Serialize(writer, filtered);
     }
+
+    private static bool ShouldOmit(string key, object? rawVal, IConditionDefinition? definition) {
+        if (rawVal == null)
+            return true;
+
+        if (rawVal is IList<object> list && list.Count == 0)
+            return true;
+
+        if (!IsNumericZero(rawVal))
+            return false;
+
+        var specified = definition?.SpecifiedIntDefault(key);
+        return specified is not int value || value == 0;
+    }
+
+    private static bool IsNumericZero(object rawVal) => rawVal switch {
+        int i => i == 0,
+        long l => l == 0,
+        double d => Math.Abs(d) < double.Epsilon,
+        float f => Math.Abs(f) < float.Epsilon,
+        _ => false
+    };
 
     public override Dictionary<string, object> ReadJson(JsonReader reader, Type objectType, Dictionary<string, object>? existingValue, bool hasExistingValue, JsonSerializer serializer) {
         if (reader.TokenType == JsonToken.Null)

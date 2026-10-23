@@ -29,4 +29,6 @@ public abstract class IntCompareConditionDefinition : IConditionDefinition {
 
     public virtual string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
         => ConditionParameterFormat.FormatIntCompare(parameters, ValueKey, DefaultValue, DefaultOp);
+
+    public int? SpecifiedIntDefault(string key) => key == ValueKey ? DefaultValue : null;
 }

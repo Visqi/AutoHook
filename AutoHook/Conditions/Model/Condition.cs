@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System.ComponentModel;
+using System.Runtime.Serialization;
 using System.Threading;
 
 namespace AutoHook.Conditions.Model;
@@ -31,6 +32,14 @@ public class Condition {
         if (UiId <= 0)
             UiId = Interlocked.Increment(ref _nextUiId);
     }
+
+    [OnSerializing]
+    private void OnSerializing(StreamingContext _)
+        => ConditionParamConverter.PushDefinition(Registry.Get(TypeId)?.Definition);
+
+    [OnSerialized]
+    private void OnSerialized(StreamingContext _)
+        => ConditionParamConverter.PopDefinition();
 
     public bool Evaluate(WorldState world, ConditionRegistry registry) {
         if (!Enabled)

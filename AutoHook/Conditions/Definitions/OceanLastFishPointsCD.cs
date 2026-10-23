@@ -1,22 +1,25 @@
 namespace AutoHook.Conditions.Definitions;
 
-public sealed class OceanLastFishPointsCD : IConditionDefinition {
-    public string Id => nameof(OceanLastFishPointsCD);
-    public string Name => "Last ocean fish points";
-    public ConditionScopeFlags AllowedScopes => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
+public sealed class OceanLastFishPointsCD : IntCompareConditionDefinition {
+    public override string Id => nameof(OceanLastFishPointsCD);
+    public override string Name => "Last ocean fish points";
+    public override ConditionScopeFlags AllowedScopes
+        => ConditionScopeFlags.Hook | ConditionScopeFlags.FishIgnore | ConditionScopeFlags.AutoCast;
 
-    public bool Evaluate(WorldState world, IReadOnlyDictionary<string, object> parameters) {
-        var points = GetLastOceanFishPointsValue(world);
-        if (points == null)
-            return GetBool(parameters, "inv", false);
+    protected override string ValueLabel => "Points";
+    protected override int DefaultValue => 300;
+    protected override Func<int, int>? Clamp => static v => Math.Max(0, v);
 
-        var args = GetIntCompareParams(parameters);
-        var result = CompareInt(points.Value, args.Value, args.Op);
-        return args.Apply(result);
+    protected override bool? InactiveResult(WorldState world, IReadOnlyDictionary<string, object> parameters) {
+        if (GetLastOceanFishPointsValue(world) != null)
+            return null;
+
+        var args = GetIntCompareParams(parameters, valueKey: ValueKey, defaultValue: DefaultValue, defaultOp: DefaultOp);
+        return args.Invert;
     }
 
-    public void DrawParams(Condition condition)
-        => DrawIntCompareParams(condition, "##ocean_points_op", "Points", defaultValue: 300, clamp: v => Math.Max(0, v));
+    protected override int ReadValue(WorldState world, IReadOnlyDictionary<string, object> parameters)
+        => GetLastOceanFishPointsValue(world) ?? 0;
 
     private static int? GetLastOceanFishPointsValue(WorldState w) {
         var of = w.OceanFishing;
@@ -32,7 +35,4 @@ public sealed class OceanLastFishPointsCD : IConditionDefinition {
         }
         return null;
     }
-
-    public string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
-        => ConditionParameterFormat.FormatIntCompare(parameters, defaultValue: 300);
 }

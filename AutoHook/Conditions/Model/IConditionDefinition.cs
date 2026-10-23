@@ -14,6 +14,8 @@ public interface IConditionDefinition {
 
     string DescribeParameters(IReadOnlyDictionary<string, object> parameters)
         => ConditionParameterFormat.FormatGenericParams(parameters);
+
+    int? SpecifiedIntDefault(string key) => null;
 }
 
 public static class ConditionDefinitionExtensions {
